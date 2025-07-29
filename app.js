@@ -23,7 +23,6 @@ const state = {
     teams: [],
     myTeamIndex: null,
     currentTeamIndex: null,
-    currentRound: 0,
     timerEnd: 0,
     voterId: null,
     subscriptions: []
@@ -90,15 +89,8 @@ function buildHostTeamSelector() {
                 // Already selected and timer running, ignore changes
                 return;
             }
-            // Update currentTeam and roundTeam mapping in DB
-            db.ref('rooms/' + state.roomCode).transaction(room => {
-                if (!room) return room;
-                room.currentTeam = index;
-                // Record mapping of round -> team index
-                if (!room.roundTeams) room.roundTeams = {};
-                room.roundTeams[state.currentRound] = index;
-                return room;
-            });
+            // Update currentTeam in DB
+            db.ref('rooms/' + state.roomCode).update({ currentTeam: index });
         });
         container.appendChild(btn);
     });
@@ -194,39 +186,39 @@ function computeWeightedAverage(ratings) {
     return sum;
 }
 
-// Host & Player: Render live results for a specific round
-function renderLiveResults(room, roundToShow) {
+// Host & Player: Render live results for the currently selected team
+function renderLiveResults(room) {
     const liveContainer = document.getElementById('liveResults');
     const playerContainer = document.getElementById('playerResults');
     liveContainer.innerHTML = '';
     playerContainer.innerHTML = '';
 
-    // If roundToShow is not provided, use the current round
-    const round = roundToShow !== undefined ? roundToShow : room.currentRound;
-
     // Determine which team is being evaluated
-    const teamIndex = room.roundTeams && room.roundTeams[round];
+    const teamIndex = room.currentTeam;
     if (teamIndex === undefined || teamIndex === null) {
-        liveContainer.textContent = 'Nessuna valutazione per questo round.';
+        liveContainer.textContent = 'Nessuna valutazione attiva. Seleziona un team.';
         playerContainer.textContent = '';
         return;
     }
+
     const teamName = room.teams[teamIndex];
-    // Collect votes for current round
-    const roundVotes = room.votes && room.votes[round] ? room.votes[round] : {};
-    const voteCount = Object.keys(roundVotes).length;
+    // Collect votes for the current team
+    const teamVotes = room.votes && room.votes[teamIndex] ? room.votes[teamIndex] : {};
+    const voteCount = Object.keys(teamVotes).length;
+
     // Compute per‑criterion averages
     const averages = {};
     CRITERIA.forEach(c => {
         let total = 0;
-        Object.values(roundVotes).forEach(v => {
+        Object.values(teamVotes).forEach(v => {
             total += parseFloat(v[c.key] || 0);
         });
         averages[c.key] = voteCount ? total / voteCount : 0;
     });
+
     // Render live results: show criteria with animated bars and numeric values
     const title = document.createElement('h3');
-    title.textContent = `Risultati Round ${round + 1} – ${teamName}`;
+    title.textContent = `Risultati Live – ${teamName}`;
     liveContainer.appendChild(title);
     CRITERIA.forEach(c => {
         const item = document.createElement('div');
@@ -280,23 +272,25 @@ function renderLeaderboard(room) {
     const teamCount = room.teams.length;
     // Aggregate scores per team
     const scores = Array(teamCount).fill(0);
-    const counts = Array(teamCount).fill(0);
-    const roundTeams = room.roundTeams || {};
+    const voteCounts = Array(teamCount).fill(0); // Use a different name to avoid conflict
     const votes = room.votes || {};
-    Object.keys(votes).forEach(roundKey => {
-        const teamIndex = roundTeams[roundKey];
-        if (teamIndex === undefined || teamIndex === null) return;
-        const roundVotes = votes[roundKey];
-        Object.values(roundVotes).forEach(vote => {
+
+    // Iterate over each team's votes
+    Object.keys(votes).forEach(teamIndexKey => {
+        const teamIndex = parseInt(teamIndexKey);
+        const teamVotes = votes[teamIndexKey];
+        Object.values(teamVotes).forEach(vote => {
             scores[teamIndex] += computeWeightedAverage(vote);
-            counts[teamIndex] += 1;
+            voteCounts[teamIndex] += 1;
         });
     });
+
     // Compute averages and pair with names
     const leaderboard = room.teams.map((name, idx) => {
-        const avg = counts[idx] ? scores[idx] / counts[idx] : 0;
+        const avg = voteCounts[idx] ? scores[idx] / voteCounts[idx] : 0;
         return { name, avg };
     });
+
     // Sort descending by avg
     leaderboard.sort((a, b) => b.avg - a.avg);
     // Render rows
@@ -366,12 +360,14 @@ function readRatings() {
     return ratings;
 }
 
-// Determine if player has already voted in current round
+// Determine if player has already voted for the current team
 function playerHasVoted(room) {
     if (!room.votes) return false;
-    const roundVotes = room.votes[state.currentRound];
-    if (!roundVotes) return false;
-    return !!roundVotes[state.voterId];
+    const teamIndex = room.currentTeam;
+    if (teamIndex === undefined || teamIndex === null) return false; // No team selected
+    const teamVotes = room.votes[teamIndex];
+    if (!teamVotes) return false;
+    return !!teamVotes[state.voterId];
 }
 
 // Subscribe host to realtime database updates
@@ -382,34 +378,9 @@ function subscribeHost() {
         const data = snapshot.val();
         if (!data) return;
         state.teams = data.teams || [];
-        state.currentRound = data.currentRound || 0;
         state.currentTeamIndex = data.currentTeam;
         state.timerEnd = data.timerEnd || 0;
 
-        // Populate round selector
-        const roundSelector = document.getElementById('roundSelector');
-        const previouslySelected = roundSelector.value;
-        roundSelector.innerHTML = '';
-        const playedRounds = Object.keys(data.roundTeams || {}).map(Number);
-        if (playedRounds.length === 0) {
-            // Add current round if no rounds are recorded yet
-            playedRounds.push(0);
-        }
-
-        playedRounds.sort((a,b) => a-b).forEach(r => {
-            const option = document.createElement('option');
-            option.value = r;
-            option.textContent = `Round ${r + 1}`;
-            roundSelector.appendChild(option);
-        });
-        
-        // Restore selection or default to current round
-        if (playedRounds.includes(Number(previouslySelected))) {
-            roundSelector.value = previouslySelected;
-        } else {
-            roundSelector.value = state.currentRound;
-        }
-        
         buildHostTeamSelector();
         // Disable team selector buttons if timer is running
         const timerIsRunning = state.timerEnd && state.timerEnd > Date.now();
@@ -417,7 +388,7 @@ function subscribeHost() {
             btn.disabled = timerIsRunning;
         });
 
-        renderLiveResults(data, Number(roundSelector.value));
+        renderLiveResults(data);
         renderLeaderboard(data);
         // Update timer controls state
         const startBtn = document.getElementById('timerStartBtn');
@@ -446,7 +417,6 @@ function subscribePlayer() {
         const data = snapshot.val();
         if (!data) return;
         state.teams = data.teams || [];
-        state.currentRound = data.currentRound || 0;
         state.currentTeamIndex = data.currentTeam;
         state.timerEnd = data.timerEnd || 0;
         // Update team name
@@ -475,8 +445,8 @@ function subscribePlayer() {
         } else {
             submitBtn.textContent = 'Invia Voto';
         }
-        // For players, always show live results of the CURRENT round
-        renderLiveResults(data, data.currentRound);
+        // For players, always show live results of the CURRENT team
+        renderLiveResults(data);
         renderLeaderboard(data);
     });
     state.subscriptions.push({ off: () => refRoom.off('value', sub) });
@@ -541,16 +511,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const code = generateRoomCode();
         state.roomCode = code;
         state.teams = names;
-        state.currentRound = 0;
         state.currentTeamIndex = null;
         state.timerEnd = 0;
         // Write room data to Firebase
         db.ref('rooms/' + code).set({
             teams: names,
-            currentRound: 0,
             currentTeam: null,
             timerEnd: 0,
-            roundTeams: {},
             votes: {},
             createdAt: firebase.database.ServerValue.TIMESTAMP // Add creation timestamp
         }).then(() => {
@@ -581,27 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('timerStopBtn').addEventListener('click', () => {
         db.ref('rooms/' + state.roomCode).update({ timerEnd: 0 });
     });
-    // Host: Previous round button
-    document.getElementById('prevRoundBtn').addEventListener('click', () => {
-        db.ref('rooms/' + state.roomCode).transaction(room => {
-            if (!room) return room;
-            // Ensure round doesn't go below 0
-            room.currentRound = Math.max(0, (room.currentRound || 0) - 1);
-            room.currentTeam = null;
-            room.timerEnd = 0;
-            return room;
-        });
-    });
-    // Host: Next round button
-    document.getElementById('nextRoundBtn').addEventListener('click', () => {
-        db.ref('rooms/' + state.roomCode).transaction(room => {
-            if (!room) return room;
-            room.currentRound = (room.currentRound || 0) + 1;
-            room.currentTeam = null;
-            room.timerEnd = 0;
-            return room;
-        });
-    });
+
     // Tab navigation for host
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -610,19 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = tab.getAttribute('data-tab');
             document.getElementById('liveResults').classList.toggle('hidden', target !== 'live');
             document.getElementById('leaderboard').classList.toggle('hidden', target !== 'leaderboard');
-            // Also hide/show round selector with the live results tab
-            document.getElementById('roundSelectorContainer').classList.toggle('hidden', target !== 'live');
-        });
-    });
-
-    // Host: Round selector change
-    document.getElementById('roundSelector').addEventListener('change', (e) => {
-        const selectedRound = Number(e.target.value);
-        // We need the latest room data to render old rounds
-        db.ref('rooms/' + state.roomCode).once('value').then(snapshot => {
-            if (snapshot.exists()) {
-                renderLiveResults(snapshot.val(), selectedRound);
-            }
         });
     });
 
@@ -692,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         // Write vote
-        const votePath = `rooms/${state.roomCode}/votes/${state.currentRound}/${state.voterId}`;
+        const votePath = `rooms/${state.roomCode}/votes/${state.currentTeamIndex}/${state.voterId}`;
         db.ref(votePath).set(ratings).then(() => {
             // After successful vote, disable button
             document.getElementById('submitVoteBtn').disabled = true;
