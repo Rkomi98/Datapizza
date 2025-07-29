@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hackathon Voting Game</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Firebase SDKs: compat versions for easy integration -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Landing choice -->
+        <div id="landing" class="panel">
+            <h1>Hackathon Voting Game</h1>
+            <p>Benvenuto! Scegli il tuo ruolo.</p>
+            <div class="btn-group">
+                <button id="hostChoice" class="primary">Host</button>
+                <button id="playerChoice" class="secondary">Giocatore</button>
+            </div>
+        </div>
+
+        <!-- Host login -->
+        <div id="hostLogin" class="panel hidden">
+            <h2>Accesso Host</h2>
+            <p>Inserisci la password per creare una stanza.</p>
+            <input type="password" id="hostPassword" placeholder="Password" />
+            <button id="hostLoginBtn" class="primary">Login</button>
+            <button id="backToLanding1" class="link">Indietro</button>
+        </div>
+
+        <!-- Host setup: create teams and room -->
+        <div id="hostSetup" class="panel hidden">
+            <h2>Crea la tua stanza</h2>
+            <div id="teamList" class="team-list"></div>
+            <button id="addTeamBtn" class="secondary">Aggiungi Squadra</button>
+            <button id="createRoomBtn" class="primary">Crea Stanza</button>
+            <button id="backToLanding2" class="link">Indietro</button>
+        </div>
+
+        <!-- Host dashboard -->
+        <div id="hostDashboard" class="panel hidden">
+            <h2>Dashboard Host</h2>
+            <p>Codice stanza: <strong id="roomCodeDisplay"></strong></p>
+            <div class="dashboard-columns">
+                <!-- Left column: controls -->
+                <div class="dashboard-left">
+                    <h3>Seleziona Team in Valutazione</h3>
+                    <div id="hostTeamSelector" class="team-selector"></div>
+                    <h3>Timer</h3>
+                    <div class="timer-container">
+                        <span id="timerDisplay">03:00</span>
+                        <button id="timerStartBtn" class="primary">Start</button>
+                        <button id="timerStopBtn" class="secondary">Stop</button>
+                    </div>
+                    <button id="nextRoundBtn" class="secondary">Prossima manche</button>
+                </div>
+                <!-- Right column: results -->
+                <div class="dashboard-right">
+                    <div class="tabs">
+                        <button data-tab="live" class="tab active">Risultati Live</button>
+                        <button data-tab="leaderboard" class="tab">Leaderboard Cumulativa</button>
+                    </div>
+                    <div id="liveResults" class="tab-content active"></div>
+                    <div id="leaderboard" class="tab-content hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player join -->
+        <div id="playerJoin" class="panel hidden">
+            <h2>Entra in una stanza</h2>
+            <input type="text" id="joinRoomCode" placeholder="Codice Stanza" maxlength="6" />
+            <button id="joinRoomBtn" class="primary">Entra</button>
+            <button id="backToLanding3" class="link">Indietro</button>
+        </div>
+
+        <!-- Player team selection -->
+        <div id="playerTeamSelect" class="panel hidden">
+            <h2>Seleziona il tuo Team</h2>
+            <div id="playerTeamList" class="team-selector"></div>
+            <button id="confirmTeamBtn" class="primary">Conferma</button>
+        </div>
+
+        <!-- Player voting -->
+        <div id="playerVoting" class="panel hidden">
+            <h2>Valutazione</h2>
+            <p id="currentTeamName">Team in valutazione: --</p>
+            <div id="ratingForm" class="rating-form"></div>
+            <button id="submitVoteBtn" class="primary" disabled>Invia Voto</button>
+            <div id="playerTimer" class="timer-display">03:00</div>
+            <div id="playerResults" class="player-results"></div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
