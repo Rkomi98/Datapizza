@@ -140,6 +140,50 @@ function updatePlayerTimer() {
     }
 }
 
+// Host: Load and display room history
+function loadHostHistory() {
+    const history = JSON.parse(localStorage.getItem('hostHistory')) || [];
+    const listEl = document.getElementById('hostRoomList');
+    listEl.innerHTML = '<p>Caricamento stanze...</p>';
+
+    if (history.length === 0) {
+        listEl.innerHTML = '<p>Nessuna stanza creata finora.</p>';
+        return;
+    }
+
+    const promises = history.map(code => db.ref('rooms/' + code).once('value'));
+
+    Promise.all(promises).then(snapshots => {
+        listEl.innerHTML = '';
+        const validHistory = [];
+        const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+
+        snapshots.forEach(snap => {
+            const roomData = snap.val();
+            if (snap.exists() && roomData.createdAt && roomData.createdAt > twentyFourHoursAgo) {
+                const code = snap.key;
+                validHistory.push(code);
+                const item = document.createElement('div');
+                item.className = 'room-list-item';
+                item.textContent = `Stanza: ${code}`;
+                item.addEventListener('click', () => {
+                    state.roomCode = code;
+                    showPanel('hostDashboard');
+                    subscribeHost();
+                });
+                listEl.appendChild(item);
+            }
+        });
+
+        if (listEl.children.length === 0) {
+            listEl.innerHTML = '<p>Nessuna stanza attiva trovata.</p>';
+        }
+
+        // Clean up localStorage from non-existent rooms
+        localStorage.setItem('hostHistory', JSON.stringify(validHistory));
+    });
+}
+
 // Compute weighted average rating for a vote object
 function computeWeightedAverage(ratings) {
     let sum = 0;
@@ -463,15 +507,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('backToLanding3').addEventListener('click', () => {
         showPanel('landing');
     });
+    document.getElementById('hubBackToLanding').addEventListener('click', () => {
+        showPanel('landing');
+    });
     // Host login
     document.getElementById('hostLoginBtn').addEventListener('click', () => {
         const pwd = document.getElementById('hostPassword').value;
         if (pwd === 'D4t4p1zz4') {
-            showPanel('hostSetup');
+            showPanel('hostHub');
+            loadHostHistory();
         } else {
             alert('Password errata');
         }
     });
+
+    // Host Hub: Go to create room
+    document.getElementById('goToCreateRoomBtn').addEventListener('click', () => {
+        showPanel('hostSetup');
+    });
+
     // Add team button
     document.getElementById('addTeamBtn').addEventListener('click', () => {
         addTeamInput();
@@ -497,8 +551,15 @@ document.addEventListener('DOMContentLoaded', () => {
             currentTeam: null,
             timerEnd: 0,
             roundTeams: {},
-            votes: {}
+            votes: {},
+            createdAt: firebase.database.ServerValue.TIMESTAMP // Add creation timestamp
         }).then(() => {
+            // Save room code to host's history in localStorage
+            let history = JSON.parse(localStorage.getItem('hostHistory')) || [];
+            if (!history.includes(code)) {
+                history.push(code);
+                localStorage.setItem('hostHistory', JSON.stringify(history));
+            }
             // Show dashboard and subscribe
             document.getElementById('roomCodeDisplay').textContent = code;
             showPanel('hostDashboard');
