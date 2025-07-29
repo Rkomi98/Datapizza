@@ -1,0 +1,20 @@
+{
+  "name": "datapizza-voting-app",
+  "version": "1.0.0",
+  "description": "A real-time hackathon voting game.",
+  "homepage": "https://Rkomi98.github.io/Datapizza",
+  "dependencies": {
+    "firebase": "^12.0.0"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1",
+    "http-server": "^14.1.1"
+  },
+  "scripts": {
+    "start": "http-server -c-1",
+    "predeploy": "npm install",
+    "deploy": "gh-pages -d ."
+  },
+  "author": "Rkomi98",
+  "license": "ISC"
+}
