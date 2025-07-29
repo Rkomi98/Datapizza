@@ -25,20 +25,24 @@
 
         <!-- Host login -->
         <div id="hostLogin" class="panel hidden">
-            <h2>Accesso Host</h2>
+            <div class="panel-header">
+                <button id="backToLanding1" class="back-btn">←</button>
+                <h2>Accesso Host</h2>
+            </div>
             <p>Inserisci la password per creare una stanza.</p>
             <input type="password" id="hostPassword" placeholder="Password" />
             <button id="hostLoginBtn" class="primary">Login</button>
-            <button id="backToLanding1" class="link">Indietro</button>
         </div>
 
         <!-- Host setup: create teams and room -->
         <div id="hostSetup" class="panel hidden">
-            <h2>Crea la tua stanza</h2>
+            <div class="panel-header">
+                <button id="backToLanding2" class="back-btn">←</button>
+                <h2>Crea la tua stanza</h2>
+            </div>
             <div id="teamList" class="team-list"></div>
             <button id="addTeamBtn" class="secondary">Aggiungi Squadra</button>
             <button id="createRoomBtn" class="primary">Crea Stanza</button>
-            <button id="backToLanding2" class="link">Indietro</button>
         </div>
 
         <!-- Host dashboard -->
@@ -56,6 +60,7 @@
                         <button id="timerStartBtn" class="primary">Start</button>
                         <button id="timerStopBtn" class="secondary">Stop</button>
                     </div>
+                    <button id="prevRoundBtn" class="secondary">Manche Precedente</button>
                     <button id="nextRoundBtn" class="secondary">Prossima manche</button>
                 </div>
                 <!-- Right column: results -->
@@ -63,6 +68,10 @@
                     <div class="tabs">
                         <button data-tab="live" class="tab active">Risultati Live</button>
                         <button data-tab="leaderboard" class="tab">Leaderboard Cumulativa</button>
+                    </div>
+                    <div id="roundSelectorContainer" style="margin-bottom: 1rem;">
+                        <label for="roundSelector">Visualizza Round:</label>
+                        <select id="roundSelector"></select>
                     </div>
                     <div id="liveResults" class="tab-content active"></div>
                     <div id="leaderboard" class="tab-content hidden"></div>
@@ -72,10 +81,12 @@
 
         <!-- Player join -->
         <div id="playerJoin" class="panel hidden">
-            <h2>Entra in una stanza</h2>
+            <div class="panel-header">
+                <button id="backToLanding3" class="back-btn">←</button>
+                <h2>Entra in una stanza</h2>
+            </div>
             <input type="text" id="joinRoomCode" placeholder="Codice Stanza" maxlength="6" />
             <button id="joinRoomBtn" class="primary">Entra</button>
-            <button id="backToLanding3" class="link">Indietro</button>
         </div>
 
         <!-- Player team selection -->
