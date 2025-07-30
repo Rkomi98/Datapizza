@@ -38,6 +38,12 @@ jobs:
           echo "  measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'" >> firebase-config.js
           echo "};" >> firebase-config.js
 
+      - name: Verify Firebase config file was created
+        run: |
+          echo "=== Firebase config file contents ==="
+          cat firebase-config.js
+          echo "=== End of file ==="
+
       - name: Install and Deploy
         run: |
           npm install
@@ -45,4 +51,4 @@ jobs:
           git config --global user.name 'Rkomi98'
           git config --global user.email 'mirko-98@libero.it'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          npx gh-pages -d . -m "Deploy from GitHub Actions" 
+          npx gh-pages -d . -m "Deploy from GitHub Actions" --dotfiles 
