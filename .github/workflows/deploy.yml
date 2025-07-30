@@ -25,24 +25,27 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Create Firebase config file
+      - name: Inject Firebase config into HTML
         run: |
-          echo "const firebaseConfig = {" > firebase-config.js
-          echo "  apiKey: '${{ secrets.FIREBASE_API_KEY }}'," >> firebase-config.js
-          echo "  authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'," >> firebase-config.js
-          echo "  databaseURL: '${{ secrets.FIREBASE_DATABASE_URL }}'," >> firebase-config.js
-          echo "  projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'," >> firebase-config.js
-          echo "  storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}'," >> firebase-config.js
-          echo "  messagingSenderId: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'," >> firebase-config.js
-          echo "  appId: '${{ secrets.FIREBASE_APP_ID }}'," >> firebase-config.js
-          echo "  measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'" >> firebase-config.js
-          echo "};" >> firebase-config.js
+          # Create the Firebase config as a JavaScript snippet
+          FIREBASE_CONFIG="const firebaseConfig = {
+            apiKey: '${{ secrets.FIREBASE_API_KEY }}',
+            authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
+            databaseURL: '${{ secrets.FIREBASE_DATABASE_URL }}',
+            projectId: '${{ secrets.FIREBASE_PROJECT_ID }}',
+            storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
+            messagingSenderId: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}',
+            appId: '${{ secrets.FIREBASE_APP_ID }}',
+            measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'
+          };"
+          
+          # Replace the firebase-config.js script tag with inline script in index.html
+          sed -i 's|<script src="firebase-config.js"></script>|<script>'"${FIREBASE_CONFIG}"'</script>|g' index.html
 
-      - name: Verify Firebase config file was created
+      - name: Verify HTML modification
         run: |
-          echo "=== Firebase config file contents ==="
-          cat firebase-config.js
-          echo "=== End of file ==="
+          echo "=== Checking if Firebase config was injected ==="
+          grep -A 10 -B 2 "const firebaseConfig" index.html || echo "Config not found in HTML"
 
       - name: Install and Deploy
         run: |
@@ -51,4 +54,4 @@ jobs:
           git config --global user.name 'Rkomi98'
           git config --global user.email 'mirko-98@libero.it'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          npx gh-pages -d . -m "Deploy from GitHub Actions" --dotfiles 
+          npx gh-pages -d . -m "Deploy from GitHub Actions" 
