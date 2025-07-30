@@ -39,8 +39,8 @@ jobs:
             measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'
           };"
           
-          # Replace the firebase-config.js script tag with inline script in index.html
-          sed -i 's|<script src="firebase-config.js"></script>|<script>'"${FIREBASE_CONFIG}"'</script>|g' index.html
+          # Replace the firebase-config.js script tag with inline script in index.html, using '#' as a delimiter
+          sed -i 's#<script src="firebase-config.js"></script>#<script>'"${FIREBASE_CONFIG}"'</script>#g' index.html
 
       - name: Verify HTML modification
         run: |
