@@ -2,4 +2,4 @@
 /node_modules
  
 # Environment files
-firebase-config.js 
+firebase-config-local.js 

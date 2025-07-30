@@ -2,16 +2,23 @@
 // Core logic for the hackathon voting game.
 
 // Firebase configuration
+// In production, these placeholders will be replaced by GitHub Actions with actual secrets
+// For local development, you can override these in firebase-config-local.js
 const firebaseConfig = {
-    apiKey: "AIzaSyBrqgVL8EIbhZaNe4d4SAfVYhh9BttglIU",
-    authDomain: "gamificationapp-fd026.firebaseapp.com",
-    databaseURL: "https://gamificationapp-fd026-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "gamificationapp-fd026",
-    storageBucket: "gamificationapp-fd026.firebasestorage.app",
-    messagingSenderId: "872395447892",
-    appId: "1:872395447892:web:f507c72c8aa99b354557c1",
-    measurementId: "G-F4LTRMNK1Y"
+    apiKey: "{{FIREBASE_API_KEY}}",
+    authDomain: "{{FIREBASE_AUTH_DOMAIN}}",
+    databaseURL: "{{FIREBASE_DATABASE_URL}}",
+    projectId: "{{FIREBASE_PROJECT_ID}}",
+    storageBucket: "{{FIREBASE_STORAGE_BUCKET}}",
+    messagingSenderId: "{{FIREBASE_MESSAGING_SENDER_ID}}",
+    appId: "{{FIREBASE_APP_ID}}",
+    measurementId: "{{FIREBASE_MEASUREMENT_ID}}"
 };
+
+// Override with local config if available (for development)
+if (typeof firebaseConfigLocal !== 'undefined') {
+    Object.assign(firebaseConfig, firebaseConfigLocal);
+}
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);

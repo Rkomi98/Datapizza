@@ -114,6 +114,17 @@
         </div>
     </div>
 
+    <!-- Load local Firebase config for development (ignored in production) -->
+    <script>
+        // Try to load local config, ignore errors if file doesn't exist (production)
+        const script = document.createElement('script');
+        script.src = 'firebase-config-local.js';
+        script.onerror = function() {
+            // File doesn't exist (production), continue normally
+            console.log('Local config not found, using production config');
+        };
+        document.head.appendChild(script);
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
