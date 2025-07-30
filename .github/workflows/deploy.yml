@@ -5,6 +5,11 @@ on:
     branches:
       - main # Trigger the action on push to the main branch
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
