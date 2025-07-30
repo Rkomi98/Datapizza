@@ -41,15 +41,19 @@ jobs:
           };
           EOF
           
-          # Replace the script src line with inline script content using awk
+          # Replace the script src line with inline script content, accounting for indentation
           awk '
-          /<script src="firebase-config.js"><\/script>/ {
-            print "<script>"
+          /^[[:space:]]*<script src="firebase-config.js"><\/script>/ {
+            # Capture the indentation from the original line
+            match($0, /^[[:space:]]*/);
+            indent = substr($0, RSTART, RLENGTH);
+            
+            print indent "<script>"
             while ((getline line < "temp_firebase_config.js") > 0) {
-              print line
+              print indent "  " line
             }
             close("temp_firebase_config.js")
-            print "</script>"
+            print indent "</script>"
             next
           }
           { print }
