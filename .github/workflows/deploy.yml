@@ -25,50 +25,31 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Inject Firebase config into HTML
+      - name: Replace Firebase config script with inline config
         run: |
-          # Create a temporary Firebase config file
-          cat > temp_firebase_config.js << 'EOF'
-          const firebaseConfig = {
-            apiKey: "${{ secrets.FIREBASE_API_KEY }}",
-            authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",
-            databaseURL: "${{ secrets.FIREBASE_DATABASE_URL }}",
-            projectId: "${{ secrets.FIREBASE_PROJECT_ID }}",
-            storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",
-            messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",
-            appId: "${{ secrets.FIREBASE_APP_ID }}",
-            measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
-          };
-          EOF
-          
-          # Replace the script src line with inline script content, accounting for indentation
-          awk '
-          /^[[:space:]]*<script src="firebase-config.js"><\/script>/ {
-            # Capture the indentation from the original line
-            match($0, /^[[:space:]]*/);
-            indent = substr($0, RSTART, RLENGTH);
-            
-            print indent "<script>"
-            while ((getline line < "temp_firebase_config.js") > 0) {
-              print indent "  " line
-            }
-            close("temp_firebase_config.js")
-            print indent "</script>"
-            next
-          }
-          { print }
-          ' index.html > index_new.html
+          # Read the current index.html and replace the firebase-config.js line with inline config
+          cat index.html | sed 's|<script src="firebase-config.js"></script>|<script>\
+          const firebaseConfig = {\
+            apiKey: "${{ secrets.FIREBASE_API_KEY }}",\
+            authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",\
+            databaseURL: "${{ secrets.FIREBASE_DATABASE_URL }}",\
+            projectId: "${{ secrets.FIREBASE_PROJECT_ID }}",\
+            storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",\
+            messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",\
+            appId: "${{ secrets.FIREBASE_APP_ID }}",\
+            measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"\
+          };\
+          </script>|' > index_modified.html
           
           # Replace the original file
-          mv index_new.html index.html
-          
-          # Clean up
-          rm temp_firebase_config.js
+          mv index_modified.html index.html
 
       - name: Verify HTML modification
         run: |
           echo "=== Checking if Firebase config was injected ==="
-          grep -A 10 -B 2 "const firebaseConfig" index.html || echo "Config not found in HTML"
+          grep -A 5 -B 2 "const firebaseConfig" index.html || echo "Config not found in HTML"
+          echo "=== Also checking if old script tag is gone ==="
+          grep "firebase-config.js" index.html && echo "ERROR: Old script tag still present!" || echo "SUCCESS: Old script tag removed"
 
       - name: Install and Deploy
         run: |
