@@ -730,20 +730,20 @@
                 </div>
                 <div>
                     <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-number">24%</span>
+                <div class="stat-card">
+                    <span class="stat-number">24%</span>
                             <span class="stat-label">Meno errori<br>dei sistemi attuali</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number">16x</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">16x</span>
                             <span class="stat-label">Meno spazio<br>per i dati</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number">50+</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">50+</span>
                             <span class="stat-label">Organizzazioni<br>che lo usano</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number">10m</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">10m</span>
                             <span class="stat-label">Accuracy spaziale</span>
                         </div>
                     </div>
@@ -787,7 +787,7 @@
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <p><strong>Costi computazionali:</strong> analizzare anni di Sentinel o Landsat richiede (di norma) cluster GPU e storage massivo</p>
-                </div>
+            </div>
             </div>
 
             <p style="margin-top: 40px; text-align: center; font-size: 1.3em;">
@@ -821,7 +821,7 @@
                             <li><strong>≈1% della superficie terrestre</strong> coperta ad alta risoluzione</li>
                             <li>Serie temporali continue per catturare i cambiamenti</li>
                         </ul>
-                    </div>
+                </div>
                     
                     <div style="background: rgba(255, 165, 0, 0.1); padding: 25px; border-radius: 15px;">
                         <h4 style="color: #ffa500; margin-bottom: 15px;">🌈 Frame Multimodali</h4>
@@ -832,8 +832,8 @@
                             <li><strong>Variabili climatiche:</strong> Temperatura, precipitazioni</li>
                             <li><strong>Time-code sinusoidale:</strong> Normalizza le date temporali</li>
                         </ul>
-                    </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -875,7 +875,7 @@
                         🔍 Il Precision Brain precisa: "Ma c'è una strada nuova a nord-est"
                     </p>
                 </div>
-            </div>
+        </div>
             
         </div>
         
@@ -883,35 +883,49 @@
         <!-- Slide 4: Integrazione Multimodale -->
         <div class="slide">
             <h2>Integrazione Dati Multimodale</h2>
-            <div class="data-flow">
-                <div class="data-source">
-                    <h3>Ottici</h3>
-                    <p>Sentinel-2 L1C<br>Landsat 8/9</p>
-                </div>
-                <div class="data-source">
-                    <h3>Radar</h3>
-                    <p>Sentinel-1 SAR<br>PALSAR-2</p>
-                </div>
-                <div class="data-source">
-                    <h3>LiDAR</h3>
-                    <p>GEDI L2A<br>100 metriche</p>
-                </div>
-                <div class="data-source">
-                    <h3>Ambientali</h3>
-                    <p>ERA5-Land<br>GRACE<br>GLO-30 DEM</p>
-                </div>
-            </div>
+          
             <div class="code-block">
-                <pre>Loss Function: l = a∑(fi(yi, y'i)wi) + b∑|ui · u'i| + c(1 - u · us/2) + d fCLIP(u, ut)
-
-a=1.0  → Ricostruzione obiettivo
-b=0.05 → Uniformità batch  
-c=0.02 → Consistenza contrastiva
-d=0.001 → Allineamento testo</pre>
+              <!-- Notazione LaTeX per MathJax -->
+              <p>
+                \[
+                  L(u) = 
+                    a\,\sum_i f_i(y_i,y'_i)\,w_i
+                  \;+\;
+                    b\,\sum_i \bigl|u_i\cdot u'_i\bigr|
+                  \;+\;
+                    c\Bigl(1 - \tfrac{u\cdot u_s}{2}\Bigr)
+                  \;+\;
+                    d\,f_{\mathrm{CLIP}}(u,u_t)
+                \]
+              </p>
+              <p style="margin-top:0.5em;">
+                \(\displaystyle
+                  \begin{aligned}
+                    &a = 1.0 &&\text{Ricostruzione multisensore}\\
+                    &b = 0.05 &&\text{Uniformità batch}\\
+                    &c = 0.02 &&\text{Consistenza teacher–student}\\
+                    &d = 0.001 &&\text{Allineamento semantico (CLIP)}
+                  \end{aligned}
+                \)
+              </p>
             </div>
-        </div>
+          
+            <ul style="margin-top:1em; font-size:1.1em; line-height:1.4;">
+              <li><strong>Ricostruzione:</strong> mantiene le informazioni fisiche (riflettanza, back-scatter, altezze LiDAR).</li>
+              <li><strong>Uniformità batch:</strong> spinge gli embedding a coprire uniformemente la sfera, evitando “ammassi” (utile per k-NN e clustering).</li>
+              <li><strong>Consistenza teacher–student:</strong> rende il modello robusto a scene mancanti o nuvolose tramite dropout e forecasting/backcasting.</li>
+              <li><strong>Testo-contrastivo (CLIP):</strong> trasferisce conoscenza da testi geolocalizzati (e.g. Wikipedia, GBIF), permettendo query semantiche (“foresta ombrofila”) direttamente sugli embedding.</li>
+            </ul>
+          
+            <p style="text-align:center; font-size:1.2em; margin-top:2em;">
+              <span class="highlight">
+                Risultato: mappe globali, compatte e time-aware in pochi secondi su Earth Engine
+              </span>
+            </p>
+          </div>
+          
 
-        <!-- Slide 5: Gemini Integration -->
+        <!-- Slide 5: Gemini Integration 
         <div class="slide">
             <h2>Apprendimento Contrastivo con Gemini</h2>
             <div class="feature-grid">
@@ -932,30 +946,54 @@ d=0.001 → Allineamento testo</pre>
                 <span class="highlight">Gemini fornisce ancoraggio semantico per embedding geospaziali</span>
             </p>
         </div>
+        -->
 
         <!-- Slide 6: Teacher-Student -->
         <div class="slide">
-            <h2>Sistema Teacher-Student per Data Sparsity</h2>
-            <div style="display: flex; justify-content: space-around; margin: 40px 0;">
-                <div style="text-align: center;">
-                    <h3 style="color: #4a9eff;">Teacher Model</h3>
-                    <p>Accesso completo a tutti gli input<br>Performance ottimale</p>
-                </div>
-                <div style="text-align: center;">
-                    <h3 style="color: #00ff88;">Student Model</h3>
-                    <p>Input perturbati artificialmente<br>Impara robustezza</p>
-                </div>
+            <h2>Sistema Teacher–Student per Data Sparsity</h2>
+          
+            <div style="display: flex; justify-content: space-around; margin: 30px 0;">
+              <!-- Teacher -->
+              <div style="flex:1; max-width:45%; text-align:center; padding:10px;">
+                <h3 style="color: #4a9eff;">👑 Teacher Model</h3>
+                <ul style="list-style:none; padding:0; text-align:left; font-size:1em; line-height:1.4;">
+                  <li><strong>Accesso completo</strong> a tutte le bande multisensore</li>
+                  <li><strong>Obiettivo:</strong> performance ottimale, senza input mancanti</li>
+                </ul>
+              </div>
+              <!-- Student -->
+              <div style="flex:1; max-width:45%; text-align:center; padding:10px;">
+                <h3 style="color: #00ff88;">🎓 Student Model</h3>
+                <ul style="list-style:none; padding:0; text-align:left; font-size:1em; line-height:1.4;">
+                  <li><strong>Input perturbati:</strong> nuvole simulate, drop sensori</li>
+                  <li><strong>Obiettivo:</strong> imparare robustezza con dati mancanti</li>
+                </ul>
+              </div>
             </div>
-            <div class="code-block">
-                <pre>Strategie di Perturbazione:
-• Source dropping: 30% Landsat/Sentinel-1 (mai Sentinel-2)
-• Temporal: Random timestep dropping
-• Forecasting: Rimozione ultimi 6 mesi
-• Backcasting: Rimozione primi 6 mesi
-
-Consistency Loss: (1 - μ · μs) / 2</pre>
-            </div>
-        </div>
+          
+            <h3 style="color:#ff6b6b; margin-bottom:10px;">Strategie di perturbazione</h3>
+            <ul style="margin:0 0 20px 20px; font-size:0.95em; line-height:1.4;">
+              <li><strong>Source dropping:</strong> rimozione 30 % Landsat/Sentinel-1 (mai Sentinel-2).</li>
+              <li><strong>Temporal dropping:</strong> caduta casuale di timesteps nella sequenza.</li>
+              <li><strong>Forecasting:</strong> rimozione degli ultimi 6 mesi di dati.</li>
+              <li><strong>Backcasting:</strong> rimozione dei primi 6 mesi di dati.</li>
+            </ul>
+          
+            <h3 style="color:#00ff88; margin-bottom:10px;">Consistency Loss</h3>
+            <p style="font-family:monospace; text-align:center; font-size:1.1em; background:rgba(0,0,0,0.5); padding:15px; border-radius:8px;">
+              \[
+                L_{\text{cons}} = \frac{1 - \langle \mu,\,\mu_s\rangle}{2}
+              \]
+            </p>
+          
+            <ul style="margin-top:20px; font-size:1.05em; line-height:1.5;">
+              <li><strong>Ricostruzione:</strong> garantisce che l’encoder non perda riflettanza, back-scatter e altezze LiDAR.</li>
+              <li><strong>Uniformità batch:</strong> spinge gli embedding a coprire uniformemente lo spazio (utile per k-NN e clustering).</li>
+              <li><strong>Consistenza T–S:</strong> il teacher guida lo student anche con dati mancanti o nuvolosi.</li>
+              <li><strong>Allineamento testo (CLIP):</strong> trasferisce conoscenza semantica da testi geolocalizzati (“foresta ombrofila”).</li>
+            </ul>
+          </div>
+          
 
         <!-- Slide 7: Confronto IBM -->
         <div class="slide">
@@ -1150,6 +1188,8 @@ clustered = filtered.mosaic().cluster(clusterer)</pre>
         <button class="nav-btn" id="prevBtn">← Indietro</button>
         <button class="nav-btn" id="nextBtn">Avanti →</button>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <script>
         // Presentation Navigation Logic
