@@ -452,7 +452,7 @@
 
     <!-- Slide Indicator -->
     <div class="slide-indicator">
-        <span id="currentSlide">1</span> / <span id="totalSlides">20</span>
+        <span id="currentSlide">1</span> / <span id="totalSlides">21</span>
     </div>
 
     <!-- Main Presentation -->
@@ -795,25 +795,53 @@
             </p>
         </div>
 
+        <!-- Slide 9: AlphaEarth - Panoramica Tecnica -->
+        <div class="slide">
+            <h2>AlphaEarth in Pillole: Il Processo Completo</h2>
+            
+            <div style="margin: 40px 0;">
+                <h3 style="color: #4a9eff; margin-bottom: 30px;">📋 Panoramica in Una Frase</h3>
+                <div style="background: rgba(74, 158, 255, 0.1); padding: 30px; border-radius: 15px; margin-bottom: 40px;">
+                    <p style="font-size: 1.2em; line-height: 1.6; text-align: justify;">
+                        <span class="highlight">AlphaEarth</span> prende <strong>sequenze video multibanda</strong> da Sentinel-2, Landsat 8/9, Sentinel-1, PALSAR-2, GEDI, ERA-5 e GRACE; 
+                        le taglia in <strong>cubi da 128×128 px (10 m)</strong>, li fa passare in blocchi STP con operatori space, time e precision interconnessi, 
+                        addestra un <strong>teacher-student</strong> con quattro loss (ricostruzione, uniformità, consistenza, contrastiva testo-immagine) e alla fine 
+                        <strong>quantizza l'output</strong> in vettori unitari a 64 dimensioni — <span style="color: #00ff88;">compressi 16× ma più precisi del 24% 
+                        rispetto agli SOTA EO models</span>.
+                    </p>
+                </div>
+                
+                <h3 style="color: #00ff88; margin-bottom: 30px;">🎬 Flusso Dati d'Ingresso</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div style="background: rgba(0, 255, 136, 0.1); padding: 25px; border-radius: 15px;">
+                        <h4 style="color: #4a9eff; margin-bottom: 15px;">📐 Patch Video 128×128×T</h4>
+                        <ul style="line-height: 1.8; padding-left: 20px;">
+                            <li><strong>5,145,244 siti globali</strong> estratti strategicamente</li>
+                            <li><strong>3 miliardi di frame</strong> accumulati nel dataset</li>
+                            <li><strong>≈1% della superficie terrestre</strong> coperta ad alta risoluzione</li>
+                            <li>Serie temporali continue per catturare i cambiamenti</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: rgba(255, 165, 0, 0.1); padding: 25px; border-radius: 15px;">
+                        <h4 style="color: #ffa500; margin-bottom: 15px;">🌈 Frame Multimodali</h4>
+                        <ul style="line-height: 1.8; padding-left: 20px;">
+                            <li><strong>Bande ottiche:</strong> Colori visibili e infrarossi</li>
+                            <li><strong>Radar SAR:</strong> Penetra nuvole e vegetazione</li>
+                            <li><strong>LiDAR:</strong> Altimetria e struttura 3D</li>
+                            <li><strong>Variabili climatiche:</strong> Temperatura, precipitazioni</li>
+                            <li><strong>Time-code sinusoidale:</strong> Normalizza le date temporali</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Slide 9: Come Funziona AlphaEarth -->
+        <!-- Slide 10: Come Funziona AlphaEarth -->
         <div class="slide">
             <h2>Il Cervello di AlphaEarth: Architettura Fondazionale</h2>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
-                <div>
-                    <h3 style="color: #4a9eff; margin-bottom: 25px;">🧠 Foundation Model per la Terra</h3>
-                    <div style="background: rgba(74, 158, 255, 0.1); padding: 25px; border-radius: 15px; margin-bottom: 20px;">
-                        <h4 style="color: #00ff88;">📡 Satellite Virtuale</h4>
-                        <p>Come ChatGPT ha imparato il linguaggio umano, AlphaEarth impara il "linguaggio della Terra"</p>
-                        <ul style="margin: 15px 0; padding-left: 20px;">
-                            <li>🌍 <strong>Input:</strong> Terabyte di dati da decine di satelliti</li>
-                            <li>🎯 <strong>Output:</strong> Mappe intelligenti in tempo reale</li>
-                            <li>🔄 <strong>Apprendimento:</strong> Da milioni di esempi terrestri</li>
-                        </ul>
-                    </div>
-                </div>
-                
                 <div>
                     <h3 style="color: #00ff88; margin-bottom: 25px;">⚙️ I Tre Cervelli Specializzati</h3>
                     
@@ -835,20 +863,22 @@
                         <p><strong>Come:</strong> Reti convoluzioni per dettagli spaziali fini</p>
                     </div>
                 </div>
+                
+                <div>
+                    <h3 style="color: #4a9eff; margin-bottom: 20px;">🔗 Il Segreto: Cross-talk Fusion</h3>
+                    <p style="font-size: 1.2em; margin-bottom: 15px;">
+                        <span class="highlight">I tre cervelli "parlano" tra loro continuamente</span>
+                    </p>
+                    <p style="font-size: 1.1em;">
+                        📊 Il Spatial Brain dice: "Vedo una foresta" <br>
+                        ⏰ Il Temporal Brain aggiunge: "Sta crescendo rapidamente" <br>
+                        🔍 Il Precision Brain precisa: "Ma c'è una strada nuova a nord-est"
+                    </p>
+                </div>
             </div>
             
-            <div style="text-align: center; margin-top: 40px; background: rgba(74, 158, 255, 0.1); padding: 30px; border-radius: 15px;">
-                <h3 style="color: #4a9eff; margin-bottom: 20px;">🔗 Il Segreto: Cross-talk Fusion</h3>
-                <p style="font-size: 1.2em; margin-bottom: 15px;">
-                    <span class="highlight">I tre cervelli "parlano" tra loro continuamente</span>
-                </p>
-                <p style="font-size: 1.1em;">
-                    📊 Il Spatial Brain dice: "Vedo una foresta" <br>
-                    ⏰ Il Temporal Brain aggiunge: "Sta crescendo rapidamente" <br>
-                    🔍 Il Precision Brain precisa: "Ma c'è una strada nuova a nord-est"
-                </p>
-            </div>
         </div>
+        
 
         <!-- Slide 4: Integrazione Multimodale -->
         <div class="slide">
