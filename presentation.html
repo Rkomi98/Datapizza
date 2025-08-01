@@ -364,6 +364,7 @@
         .timeline-item:nth-child(2) { animation-delay: 0.2s; }
         .timeline-item:nth-child(3) { animation-delay: 0.3s; }
         .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
 
         @keyframes fadeInLeft {
             from {
@@ -451,7 +452,7 @@
 
     <!-- Slide Indicator -->
     <div class="slide-indicator">
-        <span id="currentSlide">1</span> / <span id="totalSlides">16</span>
+        <span id="currentSlide">1</span> / <span id="totalSlides">20</span>
     </div>
 
     <!-- Main Presentation -->
@@ -459,21 +460,24 @@
         
         <!-- Slide 1: Introduzione all'Earth Observation -->
         <div class="slide active">
-            <h1>Earth Observation</h1>
-            <p style="text-align: center; font-size: 1.5em; color: #4a9eff; margin-bottom: 40px;">Monitoraggio del Pianeta dallo Spazio</p>
+            <h1>Come Osserviamo la Terra</h1>
+            <p style="text-align: center; font-size: 1.5em; color: #4a9eff; margin-bottom: 40px;">Il nostro pianeta visto dallo spazio</p>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
                 <div>
-                    <img src="https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=600&h=400&fit=crop&auto=format" 
-                         alt="Satellite Earth Observation" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/A-Train_w-Time2013_Web.jpg" 
+                         alt="NASA A-Train Satellite Constellation" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="text-align: center; font-size: 0.9em; color: #999; margin-top: 10px;">
+                        Costellazione di satelliti NASA A-Train
+                    </p>
                 </div>
                 <div>
-                    <h3 style="color: #00ff88; margin-bottom: 20px;">Cos'è l'Earth Observation?</h3>
+                    <h3 style="color: #00ff88; margin-bottom: 20px;">Cosa significa osservare la Terra?</h3>
                     <ul style="font-size: 1.1em; line-height: 1.8; list-style: none; padding: 0;">
-                        <li style="margin: 15px 0;">🛰️ <strong>Satelliti</strong> che osservano continuamente la Terra</li>
-                        <li style="margin: 15px 0;">📊 <strong>Dati multispettrali</strong> e multitemporali</li>
-                        <li style="margin: 15px 0;">🌍 <strong>Copertura globale</strong> con risoluzione fino a 10 metri</li>
-                        <li style="margin: 15px 0;">⏰ <strong>Aggiornamenti regolari</strong> per monitorare i cambiamenti</li>
+                        <li style="margin: 15px 0;">🛰️ <strong>Flotte di satelliti</strong> che sorvegliano il nostro pianeta 24/7</li>
+                        <li style="margin: 15px 0;">📊 <strong>Occhi speciali</strong> che vedono oltre il visibile</li>
+                        <li style="margin: 15px 0;">🌍 <strong>Ogni angolo del pianeta</strong> mappato e rivisitato regolarmente</li>
+                        <li style="margin: 15px 0;">⏰ <strong>Una macchina del tempo</strong> per vedere come cambia la Terra</li>
                     </ul>
                 </div>
             </div>
@@ -481,170 +485,270 @@
 
         <!-- Slide 2: Applicazioni Concrete -->
         <div class="slide">
-            <h2>Applicazioni dell'Earth Observation</h2>
+            <h2>Cosa Possiamo Vedere dal Cielo</h2>
             
             <div class="feature-grid" style="margin: 40px 0;">
                 <div class="feature-card">
                     <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=300&h=200&fit=crop&auto=format" 
                          alt="Agricoltura" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                    <h3>🌾 Agricoltura di Precisione</h3>
-                    <p>Monitoraggio crescita colture, previsione rese, ottimizzazione irrigazione</p>
+                    <h3>🌾 Campi Più Intelligenti</h3>
+                    <p>Come crescono le piante, dove serve più acqua, quando raccogliere per il massimo profitto</p>
+                    <div style="display: flex; gap: 5px; font-size: 0.8em; color: #ccc; margin-top: 10px;">
+                        <span>🛰️ Sentinel-2</span> <span>🛰️ Landsat-8</span> <span>🛰️ Planet</span>
+                    </div>
                 </div>
                 
                 <div class="feature-card">
                     <img src="https://images.unsplash.com/photo-1551808525-51a94da548ce?w=300&h=200&fit=crop&auto=format" 
                          alt="Foreste" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                    <h3>🌲 Monitoraggio Forestale</h3>
-                    <p>Deforestazione, carbon storage, biodiversità, incendi boschivi</p>
+                    <h3>🌲 I Polmoni del Pianeta</h3>
+                    <p>Dove scompaiono le foreste, quanto carbonio immagazzinano, dove nasce un incendio</p>
+                    <div style="display: flex; gap: 5px; font-size: 0.8em; color: #ccc; margin-top: 10px;">
+                        <span>🛰️ MODIS</span> <span>🛰️ Sentinel-1</span> <span>🛰️ VIIRS</span>
+                    </div>
                 </div>
                 
                 <div class="feature-card">
                     <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop&auto=format" 
                          alt="Città" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                    <h3>🏙️ Urban Planning</h3>
-                    <p>Espansione urbana, traffico, isole di calore, infrastrutture</p>
+                    <h3>🏙️ Città che Respirano</h3>
+                    <p>Come crescono le metropoli, quali zone sono più calde, dove serve più verde</p>
+                    <div style="display: flex; gap: 5px; font-size: 0.8em; color: #ccc; margin-top: 10px;">
+                        <span>🛰️ WorldView</span> <span>🛰️ Landsat-9</span> <span>🛰️ Sentinel-2</span>
+                    </div>
                 </div>
                 
                 <div class="feature-card">
                     <img src="https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=300&h=200&fit=crop&auto=format" 
                          alt="Cambiamenti climatici" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                    <h3>🌡️ Climate Change</h3>
-                    <p>Scioglimento ghiacci, innalzamento mari, temperature superficiali</p>
+                    <h3>🌡️ Il Termometro Globale</h3>
+                    <p>Dove si sciolgono i ghiacci, come si alza il livello del mare, quali luoghi si riscaldano di più</p>
+                    <div style="display: flex; gap: 5px; font-size: 0.8em; color: #ccc; margin-top: 10px;">
+                        <span>🛰️ GRACE</span> <span>🛰️ ICESat-2</span> <span>🛰️ MODIS</span>
+                    </div>
                 </div>
                 
                 <div class="feature-card">
                     <img src="https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=300&h=200&fit=crop&auto=format" 
                          alt="Disastri naturali" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                    <h3>⚡ Disaster Response</h3>
-                    <p>Alluvioni, terremoti, uragani, valutazione danni in tempo reale</p>
+                    <h3>⚡ Occhi sulla Tempesta</h3>
+                    <p>Dove colpirà l'uragano, quali case sono state danneggiate, dove servono i soccorsi</p>
+                    <div style="display: flex; gap: 5px; font-size: 0.8em; color: #ccc; margin-top: 10px;">
+                        <span>🛰️ GOES-16</span> <span>🛰️ Sentinel-1</span> <span>🛰️ Planet</span>
+                    </div>
                 </div>
                 
                 <div class="feature-card">
-                    <img src="https://images.unsplash.com/photo-1569163139394-de4e4f43e4e5?w=300&h=200&fit=crop&auto=format" 
+                    <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop&auto=format" 
                          alt="Oceani" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                    <h3>🌊 Oceani e Coste</h3>
-                    <p>Qualità dell'acqua, erosione costiera, ecosistemi marini</p>
+                    <h3>🌊 Mari che Cambiano</h3>
+                    <p>Come si muovono le correnti, dove l'acqua è più pulita, quando arriva la tempesta</p>
+                    <div style="display: flex; gap: 5px; font-size: 0.8em; color: #ccc; margin-top: 10px;">
+                        <span>🛰️ Jason-3</span> <span>🛰️ AQUA</span> <span>🛰️ Sentinel-3</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 3: I Dati Geospaziali Oggi -->
+        <!-- Slide 3: Tipi di Dati Satellitari -->
         <div class="slide">
-            <h2>La Complessità dei Dati Geospaziali</h2>
+            <h2>Gli Occhi Diversi dei Satelliti</h2>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
-                <div>
-                    <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=600&h=400&fit=crop&auto=format" 
-                         alt="Satellite Data Complexity" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                    <p style="text-align: center; font-size: 0.9em; color: #999; margin-top: 10px;">
-                        Dati multispettrali da satelliti Sentinel e Landsat
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin: 40px 0;">
+                <div class="feature-card" style="padding: 30px;">
+                    <h3 style="color: #4a9eff;">📡 Ottico Multispettrale</h3>
+                    <p><strong>Come funziona:</strong> Fotografa in diverse "bande" di colore, anche quelle invisibili</p>
+                    <p><strong>Cosa vede:</strong> Salute delle piante, tipo di terreno, urbanizzazione</p>
+                    <p><strong>Esempio:</strong> Landsat vede in 11 bande diverse, dal blu all'infrarosso</p>
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(74, 158, 255, 0.1); border-radius: 8px;">
+                        <strong>📊 Risoluzione:</strong> 10-30 metri per pixel
+                    </div>
+                </div>
+                
+                <div class="feature-card" style="padding: 30px;">
+                    <h3 style="color: #00ff88;">🌈 Iperspettrale</h3>
+                    <p><strong>Come funziona:</strong> Fotografa in centinaia di bande sottili come una "super-prism"</p>
+                    <p><strong>Cosa vede:</strong> Minerali specifici, inquinamento, malattie delle piante</p>
+                    <p><strong>Esempio:</strong> Può distinguere tra 200+ tipi diversi di rocce e vegetazione</p>
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(0, 255, 136, 0.1); border-radius: 8px;">
+                        <strong>📊 Risoluzione:</strong> 30+ metri, ma dettaglio chimico estremo
+                    </div>
+                </div>
+                
+                <div class="feature-card" style="padding: 30px;">
+                    <h3 style="color: #ff6b6b;">⚡ Radar SAR</h3>
+                    <p><strong>Come funziona:</strong> Invia onde radio e misura il ToR, funziona giorno e notte</p>
+                    <p><strong>Cosa vede:</strong> Attraversa nuvole, misura deformazioni del suolo</p>
+                    <p><strong>Esempio:</strong> Sentinel-1 monitora terremoti e cedimenti anche con maltempo</p>
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(255, 107, 107, 0.1); border-radius: 8px;">
+                        <strong>📊 Risoluzione:</strong> 1-100 metri, vede sempre
+                    </div>
+                </div>
+                
+                <div class="feature-card" style="padding: 30px;">
+                    <h3 style="color: #ffa500;">🌡️ Termico</h3>
+                    <p><strong>Come funziona:</strong> Misura il calore emesso dalle superfici</p>
+                    <p><strong>Cosa vede:</strong> Temperature, stress idrico, isole di calore urbane</p>
+                    <p><strong>Esempio:</strong> MODIS rileva incendi e misura temperatura oceani</p>
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(255, 165, 0, 0.1); border-radius: 8px;">
+                        <strong>📊 Risoluzione:</strong> 60-1000 metri termici
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Confronto Landsat vs Copernicus -->
+        <div class="slide">
+            <h2>La Battaglia dei Giganti: USA vs Europa</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin: 40px 0;">
+                <div style="text-align: center;">
+                    <img src="https://pbs.twimg.com/media/GcMHJbmXkAAfapv?format=jpg&name=large" 
+                         alt="Detailed Landsat vs Sentinel Comparison" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="color: #999; font-size: 0.9em; margin-top: 10px;">
+                        Confronto dettagliato delle caratteristiche tecniche
                     </p>
                 </div>
+                
                 <div>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-number">10+ TB</span>
-                            <span class="stat-label">Dati giornalieri<br>dai satelliti</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number">13</span>
-                            <span class="stat-label">Bande spettrali<br>Sentinel-2</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number">5 giorni</span>
-                            <span class="stat-label">Tempo di<br>rivisitazione</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-number">40+ anni</span>
-                            <span class="stat-label">Archivio storico<br>Landsat</span>
-                        </div>
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="color: #4a9eff; margin-bottom: 20px;">🇺🇸 Landsat (NASA/USGS)</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="margin: 10px 0;">📅 <strong>Dal 1972</strong> - Il nonno dell'osservazione terrestre</li>
+                            <li style="margin: 10px 0;">🔄 <strong>16 giorni</strong> - Tempo per rivedere lo stesso posto</li>
+                            <li style="margin: 10px 0;">📏 <strong>30 metri</strong> - Risoluzione spaziale</li>
+                            <li style="margin: 10px 0;">🌈 <strong>11 bands</strong> - Dal visibile al termico</li>
+                            <li style="margin: 10px 0;">🆓 <strong>Gratis</strong> - Dati aperti dal 2008</li>
+                        </ul>
                     </div>
                     
-                    <div style="margin-top: 30px;">
-                        <h3 style="color: #ff6b6b;">Sfide Attuali</h3>
+                    <div>
+                        <h3 style="color: #00ff88; margin-bottom: 20px;">🇪🇺 Copernicus Sentinel (ESA)</h3>
                         <ul style="list-style: none; padding: 0;">
-                            <li style="margin: 10px 0;">☁️ Copertura nuvolosa irregolare</li>
-                            <li style="margin: 10px 0;">📊 Formati dati eterogenei</li>
-                            <li style="margin: 10px 0;">⚡ Processing computazionalmente intensivo</li>
-                            <li style="margin: 10px 0;">🎯 Expertise domain specifica richiesta</li>
+                            <li style="margin: 10px 0;">📅 <strong>Dal 2014</strong> - La nuova generazione europea</li>
+                            <li style="margin: 10px 0;">🔄 <strong>5 giorni</strong> - Aggiornamenti più frequenti</li>
+                            <li style="margin: 10px 0;">📏 <strong>10 metri</strong> - Risoluzione superiore</li>
+                            <li style="margin: 10px 0;">🌈 <strong>13 bands</strong> - Più dettaglio spettrale</li>
+                            <li style="margin: 10px 0;">🆓 <strong>Gratis</strong> - Open data fin dall'inizio</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 4: Esempio Concreto - Deforestazione -->
+        <!-- Slide 5: Perché Serviva AlphaEarth -->
         <div class="slide">
-            <h2>Esempio: Monitoraggio Deforestazione</h2>
+            <h2>Prima di AlphaEarth: Un Mondo di Problemi</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin: 40px 0;">
+                <div class="feature-card" style="padding: 30px; background: rgba(255, 107, 107, 0.1);">
+                    <h3 style="color: #ff6b6b;">🧩 Il Puzzle (quasi) Risolto</h3>
+                    <p><strong>Il problema:</strong> Hai foto Landsat, radar Sentinel-1, termiche VIIRS… e ognuna parla una lingua diversa.</p>
+                    <p><strong>Esempio reale:</strong> Oggi servono almeno 2 sorgenti (VIIRS per l’allerta in < 3 h + Sentinel-2 ogni 5 giorni per la mappa dettagliata) con evidenti problemi di integrazione tra i dati.</p>
+                </div>                
+                
+                <div class="feature-card" style="padding: 30px; background: rgba(255, 107, 107, 0.1);">
+                    <h3 style="color: #ff6b6b;">☁️ Quando le Nuvole Rovinano Tutto</h3>
+                    <p><strong>Il problema:</strong> Le nuvole coprono il 60% delle immagini. Ti servono dati ma vedi solo bianco</p>
+                    <p><strong>Esempio reale:</strong> L'Amazzonia è coperta per 8 mesi l'anno, impossibile monitorare in tempo reale</p>
+                </div>
+                
+                <div class="feature-card" style="padding: 30px; background: rgba(255, 107, 107, 0.1);">
+                    <h3 style="color: #ff6b6b;">💻 Cloud Processing On-Demand</h3>
+                    <p><strong>Il problema (ieri):</strong> Analizzare immagini satellitari significava scaricare terabyte e disporre di un data-center dedicato.</p>
+                    <p><strong>Esempio:</strong> Con <em>Google Earth Engine</em> i 37 anni di Landsat sono già nel cloud – bastano pochi script per produrre un timelapse globale in minuti, senza supercomputer né costi hardware.</p>
+                </div>
+                
+                <!-- ② Nuovo riquadro “Indicatori già pronti” -->
+                <div class="feature-card" style="padding: 30px; background: rgba(255, 107, 107, 0.1);">
+                    <h3 style="color: #ff6b6b;">🎓 Indicatori già pronti</h3>
+                    <p><strong>Il problema (ieri):</strong> Sigle come “NDVI 0.7 in banda 4” suonavano criptiche e serviva un esperto per capirle.</p>
+                    <p><strong>Esempio:</strong> Earth Engine calcola NDVI, NBR e dozzine di indici con una riga di codice; dashboard come OneSoil mostrano <em>“verde sano / giallo stress”</em> in linguaggio naturale.</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.4em; color: #00ff88;">
+                    <span class="highlight">AlphaEarth risolve tutti questi problemi in un colpo solo 🚀</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Esempio Concreto - Deforestazione -->
+        <div class="slide">
+            <h2>Storia di una Tragedia: L'Amazzonia che Svanisce</h2>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; margin: 40px 0;">
                 <div style="text-align: center;">
-                    <h3 style="color: #00ff88;">Amazzonia 2000</h3>
-                    <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop&auto=format" 
-                         alt="Amazon Forest 2000" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                    <p style="color: #00ff88; margin-top: 15px;">Copertura forestale densa</p>
+                    <h3 style="color: #00ff88;">Stato del Parà - 2019</h3>
+                    <img src="https://eoimages.gsfc.nasa.gov/images/imagerecords/145000/145498/para_tmo_2019231.jpg" 
+                         alt="Amazon Para State 2019" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="color: #00ff88; margin-top: 15px;">Foresta verde e densa vista da Landsat</p>
                 </div>
                 
                 <div style="text-align: center;">
-                    <h3 style="color: #ff6b6b;">Amazzonia 2023</h3>
-                    <img src="https://images.unsplash.com/photo-1574263867128-7cec7bfe0bc8?w=400&h=300&fit=crop&auto=format" 
-                         alt="Amazon Deforestation 2023" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                    <p style="color: #ff6b6b; margin-top: 15px;">Perdita forestale significativa</p>
+                    <h3 style="color: #ff6b6b;">Sudamerica - Incendi 2019</h3>
+                    <img src="https://eoimages.gsfc.nasa.gov/images/imagerecords/145000/145498/southamerica_tamo_2019234.png" 
+                         alt="South America Fires 2019" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="color: #ff6b6b; margin-top: 15px;">Fumo e incendi rilevati da MODIS</p>
                 </div>
             </div>
             
             <div style="text-align: center; margin-top: 40px;">
                 <p style="font-size: 1.3em; margin-bottom: 20px;">
-                    <span class="highlight">Come possiamo quantificare e prevedere questi cambiamenti automaticamente?</span>
+                    <span class="highlight">I satelliti sono diventati i testimoni digitali di questa perdita</span>
                 </p>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <span class="stat-number">17%</span>
-                        <span class="stat-label">Foresta Amazzonica<br>persa dal 1970</span>
+                        <span class="stat-label">Dell'Amazzonia<br>è già scomparsa</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-number">11,568</span>
-                        <span class="stat-label">km² deforestati<br>nel 2022</span>
+                        <span class="stat-label">km² bruciati<br>solo nel 2022</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-number">24/7</span>
-                        <span class="stat-label">Monitoraggio<br>necessario</span>
+                        <span class="stat-label">Sorveglianza<br>satellitare</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 5: Entra AlphaEarth -->
+        <!-- Slide 7: Entra AlphaEarth -->
         <div class="slide">
-            <h1>AlphaEarth Foundations</h1>
-            <p style="text-align: center; font-size: 1.5em; color: #4a9eff; margin-bottom: 40px;">La Rivoluzione dell'AI Geospaziale di DeepMind</p>
+            <h1>AlphaEarth: L'AI che Vede il Mondo</h1>
+            <p style="text-align: center; font-size: 1.5em; color: #4a9eff; margin-bottom: 40px;">Il primo cervello artificiale per il nostro pianeta</p>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
                 <div>
-                    <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&h=400&fit=crop&auto=format" 
-                         alt="AI Earth Analysis" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <img src="https://lh3.googleusercontent.com/HDhR_jsZ6VhgwXTApMGZVLbHRE49liKtWC_4REPPFHUmiyRRbtKH9Bb5tjSEZrPoWLm-yu69vpBvEzwOf6oFKHawCUlANxD8djHP_DQQRpwI9JRwbA=w1072-h603-n-nu" 
+                         alt="AlphaEarth Google DeepMind" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="text-align: center; font-size: 0.9em; color: #999; margin-top: 10px;">
+                        AlphaEarth di Google DeepMind
+                    </p>
                 </div>
                 <div>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <span class="stat-number">24%</span>
-                            <span class="stat-label">Riduzione Errori</span>
+                            <span class="stat-label">Meno errori<br>dei sistemi attuali</span>
                         </div>
                         <div class="stat-card">
                             <span class="stat-number">16x</span>
-                            <span class="stat-label">Efficienza Storage</span>
+                            <span class="stat-label">Meno spazio<br>per i dati</span>
                         </div>
                         <div class="stat-card">
                             <span class="stat-number">50+</span>
-                            <span class="stat-label">Organizzazioni Attive</span>
+                            <span class="stat-label">Organizzazioni<br>che lo usano</span>
                         </div>
                         <div class="stat-card">
                             <span class="stat-number">10m</span>
-                            <span class="stat-label">Risoluzione</span>
+                            <span class="stat-label">Accuracy spaziale</span>
                         </div>
                     </div>
                     <p style="text-align: center; margin-top: 30px; font-size: 1.2em;">
-                        <span class="highlight">Primo modello fondazionale per Earth Observation</span>
+                        <span class="highlight">Un esempio di embedding per il nostro pianeta.</span>
                     </p>
                 </div>
             </div>
@@ -652,64 +756,96 @@
 
         <!-- Slide 2: Il Problema -->
         <div class="slide">
-            <h2>La Sfida dell'Earth Observation</h2>
+            <h2>Le grandi sfide dell'Earth Observation</h2>
+
             <div class="timeline">
+                <!-- Diluvio di dati -->
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
-                    <p><strong>Frammentazione dei dati:</strong> Petabyte di dati da sensori diversi, formati incompatibili</p>
+                    <p><strong>Diluvio di dati:</strong> <em>Petabyte</em> quotidiani non più scaricabili o archiviabili on-premise</p>
                 </div>
+
+                <!-- Sensori eterogenei -->
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
-                    <p><strong>Copertura temporale irregolare:</strong> Nuvole, orbite satellitari, guasti tecnici</p>
+                    <p><strong>Sensori eterogenei:</strong> ottico, radar, LiDAR e modelli climatici “parlano lingue diverse”</p>
                 </div>
+
+                <!-- Vuoti temporali e nuvole -->
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
-                    <p><strong>Complessità computazionale:</strong> Processing impossibile per organizzazioni medie</p>
+                    <p><strong>Vuoti temporali:</strong> nuvole, orbite e guasti lasciano buchi nelle serie storiche</p>
                 </div>
+
+                <!-- Scarsità di etichette -->
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
-                    <p><strong>Gap tecnologico:</strong> Da dati grezzi a insights azionabili</p>
+                    <p><strong>Pochi dati di campo:</strong> servono etichette, ma raccoglierle sul terreno costa tempo e denaro</p>
+                </div>
+
+                <!-- Costi computazionali -->
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <p><strong>Costi computazionali:</strong> analizzare anni di Sentinel o Landsat richiede (di norma) cluster GPU e storage massivo</p>
                 </div>
             </div>
+
             <p style="margin-top: 40px; text-align: center; font-size: 1.3em;">
-                <span class="highlight">AlphaEarth trasforma questa complessità in opportunità</span>
+                <span class="highlight">Alpha Earth comprime, fonde e rende interrogabili questi dati in pochi secondi</span>
             </p>
         </div>
 
-        <!-- Slide 7: Architettura STP -->
+
+        <!-- Slide 9: Come Funziona AlphaEarth -->
         <div class="slide">
-            <h2>L'Architettura Space Time Precision</h2>
+            <h2>Il Cervello di AlphaEarth: Architettura Fondazionale</h2>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 30px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 40px 0;">
                 <div>
-                    <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&h=400&fit=crop&auto=format" 
-                         alt="Neural Network Architecture" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                    <p style="text-align: center; font-size: 0.9em; color: #999; margin-top: 10px;">
-                        Architettura neurale avanzata per dati spazio-temporali
-                    </p>
+                    <h3 style="color: #4a9eff; margin-bottom: 25px;">🧠 Foundation Model per la Terra</h3>
+                    <div style="background: rgba(74, 158, 255, 0.1); padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                        <h4 style="color: #00ff88;">📡 Satellite Virtuale</h4>
+                        <p>Come ChatGPT ha imparato il linguaggio umano, AlphaEarth impara il "linguaggio della Terra"</p>
+                        <ul style="margin: 15px 0; padding-left: 20px;">
+                            <li>🌍 <strong>Input:</strong> Terabyte di dati da decine di satelliti</li>
+                            <li>🎯 <strong>Output:</strong> Mappe intelligenti in tempo reale</li>
+                            <li>🔄 <strong>Apprendimento:</strong> Da milioni di esempi terrestri</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="architecture-diagram">
-                    <div class="arch-component">
-                        <h3>Spatial Pathway</h3>
-                        <p>ViT-like self-attention<br>Risoluzione: 1/16L<br>Pattern geografici locali</p>
+                
+                <div>
+                    <h3 style="color: #00ff88; margin-bottom: 25px;">⚙️ I Tre Cervelli Specializzati</h3>
+                    
+                    <div style="background: rgba(0, 255, 136, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+                        <h4 style="color: #4a9eff;">🗺️ Spatial Brain</h4>
+                        <p><strong>Cosa fa:</strong> Riconosce pattern geografici (foreste, città, mari)</p>
+                        <p><strong>Come:</strong> Vision Transformer che "guarda" ogni pixel nel contesto</p>
                     </div>
-                    <div class="arch-component">
-                        <h3>Temporal Pathway</h3>
-                        <p>Time-axial attention<br>Risoluzione: 1/8L<br>Tempo continuo</p>
+                    
+                    <div style="background: rgba(255, 165, 0, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+                        <h4 style="color: #ffa500;">⏰ Temporal Brain</h4>
+                        <p><strong>Cosa fa:</strong> Capisce come cambiano le cose nel tempo</p>
+                        <p><strong>Come:</strong> Attention che "ricorda" il passato e predice il futuro</p>
                     </div>
-                    <div class="arch-component">
-                        <h3>Precision Pathway</h3>
-                        <p>Convoluzioni 3x3<br>Risoluzione: 1/2L<br>Dettagli spaziali</p>
+                    
+                    <div style="background: rgba(255, 107, 107, 0.1); padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #ff6b6b;">🔍 Precision Brain</h4>
+                        <p><strong>Cosa fa:</strong> Cattura dettagli fino a 10 metri di precisione</p>
+                        <p><strong>Come:</strong> Reti convoluzioni per dettagli spaziali fini</p>
                     </div>
                 </div>
             </div>
             
-            <div style="text-align: center;">
-                <p style="margin-bottom: 15px;">
-                    <strong>Cross-talk Pyramid Exchanges:</strong> Learned Laplacian pyramid rescaling tra i blocchi
+            <div style="text-align: center; margin-top: 40px; background: rgba(74, 158, 255, 0.1); padding: 30px; border-radius: 15px;">
+                <h3 style="color: #4a9eff; margin-bottom: 20px;">🔗 Il Segreto: Cross-talk Fusion</h3>
+                <p style="font-size: 1.2em; margin-bottom: 15px;">
+                    <span class="highlight">I tre cervelli "parlano" tra loro continuamente</span>
                 </p>
-                <p>
-                    Primo sistema EO con supporto temporale continuo attraverso timecode sinusoidali
+                <p style="font-size: 1.1em;">
+                    📊 Il Spatial Brain dice: "Vedo una foresta" <br>
+                    ⏰ Il Temporal Brain aggiunge: "Sta crescendo rapidamente" <br>
+                    🔍 Il Precision Brain precisa: "Ma c'è una strada nuova a nord-est"
                 </p>
             </div>
         </div>
