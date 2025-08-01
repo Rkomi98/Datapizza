@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaEarth Foundations - La Rivoluzione dell'AI Geospaziale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Earth Animation Background */
+        .earth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .earth {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle at 30% 30%, #4a9eff, #1a5fb4, #0a2463);
+            border-radius: 50%;
+            box-shadow: 
+                inset -40px -40px 80px rgba(0,0,0,0.5),
+                0 0 100px rgba(74, 158, 255, 0.5);
+            animation: rotate 60s linear infinite;
+        }
+
+        .earth::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: rotate 120s linear infinite reverse;
+        }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Satellite Orbits */
+        .orbit {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: rotate 30s linear infinite;
+        }
+
+        .orbit1 {
+            width: 800px;
+            height: 800px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .orbit2 {
+            width: 900px;
+            height: 900px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-duration: 45s;
+            animation-direction: reverse;
+        }
+
+        .satellite {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Content */
+        .presentation-container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Navigation */
+        .navigation {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: rgba(74, 158, 255, 0.2);
+            border: 1px solid rgba(74, 158, 255, 0.5);
+            color: #fff;
+            cursor: pointer;
+            border-radius: 30px;
+            font-size: 14px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(74, 158, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(74, 158, 255, 0.3);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4a9eff, #00ff88);
+            transition: width 0.3s;
+            z-index: 1000;
+        }
+
+        /* Slide Indicator */
+        .slide-indicator {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 100;
+        }
+
+        /* Slide Styles */
+        h1 {
+            font-size: 4em;
+            font-weight: 300;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #4a9eff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            font-weight: 300;
+            margin-bottom: 20px;
+            color: #4a9eff;
+        }
+
+        h3 {
+            font-size: 1.8em;
+            font-weight: 400;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .highlight {
+            color: #00ff88;
+            font-weight: 500;
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .arch-component {
+            background: rgba(74, 158, 255, 0.1);
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .arch-component:hover {
+            transform: translateY(-5px);
+            background: rgba(74, 158, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.3);
+        }
+
+        /* Data Flow Visualization */
+        .data-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .data-source {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            min-width: 150px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .data-source:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .code-block pre {
+            color: #00ff88;
+            white-space: pre-wrap;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: rgba(74, 158, 255, 0.1);
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            color: #00ff88;
+            display: block;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 10px;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th {
+            background: rgba(74, 158, 255, 0.2);
+            padding: 20px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .comparison-table td {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(74, 158, 255, 0.2);
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            opacity: 0;
+            animation: fadeInLeft 0.6s forwards;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-marker {
+            width: 20px;
+            height: 20px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(0, 255, 136, 0.1));
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(74, 158, 255, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5em; }
+            h2 { font-size: 1.8em; }
+            .architecture-diagram { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Earth Background -->
+    <div class="earth-container">
+        <div class="earth"></div>
+        <div class="orbit orbit1">
+            <div class="satellite"></div>
+        </div>
+        <div class="orbit orbit2">
+            <div class="satellite"></div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Slide Indicator -->
+    <div class="slide-indicator">
+        <span id="currentSlide">1</span> / <span id="totalSlides">12</span>
+    </div>
+
+    <!-- Main Presentation -->
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <h1>AlphaEarth Foundations</h1>
+            <p style="text-align: center; font-size: 1.5em; color: #4a9eff;">La Rivoluzione dell'AI Geospaziale di DeepMind</p>
+            <div class="stats-grid" style="margin-top: 60px;">
+                <div class="stat-card">
+                    <span class="stat-number">24%</span>
+                    <span class="stat-label">Riduzione Errori</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">16x</span>
+                    <span class="stat-label">Efficienza Storage</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Organizzazioni Attive</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">10m</span>
+                    <span class="stat-label">Risoluzione</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Il Problema -->
+        <div class="slide">
+            <h2>La Sfida dell'Earth Observation</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <p><strong>Frammentazione dei dati:</strong> Petabyte di dati da sensori diversi, formati incompatibili</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <p><strong>Copertura temporale irregolare:</strong> Nuvole, orbite satellitari, guasti tecnici</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <p><strong>Complessità computazionale:</strong> Processing impossibile per organizzazioni medie</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <p><strong>Gap tecnologico:</strong> Da dati grezzi a insights azionabili</p>
+                </div>
+            </div>
+            <p style="margin-top: 40px; text-align: center; font-size: 1.3em;">
+                <span class="highlight">AlphaEarth trasforma questa complessità in opportunità</span>
+            </p>
+        </div>
+
+        <!-- Slide 3: Architettura STP -->
+        <div class="slide">
+            <h2>L'Architettura Space Time Precision</h2>
+            <div class="architecture-diagram">
+                <div class="arch-component">
+                    <h3>Spatial Pathway</h3>
+                    <p>ViT-like self-attention<br>Risoluzione: 1/16L<br>Pattern geografici locali</p>
+                </div>
+                <div class="arch-component">
+                    <h3>Temporal Pathway</h3>
+                    <p>Time-axial attention<br>Risoluzione: 1/8L<br>Tempo continuo</p>
+                </div>
+                <div class="arch-component">
+                    <h3>Precision Pathway</h3>
+                    <p>Convoluzioni 3x3<br>Risoluzione: 1/2L<br>Dettagli spaziali</p>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 30px;">
+                <strong>Cross-talk Pyramid Exchanges:</strong> Learned Laplacian pyramid rescaling tra i blocchi
+            </p>
+            <p style="text-align: center;">
+                Primo sistema EO con supporto temporale continuo attraverso timecode sinusoidali
+            </p>
+        </div>
+
+        <!-- Slide 4: Integrazione Multimodale -->
+        <div class="slide">
+            <h2>Integrazione Dati Multimodale</h2>
+            <div class="data-flow">
+                <div class="data-source">
+                    <h3>Ottici</h3>
+                    <p>Sentinel-2 L1C<br>Landsat 8/9</p>
+                </div>
+                <div class="data-source">
+                    <h3>Radar</h3>
+                    <p>Sentinel-1 SAR<br>PALSAR-2</p>
+                </div>
+                <div class="data-source">
+                    <h3>LiDAR</h3>
+                    <p>GEDI L2A<br>100 metriche</p>
+                </div>
+                <div class="data-source">
+                    <h3>Ambientali</h3>
+                    <p>ERA5-Land<br>GRACE<br>GLO-30 DEM</p>
+                </div>
+            </div>
+            <div class="code-block">
+                <pre>Loss Function: l = a∑(fi(yi, y'i)wi) + b∑|ui · u'i| + c(1 - u · us/2) + d fCLIP(u, ut)
+
+a=1.0  → Ricostruzione obiettivo
+b=0.05 → Uniformità batch  
+c=0.02 → Consistenza contrastiva
+d=0.001 → Allineamento testo</pre>
+            </div>
+        </div>
+
+        <!-- Slide 5: Gemini Integration -->
+        <div class="slide">
+            <h2>Apprendimento Contrastivo con Gemini</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Tri-Model Training</h3>
+                    <p>• Teacher video model<br>• Student video model<br>• Text alignment con Gemini</p>
+                </div>
+                <div class="feature-card">
+                    <h3>CLIP-Style Loss</h3>
+                    <p>Allineamento video-text embeddings<br>MLP decoder condizionato su Gemini</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Fonti Testuali</h3>
+                    <p>• Wikipedia geocodificata<br>• GBIF osservazioni specie<br>• Descrizioni semantiche</p>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 30px; font-size: 1.2em;">
+                <span class="highlight">Gemini fornisce ancoraggio semantico per embedding geospaziali</span>
+            </p>
+        </div>
+
+        <!-- Slide 6: Teacher-Student -->
+        <div class="slide">
+            <h2>Sistema Teacher-Student per Data Sparsity</h2>
+            <div style="display: flex; justify-content: space-around; margin: 40px 0;">
+                <div style="text-align: center;">
+                    <h3 style="color: #4a9eff;">Teacher Model</h3>
+                    <p>Accesso completo a tutti gli input<br>Performance ottimale</p>
+                </div>
+                <div style="text-align: center;">
+                    <h3 style="color: #00ff88;">Student Model</h3>
+                    <p>Input perturbati artificialmente<br>Impara robustezza</p>
+                </div>
+            </div>
+            <div class="code-block">
+                <pre>Strategie di Perturbazione:
+• Source dropping: 30% Landsat/Sentinel-1 (mai Sentinel-2)
+• Temporal: Random timestep dropping
+• Forecasting: Rimozione ultimi 6 mesi
+• Backcasting: Rimozione primi 6 mesi
+
+Consistency Loss: (1 - μ · μs) / 2</pre>
+            </div>
+        </div>
+
+        <!-- Slide 7: Confronto IBM -->
+        <div class="slide">
+            <h2>AlphaEarth vs IBM TerraMind</h2>
+            <div class="comparison-table">
+                <table>
+                    <tr>
+                        <th>Feature</th>
+                        <th>AlphaEarth (DeepMind)</th>
+                        <th>TerraMind (IBM)</th>
+                    </tr>
+                    <tr>
+                        <td>Architettura</td>
+                        <td>Space Time Precision (STP)</td>
+                        <td>Encoder-Decoder Simmetrico</td>
+                    </tr>
+                    <tr>
+                        <td>Tempo</td>
+                        <td>Continuo (timecode sinusoidali)</td>
+                        <td>Finestre discrete</td>
+                    </tr>
+                    <tr>
+                        <td>Efficienza</td>
+                        <td>16x storage reduction</td>
+                        <td>10x compute reduction</td>
+                    </tr>
+                    <tr>
+                        <td>Performance</td>
+                        <td>24% error reduction</td>
+                        <td>8%+ su PANGAEA benchmark</td>
+                    </tr>
+                    <tr>
+                        <td>Parametri</td>
+                        <td>Non disclosed</td>
+                        <td>500B tokens, 9 modalità</td>
+                    </tr>
+                    <tr>
+                        <td>Best Use Case</td>
+                        <td>Operational mapping, GEE</td>
+                        <td>Scientific customization</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Slide 8: Codice Python -->
+        <div class="slide">
+            <h2>Implementazione Pratica</h2>
+            <div class="code-block">
+                <pre>import ee
+ee.Initialize()
+
+# Caricamento AlphaEarth embeddings
+embeddings = ee.ImageCollection('GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL')
+geometry = ee.Geometry.Polygon([[76.3978, 12.5521], [76.6519, 12.3550]])
+
+# 64 bande (A00-A63), risoluzione 10m, copertura 2017-2024
+filtered = embeddings.filter(
+    ee.Filter.date('2024-01-01', '2025-01-01')
+).filter(ee.Filter.bounds(geometry))
+
+# K-means clustering non supervisionato
+samples = filtered.mosaic().sample({
+    'region': geometry, 
+    'scale': 10, 
+    'numPixels': 1000
+})
+
+clusterer = ee.Clusterer.wekaKMeans({'nClusters': 5}).train(samples)
+clustered = filtered.mosaic().cluster(clusterer)</pre>
+            </div>
+            <p style="text-align: center; margin-top: 20px;">
+                <span class="highlight">Low-shot learning: 10-100 samples vs migliaia tradizionali</span>
+            </p>
+        </div>
+
+        <!-- Slide 9: Applicazioni Reali -->
+        <div class="slide">
+            <h2>Impatto nel Mondo Reale</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>MapBiomas Brasile</h3>
+                    <p>Monitoraggio deforestazione Amazzonia attraverso copertura nuvolosa</p>
+                </div>
+                <div class="feature-card">
+                    <h3>UN FAO</h3>
+                    <p>Food security monitoring e rapid assessment impatti climatici</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Harvard Forest</h3>
+                    <p>Long-Term Ecological Research per dynamics forestali</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Global Ecosystems Atlas</h3>
+                    <p>Prima risorsa comprensiva per mappare ecosistemi mondiali</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Stanford & Oregon State</h3>
+                    <p>Ricerca collaborativa su environmental studies</p>
+                </div>
+                <div class="feature-card">
+                    <h3>50+ Organizzazioni</h3>
+                    <p>Adoption globale per climate action</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Performance -->
+        <div class="slide">
+            <h2>Performance Quantitative</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">R² = 0.58</span>
+                    <span class="stat-label">Evapotranspiration<br>(vs valori negativi competitors)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">15</span>
+                    <span class="stat-label">Mapping tasks<br>con performance superiore</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">1.4T</span>
+                    <span class="stat-label">Embedding footprints<br>per anno</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">1-10</span>
+                    <span class="stat-label">Samples per classe<br>in low-data scenarios</span>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 40px; font-size: 1.3em;">
+                Performance eccezionale anche con <span class="highlight">dati labeled estremamente limitati</span>
+            </p>
+        </div>
+
+        <!-- Slide 11: Limitazioni e Futuro -->
+        <div class="slide">
+            <h2>Limitazioni e Direzioni Future</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div>
+                    <h3 style="color: #ff6b6b;">Limitazioni Attuali</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin: 10px 0;">📍 Risoluzione 10m (no identificazione individuale)</li>
+                        <li style="margin: 10px 0;">📅 Update frequenza annuale</li>
+                        <li style="margin: 10px 0;">💾 Requisiti computazionali elevati</li>
+                        <li style="margin: 10px 0;">🏷️ Dependency da ground truth</li>
+                        <li style="margin: 10px 0;">🌍 Potential bias regionali</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="color: #00ff88;">Sviluppi Futuri</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin: 10px 0;">🤖 Integrazione Gemini reasoning agents</li>
+                        <li style="margin: 10px 0;">⏱️ Temporal coverage oltre annuale</li>
+                        <li style="margin: 10px 0;">🔍 Precisione sub-10 metri</li>
+                        <li style="margin: 10px 0;">📡 Nuovi tipi di sensori</li>
+                        <li style="margin: 10px 0;">🌐 Google Earth AI integration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Conclusioni -->
+        <div class="slide">
+            <h2>L'Era dell'AI Geospaziale Planetaria
