@@ -451,31 +451,201 @@
 
     <!-- Slide Indicator -->
     <div class="slide-indicator">
-        <span id="currentSlide">1</span> / <span id="totalSlides">12</span>
+        <span id="currentSlide">1</span> / <span id="totalSlides">16</span>
     </div>
 
     <!-- Main Presentation -->
     <div class="presentation-container">
-        <!-- Slide 1: Title -->
+        
+        <!-- Slide 1: Introduzione all'Earth Observation -->
         <div class="slide active">
+            <h1>Earth Observation</h1>
+            <p style="text-align: center; font-size: 1.5em; color: #4a9eff; margin-bottom: 40px;">Monitoraggio del Pianeta dallo Spazio</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+                <div>
+                    <img src="https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=600&h=400&fit=crop&auto=format" 
+                         alt="Satellite Earth Observation" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                </div>
+                <div>
+                    <h3 style="color: #00ff88; margin-bottom: 20px;">Cos'è l'Earth Observation?</h3>
+                    <ul style="font-size: 1.1em; line-height: 1.8; list-style: none; padding: 0;">
+                        <li style="margin: 15px 0;">🛰️ <strong>Satelliti</strong> che osservano continuamente la Terra</li>
+                        <li style="margin: 15px 0;">📊 <strong>Dati multispettrali</strong> e multitemporali</li>
+                        <li style="margin: 15px 0;">🌍 <strong>Copertura globale</strong> con risoluzione fino a 10 metri</li>
+                        <li style="margin: 15px 0;">⏰ <strong>Aggiornamenti regolari</strong> per monitorare i cambiamenti</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Applicazioni Concrete -->
+        <div class="slide">
+            <h2>Applicazioni dell'Earth Observation</h2>
+            
+            <div class="feature-grid" style="margin: 40px 0;">
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=300&h=200&fit=crop&auto=format" 
+                         alt="Agricoltura" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                    <h3>🌾 Agricoltura di Precisione</h3>
+                    <p>Monitoraggio crescita colture, previsione rese, ottimizzazione irrigazione</p>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1551808525-51a94da548ce?w=300&h=200&fit=crop&auto=format" 
+                         alt="Foreste" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                    <h3>🌲 Monitoraggio Forestale</h3>
+                    <p>Deforestazione, carbon storage, biodiversità, incendi boschivi</p>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop&auto=format" 
+                         alt="Città" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                    <h3>🏙️ Urban Planning</h3>
+                    <p>Espansione urbana, traffico, isole di calore, infrastrutture</p>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=300&h=200&fit=crop&auto=format" 
+                         alt="Cambiamenti climatici" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                    <h3>🌡️ Climate Change</h3>
+                    <p>Scioglimento ghiacci, innalzamento mari, temperature superficiali</p>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=300&h=200&fit=crop&auto=format" 
+                         alt="Disastri naturali" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                    <h3>⚡ Disaster Response</h3>
+                    <p>Alluvioni, terremoti, uragani, valutazione danni in tempo reale</p>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1569163139394-de4e4f43e4e5?w=300&h=200&fit=crop&auto=format" 
+                         alt="Oceani" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                    <h3>🌊 Oceani e Coste</h3>
+                    <p>Qualità dell'acqua, erosione costiera, ecosistemi marini</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: I Dati Geospaziali Oggi -->
+        <div class="slide">
+            <h2>La Complessità dei Dati Geospaziali</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+                <div>
+                    <img src="https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=600&h=400&fit=crop&auto=format" 
+                         alt="Satellite Data Complexity" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="text-align: center; font-size: 0.9em; color: #999; margin-top: 10px;">
+                        Dati multispettrali da satelliti Sentinel e Landsat
+                    </p>
+                </div>
+                <div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">10+ TB</span>
+                            <span class="stat-label">Dati giornalieri<br>dai satelliti</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">13</span>
+                            <span class="stat-label">Bande spettrali<br>Sentinel-2</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">5 giorni</span>
+                            <span class="stat-label">Tempo di<br>rivisitazione</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">40+ anni</span>
+                            <span class="stat-label">Archivio storico<br>Landsat</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <h3 style="color: #ff6b6b;">Sfide Attuali</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="margin: 10px 0;">☁️ Copertura nuvolosa irregolare</li>
+                            <li style="margin: 10px 0;">📊 Formati dati eterogenei</li>
+                            <li style="margin: 10px 0;">⚡ Processing computazionalmente intensivo</li>
+                            <li style="margin: 10px 0;">🎯 Expertise domain specifica richiesta</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Esempio Concreto - Deforestazione -->
+        <div class="slide">
+            <h2>Esempio: Monitoraggio Deforestazione</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; margin: 40px 0;">
+                <div style="text-align: center;">
+                    <h3 style="color: #00ff88;">Amazzonia 2000</h3>
+                    <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop&auto=format" 
+                         alt="Amazon Forest 2000" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="color: #00ff88; margin-top: 15px;">Copertura forestale densa</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <h3 style="color: #ff6b6b;">Amazzonia 2023</h3>
+                    <img src="https://images.unsplash.com/photo-1574263867128-7cec7bfe0bc8?w=400&h=300&fit=crop&auto=format" 
+                         alt="Amazon Deforestation 2023" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="color: #ff6b6b; margin-top: 15px;">Perdita forestale significativa</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 1.3em; margin-bottom: 20px;">
+                    <span class="highlight">Come possiamo quantificare e prevedere questi cambiamenti automaticamente?</span>
+                </p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">17%</span>
+                        <span class="stat-label">Foresta Amazzonica<br>persa dal 1970</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">11,568</span>
+                        <span class="stat-label">km² deforestati<br>nel 2022</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Monitoraggio<br>necessario</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Entra AlphaEarth -->
+        <div class="slide">
             <h1>AlphaEarth Foundations</h1>
-            <p style="text-align: center; font-size: 1.5em; color: #4a9eff;">La Rivoluzione dell'AI Geospaziale di DeepMind</p>
-            <div class="stats-grid" style="margin-top: 60px;">
-                <div class="stat-card">
-                    <span class="stat-number">24%</span>
-                    <span class="stat-label">Riduzione Errori</span>
+            <p style="text-align: center; font-size: 1.5em; color: #4a9eff; margin-bottom: 40px;">La Rivoluzione dell'AI Geospaziale di DeepMind</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+                <div>
+                    <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&h=400&fit=crop&auto=format" 
+                         alt="AI Earth Analysis" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number">16x</span>
-                    <span class="stat-label">Efficienza Storage</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number">50+</span>
-                    <span class="stat-label">Organizzazioni Attive</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number">10m</span>
-                    <span class="stat-label">Risoluzione</span>
+                <div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">24%</span>
+                            <span class="stat-label">Riduzione Errori</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">16x</span>
+                            <span class="stat-label">Efficienza Storage</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">50+</span>
+                            <span class="stat-label">Organizzazioni Attive</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">10m</span>
+                            <span class="stat-label">Risoluzione</span>
+                        </div>
+                    </div>
+                    <p style="text-align: center; margin-top: 30px; font-size: 1.2em;">
+                        <span class="highlight">Primo modello fondazionale per Earth Observation</span>
+                    </p>
                 </div>
             </div>
         </div>
@@ -506,29 +676,42 @@
             </p>
         </div>
 
-        <!-- Slide 3: Architettura STP -->
+        <!-- Slide 7: Architettura STP -->
         <div class="slide">
             <h2>L'Architettura Space Time Precision</h2>
-            <div class="architecture-diagram">
-                <div class="arch-component">
-                    <h3>Spatial Pathway</h3>
-                    <p>ViT-like self-attention<br>Risoluzione: 1/16L<br>Pattern geografici locali</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&h=400&fit=crop&auto=format" 
+                         alt="Neural Network Architecture" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <p style="text-align: center; font-size: 0.9em; color: #999; margin-top: 10px;">
+                        Architettura neurale avanzata per dati spazio-temporali
+                    </p>
                 </div>
-                <div class="arch-component">
-                    <h3>Temporal Pathway</h3>
-                    <p>Time-axial attention<br>Risoluzione: 1/8L<br>Tempo continuo</p>
-                </div>
-                <div class="arch-component">
-                    <h3>Precision Pathway</h3>
-                    <p>Convoluzioni 3x3<br>Risoluzione: 1/2L<br>Dettagli spaziali</p>
+                <div class="architecture-diagram">
+                    <div class="arch-component">
+                        <h3>Spatial Pathway</h3>
+                        <p>ViT-like self-attention<br>Risoluzione: 1/16L<br>Pattern geografici locali</p>
+                    </div>
+                    <div class="arch-component">
+                        <h3>Temporal Pathway</h3>
+                        <p>Time-axial attention<br>Risoluzione: 1/8L<br>Tempo continuo</p>
+                    </div>
+                    <div class="arch-component">
+                        <h3>Precision Pathway</h3>
+                        <p>Convoluzioni 3x3<br>Risoluzione: 1/2L<br>Dettagli spaziali</p>
+                    </div>
                 </div>
             </div>
-            <p style="text-align: center; margin-top: 30px;">
-                <strong>Cross-talk Pyramid Exchanges:</strong> Learned Laplacian pyramid rescaling tra i blocchi
-            </p>
-            <p style="text-align: center;">
-                Primo sistema EO con supporto temporale continuo attraverso timecode sinusoidali
-            </p>
+            
+            <div style="text-align: center;">
+                <p style="margin-bottom: 15px;">
+                    <strong>Cross-talk Pyramid Exchanges:</strong> Learned Laplacian pyramid rescaling tra i blocchi
+                </p>
+                <p>
+                    Primo sistema EO con supporto temporale continuo attraverso timecode sinusoidali
+                </p>
+            </div>
         </div>
 
         <!-- Slide 4: Integrazione Multimodale -->
