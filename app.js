@@ -154,26 +154,28 @@ function loadAllRooms() {
     listEl.innerHTML = '<p>Caricamento stanze...</p>';
 
     const roomsRef = db.ref('rooms');
-    // Order by creation time to fetch them, we'll reverse client-side for display
-    roomsRef.orderByChild('createdAt').once('value').then(snapshot => {
+    roomsRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
             listEl.innerHTML = '<p>Nessuna stanza trovata.</p>';
             return;
         }
 
-        listEl.innerHTML = ''; // Clear loading message
+        listEl.innerHTML = '';
         const rooms = [];
         snapshot.forEach(childSnapshot => {
-            // Prepend to the array to show newest rooms first
-            rooms.unshift({ code: childSnapshot.key, data: childSnapshot.val() });
+            rooms.push({ code: childSnapshot.key, data: childSnapshot.val() });
         });
+
+        // Sort by createdAt desc (fallback to 0 if missing)
+        rooms.sort((a, b) => (b.data.createdAt || 0) - (a.data.createdAt || 0));
 
         rooms.forEach(room => {
             const item = document.createElement('div');
             item.className = 'room-list-item';
 
             const info = document.createElement('span');
-            const creationDate = new Date(room.data.createdAt).toLocaleString('it-IT');
+            const ts = room.data.createdAt;
+            const creationDate = ts ? new Date(ts).toLocaleString('it-IT') : 'data non disponibile';
             info.textContent = `Stanza: ${room.code} (del ${creationDate})`;
             item.appendChild(info);
 
@@ -195,12 +197,11 @@ function loadAllRooms() {
             deleteBtn.textContent = 'Elimina';
             deleteBtn.className = 'danger';
             deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent rejoining when clicking delete
+                e.stopPropagation();
                 if (confirm(`Sei sicuro di voler eliminare la stanza "${room.code}"? L'azione è irreversibile.`)) {
                     db.ref('rooms/' + room.code).remove()
                         .then(() => {
-                            console.log(`Room ${room.code} deleted successfully.`);
-                            item.remove(); // Remove from UI
+                            item.remove();
                         })
                         .catch(err => {
                             console.error('Error deleting room:', err);
