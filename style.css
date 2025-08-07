@@ -149,17 +149,36 @@ button:hover:not(:disabled) {
 }
 
 .room-list-item {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 1rem;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: background var(--transition);
-    border: 1px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    cursor: default;
 }
 
-.room-list-item:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
+.room-item-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.room-item-controls button {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 0.9em;
+}
+
+button.danger {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
+}
+
+button.danger:hover {
+    background-color: #c0392b;
 }
 
 .panel-header {

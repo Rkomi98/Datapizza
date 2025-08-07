@@ -148,47 +148,75 @@ function updatePlayerTimer() {
     }
 }
 
-// Host: Load and display room history
-function loadHostHistory() {
-    const history = JSON.parse(localStorage.getItem('hostHistory')) || [];
+// Host: Load all rooms from Firebase and display them
+function loadAllRooms() {
     const listEl = document.getElementById('hostRoomList');
     listEl.innerHTML = '<p>Caricamento stanze...</p>';
 
-    if (history.length === 0) {
-        listEl.innerHTML = '<p>Nessuna stanza creata finora.</p>';
-        return;
-    }
-
-    const promises = history.map(code => db.ref('rooms/' + code).once('value'));
-
-    Promise.all(promises).then(snapshots => {
-        listEl.innerHTML = '';
-        const validHistory = [];
-        const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
-
-        snapshots.forEach(snap => {
-            const roomData = snap.val();
-            if (snap.exists() && roomData.createdAt && roomData.createdAt > twentyFourHoursAgo) {
-                const code = snap.key;
-                validHistory.push(code);
-                const item = document.createElement('div');
-                item.className = 'room-list-item';
-                item.textContent = `Stanza: ${code}`;
-                item.addEventListener('click', () => {
-                    state.roomCode = code;
-                    showPanel('hostDashboard');
-                    subscribeHost();
-                });
-                listEl.appendChild(item);
-            }
-        });
-
-        if (listEl.children.length === 0) {
-            listEl.innerHTML = '<p>Nessuna stanza attiva trovata.</p>';
+    const roomsRef = db.ref('rooms');
+    // Order by creation time to fetch them, we'll reverse client-side for display
+    roomsRef.orderByChild('createdAt').once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+            listEl.innerHTML = '<p>Nessuna stanza trovata.</p>';
+            return;
         }
 
-        // Clean up localStorage from non-existent rooms
-        localStorage.setItem('hostHistory', JSON.stringify(validHistory));
+        listEl.innerHTML = ''; // Clear loading message
+        const rooms = [];
+        snapshot.forEach(childSnapshot => {
+            // Prepend to the array to show newest rooms first
+            rooms.unshift({ code: childSnapshot.key, data: childSnapshot.val() });
+        });
+
+        rooms.forEach(room => {
+            const item = document.createElement('div');
+            item.className = 'room-list-item';
+
+            const info = document.createElement('span');
+            const creationDate = new Date(room.data.createdAt).toLocaleString('it-IT');
+            info.textContent = `Stanza: ${room.code} (del ${creationDate})`;
+            item.appendChild(info);
+
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'room-item-controls';
+
+            const rejoinBtn = document.createElement('button');
+            rejoinBtn.textContent = 'Entra';
+            rejoinBtn.className = 'secondary';
+            rejoinBtn.addEventListener('click', () => {
+                state.roomCode = room.code;
+                document.getElementById('roomCodeDisplay').textContent = room.code;
+                showPanel('hostDashboard');
+                subscribeHost();
+            });
+            btnGroup.appendChild(rejoinBtn);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Elimina';
+            deleteBtn.className = 'danger';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent rejoining when clicking delete
+                if (confirm(`Sei sicuro di voler eliminare la stanza "${room.code}"? L'azione è irreversibile.`)) {
+                    db.ref('rooms/' + room.code).remove()
+                        .then(() => {
+                            console.log(`Room ${room.code} deleted successfully.`);
+                            item.remove(); // Remove from UI
+                        })
+                        .catch(err => {
+                            console.error('Error deleting room:', err);
+                            alert('Si è verificato un errore durante l\'eliminazione della stanza.');
+                        });
+                }
+            });
+            btnGroup.appendChild(deleteBtn);
+            item.appendChild(btnGroup);
+
+            listEl.appendChild(item);
+        });
+
+    }).catch(err => {
+        listEl.innerHTML = '<p>Errore nel caricamento delle stanze. Controlla le regole del database.</p>';
+        console.error('Firebase read error:', err);
     });
 }
 
@@ -501,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pwd = document.getElementById('hostPassword').value;
         if (pwd === 'D4t4p1zz4') {
             showPanel('hostHub');
-            loadHostHistory();
+            loadAllRooms();
         } else {
             alert('Password errata');
         }
