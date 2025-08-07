@@ -38,25 +38,28 @@ git clone https://github.com/tuo-username/tuo-repository.git
 cd tuo-repository
 ```
 
-### 3. Configura Firebase
+### 3. Configura Firebase (locale)
 
-Crea un file `firebase-config.js` nella root del progetto. Copia e incolla il seguente codice, sostituendo i valori con le credenziali del tuo progetto Firebase (che puoi trovare nella console di Firebase in *Project Settings > General > Your apps > Firebase SDK snippet*).
+Crea manualmente un file `firebase-config-local.js` nella root del progetto con il seguente contenuto e compila i campi con le credenziali del tuo progetto Firebase (console Firebase: Settings > General > Your apps > SDK snippet). Questo file viene caricato prima di `app.js` solo in locale e NON va committato.
 
 ```javascript
-// firebase-config.js
-const firebaseConfig = {
-  apiKey: "IL_TUO_API_KEY",
-  authDomain: "IL_TUO_AUTH_DOMAIN",
-  databaseURL: "IL_TUO_DATABASE_URL",
-  projectId: "IL_TUO_PROJECT_ID",
-  storageBucket: "IL_TUO_STORAGE_BUCKET",
-  messagingSenderId: "IL_TUO_MESSAGING_SENDER_ID",
-  appId: "IL_TUO_APP_ID",
-  measurementId: "IL_TUO_MEASUREMENT_ID"
+// firebase-config-local.js
+window.firebaseConfigLocal = {
+  apiKey: "<API_KEY>",
+  authDomain: "<PROJECT_ID>.firebaseapp.com",
+  // Realtime Database URL (esempi):
+  //   https://<PROJECT_ID>-default-rtdb.firebaseio.com
+  //   https://<PROJECT_ID>-default-rtdb.europe-west1.firebasedatabase.app
+  databaseURL: "https://<PROJECT_ID>-default-rtdb.firebaseio.com",
+  projectId: "<PROJECT_ID>",
+  storageBucket: "<PROJECT_ID>.appspot.com",
+  messagingSenderId: "<SENDER_ID>",
+  appId: "<APP_ID>",
+  measurementId: "<MEASUREMENT_ID>"
 };
 ```
 
-**Nota**: Il file `firebase-config.js` è deliberatamente ignorato da Git (tramite `.gitignore`) per non esporre le tue credenziali.
+**Nota**: `firebase-config-local.js` non viene committato né usato in produzione.
 
 ### 4. Installa le Dipendenze
 
