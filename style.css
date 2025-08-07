@@ -28,7 +28,7 @@ html, body {
     height: 100%;
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    color: #060606;
+    color: var(--text-light);
     overflow: hidden;
 }
 
@@ -158,6 +158,7 @@ button:hover:not(:disabled) {
     margin-bottom: 8px;
     background-color: #fff;
     cursor: default;
+    color: var(--text-dark);
 }
 
 .room-item-controls {
