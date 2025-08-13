@@ -1,13 +1,11 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Data-Pizza/Data-Pizza/main/datapizza-logo.png" alt="Datapizza Logo" width="200"/>
-</p>
+<h1 align="left">
+  PizzAI Template
+</h1>
 
-<h1 align="center">PizzAI Template</h1>
-
-<p align="center">
+<p align="left">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12+-blue?logo=python&logoColor=white"/>
   <img alt="uv" src="https://img.shields.io/badge/installer-uv-blueviolet"/>
-  <img alt="License" src="https://img.shields.io/badge/License-MIT-green"/>
+  <!--<img alt="License" src="https://img.shields.io/badge/License-MIT-green"/> Qua mettiamo la licenza quando l'avremo-->
 </p>
 
 Questo progetto è un template per iniziare a sviluppare con i pacchetti privati di Datapizza.
