@@ -1,19 +1,19 @@
-# Guida alla Configurazione dei Client DatapizzAI
+# Guida alla configurazione dei client DatapizzAI
 
 Questa guida ti aiuterà a configurare tutti i tipi di client disponibili nella libreria DatapizzAI per interagire con diversi provider di modelli LLM.
 
-## 📋 Prerequisiti
+## Prerequisiti
 
-### 1. Installazione delle dipendenze
+### Installazione delle dipendenze
 ```bash
 pip install python-dotenv
 ```
 
-### 2. Configurazione delle variabili d'ambiente
-Crea un file `.env` nella root del tuo progetto:
+### Configurazione delle variabili d'ambiente
+Crea un file `.env` nella root del tuo progetto con almeno una chiave API:
 
 ```bash
-# File .env
+# File .env - aggiungi solo le chiavi che ti servono
 OPENAI_API_KEY=sk-your-openai-api-key-here
 ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key-here
 GOOGLE_API_KEY=your-google-api-key-here
@@ -23,7 +23,7 @@ AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
 AZURE_OPENAI_DEPLOYMENT=your-deployment-name
 ```
 
-### 3. Setup base del codice
+### Setup base del codice
 ```python
 import os
 from dotenv import load_dotenv
@@ -45,11 +45,11 @@ from datapizzai.clients.factory import Provider
 
 ---
 
-## 🏭 Metodo 1: Utilizzo del ClientFactory (Raccomandato)
+## Metodo 1: Utilizzo del ClientFactory (raccomandato)
 
 Il `ClientFactory` è il modo più semplice per creare client con configurazione automatica.
 
-### OpenAI Client
+### OpenAI client
 ```python
 # Configurazione base
 openai_client = ClientFactory.create(
@@ -63,7 +63,7 @@ openai_client = ClientFactory.create(
 # Modelli disponibili: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
 ```
 
-### Anthropic Client (Claude)
+### Anthropic client (Claude)
 ```python
 # Configurazione base
 anthropic_client = ClientFactory.create(
@@ -77,7 +77,7 @@ anthropic_client = ClientFactory.create(
 # Modelli disponibili: claude-3-5-sonnet-latest, claude-3-5-haiku-latest, claude-3-opus-latest
 ```
 
-### Google Client (Gemini)
+### Google client (Gemini)
 ```python
 # Configurazione base
 google_client = ClientFactory.create(
@@ -91,7 +91,7 @@ google_client = ClientFactory.create(
 # Modelli disponibili: gemini-2.0-flash, gemini-1.5-pro, gemini-1.5-flash
 ```
 
-### Mistral Client
+### Mistral client
 ```python
 # Configurazione base
 mistral_client = ClientFactory.create(
@@ -105,7 +105,7 @@ mistral_client = ClientFactory.create(
 # Modelli disponibili: mistral-large-latest, mistral-medium-latest, mistral-small-latest
 ```
 
-### Azure OpenAI Client
+### Azure OpenAI client
 ```python
 # Configurazione base
 azure_client = ClientFactory.create(
@@ -123,11 +123,11 @@ azure_client = ClientFactory.create(
 
 ---
 
-## 🔧 Metodo 2: Configurazione Diretta dei Client
+## Metodo 2: Configurazione diretta dei client
 
 Per configurazioni avanzate, puoi creare i client direttamente.
 
-### OpenAI Client Avanzato
+### OpenAI client avanzato
 ```python
 from datapizzai.cache import MemoryCache
 
@@ -147,7 +147,7 @@ response = openai_client.invoke("Ciao! Come stai?")
 print(f"Risposta: {response.text}")
 ```
 
-### Anthropic Client Avanzato
+### Anthropic client avanzato
 ```python
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -161,7 +161,7 @@ response = anthropic_client.invoke("Scrivi una breve poesia sulla tecnologia")
 print(f"Risposta: {response.text}")
 ```
 
-### Google Client Avanzato
+### Google client avanzato
 ```python
 # Configurazione standard (GenAI API)
 google_client = GoogleClient(
@@ -188,7 +188,7 @@ response = google_client.invoke("Spiegami il teorema di Pitagora")
 print(f"Risposta: {response.text}")
 ```
 
-### Mistral Client Avanzato
+### Mistral client avanzato
 ```python
 mistral_client = MistralClient(
     api_key=os.getenv("MISTRAL_API_KEY"),
@@ -202,7 +202,7 @@ response = mistral_client.invoke("Traduci 'Hello world' in italiano e francese")
 print(f"Risposta: {response.text}")
 ```
 
-### Azure OpenAI Client Avanzato
+### Azure OpenAI client avanzato
 ```python
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -221,35 +221,9 @@ print(f"Risposta: {response.text}")
 
 ---
 
-## 📊 Parametri di Configurazione Comuni
+## Test di base per ogni client
 
-### Parametri Base
-| Parametro | Tipo | Descrizione | Valore di Default |
-|-----------|------|-------------|-------------------|
-| `api_key` | `str` | Chiave API del provider | **Obbligatorio** |
-| `model` | `str` | Nome del modello da utilizzare | Varia per provider |
-| `system_prompt` | `str` | Prompt di sistema per il comportamento | `""` |
-| `temperature` | `float` | Creatività delle risposte (0.0-2.0) | `0.7` |
-| `cache` | `Cache` | Sistema di cache per ottimizzazioni | `None` |
-
-### Parametri Specifici per Provider
-
-#### OpenAI/Azure OpenAI
-- `azure_endpoint`: URL dell'endpoint Azure
-- `azure_deployment`: Nome del deployment Azure
-- `api_version`: Versione API Azure
-
-#### Google
-- `project_id`: ID progetto GCP (per Vertex AI)
-- `location`: Regione GCP (per Vertex AI)
-- `credentials_path`: Percorso credenziali service account
-- `use_vertexai`: Usa Vertex AI invece di GenAI API
-
----
-
-## ✅ Test di Base per Ogni Client
-
-### Script di Test Completo
+### Script di test completo
 ```python
 import os
 from dotenv import load_dotenv
@@ -263,11 +237,11 @@ def test_client(client, provider_name):
     """Testa un client con una domanda semplice"""
     try:
         response = client.invoke("Dimmi ciao in una frase")
-        print(f"✅ {provider_name}: {response.text}")
+        print(f"{provider_name}: {response.text}")
         print(f"   Token usati: {response.prompt_tokens_used + response.completion_tokens_used}")
         return True
     except Exception as e:
-        print(f"❌ {provider_name}: Errore - {e}")
+        print(f"{provider_name}: Errore - {e}")
         return False
 
 # Test di tutti i client
@@ -278,7 +252,7 @@ clients_to_test = [
     (Provider.MISTRAL, "MISTRAL_API_KEY", "mistral-large-latest"),
 ]
 
-print("🧪 Test dei client DatapizzAI:")
+print("Test dei client DatapizzAI:")
 print("-" * 40)
 
 for provider, env_key, model in clients_to_test:
@@ -294,55 +268,17 @@ for provider, env_key, model in clients_to_test:
             )
             test_client(client, provider.value.upper())
         except Exception as e:
-            print(f"❌ {provider.value.upper()}: Errore configurazione - {e}")
+            print(f"Errore {provider.value.upper()}: {e}")
     else:
-        print(f"⚠️  {provider.value.upper()}: Chiave API non configurata")
+        print(f"{provider.value.upper()}: Chiave API non configurata")
 
 print("-" * 40)
-print("✅ Test completati!")
+print("Test completati!")
 ```
 
 ---
 
-## 🚨 Risoluzione Problemi Comuni
-
-### Errore: "ImportError: cannot import name 'Provider'"
-```python
-# ❌ SBAGLIATO
-from datapizzai.clients import Provider
-
-# ✅ CORRETTO
-from datapizzai.clients.factory import Provider
-```
-
-### Errore: "API key not found"
-Verifica che il file `.env` sia nella directory corretta e che le chiavi siano definite correttamente:
-```bash
-# Controlla se il file .env esiste
-ls -la .env
-
-# Controlla il contenuto (senza mostrare le chiavi)
-grep -E "^[A-Z_]+=" .env
-```
-
-### Errore: "Invalid model name"
-Controlla i modelli disponibili per ogni provider:
-
-**OpenAI**: `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`  
-**Anthropic**: `claude-3-5-sonnet-latest`, `claude-3-5-haiku-latest`  
-**Google**: `gemini-2.0-flash`, `gemini-1.5-pro`, `gemini-1.5-flash`  
-**Mistral**: `mistral-large-latest`, `mistral-medium-latest`
-
-### Errore: "Temperature out of range"
-La temperatura deve essere tra 0.0 e 2.0:
-```python
-# ✅ CORRETTO
-temperature=0.7  # Valore tra 0.0 e 2.0
-```
-
----
-
-## 📝 Esempio Completo di Utilizzo
+## Esempio completo di utilizzo
 
 ```python
 #!/usr/bin/env python3
@@ -369,7 +305,7 @@ def main():
     )
     
     # Test del client
-    print("🤖 Test del client DatapizzAI")
+    print("Test del client DatapizzAI")
     print("-" * 30)
     
     response = client.invoke("Ciao! Presentati brevemente.")
@@ -383,7 +319,7 @@ if __name__ == "__main__":
 
 ---
 
-## 🎯 Prossimi Passi
+## Prossimi passi
 
 Una volta configurato il tuo client, puoi esplorare:
 
