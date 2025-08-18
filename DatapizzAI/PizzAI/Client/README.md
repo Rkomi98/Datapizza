@@ -221,69 +221,12 @@ print(f"Risposta: {response.text}")
 
 ---
 
-## Test di base per ogni client
-
-### Script di test completo
-```python
-import os
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.clients.factory import Provider
-
-# Carica variabili d'ambiente
-load_dotenv()
-
-def test_client(client, provider_name):
-    """Testa un client con una domanda semplice"""
-    try:
-        response = client.invoke("Dimmi ciao in una frase")
-        print(f"{provider_name}: {response.text}")
-        print(f"   Token usati: {response.prompt_tokens_used + response.completion_tokens_used}")
-        return True
-    except Exception as e:
-        print(f"{provider_name}: Errore - {e}")
-        return False
-
-# Test di tutti i client
-clients_to_test = [
-    (Provider.OPENAI, "OPENAI_API_KEY", "gpt-4o-mini"),
-    (Provider.ANTHROPIC, "ANTHROPIC_API_KEY", "claude-3-5-sonnet-latest"),
-    (Provider.GOOGLE, "GOOGLE_API_KEY", "gemini-2.0-flash"),
-    (Provider.MISTRAL, "MISTRAL_API_KEY", "mistral-large-latest"),
-]
-
-print("Test dei client DatapizzAI:")
-print("-" * 40)
-
-for provider, env_key, model in clients_to_test:
-    api_key = os.getenv(env_key)
-    if api_key and api_key != "your-api-key-here":
-        try:
-            client = ClientFactory.create(
-                provider=provider,
-                api_key=api_key,
-                model=model,
-                system_prompt="Rispondi sempre in italiano.",
-                temperature=0.5
-            )
-            test_client(client, provider.value.upper())
-        except Exception as e:
-            print(f"Errore {provider.value.upper()}: {e}")
-    else:
-        print(f"{provider.value.upper()}: Chiave API non configurata")
-
-print("-" * 40)
-print("Test completati!")
-```
-
----
-
 ## Esempio completo di utilizzo
 
 ```python
 #!/usr/bin/env python3
 """
-Esempio completo di configurazione client DatapizzAI
+Esempio completo di utilizzo client DatapizzAI
 """
 
 import os
