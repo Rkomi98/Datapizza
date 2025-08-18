@@ -66,6 +66,9 @@ PizzaAI/
 .idea/
 .vscode/
 
+# Video
+*.mp4
+
 # Credentials
 .netrc
 _netrc
