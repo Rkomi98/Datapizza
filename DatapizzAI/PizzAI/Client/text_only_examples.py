@@ -15,8 +15,8 @@ import os
 import time
 from dotenv import load_dotenv
 
-# Carica le variabili d'ambiente
-load_dotenv()
+# Carica le variabili d'ambiente dal file .env nella directory parent
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # Importazioni datapizzai
 from datapizzai.clients import ClientFactory
@@ -59,17 +59,25 @@ def create_client(provider_name: str = "openai", use_cache: bool = False):
     models = {
         "openai": "gpt-4o",
         "anthropic": "claude-3-5-sonnet-latest",
-        "google": "gemini-2.0-flash", 
+        "google": "gemini-2.5-flash", 
         "mistral": "mistral-large-latest"
     }
+    
+    # Provider che supportano cache nel costruttore
+    cache_supported_providers = {"openai", "azure_openai"}
     
     api_key = os.getenv(api_keys.get(provider_name))
     if not api_key:
         print(f"⚠️ Chiave API non trovata per {provider_name}. Verifica il file .env")
         return None
     
-    # Cache opzionale
-    cache = MemoryCache() if use_cache else None
+    # Cache opzionale - solo per provider che la supportano
+    cache = None
+    extra_kwargs = {}
+    
+    if use_cache and provider_name.lower() in cache_supported_providers:
+        cache = MemoryCache()
+        extra_kwargs["cache"] = cache
     
     try:
         client = ClientFactory.create(
@@ -78,12 +86,14 @@ def create_client(provider_name: str = "openai", use_cache: bool = False):
             model=models[provider_name],
             system_prompt="Sei un assistente AI utile. Rispondi sempre in italiano in modo chiaro e conciso.",
             temperature=0.7,
-            cache=cache
+            **extra_kwargs
         )
         
         print(f"✅ Client {provider_name} creato con successo")
         if cache:
             print("   📦 Cache in memoria abilitata")
+        elif use_cache:
+            print(f"   ⚠️ Cache non supportata per {provider_name}")
         
         return client
         
@@ -269,7 +279,7 @@ def demo_conversational_basic():
     # Definisci i turni della conversazione
     conversation_turns = [
         {
-            "user": "Ciao! Mi chiamo Marco e sono un GenAI Engineer di 27 anni.",
+            "user": "Ciao! Mi chiamo Mirko e sono un GenAI Engineer di 27 anni.",
             "context": "Presentazione iniziale dell'utente"
         },
         {
@@ -442,8 +452,8 @@ def demo_conversational_memory_management():
     
     # Aggiungi alcuni messaggi di esempio
     sample_messages = [
-        ("Mi chiamo Alice e lavoro come designer", ROLE.USER),
-        ("Piacere di conoscerti Alice! Come posso aiutarti oggi?", ROLE.ASSISTANT),
+        ("Mi chiamo Ilaria e lavoro come designer", ROLE.USER),
+        ("Piacere di conoscerti Ilaria! Come posso aiutarti oggi?", ROLE.ASSISTANT),
         ("Sto lavorando su un progetto di UI/UX per un'app mobile", ROLE.USER),
         ("Interessante! Di che tipo di app si tratta?", ROLE.ASSISTANT),
         ("È un'app per il fitness con tracciamento degli allenamenti", ROLE.USER)
@@ -589,12 +599,13 @@ def main():
     # Verifica configurazione base
     print("🔍 Verifica configurazione...")
     
-    # Controlla se il file .env esiste
-    if not os.path.exists('.env'):
-        print("""
-⚠️ File .env non trovato!
+    # Controlla se il file .env esiste nella directory parent
+    env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+    if not os.path.exists(env_path):
+        print(f"""
+⚠️ File .env non trovato in {env_path}!
 
-Crea un file .env nella directory corrente con le tue chiavi API:
+Crea un file .env nella directory PizzAI/ con le tue chiavi API:
 
 OPENAI_API_KEY=sk-your-openai-key-here
 ANTHROPIC_API_KEY=sk-ant-your-anthropic-key-here  

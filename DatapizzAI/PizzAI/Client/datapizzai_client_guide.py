@@ -16,8 +16,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# Carica le variabili d'ambiente dal file .env
-load_dotenv()
+# Carica le variabili d'ambiente dal file .env nella directory parent
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # Importazioni principali della libreria datapizzai
 from datapizzai.clients import (
@@ -280,15 +280,18 @@ def esempio_cache():
     print("\n=== ESEMPIO: Sistema di cache ===")
     
     # 1. Cache in memoria (per sviluppo e test)
-    print("1. Cache in memoria:")
+    print("1. Cache in memoria (supportata solo da OpenAI e Azure OpenAI):")
     memory_cache = MemoryCache()
     
+    # Solo OpenAI supporta cache direttamente nel costruttore
     client_with_cache = OpenAIClient(
         api_key=os.getenv("OPENAI_API_KEY"),
         model="gpt-4o-mini",
         system_prompt="Rispondi sempre la stessa cosa per test di cache.",
         cache=memory_cache
     )
+    
+    print("   ℹ️ Nota: Cache supportata direttamente solo con OpenAI e Azure OpenAI")
     
     # Simula due chiamate identiche
     prompt = "Dimmi ciao"
@@ -317,7 +320,7 @@ def esempio_cache():
             host="localhost",
             port=6379,
             db=0,
-            password=None    # Optional Redis password
+            password=None,   # Optional Redis password
             expiration_time=120  # 2 minuti
         )
         
@@ -808,8 +811,8 @@ def esempio_configurazioni_avanzate():
         import os
         from dotenv import load_dotenv
         
-        # Carica variabili d'ambiente da file .env
-        # load_dotenv()
+        # Carica variabili d'ambiente dal file .env (già fatto all'inizio del file)
+        # load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
         
         # Configurazione flessibile
         provider = os.getenv("LLM_PROVIDER", "openai")
