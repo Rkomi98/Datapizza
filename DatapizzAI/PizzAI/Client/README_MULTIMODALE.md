@@ -1,55 +1,75 @@
-# DatapizzAI multimodale - quick start
+# DatapizzAI multimodale
 
-> Sistema completo per analisi e generazione di contenuti multimodali (immagini, video, audio) con DatapizzAI
+Guida rapida per l'utilizzo delle funzionalità di analisi e generazione immagini.
 
 ## Avvio rapido
 
 ```bash
-# 1. Attiva l'ambiente virtuale
+# Attiva ambiente virtuale
 source .venv/bin/activate
 
-# 2. Esegui il sistema multimodale
+# Configura API keys nel file .env
+echo 'OPENAI_API_KEY=your-key-here' > PizzAI/.env
+
+# Esegui l'esempio
 python Client/multimodal_examples.py
 ```
 
-## Menu principale
+## Funzionalità principali
 
-```
-Da cosa vuoi partire?
+| Funzione | Descrizione | Provider supportati |
+|----------|-------------|-------------------|
+| **Analisi immagini** | Analizza immagini locali o da URL | OpenAI, Google, Anthropic |
+| **Generazione immagini** | Crea immagini da descrizioni testuali | OpenAI (DALL-E 3) |
 
-1. Immagine → Analisi dettagliata di un'immagine
-2. Video → Descrizione di cosa accade nel video  
-3. Audio → Analisi e trascrizione audio
-4. Testo → Suggerimenti per generazione contenuti
-```
-
-## Esempio veloce
+## Esempio rapido - Analisi immagine
 
 ```python
 from datapizzai.clients import ClientFactory
 from datapizzai.type import TextBlock, MediaBlock, Media
+import os
 
-# Crea client
+# Setup client
 client = ClientFactory.create(
-    provider="openai", 
-    api_key="your-key",
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o"
 )
 
-# Analizza immagine
-image_media = Media(
+# Analizza immagine da URL
+media = Media(
     extension=".jpg",
-    media_type="image", 
+    media_type="image",
     source_type="url",
     source="https://example.com/image.jpg"
 )
 
-response = client.invoke(input=[
+response = client.invoke([
     TextBlock(content="Descrivi questa immagine"),
-    MediaBlock(media=image_media)
+    MediaBlock(media=media)
 ])
 
 print(response.text)
+```
+
+## Esempio rapido - Generazione immagine
+
+```python
+import openai
+import os
+
+# Setup client DALL-E
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Genera immagine
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="Un gatto che suona il pianoforte",
+    size="1024x1024",
+    quality="hd"
+)
+
+print(f"Immagine generata: {response.data[0].url}")
 ```
 
 ## Configurazione
@@ -57,164 +77,93 @@ print(response.text)
 ### File .env richiesto
 
 ```bash
-# Aggiungi almeno una chiave API
-OPENAI_API_KEY=sk-your-openai-key        # Immagini
-GOOGLE_API_KEY=your-google-key           # Tutto
-ANTHROPIC_API_KEY=sk-ant-your-key        # Immagini
+# Directory: PizzAI/.env
+OPENAI_API_KEY=sk-your-openai-key-here
+GOOGLE_API_KEY=your-google-key-here  
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-key-here
 ```
 
-### Provider supportati
+### Provider e modelli
 
-| Provider | Immagini | Video | Audio | Cache | Modello Consigliato |
-|----------|----------|--------|-------|--------|---------------------|
-| **OpenAI** | ✅ | ❌ | ❌ | ✅ | `gpt-4o` |
-| **Google** | ✅ | ✅ | ✅ | ❌ | `gemini-2.5-flash` |  
-| **Anthropic** | ✅ | ❌ | ❌ | ❌ | `claude-3-5-sonnet-latest` |
+| Provider | Modello | Analisi | Generazione | Cache |
+|----------|---------|---------|-------------|-------|
+| OpenAI | gpt-4o | ✅ | ✅ | ✅ |
+| Google | gemini-2.5-flash | ✅ | ❌ | ❌ |
+| Anthropic | claude-3-5-sonnet | ✅ | ❌ | ❌ |
 
-## File supportati
+## Menu interattivo
 
-### Immagini
-- `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.webp`
+```
+Da cosa vuoi partire?
 
-### Audio  
-- `.mp3`, `.wav`, `.m4a`, `.aac`, `.ogg`, `.flac`, `.wma`
+1. Analizza immagine → Carica e analizza qualsiasi immagine in dettaglio
+2. Genera immagine → Crea immagini AI professionali da testo con DALL-E 3
 
-### Video
-- `.mp4`, `.avi`, `.mov`, `.mkv`, `.wmv`, `.flv`, `.webm`
-
-## Casi d'uso principali
-
-### 1. Analisi immagine
-```python
-# Carica immagine locale
-image_block = create_mediablock_from_file("my_image.jpg")
-
-# Analizza
-result = client.invoke(input=[
-    TextBlock(content="Analizza questa immagine in dettaglio"),
-    image_block
-])
+0. Esci
 ```
 
-### 2. Analisi video
-```python  
-# Video dal web
-video_block = create_video_mediablock_from_url("https://example.com/video.mp4")
+### Opzioni disponibili
 
-# Analizza cosa accade
-result = client.invoke(input=[
-    TextBlock(content="Cosa sta accadendo in questo video?"),
-    video_block
-])
-```
+**Analisi immagine:**
+- File locali (PNG, JPG, GIF, WebP)
+- Immagini da URL web
+- Domande personalizzate
 
-### 3. Analisi audio
-```python
-# Audio locale
-audio_block = create_audio_mediablock_from_file("audio.mp3")
+**Generazione immagine:**
+- Prompt enhancement automatico (opzionale)
+- Qualità HD
+- Salvataggio locale automatico
 
-# Trascrivi e descrivi
-result = client.invoke(input=[
-    TextBlock(content="Descrivi questo audio e trascrivi eventuali parole"),
-    audio_block
-])
-```
+## Formati supportati
 
-### 4. Generazione da testo
-```python
-# Suggerimenti per generare contenuti
-prompt = "Crea suggerimenti per generare un'immagine di un tramonto sulla montagna"
-result = client.invoke(prompt)
-```
+### Immagini input
+- **Estensioni**: .jpg, .jpeg, .png, .gif, .bmp, .webp
+- **Dimensione massima**: 20MB
+- **Sorgenti**: File locali, URL web
 
-## Fix errore MIME importante
+### Immagini output
+- **Formato**: PNG
+- **Risoluzioni**: 1024x1024, 1792x1024, 1024x1792
+- **Qualità**: standard, hd
 
-**Sempre specificare `extension` nei Media objects per evitare errori:**
+## Risoluzione problemi comuni
+
+### Error: "Unsupported MIME type"
 
 ```python
-# Errore: Unsupported MIME type
+# Problema: extension mancante
 media = Media(media_type="image", source=data)
 
-# Corretto
-media = Media(
-    extension=".png",  # Necessario 
-    media_type="image",
-    source=data
-)
+# Soluzione: specifica sempre l'extension
+media = Media(extension=".jpg", media_type="image", source=data)
+```
+
+### Error: "API key not found"
+
+```bash
+# Verifica file .env
+ls -la PizzAI/.env
+
+# Crea se mancante
+echo 'OPENAI_API_KEY=your-key' > PizzAI/.env
 ```
 
 ## Documentazione completa
 
-➡️ **[GUIDA_MULTIMODALE.md](GUIDA_MULTIMODALE.md)** - Documentazione completa con tutti i dettagli
+→ **[GUIDA_MULTIMODALE.md](GUIDA_MULTIMODALE.md)** - Documentazione tecnica dettagliata con esempi completi
 
-## Script disponibili
+## Requisiti tecnici
 
-| File | Descrizione | Uso |
-|------|-------------|-----|
-| `multimodal_examples.py` | **Sistema completo multimodale** | `python multimodal_examples.py` |
-| `text_only_examples.py` | Esempi solo testo | `python text_only_examples.py` |
-| `datapizzai_client_guide.py` | Guida completa client | `python datapizzai_client_guide.py` |
+- Python 3.8+
+- Ambiente virtuale attivato
+- Almeno una API key configurata
+- Connessione internet per API calls
 
-## Demo interattive disponibili
+## Note sui costi
 
-### Menu principale (semplificato)
-1. **Analisi immagine** - scegli e analizza immagini
-2. **Analisi video** - descrivi cosa accade nei video
-3. **Analisi audio** - trascrivi e descrivi audio
-4. **Generazione testo** - suggerimenti per creare contenuti
+- **OpenAI GPT-4o**: ~$0.01 per immagine analizzata
+- **Google Gemini**: Tariffe competitive per analisi
+- **DALL-E 3**: ~$0.04 per immagine generata (qualità standard), ~$0.08 (HD)
+- **Anthropic Claude**: Pricing per token per analisi
 
-### Menu legacy (avanzato)
-- Accesso a tutte le demo originali
-- Funzionalità conversazionali
-- Gestione memoria avanzata
-- Strumenti di debugging
-
-## Troubleshooting rapido
-
-### Problema: "No module named 'datapizzai'"
-```bash
-# Soluzione: Attiva l'ambiente virtuale
-source .venv/bin/activate
-```
-
-### Problema: "API key not found"
-```bash
-# Soluzione: Verifica file .env nella directory PizzAI/
-ls -la PizzAI/.env
-```
-
-### Problema: "Unsupported MIME type"
-```python
-# Soluzione: Aggiungi extension ai Media objects
-media = Media(extension=".jpg", media_type="image", ...)
-```
-
-### Problema: "Client cache error"
-```python
-# Soluzione: Cache solo per OpenAI
-if provider == "openai":
-    client = ClientFactory.create(..., cache=MemoryCache())
-else:
-    client = ClientFactory.create(...)  # Senza cache
-```
-
-## Informazioni sui token
-
-| Operazione | Token Medi | Provider | Note |
-|------------|------------|----------|------|
-| Analisi immagine semplice | 100-300 | OpenAI | Dipende da dettaglio |
-| Analisi video breve | 200-500 | Google | Varia con durata |  
-| Trascrizione audio | 50-200 | Google | Dipende da lunghezza |
-| Generazione suggerimenti | 100-400 | Tutti | Base alla complessità |
-
-## Prossimi passi
-
-1. **Inizia** → `python multimodal_examples.py`
-2. **Esplora** → prova tutti i 4 tipi di analisi
-3. **Approfondisci** → leggi [GUIDA_MULTIMODALE.md](GUIDA_MULTIMODALE.md)
-4. **Personalizza** → modifica i prompt per le tue esigenze
-5. **Sviluppa** → integra nel tuo progetto
-
----
-
-> **Suggerimento**: inizia con l'analisi di un'immagine locale per familiarizzare con il sistema, poi esplora video e audio dal web.
+Consultare la documentazione ufficiale dei provider per tariffe aggiornate.

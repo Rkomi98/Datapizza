@@ -1,19 +1,15 @@
 # Guida completa: DatapizzAI multimodale
 
-Una guida passo-passo per utilizzare le funzionalità multimodali di DatapizzAI per analizzare immagini, video, audio e generare contenuti.
+Una guida tecnica per utilizzare le funzionalità di analisi e generazione immagini del framework DatapizzAI.
 
 ## Indice
 
 1. [Setup e configurazione](#1-setup-e-configurazione)
-2. [Client multimodali supportati](#2-client-multimodali-supportati)
-3. [Gestione media: immagini](#3-gestione-media-immagini)
-4. [Gestione media: audio](#4-gestione-media-audio)
-5. [Gestione media: video](#5-gestione-media-video)
-6. [Analisi interattiva](#6-analisi-interattiva)
-7. [Generazione da testo](#7-generazione-da-testo)
-8. [Script completo di esempio](#8-script-completo-di-esempio)
-9. [Troubleshooting](#9-troubleshooting)
-10. [Best practices](#10-best-practices)
+2. [Client supportati](#2-client-supportati)
+3. [Analisi immagini](#3-analisi-immagini)
+4. [Generazione immagini](#4-generazione-immagini)
+5. [Esempio completo](#5-esempio-completo)
+6. [Troubleshooting](#6-troubleshooting)
 
 ---
 
@@ -22,965 +18,660 @@ Una guida passo-passo per utilizzare le funzionalità multimodali di DatapizzAI 
 ### Prerequisiti
 
 ```bash
-# Assicurati di avere il virtual environment attivato
+# Attiva l'ambiente virtuale
 source .venv/bin/activate
-
-# Dipendenze necessarie
-pip install python-dotenv
 ```
 
-### Configurazione variabili d'ambiente
+### Configurazione delle API keys
 
-Crea un file `.env` nella directory `PizzAI/` con le tue chiavi API:
+Crea un file `.env` nella directory `PizzAI/`:
 
 ```bash
-# File .env - Aggiungi almeno una chiave per provider multimodale
+# File .env - Almeno una chiave API è richiesta
 OPENAI_API_KEY=sk-your-openai-api-key-here
 GOOGLE_API_KEY=your-google-api-key-here  
 ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key-here
 ```
 
-### Import base
+### Import necessari
 
 ```python
 import os
 import base64
 from pathlib import Path
-from typing import List, Union
 from dotenv import load_dotenv
 
 # Carica variabili d'ambiente
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+load_dotenv('../.env')
 
-# Import datapizzai
+# Import DatapizzAI
 from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, MediaBlock, Media, ROLE
-from datapizzai.cache import MemoryCache
+from datapizzai.type import TextBlock, MediaBlock, Media
 ```
 
 ---
 
-## 2. Client multimodali supportati
+## 2. Client supportati
 
-### Creazione client multimodali
+### Configurazione client
 
 ```python
-def create_multimodal_client(provider_name: str = "openai", use_cache: bool = False):
+def create_client(provider: str = "openai"):
     """
-    Crea un client che supporta contenuti multimodali
+    Crea un client per il provider specificato
     
     Args:
-        provider_name: "openai", "google", "anthropic"
-        use_cache: Se abilitare la cache (solo OpenAI)
+        provider: "openai", "google", o "anthropic"
+    
+    Returns:
+        Client configurato
     """
     
-    # Configurazione provider multimodali
-    multimodal_providers = {
-        "openai": {
-            "api_key_env": "OPENAI_API_KEY", 
-            "model": "gpt-4o",  # Supporta immagini
-            "features": ["images", "text"],
-            "cache_supported": True
-        },
-        "google": {
-            "api_key_env": "GOOGLE_API_KEY",
-            "model": "gemini-2.5-flash",  # Supporta immagini, audio, video
-            "features": ["images", "text", "audio", "video"],
-            "cache_supported": False
-        },
-        "anthropic": {
-            "api_key_env": "ANTHROPIC_API_KEY",
-            "model": "claude-3-5-sonnet-latest",  # Supporta immagini
-            "features": ["images", "text"],
-            "cache_supported": False
-        }
+    models = {
+        "openai": "gpt-4o",
+        "google": "gemini-2.5-flash",
+        "anthropic": "claude-3-5-sonnet-latest"
     }
     
-    config = multimodal_providers[provider_name]
-    api_key = os.getenv(config["api_key_env"])
-    
+    api_key = os.getenv(f"{provider.upper()}_API_KEY")
     if not api_key:
-        raise ValueError(f"Chiave API non trovata per {provider_name}")
+        raise ValueError(f"API key non trovata per {provider}")
     
-    # Cache solo per provider che la supportano
-    extra_kwargs = {}
-    if use_cache and config.get("cache_supported", False):
-        cache = MemoryCache()
-        extra_kwargs["cache"] = cache
-    
-    client = ClientFactory.create(
-        provider=provider_name,
+    return ClientFactory.create(
+        provider=provider,
         api_key=api_key,
-        model=config["model"],
-        system_prompt="Sei un assistente AI multimodale. Rispondi in italiano in modo dettagliato.",
-        temperature=0.7,
-        **extra_kwargs
+        model=models[provider]
     )
-    
-    print(f"Client multimodale {provider_name} creato")
-    print(f"   Modello: {config['model']}")
-    print(f"   Supporta: {', '.join(config['features'])}")
-    
-    return client
 ```
 
-### Esempio di uso
+### Caratteristiche dei provider
 
-```python
-# Client OpenAI con cache
-openai_client = create_multimodal_client("openai", use_cache=True)
-
-# Client Google (migliore per video/audio)
-google_client = create_multimodal_client("google")
-
-# Client Anthropic
-anthropic_client = create_multimodal_client("anthropic")
-```
+| Provider | Modello | Analisi immagini | Generazione immagini | Cache supportata |
+|----------|---------|------------------|---------------------|------------------|
+| OpenAI | gpt-4o | ✅ | ✅ | ✅ |
+| Google | gemini-2.5-flash | ✅ | ❌ | ❌ |
+| Anthropic | claude-3-5-sonnet | ✅ | ❌ | ❌ |
 
 ---
 
-## 3. Gestione media: immagini
+## 3. Analisi immagini
 
-### Ricerca immagini locali
-
-```python
-def find_local_images() -> List[str]:
-    """Trova tutte le immagini nella directory corrente"""
-    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
-    current_dir = Path('.')
-    
-    found_images = []
-    for ext in image_extensions:
-        found_images.extend(current_dir.glob(f'*{ext}'))
-        found_images.extend(current_dir.glob(f'*{ext.upper()}'))
-    
-    return [str(img) for img in found_images]
-
-# Esempio di uso
-local_images = find_local_images()
-print(f"Trovate {len(local_images)} immagini locali")
-```
-
-### Caricamento immagini
-
-#### Da file locale
+### Analisi da file locale
 
 ```python
-def load_image_as_base64(image_path: str) -> Union[str, None]:
-    """Carica un'immagine locale e la converte in base64"""
-    try:
-        with open(image_path, "rb") as image_file:
-            image_data = base64.b64encode(image_file.read()).decode('utf-8')
-            return image_data
-    except Exception as e:
-        print(f"Errore caricamento {image_path}: {e}")
-        return None
-
-def create_mediablock_from_file(file_path: str) -> MediaBlock:
-    """Crea MediaBlock da file immagine locale"""
-    image_b64 = load_image_as_base64(file_path)
-    if not image_b64:
-        raise ValueError(f"Impossibile caricare {file_path}")
+def analyze_local_image(file_path: str, question: str = "Descrivi questa immagine"):
+    """
+    Analizza un'immagine da file locale
     
-    # IMPORTANTE: Determina l'extension per evitare errori MIME
-    file_ext = Path(file_path).suffix.lower()
-    if not file_ext:
-        file_ext = ".png"  # Fallback
+    Args:
+        file_path: Path al file immagine
+        question: Domanda da porre sull'immagine
     
+    Returns:
+        str: Risposta del modello
+    """
+    
+    # Verifica esistenza file
+    if not Path(file_path).exists():
+        raise FileNotFoundError(f"File non trovato: {file_path}")
+    
+    # Carica immagine in base64
+    with open(file_path, "rb") as f:
+        image_data = base64.b64encode(f.read()).decode('utf-8')
+    
+    # Crea oggetto Media
     media = Media(
-        extension=file_ext,  # Critico per Google
+        extension=Path(file_path).suffix or ".jpg",
         media_type="image",
         source_type="base64",
-        source=image_b64,
+        source=image_data,
         detail="high"
     )
     
-    return MediaBlock(media=media)
+    # Analizza
+    client = create_client("openai")
+    response = client.invoke([
+        TextBlock(content=question),
+        MediaBlock(media=media)
+    ])
+    
+    return response.text
 
-# Esempio di uso
-image_block = create_mediablock_from_file("example.jpg")
+# Esempio d'uso
+try:
+    result = analyze_local_image("example.jpg", "Cosa vedi in questa immagine?")
+    print(result)
+except Exception as e:
+    print(f"Errore: {e}")
 ```
 
-#### Da URL web
+### Analisi da URL
 
 ```python
-def create_mediablock_from_url(url: str) -> MediaBlock:
-    """Crea MediaBlock da URL immagine"""
-    # Determina extension dall'URL
-    file_ext = None
-    for ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp']:
-        if ext in url.lower():
-            file_ext = ext
-            break
-    if not file_ext:
-        file_ext = ".png"  # Fallback
+def analyze_web_image(url: str, question: str = "Descrivi questa immagine"):
+    """
+    Analizza un'immagine da URL web
+    
+    Args:
+        url: URL dell'immagine
+        question: Domanda da porre sull'immagine
+    
+    Returns:
+        str: Risposta del modello
+    """
     
     media = Media(
-        extension=file_ext,  # Critico per Google
+        extension=".jpg",  # Estensione di default per URL
         media_type="image",
         source_type="url",
         source=url,
         detail="high"
     )
     
-    return MediaBlock(media=media)
-
-# Esempio di uso
-web_image = create_mediablock_from_url(
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png"
-)
-```
-
-### Analisi immagini
-
-```python
-def analyze_image(client, image_block: MediaBlock, custom_prompt: str = None):
-    """Analizza un'immagine con il client specificato"""
+    client = create_client("google")  # Google ottimizzato per analisi da URL
+    response = client.invoke([
+        TextBlock(content=question),
+        MediaBlock(media=media)
+    ])
     
-    default_prompt = """
-    Analizza attentamente questa immagine e descrivi tutto quello che vedi in modo dettagliato, 
-    includendo:
-    - Oggetti e persone presenti
-    - Colori dominanti
-    - Ambientazione e contesto
-    - Stile e composizione
-    - Qualsiasi dettaglio rilevante
-    """
-    
-    prompt = custom_prompt or default_prompt
-    
-    analysis_input = [
-        TextBlock(content=prompt),
-        image_block
-    ]
-    
-    response = client.invoke(input=analysis_input)
-    
-    return {
-        "text": response.text,
-        "tokens_used": response.prompt_tokens_used + response.completion_tokens_used,
-        "stop_reason": response.stop_reason
-    }
-
-# Esempio completo
-client = create_multimodal_client("openai")
-image_block = create_mediablock_from_file("my_image.jpg")
-result = analyze_image(client, image_block)
-
-print(f"Analisi: {result['text']}")
-print(f"Token utilizzati: {result['tokens_used']}")
-```
-
----
-
-## 4. Gestione media: audio
-
-### Supporto audio
-
-```python
-def find_local_audio() -> List[str]:
-    """Trova tutti i file audio nella directory corrente"""
-    audio_extensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac', '.wma']
-    current_dir = Path('.')
-    
-    found_audio = []
-    for ext in audio_extensions:
-        found_audio.extend(current_dir.glob(f'*{ext}'))
-        found_audio.extend(current_dir.glob(f'*{ext.upper()}'))
-    
-    return [str(audio) for audio in found_audio]
-
-def load_audio_as_base64(audio_path: str) -> Union[str, None]:
-    """Carica un file audio e lo converte in base64"""
-    try:
-        with open(audio_path, "rb") as audio_file:
-            return base64.b64encode(audio_file.read()).decode('utf-8')
-    except Exception as e:
-        print(f"Errore caricamento audio {audio_path}: {e}")
-        return None
-
-def create_audio_mediablock_from_file(file_path: str) -> MediaBlock:
-    """Crea MediaBlock da file audio locale"""
-    audio_b64 = load_audio_as_base64(file_path)
-    if not audio_b64:
-        raise ValueError(f"Impossibile caricare {file_path}")
-    
-    file_ext = Path(file_path).suffix.lower()
-    if not file_ext:
-        file_ext = ".mp3"  # Fallback
-    
-    media = Media(
-        extension=file_ext,
-        media_type="audio",
-        source_type="base64",
-        source=audio_b64
-    )
-    
-    return MediaBlock(media=media)
-
-def create_audio_mediablock_from_url(url: str) -> MediaBlock:
-    """Crea MediaBlock da URL audio"""
-    file_ext = None
-    for ext in ['.mp3', '.wav', '.m4a', '.aac', '.ogg']:
-        if ext in url.lower():
-            file_ext = ext
-            break
-    if not file_ext:
-        file_ext = ".mp3"  # Fallback
-    
-    media = Media(
-        extension=file_ext,
-        media_type="audio",
-        source_type="url",
-        source=url
-    )
-    
-    return MediaBlock(media=media)
-```
-
-### Analisi audio
-
-```python
-def analyze_audio(client, audio_block: MediaBlock):
-    """Analizza un file audio"""
-    
-    analysis_input = [
-        TextBlock(content="""
-        Descrivi attentamente questo audio. Identifica:
-        - Tutti i suoni presenti
-        - Musica o melodie
-        - Voci e dialoghi (trascrivi se possibile)
-        - Rumori di fondo
-        - Emozioni o mood trasmessi
-        - Qualità audio
-        """),
-        audio_block
-    ]
-    
-    response = client.invoke(input=analysis_input)
     return response.text
 
-# Esempio di uso (Google supporta meglio l'audio)
-client = create_multimodal_client("google")
-audio_block = create_audio_mediablock_from_file("my_audio.mp3")
-analysis = analyze_audio(client, audio_block)
-print(f"Analisi audio: {analysis}")
+# Esempio d'uso
+url = "https://example.com/image.jpg"
+analysis = analyze_web_image(url, "Identifica gli elementi presenti nell'immagine")
+print(analysis)
 ```
 
----
-
-## 5. Gestione media: video
-
-### Supporto video
+### Ricerca immagini locali
 
 ```python
-def find_local_videos() -> List[str]:
-    """Trova tutti i file video nella directory corrente"""
-    video_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm']
-    current_dir = Path('.')
-    
-    found_videos = []
-    for ext in video_extensions:
-        found_videos.extend(current_dir.glob(f'*{ext}'))
-        found_videos.extend(current_dir.glob(f'*{ext.upper()}'))
-    
-    return [str(video) for video in found_videos]
-
-def load_video_as_base64(video_path: str) -> Union[str, None]:
-    """Carica un file video e lo converte in base64"""
-    try:
-        with open(video_path, "rb") as video_file:
-            return base64.b64encode(video_file.read()).decode('utf-8')
-    except Exception as e:
-        print(f"Errore caricamento video {video_path}: {e}")
-        return None
-
-def create_video_mediablock_from_file(file_path: str) -> MediaBlock:
-    """Crea MediaBlock da file video locale"""
-    video_b64 = load_video_as_base64(file_path)
-    if not video_b64:
-        raise ValueError(f"Impossibile caricare {file_path}")
-    
-    file_ext = Path(file_path).suffix.lower()
-    if not file_ext:
-        file_ext = ".mp4"  # Fallback
-    
-    media = Media(
-        extension=file_ext,
-        media_type="video",
-        source_type="base64",
-        source=video_b64
-    )
-    
-    return MediaBlock(media=media)
-
-def create_video_mediablock_from_url(url: str) -> MediaBlock:
-    """Crea MediaBlock da URL video"""
-    file_ext = None
-    for ext in ['.mp4', '.avi', '.mov', '.mkv', '.webm']:
-        if ext in url.lower():
-            file_ext = ext
-            break
-    if not file_ext:
-        file_ext = ".mp4"  # Fallback
-    
-    media = Media(
-        extension=file_ext,
-        media_type="video",
-        source_type="url",
-        source=url
-    )
-    
-    return MediaBlock(media=media)
-```
-
-### Analisi video
-
-```python
-def analyze_video(client, video_block: MediaBlock):
-    """Analizza un video"""
-    
-    analysis_input = [
-        TextBlock(content="""
-        Cosa sta accadendo in questo video? Descrivi dettagliatamente:
-        - La scena e l'ambientazione
-        - Le azioni che si svolgono
-        - I personaggi presenti
-        - Gli elementi visivi importanti
-        - La narrativa o il messaggio
-        - Lo stile e la qualità
-        """),
-        video_block
-    ]
-    
-    response = client.invoke(input=analysis_input)
-    return response.text
-
-# Esempio di uso (Google supporta meglio i video)
-client = create_multimodal_client("google")
-video_block = create_video_mediablock_from_url(
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-)
-analysis = analyze_video(client, video_block)
-print(f"Cosa accade nel video: {analysis}")
-```
-
----
-
-## 6. Analisi interattiva
-
-### Sistema di selezione media
-
-```python
-def interactive_media_selection(media_type: str) -> MediaBlock:
+def find_local_images(directory: str = ".") -> list:
     """
-    Sistema unificato per selezione interattiva di media
+    Trova tutte le immagini in una directory
     
     Args:
-        media_type: "image", "audio", "video"
+        directory: Directory da cercare (default: directory corrente)
+    
+    Returns:
+        list: Lista di path alle immagini trovate
     """
     
-    # Trova file locali in base al tipo
-    if media_type == "image":
-        local_files = find_local_images()
-        web_examples = [
-            {"name": "Wikipedia PNG Demo", "url": "https://upload.wikimedia.org/.../demo.png"},
-            {"name": "Test Pattern", "url": "https://via.placeholder.com/400x300"}
-        ]
-    elif media_type == "audio":
-        local_files = find_local_audio()
-        web_examples = [
-            {"name": "Sample Bell", "url": "https://www.soundjay.com/.../bell.wav"},
-            {"name": "Test Beep", "url": "https://www.soundjay.com/.../beep.wav"}
-        ]
-    elif media_type == "video":
-        local_files = find_local_videos()
-        web_examples = [
-            {"name": "Big Buck Bunny", "url": "http://commondatastorage.googleapis.com/.../BigBuckBunny.mp4"},
-            {"name": "Sample Video", "url": "https://www.learningcontainer.com/.../sample.mp4"}
-        ]
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
+    images = []
     
-    print(f"\nSelezione {media_type.capitalize()}")
-    print("=" * 40)
+    for ext in image_extensions:
+        images.extend(Path(directory).glob(f"*{ext}"))
+        images.extend(Path(directory).glob(f"*{ext.upper()}"))
     
-    options = []
-    
-    # Mostra file locali
-    if local_files:
-        print(f"File {media_type} locali:")
-        for file_path in local_files:
-            file_size = Path(file_path).stat().st_size
-            print(f"   {len(options) + 1}. {Path(file_path).name} ({file_size:,} bytes)")
-            options.append(("local", file_path))
-    
-    # Mostra opzioni web
-    print(f"\n{media_type.capitalize()} dal web:")
-    for example in web_examples:
-        print(f"   {len(options) + 1}. {example['name']}")
-        options.append(("web", example["url"]))
-    
-    # Input utente
-    while True:
-        try:
-            choice = input(f"\nScegli (1-{len(options)}): ").strip()
-            choice_idx = int(choice) - 1
-            if 0 <= choice_idx < len(options):
-                break
-            print("Scelta non valida!")
-        except ValueError:
-            print("Inserisci un numero valido!")
-    
-    source_type, source_value = options[choice_idx]
-    
-    # Crea MediaBlock appropriato
-    if source_type == "local":
-        if media_type == "image":
-            return create_mediablock_from_file(source_value)
-        elif media_type == "audio":
-            return create_audio_mediablock_from_file(source_value)
-        elif media_type == "video":
-            return create_video_mediablock_from_file(source_value)
-    elif source_type == "web":
-        if media_type == "image":
-            return create_mediablock_from_url(source_value)
-        elif media_type == "audio":
-            return create_audio_mediablock_from_url(source_value)
-        elif media_type == "video":
-            return create_video_mediablock_from_url(source_value)
+    return [str(img) for img in sorted(images)]
 
-# Esempio di uso
-media_block = interactive_media_selection("image")
-client = create_multimodal_client("openai")
-result = analyze_image(client, media_block)
-print(result["text"])
+# Esempio d'uso
+local_images = find_local_images()
+print(f"Immagini trovate: {len(local_images)}")
+for img in local_images:
+    print(f"  - {img}")
 ```
 
 ---
 
-## 7. Generazione da testo
+## 4. Generazione immagini
 
-### Sistema di generazione guidata
+### Generazione base con DALL-E
 
 ```python
-def text_to_content_generation(client):
-    """Sistema per generare suggerimenti di contenuti da descrizioni testuali"""
-    
-    print("Generazione contenuti da testo")
-    print("=" * 40)
-    
-    # Menu di scelta
-    content_types = {
-        "1": {"name": "Immagine", "tools": ["DALL-E", "Midjourney", "Stable Diffusion"]},
-        "2": {"name": "Video", "tools": ["RunwayML", "Pika Labs", "Synthesia"]},
-        "3": {"name": "Audio", "tools": ["Mubert", "AIVA", "Soundful"]},
-        "4": {"name": "Prompt Dettagliato", "tools": ["Universale"]}
-    }
-    
-    print("Cosa vuoi generare?")
-    for key, value in content_types.items():
-        print(f"{key}. {value['name']}")
-    
-    # Input utente
-    while True:
-        choice = input("\nScegli (1-4): ").strip()
-        if choice in content_types:
-            break
-        print("Scelta non valida!")
-    
-    # Descrizione del contenuto
-    description = input("\nDescrivi cosa vuoi generare: ").strip()
-    if not description:
-        print("Descrizione necessaria!")
-        return
-    
-    content_info = content_types[choice]
-    
-    # Genera prompt per AI
-    if choice == "4":  # Prompt dettagliato
-        ai_prompt = f"""
-        L'utente vuole generare contenuti basati su questa descrizione:
-        "{description}"
-        
-        Crea un prompt dettagliato e specifico che potrebbe essere utilizzato con 
-        strumenti di generazione AI. Includi:
-        - Dettagli visivi/sonori specifici
-        - Stile e mood
-        - Parametri tecnici
-        - Considerazioni creative
-        """
-    else:
-        ai_prompt = f"""
-        L'utente vuole generare {content_info['name'].lower()} basato su: "{description}"
-        
-        Fornisci suggerimenti dettagliati includendo:
-        - Tecniche e approcci consigliati  
-        - Strumenti specifici da utilizzare
-        - Parametri e impostazioni ottimali
-        - Considerazioni creative e tecniche
-        """
-    
-    # Genera risposta
-    response = client.invoke(ai_prompt)
-    
-    print(f"\n🎨 Suggerimenti per {content_info['name']}:")
-    print(f"{response.text}")
-    
-    print(f"\n🛠️ Strumenti consigliati:")
-    for tool in content_info['tools']:
-        print(f"   • {tool}")
+import openai
 
-# Esempio di uso
-client = create_multimodal_client("openai")
-text_to_content_generation(client)
+def generate_image(prompt: str, size: str = "1024x1024", quality: str = "standard"):
+    """
+    Genera un'immagine usando DALL-E 3
+    
+    Args:
+        prompt: Descrizione dell'immagine da generare
+        size: Dimensioni ("1024x1024", "1792x1024", "1024x1792")
+        quality: Qualità ("standard" o "hd")
+    
+    Returns:
+        str: URL dell'immagine generata
+    """
+    
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY non configurata")
+    
+    client = openai.OpenAI(api_key=api_key)
+    
+    try:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size=size,
+            quality=quality,
+            n=1
+        )
+        return response.data[0].url
+    
+    except Exception as e:
+        raise Exception(f"Errore generazione immagine: {e}")
+
+# Esempio d'uso
+try:
+    image_url = generate_image("Un gatto che suona il pianoforte")
+    print(f"Immagine generata: {image_url}")
+except Exception as e:
+    print(f"Errore: {e}")
+```
+
+### Generazione con miglioramento del prompt
+
+```python
+def generate_enhanced_image(description: str):
+    """
+    Genera un'immagine migliorando prima il prompt con AI
+    
+    Args:
+        description: Descrizione base dell'immagine
+    
+    Returns:
+        dict: Contiene URL immagine e prompt migliorato
+    """
+    
+    # Step 1: Migliora il prompt
+    client = create_client("openai")
+    enhanced_prompt = client.invoke(
+        f"Migliora questo prompt per DALL-E 3: '{description}'. "
+        f"Aggiungi dettagli su stile, lighting, composizione e qualità. "
+        f"Rispondi solo con il prompt migliorato, senza spiegazioni."
+    ).text
+    
+    # Step 2: Genera l'immagine
+    image_url = generate_image(enhanced_prompt, quality="hd")
+    
+    return {
+        "url": image_url,
+        "enhanced_prompt": enhanced_prompt,
+        "original_description": description
+    }
+
+# Esempio d'uso
+result = generate_enhanced_image("Un robot in una cucina")
+print(f"Prompt originale: {result['original_description']}")
+print(f"Prompt migliorato: {result['enhanced_prompt']}")
+print(f"Immagine: {result['url']}")
+```
+
+### Salvataggio locale delle immagini
+
+```python
+import requests
+import time
+
+def save_generated_image(image_url: str, filename: str = None):
+    """
+    Salva un'immagine generata in locale
+    
+    Args:
+        image_url: URL dell'immagine da salvare
+        filename: Nome del file (opzionale, genera timestamp se None)
+    
+    Returns:
+        str: Path del file salvato
+    """
+    
+    if filename is None:
+        timestamp = int(time.time())
+        filename = f"generated_image_{timestamp}.png"
+    
+    try:
+        response = requests.get(image_url)
+        response.raise_for_status()
+        
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+        
+        print(f"Immagine salvata: {filename}")
+        return filename
+    
+    except Exception as e:
+        raise Exception(f"Errore salvataggio: {e}")
+
+# Esempio d'uso completo
+description = "Un paesaggio montano al tramonto"
+result = generate_enhanced_image(description)
+saved_file = save_generated_image(result['url'])
+print(f"File salvato: {saved_file}")
 ```
 
 ---
 
-## 8. Script completo di esempio
+## 5. Esempio completo
 
-### Menu principale integrato
+### Applicazione completa
 
 ```python
 #!/usr/bin/env python3
 """
-Esempio completo del sistema multimodale DatapizzAI
+DatapizzAI - Esempio completo di analisi e generazione immagini
 """
 
 import os
-import sys
+import base64
+import requests
+import time
+from pathlib import Path
 from dotenv import load_dotenv
+import openai
 
-# Carica configurazione
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+# Setup
+load_dotenv('../.env')
+from datapizzai.clients import ClientFactory
+from datapizzai.type import TextBlock, MediaBlock, Media
 
-# Import delle funzioni create sopra
-# (Includi tutte le funzioni definite nelle sezioni precedenti)
+class ImageProcessor:
+    """Classe per processare immagini con DatapizzAI"""
+    
+    def __init__(self, default_provider: str = "openai"):
+        self.default_provider = default_provider
+        self._clients = {}
+    
+    def get_client(self, provider: str = None):
+        """Ottieni client per provider specificato"""
+        if provider is None:
+            provider = self.default_provider
+        
+        if provider not in self._clients:
+            models = {
+                "openai": "gpt-4o",
+                "google": "gemini-2.5-flash",
+                "anthropic": "claude-3-5-sonnet-latest"
+            }
+            
+            api_key = os.getenv(f"{provider.upper()}_API_KEY")
+            if not api_key:
+                raise ValueError(f"API key mancante per {provider}")
+            
+            self._clients[provider] = ClientFactory.create(
+                provider=provider,
+                api_key=api_key,
+                model=models[provider]
+            )
+        
+        return self._clients[provider]
+    
+    def analyze_image(self, source: str, question: str = "Descrivi questa immagine"):
+        """
+        Analizza un'immagine (locale o web)
+        
+        Args:
+            source: Path file locale o URL web
+            question: Domanda sull'immagine
+        
+        Returns:
+            str: Analisi dell'immagine
+        """
+        
+        if source.startswith('http'):
+            # URL web
+            media = Media(
+                extension=".jpg",
+                media_type="image",
+                source_type="url",
+                source=source,
+                detail="high"
+            )
+        else:
+            # File locale
+            if not Path(source).exists():
+                raise FileNotFoundError(f"File non trovato: {source}")
+            
+            with open(source, "rb") as f:
+                image_data = base64.b64encode(f.read()).decode('utf-8')
+            
+            media = Media(
+                extension=Path(source).suffix or ".jpg",
+                media_type="image",
+                source_type="base64",
+                source=image_data,
+                detail="high"
+            )
+        
+        client = self.get_client()
+        response = client.invoke([
+            TextBlock(content=question),
+            MediaBlock(media=media)
+        ])
+        
+        return response.text
+    
+    def generate_image(self, description: str, enhance_prompt: bool = True, save_local: bool = False):
+        """
+        Genera un'immagine da testo
+        
+        Args:
+            description: Descrizione dell'immagine
+            enhance_prompt: Se migliorare il prompt con AI
+            save_local: Se salvare l'immagine localmente
+        
+        Returns:
+            dict: Risultati della generazione
+        """
+        
+        # Migliora prompt se richiesto
+        if enhance_prompt:
+            client = self.get_client()
+            enhanced_description = client.invoke(
+                f"Migliora questo prompt per DALL-E 3: '{description}'. "
+                f"Aggiungi dettagli tecnici per qualità professionale. "
+                f"Rispondi solo con il prompt migliorato."
+            ).text
+        else:
+            enhanced_description = description
+        
+        # Genera immagine
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY richiesta per generazione")
+        
+        openai_client = openai.OpenAI(api_key=api_key)
+        response = openai_client.images.generate(
+            model="dall-e-3",
+            prompt=enhanced_description,
+            size="1024x1024",
+            quality="hd"
+        )
+        
+        image_url = response.data[0].url
+        result = {
+            "url": image_url,
+            "original_prompt": description,
+            "enhanced_prompt": enhanced_description if enhance_prompt else None
+        }
+        
+        # Salva localmente se richiesto
+        if save_local:
+            timestamp = int(time.time())
+            filename = f"generated_{timestamp}.png"
+            
+            img_response = requests.get(image_url)
+            with open(filename, 'wb') as f:
+                f.write(img_response.content)
+            
+            result["saved_file"] = filename
+        
+        return result
 
-def show_main_menu():
-    """Menu principale dell'applicazione"""
+def main():
+    """Esempio di utilizzo"""
+    processor = ImageProcessor()
     
-    # Conta file disponibili
-    local_images = find_local_images()
-    local_audio = find_local_audio() 
-    local_videos = find_local_videos()
-    
-    print("\n" + "="*60)
-    print(" DATAPIZZAI - Analisi e Generazione Multimodale")
-    print("="*60)
-    
-    print("File disponibili nella directory:")
-    print(f"   Immagini: {len(local_images)} file")
-    print(f"   Audio: {len(local_audio)} file") 
-    print(f"   Video: {len(local_videos)} file")
-    
-    print("""
-🚀 Da cosa vuoi partire?
-
-1. Immagine → Analisi dettagliata di un'immagine
-2. Video → Descrizione di cosa accade nel video
-3. Audio → Analisi e trascrizione audio  
-4. Testo → Suggerimenti per generazione contenuti
-
-0. Esci
-
-💡 Per ogni opzione potrai scegliere tra file locali o esempi dal web
-    """)
-
-def run_analysis():
-    """Funzione principale per eseguire le analisi"""
-    
-    # Verifica client disponibili
-    available_providers = []
-    if os.getenv("OPENAI_API_KEY"):
-        available_providers.append("OpenAI")
-    if os.getenv("GOOGLE_API_KEY"):
-        available_providers.append("Google")
-    if os.getenv("ANTHROPIC_API_KEY"):
-        available_providers.append("Anthropic")
-    
-    if not available_providers:
-        print("Nessuna chiave API configurata!")
-        print("Aggiungi almeno una chiave nel file .env")
-        return
-    
-    print(f"✅ Provider disponibili: {', '.join(available_providers)}")
+    print("DatapizzAI - Processore immagini")
+    print("="*40)
     
     while True:
+        print("\n1. Analizza immagine")
+        print("2. Genera immagine")
+        print("0. Esci")
+        
+        choice = input("\nScegli un'opzione: ").strip()
+        
         try:
-            show_main_menu()
-            choice = input("Scegli un'opzione: ").strip()
-            
-            if choice == "0":
-                print("👋 Arrivederci!")
-                break
-            elif choice == "1":
-                # Analisi immagine
-                print("\nAnalisi immagine")
-                client = create_multimodal_client("openai", use_cache=True)
-                image_block = interactive_media_selection("image")
-                result = analyze_image(client, image_block)
-                print(f"\n📋 Risultato:\n{result['text']}")
-                print(f"\n📊 Token utilizzati: {result['tokens_used']}")
+            if choice == "1":
+                source = input("Path immagine o URL: ").strip()
+                question = input("Domanda (Enter per default): ").strip() or "Descrivi questa immagine"
+                
+                analysis = processor.analyze_image(source, question)
+                print(f"\nAnalisi:\n{analysis}")
                 
             elif choice == "2":
-                # Analisi video
-                print("\nAnalisi video")
-                client = create_multimodal_client("google")  # Google meglio per video
-                video_block = interactive_media_selection("video")
-                result = analyze_video(client, video_block)
-                print(f"\n📋 Cosa accade nel video:\n{result}")
+                description = input("Descrivi l'immagine da generare: ").strip()
+                enhance = input("Migliorare il prompt? (s/N): ").strip().lower() == 's'
+                save = input("Salvare localmente? (s/N): ").strip().lower() == 's'
                 
-            elif choice == "3":
-                # Analisi audio
-                print("\nAnalisi audio")
-                client = create_multimodal_client("google")  # Google meglio per audio
-                audio_block = interactive_media_selection("audio")
-                result = analyze_audio(client, audio_block)
-                print(f"\n📋 Descrizione audio:\n{result}")
+                result = processor.generate_image(description, enhance, save)
+                print(f"\nImmagine generata: {result['url']}")
                 
-            elif choice == "4":
-                # Generazione da testo
-                print("\nGenerazione da testo")
-                client = create_multimodal_client("openai")
-                text_to_content_generation(client)
+                if result.get('enhanced_prompt'):
+                    print(f"Prompt migliorato: {result['enhanced_prompt']}")
                 
+                if result.get('saved_file'):
+                    print(f"Salvata come: {result['saved_file']}")
+                
+            elif choice == "0":
+                print("Arrivederci!")
+                break
+            
             else:
-                print("Scelta non valida!")
-                continue
-            
-            input("\nPremi INVIO per continuare...")
-            
-        except KeyboardInterrupt:
-            print("\n\n👋 Uscita forzata!")
-            break
+                print("Opzione non valida")
+        
         except Exception as e:
-            print(f"\nErrore: {e}")
-            input("Premi INVIO per continuare...")
+            print(f"Errore: {e}")
 
 if __name__ == "__main__":
-    run_analysis()
+    main()
 ```
 
 ---
 
-## 9. Troubleshooting
+## 6. Troubleshooting
 
-### Problemi comuni e soluzioni
+### Errori comuni
 
-#### Errore "Unsupported MIME type"
+#### Error: "Unsupported MIME type"
 
-**Problema**: `400 INVALID_ARGUMENT: Unsupported MIME type: image/None`
+**Causa**: Campo `extension` mancante nell'oggetto `Media`
 
-**Soluzione**: Assicurati di specificare sempre il campo `extension` nei Media objects:
-
+**Soluzione**:
 ```python
-# Sbagliato - causa errore MIME
-media = Media(
-    media_type="image",
-    source_type="base64",
-    source=image_data
-)
+# Errato
+media = Media(media_type="image", source=data)
 
-# Corretto - include extension
+# Corretto
 media = Media(
-    extension=".png",  # Necessario
-    media_type="image", 
-    source_type="base64",
-    source=image_data,
-    detail="high"
+    extension=".jpg",  # Sempre specificare
+    media_type="image",
+    source=data
 )
 ```
 
-#### Cache Non Supportata
+#### Error: "API key not found"
 
-**Problema**: `Client.__init__() got an unexpected keyword argument 'cache'`
+**Causa**: Chiave API non configurata o file `.env` nel path sbagliato
 
-**Soluzione**: Solo OpenAI supporta il parametro cache nel costruttore:
+**Soluzione**:
+```bash
+# Verifica file .env
+ls -la PizzAI/.env
 
+# Se manca, crea il file
+echo 'OPENAI_API_KEY=your-key-here' > PizzAI/.env
+```
+
+#### Error: "Cache not supported"
+
+**Causa**: Cache passata a client che non la supporta
+
+**Soluzione**:
 ```python
-# Gestione cache sicura
-def create_client_with_cache(provider, use_cache=False):
-    cache_supported = provider == "openai"
+# Solo OpenAI supporta cache nel constructor
+def create_safe_client(provider: str):
+    kwargs = {
+        "provider": provider,
+        "api_key": os.getenv(f"{provider.upper()}_API_KEY"),
+        "model": get_model(provider)
+    }
     
-    kwargs = {}
-    if use_cache and cache_supported:
+    # Cache solo per OpenAI
+    if provider == "openai":
+        from datapizzai.cache import MemoryCache
         kwargs["cache"] = MemoryCache()
     
-    return ClientFactory.create(
-        provider=provider,
-        **other_params,
-        **kwargs
-    )
+    return ClientFactory.create(**kwargs)
 ```
 
-#### File Non Trovato
-
-**Soluzione**: Verifica sempre l'esistenza del file:
+### Validazione input
 
 ```python
-def safe_load_file(file_path: str):
+def validate_image_file(file_path: str):
+    """Valida un file immagine prima del processamento"""
+    
+    # Verifica esistenza
     if not Path(file_path).exists():
         raise FileNotFoundError(f"File non trovato: {file_path}")
     
-    if not Path(file_path).is_file():
-        raise ValueError(f"Il path non è un file: {file_path}")
+    # Verifica estensione
+    allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
+    if Path(file_path).suffix.lower() not in allowed_extensions:
+        raise ValueError(f"Estensione non supportata. Usa: {allowed_extensions}")
     
-    # Carica il file...
-```
-
-#### Chiavi API Mancanti
-
-```python
-def verify_api_keys():
-    """Verifica la presenza delle chiavi API necessarie"""
-    required_keys = ["OPENAI_API_KEY", "GOOGLE_API_KEY", "ANTHROPIC_API_KEY"]
-    available_keys = [key for key in required_keys if os.getenv(key)]
+    # Verifica dimensione (max 20MB)
+    max_size = 20 * 1024 * 1024  # 20MB
+    if Path(file_path).stat().st_size > max_size:
+        raise ValueError(f"File troppo grande (max {max_size/1024/1024:.1f}MB)")
     
-    if not available_keys:
-        print("Nessuna chiave API trovata!")
-        print("Aggiungi almeno una di queste al file .env:")
-        for key in required_keys:
-            print(f"   {key}=your-key-here")
-        return False
-    
-    print(f"✅ Chiavi disponibili: {len(available_keys)}")
     return True
+
+# Uso
+try:
+    validate_image_file("large_image.jpg")
+    result = analyze_local_image("large_image.jpg")
+except Exception as e:
+    print(f"Validazione fallita: {e}")
 ```
-
----
-
-## 10. Best practices
 
 ### Gestione errori robusta
 
 ```python
-def robust_media_analysis(client, media_block, max_retries=3):
-    """Analisi media con retry automatico"""
+def safe_image_processing(func, *args, max_retries: int = 3, **kwargs):
+    """Wrapper per gestione errori con retry"""
     
     for attempt in range(max_retries):
         try:
-            response = client.invoke(input=[
-                TextBlock(content="Analizza questo media"),
-                media_block
-            ])
-            return response.text
-            
+            return func(*args, **kwargs)
+        
         except Exception as e:
             if attempt < max_retries - 1:
+                wait_time = 2 ** attempt  # Backoff esponenziale
                 print(f"Tentativo {attempt + 1} fallito: {e}")
-                time.sleep(2 ** attempt)  # Backoff esponenziale
+                print(f"Riprovo tra {wait_time} secondi...")
+                time.sleep(wait_time)
             else:
-                print(f"Tutti i tentativi falliti: {e}")
-                raise
-```
+                raise Exception(f"Operazione fallita dopo {max_retries} tentativi: {e}")
 
-### Ottimizzazione performance
-
-```python
-# 1. Usa cache quando possibile
-client = create_multimodal_client("openai", use_cache=True)
-
-# 2. Riduci dettaglio per file grandi
-media = Media(
-    extension=".jpg",
-    media_type="image",
-    source_type="base64", 
-    source=image_data,
-    detail="low"  # Invece di "high" per file grandi
-)
-
-# 3. Gestisci dimensioni file
-def check_file_size(file_path: str, max_size_mb: int = 20):
-    size_mb = Path(file_path).stat().st_size / (1024 * 1024)
-    if size_mb > max_size_mb:
-        print(f"⚠️ File grande: {size_mb:.1f}MB (max: {max_size_mb}MB)")
-        return False
-    return True
-```
-
-### Sicurezza e validazione
-
-```python
-def validate_media_input(file_path: str, allowed_types: List[str]):
-    """Valida input media per sicurezza"""
-    
-    # Verifica estensione
-    file_ext = Path(file_path).suffix.lower()
-    if file_ext not in allowed_types:
-        raise ValueError(f"Tipo file non supportato: {file_ext}")
-    
-    # Verifica dimensioni
-    if not check_file_size(file_path):
-        raise ValueError("File troppo grande")
-    
-    # Verifica che sia realmente un file media
-    try:
-        with open(file_path, 'rb') as f:
-            header = f.read(8)
-            # Controlla signature del file...
-    except Exception:
-        raise ValueError("File corrotto o non accessibile")
-    
-    return True
-```
-
-### Logging e monitoraggio
-
-```python
-import logging
-
-def setup_logging():
-    """Configura logging per debugging"""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler('multimodal_analysis.log'),
-            logging.StreamHandler()
-        ]
-    )
-
-def log_analysis_request(media_type: str, file_info: dict):
-    """Log delle richieste di analisi"""
-    logging.info(f"Analisi {media_type}: {file_info['name']} ({file_info['size']} bytes)")
-
-def log_token_usage(tokens_used: int, provider: str):
-    """Traccia utilizzo token"""
-    logging.info(f"Token utilizzati: {tokens_used} (Provider: {provider})")
+# Uso
+try:
+    result = safe_image_processing(analyze_local_image, "test.jpg")
+    print(result)
+except Exception as e:
+    print(f"Errore definitivo: {e}")
 ```
 
 ---
 
-## Risorse aggiuntive
+## Note tecniche
 
-### File di esempio per test
+- **Formati supportati**: JPG, JPEG, PNG, GIF, BMP, WEBP
+- **Dimensione massima**: 20MB per file
+- **Risoluzioni DALL-E**: 1024x1024, 1792x1024, 1024x1792
+- **Qualità DALL-E**: "standard" o "hd"
+- **Rate limiting**: Rispetta i limiti API dei provider
 
-Puoi scaricare questi file per testare il sistema:
-
-- **Immagini**: [Lorem Picsum](https://picsum.photos/) - Genera immagini casuali
-- **Audio**: [Freesound](https://freesound.org/) - Audio di dominio pubblico  
-- **Video**: [Sample Videos](https://sample-videos.com/) - Video di test
-
-### Documentazione ufficiale
-
-- [DatapizzAI Documentation](https://docs.datapizza.tech/)
-- [OpenAI Vision API](https://platform.openai.com/docs/guides/vision)
-- [Google Gemini Multimodal](https://ai.google.dev/gemini-api/docs/vision)
-- [Anthropic Claude Vision](https://docs.anthropic.com/claude/docs/vision)
-
----
-
-## Conclusioni
-
-Questa guida fornisce tutti gli strumenti necessari per implementare un sistema multimodale completo con DatapizzAI. Le funzionalità includono:
-
-- Analisi immagini con tutti i provider
-- Analisi video (Google consigliato)
-- Analisi audio (Google consigliato)  
-- Generazione guidata da testo
-- Gestione errori robusta
-- Interface utente intuitiva
-- Best practices per produzione
-
-Il sistema è progettato per essere facilmente estensibile e adattabile a diverse esigenze di analisi multimodale.
+Per questioni specifiche consultare la documentazione ufficiale dei provider AI utilizzati.

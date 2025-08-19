@@ -20,9 +20,11 @@ Data: 2025
 import os
 import time
 import base64
+import requests
 from pathlib import Path
 from typing import List, Union
 from dotenv import load_dotenv
+import openai
 
 # Carica le variabili d'ambiente dal file .env nella directory parent
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -66,8 +68,8 @@ def create_multimodal_client(provider_name: str = "openai", use_cache: bool = Fa
         },
         "google": {
             "api_key_env": "GOOGLE_API_KEY",
-            "model": "gemini-2.5-flash",  # Supporta visione e audio
-            "features": ["images", "text", "audio"],
+            "model": "gemini-2.5-flash",  # Supporta analisi immagini
+            "features": ["images", "text"],
             "cache_supported": False
         },
         "anthropic": {
@@ -671,75 +673,37 @@ def demo_image_analysis():
         print(f"❌ Errore durante l'analisi: {e}")
 
 
-def demo_video_analysis():
-    """
-    Analizza un video scelto dall'utente
-    """
-    print_section("ANALISI VIDEO")
-    
-    client = create_multimodal_client("google")  # Google supporta meglio i video
-    if not client:
-        client = create_multimodal_client("openai")
-        
-    if not client:
-        print("❌ Client multimodale non disponibile")
-        return
-    
-    try:
-        # Scelta del video
-        video_block = choose_video_source(interactive=True)
-        
-        # Analisi video con prompt specifico
-        analysis_input = [
-            TextBlock(content="Cosa sta accadendo in questo video? Descrivi dettagliatamente la scena, le azioni, i personaggi, l'ambientazione e tutti gli elementi visivi e narrativi che osservi."),
-            video_block
-        ]
-        
-        print("\n🔄 Analisi video in corso...")
-        response = client.invoke(input=analysis_input)
-        
-        print("\n🤖 Cosa sta accadendo nel video:")
-        print(f"   {response.text}")
-        
-        print(f"\n📊 Token utilizzati: {response.prompt_tokens_used + response.completion_tokens_used}")
-        
-    except Exception as e:
-        print(f"❌ Errore durante l'analisi video: {e}")
-        print("💡 Nota: L'analisi video potrebbe non essere supportata da tutti i provider")
 
 
-def demo_audio_analysis():
+
+def generate_image_with_dalle(prompt: str, api_key: str, size: str = "1024x1024", quality: str = "standard") -> str:
     """
-    Analizza un file audio scelto dall'utente
+    Genera un'immagine usando DALL-E
+    
+    Args:
+        prompt: Descrizione dell'immagine da generare
+        api_key: Chiave API OpenAI
+        size: Dimensioni dell'immagine ("1024x1024", "1792x1024", "1024x1792")
+        quality: Qualità dell'immagine ("standard" o "hd")
+    
+    Returns:
+        URL dell'immagine generata
     """
-    print_section("ANALISI AUDIO")
-    
-    client = create_multimodal_client("google")  # Google supporta l'audio
-    if not client:
-        print("❌ Client multimodale non disponibile")
-        return
-    
     try:
-        # Scelta dell'audio
-        audio_block = choose_audio_source(interactive=True)
+        client = openai.OpenAI(api_key=api_key)
         
-        # Analisi audio con prompt specifico
-        analysis_input = [
-            TextBlock(content="Descrivi attentamente questo audio. Cosa senti? Identifica tutti i suoni, la musica, le voci, i rumori di fondo e qualsiasi altro elemento sonoro. Se ci sono parole, trascrivile."),
-            audio_block
-        ]
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size=size,
+            quality=quality,
+            n=1,
+        )
         
-        print("\n🔄 Analisi audio in corso...")
-        response = client.invoke(input=analysis_input)
-        
-        print("\n🤖 Descrizione dell'audio:")
-        print(f"   {response.text}")
-        
-        print(f"\n📊 Token utilizzati: {response.prompt_tokens_used + response.completion_tokens_used}")
-        
+        return response.data[0].url
+    
     except Exception as e:
-        print(f"❌ Errore durante l'analisi audio: {e}")
-        print("💡 Nota: L'analisi audio potrebbe non essere supportata da tutti i provider")
+        raise Exception(f"Errore generazione immagine: {e}")
 
 
 def demo_text_generation():
@@ -748,69 +712,148 @@ def demo_text_generation():
     """
     print_section("GENERAZIONE DA TESTO")
     
-    print("🎨 Genera contenuti multimediali basati su una descrizione testuale")
-    print("Nota: Questa è una simulazione - i modelli attuali non generano direttamente media")
+    print("Genera contenuti AI: immagini, video, audio")
+    print("")
     
     # Chiedi all'utente cosa vuole generare
-    print("\nCosa vuoi generare?")
-    print("1. Immagine")
-    print("2. Video")
-    print("3. Audio")
-    print("4. Descrizione dettagliata per generazione esterna")
+    print("Cosa vuoi generare?")
+    print("1. Immagine (DALL-E 3) - Generazione reale")
+    print("2. Video (prompt per RunwayML, Pika Labs, etc.)")
+    print("3. Audio (prompt per Mubert, AIVA, etc.)")
     
     while True:
         try:
-            choice = input("\n👉 Scegli (1-4): ").strip()
-            if choice in ["1", "2", "3", "4"]:
+            choice = input("\nScegli (1-3): ").strip()
+            if choice in ["1", "2", "3"]:
                 break
-            print("❌ Scelta non valida!")
+            print("Scelta non valida!")
         except ValueError:
-            print("❌ Inserisci un numero valido!")
+            print("Inserisci un numero valido!")
     
     # Chiedi la descrizione
-    description = input("\n✍️ Descrivi cosa vuoi generare: ").strip()
+    description = input("\nDescrivi cosa vuoi generare: ").strip()
     
     if not description:
-        print("❌ Descrizione vuota!")
+        print("Descrizione vuota!")
         return
     
-    client = create_multimodal_client("openai")
-    if not client:
-        return
+    if choice == "1":
+        # Generazione reale con DALL-E
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            print("Chiave OpenAI non trovata!")
+            return
+            
+        try:
+            print("\nGenerazione immagine con DALL-E 3...")
+            print("Questo potrebbe richiedere alcuni secondi...")
+            
+            # Usa la descrizione diretta dell'utente o migliora il prompt
+            use_enhanced = input("\nUsa un prompt migliorato? (s/n): ").strip().lower() == 's'
+            
+            if use_enhanced:
+                # Crea client per migliorare il prompt
+                client = create_multimodal_client("openai")
+                enhance_prompt = f"""Migliora questo prompt per DALL-E 3: "{description}"
+
+Rendi il prompt più dettagliato e specifico, includendo:
+- Stile artistico e qualità (photorealistic, 4K, detailed, etc.)
+- Lighting e mood
+- Composizione e prospettiva
+- Colori e atmosfera
+
+Rispondi SOLO con il prompt migliorato, niente altro."""
+
+                enhanced_response = client.invoke(enhance_prompt)
+                final_prompt = enhanced_response.text.strip()
+                
+                print(f"\nPrompt migliorato:")
+                print(f'"{final_prompt}"')
+                print("")
+            else:
+                final_prompt = description
+            
+            # Genera l'immagine
+            image_url = generate_image_with_dalle(final_prompt, api_key)
+            
+            print("Immagine generata!")
+            print("=" * 50)
+            print(f"URL: {image_url}")
+            print("=" * 50)
+            
+            # Opzione per salvare l'immagine
+            save_image = input("\nVuoi salvare l'immagine localmente? (s/n): ").strip().lower() == 's'
+            
+            if save_image:
+                try:
+                    # Scarica e salva l'immagine
+                    response = requests.get(image_url)
+                    if response.status_code == 200:
+                        filename = f"generated_image_{int(time.time())}.png"
+                        with open(filename, 'wb') as f:
+                            f.write(response.content)
+                        print(f"Immagine salvata come: {filename}")
+                    else:
+                        print("Errore nel download dell'immagine")
+                except Exception as e:
+                    print(f"Errore salvataggio: {e}")
+            
+        except Exception as e:
+            print(f"Errore: {e}")
     
-    generation_types = {
-        "1": "un'immagine",
-        "2": "un video", 
-        "3": "un file audio",
-        "4": "una descrizione dettagliata"
-    }
-    
-    prompt = f"""
-    L'utente vuole generare {generation_types[choice]} basato su questa descrizione:
-    "{description}"
-    
-    {"Crea un prompt dettagliato e specifico che potrebbe essere utilizzato con strumenti di generazione AI per creare questo contenuto. Includi dettagli su stile, mood, colori, composizione e qualsiasi altro elemento tecnico rilevante." if choice == "4" else f"Fornisci suggerimenti dettagliati su come creare {generation_types[choice]} basato su questa descrizione, includendo strumenti consigliati, tecniche e considerazioni creative."}
-    """
-    
-    try:
-        print(f"\n🔄 Generazione suggerimenti per {generation_types[choice]}...")
-        response = client.invoke(prompt)
+    else:
+        # Generazione prompt per altri strumenti
+        client = create_multimodal_client("openai")
+        if not client:
+            return
         
-        print(f"\n🎨 Suggerimenti per generare {generation_types[choice]}:")
-        print(f"   {response.text}")
-        
-        # Suggerimenti di strumenti
-        tools_suggestions = {
-            "1": ["DALL-E", "Midjourney", "Stable Diffusion", "Adobe Firefly"],
-            "2": ["RunwayML", "Pika Labs", "Stable Video Diffusion", "Synthesia"],
-            "3": ["Mubert", "AIVA", "Soundful", "Amper Music"],
-            "4": ["Per uso con qualsiasi strumento di generazione AI"]
+        prompts = {
+            "2": f"""Crea un prompt per generazione video basato su: "{description}"
+
+Il prompt deve includere:
+- Azione specifica e movimento
+- Durata (es: "5 seconds")  
+- Stile visivo e mood
+- Qualità (HD, cinematic, etc.)
+
+Formato: solo il prompt finale, pronto da usare.""",
+            
+            "3": f"""Crea un prompt per generazione audio basato su: "{description}"
+
+Il prompt deve specificare:
+- Genere musicale o tipo di suono
+- Durata (es: "30 seconds")
+- Mood e atmosfera
+- Strumenti/elementi specifici
+
+Formato: solo il prompt finale, pronto da usare."""
         }
         
-        print(f"\n🛠️ Strumenti consigliati: {', '.join(tools_suggestions[choice])}")
+        generation_names = {
+            "2": "video", 
+            "3": "audio"
+        }
         
-    except Exception as e:
-        print(f"❌ Errore: {e}")
+        try:
+            print(f"\nGenerazione prompt per {generation_names[choice]}...")
+            response = client.invoke(prompts[choice])
+            
+            print(f"\nPrompt ottimizzato:")
+            print("=" * 50)
+            print(response.text)
+            print("=" * 50)
+            
+            # Suggerimenti di strumenti
+            tools_suggestions = {
+                "2": ["RunwayML", "Pika Labs", "Stable Video Diffusion", "Synthesia"],
+                "3": ["Mubert", "AIVA", "Soundful", "Amper Music"]
+            }
+            
+            print(f"\nStrumenti consigliati: {', '.join(tools_suggestions[choice])}")
+            print("\nCopia il prompt sopra e incollalo nel tool che preferisci!")
+            
+        except Exception as e:
+            print(f"Errore: {e}")
 
 
 # ==============================================================================
@@ -1379,29 +1422,23 @@ def demo_file_management():
 
 def show_main_menu():
     """Mostra il menu principale ristrutturato"""
-    print_section("DATAPIZZAI - Analisi e Generazione Multimodale")
+    print_section("DATAPIZZAI - Analisi e generazione immagini")
     
     # Mostra informazioni sui file disponibili
     local_images = find_local_images()
-    local_audio = find_local_audio() 
-    local_videos = find_local_videos()
     
-    print("📁 File disponibili nella directory:")
-    print(f"   🖼️ Immagini: {len(local_images)} file")
-    print(f"   🎵 Audio: {len(local_audio)} file") 
-    print(f"   🎬 Video: {len(local_videos)} file")
+    print("File disponibili nella directory:")
+    print(f"   Immagini: {len(local_images)} file")
     
     print("""
-🚀 Da cosa vuoi partire?
+Da cosa vuoi partire?
 
-1. 🖼️  IMMAGINE → Scegli un'immagine e la analizzerò dettagliatamente
-2. 🎬 VIDEO → Scegli un video e ti dirò cosa sta accadendo
-3. 🎵 AUDIO → Scegli un audio e lo descriverò attentamente  
-4. ✍️  TESTO → Dammi una descrizione e ti aiuterò a generare contenuti
+1. Analizza immagine → Carica e analizza qualsiasi immagine in dettaglio
+2. Genera immagine → Crea immagini AI professionali da testo con DALL-E 3
 
-0. ❌ Esci
+0. Esci
 
-💡 Per ogni opzione potrai scegliere tra file locali o esempi dal web
+Due funzionalità principali per l'elaborazione di immagini con AI
     """)
 
 
@@ -1478,24 +1515,22 @@ def run_main_demo(choice: str):
     """Esegue la demo principale selezionata"""
     demos = {
         "1": demo_image_analysis,
-        "2": demo_video_analysis, 
-        "3": demo_audio_analysis,
-        "4": demo_text_generation
+        "2": demo_text_generation
     }
     
     if choice in demos:
-        print(f"\n🚀 Avvio analisi/generazione...")
+        print(f"\nAvvio...")
         try:
             demos[choice]()
         except KeyboardInterrupt:
-            print("\n\n⏹️ Operazione interrotta")
+            print("\n\nOperazione interrotta")
         except Exception as e:
-            print(f"\n❌ Errore durante esecuzione: {e}")
+            print(f"\nErrore durante esecuzione: {e}")
     elif choice == "legacy":
         # Menu nascosto per le demo legacy
         return "legacy"
     else:
-        print("❌ Scelta non valida")
+        print("Scelta non valida")
     
     return None
 
