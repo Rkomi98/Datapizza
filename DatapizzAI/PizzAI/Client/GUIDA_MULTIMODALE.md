@@ -1,6 +1,6 @@
 # Guida completa: DatapizzAI multimodale
 
-Una guida tecnica per utilizzare le funzionalità di analisi e generazione immagini del framework DatapizzAI.
+Una guida tecnica per utilizzare le funzionalità di analisi immagini e generazione con GPT-5 + DALL-E 3 del framework DatapizzAI.
 
 ## Indice
 
@@ -27,10 +27,9 @@ source .venv/bin/activate
 Crea un file `.env` nella directory `PizzAI/`:
 
 ```bash
-# File .env - Almeno una chiave API è richiesta
-OPENAI_API_KEY=sk-your-openai-api-key-here
-GOOGLE_API_KEY=your-google-api-key-here  
-ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key-here
+# File .env - OPENAI_API_KEY richiesta per tutte le funzioni
+OPENAI_API_KEY=sk-your-openai-api-key-here  # Richiesta (gpt-4o, gpt-5, dall-e-3)
+GOOGLE_API_KEY=your-google-api-key-here     # Opzionale (solo per analisi con Gemini)
 ```
 
 ### Import necessari
@@ -38,6 +37,8 @@ ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key-here
 ```python
 import os
 import base64
+import time
+import requests
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -47,6 +48,9 @@ load_dotenv('../.env')
 # Import DatapizzAI
 from datapizzai.clients import ClientFactory
 from datapizzai.type import TextBlock, MediaBlock, Media
+
+# Import OpenAI per DALL-E 3
+import openai
 ```
 
 ---
@@ -56,41 +60,63 @@ from datapizzai.type import TextBlock, MediaBlock, Media
 ### Configurazione client
 
 ```python
-def create_client(provider: str = "openai"):
+def create_analysis_client(provider: str = "openai"):
     """
-    Crea un client per il provider specificato
+    Crea un client per l'analisi immagini
     
     Args:
-        provider: "openai", "google", o "anthropic"
+        provider: "openai" o "google"
     
     Returns:
-        Client configurato
+        Client configurato per analisi
     """
     
     models = {
         "openai": "gpt-4o",
-        "google": "gemini-2.5-flash",
-        "anthropic": "claude-3-5-sonnet-latest"
+        "google": "gemini-2.5-flash"
     }
     
-    api_key = os.getenv(f"{provider.upper()}_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY" if provider == "openai" else "GOOGLE_API_KEY")
     if not api_key:
         raise ValueError(f"API key non trovata per {provider}")
     
     return ClientFactory.create(
         provider=provider,
         api_key=api_key,
-        model=models[provider]
+        model=models[provider],
+        temperature=0.7
+    )
+
+def create_gpt5_client():
+    """
+    Crea un client GPT-5 per augmentazione prompt
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY richiesta per GPT-5")
+    
+    return ClientFactory.create(
+        provider="openai",
+        api_key=api_key,
+        model="gpt-5",
+        temperature=1.0  # GPT-5 supporta solo temperature=1.0
     )
 ```
 
 ### Caratteristiche dei provider
 
-| Provider | Modello | Analisi immagini | Generazione immagini | Cache supportata |
-|----------|---------|------------------|---------------------|------------------|
-| OpenAI | gpt-4o | ✅ | ✅ | ✅ |
-| Google | gemini-2.5-flash | ✅ | ❌ | ❌ |
-| Anthropic | claude-3-5-sonnet | ✅ | ❌ | ❌ |
+| Provider | Modello | Analisi immagini | Augmentazione prompt | Generazione immagini | Cache |
+|----------|---------|------------------|-------------------|-------------------|-------|
+| OpenAI | gpt-4o | ✅ | ❌ | ❌ | ✅ |
+| OpenAI | gpt-5 | ❌ | ✅ | ❌ | ❌ |
+| OpenAI | dall-e-3 | ❌ | ❌ | ✅ | ❌ |
+| Google | gemini-2.5-flash | ✅ | ❌ | ❌ | ❌ |
+
+**Note:**
+- **gpt-4o**: Migliore per analisi dettagliate, supporta cache
+- **gpt-5**: Eccellente per augmentazione prompt, solo temperature=1.0
+- **dall-e-3**: Generazione immagini di alta qualità, download automatico
+- **gemini-2.5-flash**: Alternativa veloce per analisi, nessuna cache
 
 ---
 
@@ -216,52 +242,106 @@ for img in local_images:
 
 ## 4. Generazione immagini
 
-### Generazione base con DALL-E
+### Generazione completa con GPT-5 + DALL-E 3
+
+Il sistema ottimale combina **GPT-5** per l'augmentazione del prompt e **DALL-E 3** per la generazione, con download automatico in locale.
 
 ```python
 import openai
+import requests
 
-def generate_image(prompt: str, size: str = "1024x1024", quality: str = "standard"):
+def generate_image_complete(prompt: str, enhance_prompt: bool = True, 
+                          size: str = "1024x1024", quality: str = "standard"):
     """
-    Genera un'immagine usando DALL-E 3
+    Genera un'immagine con augmentazione GPT-5 + DALL-E 3 + download locale
     
     Args:
         prompt: Descrizione dell'immagine da generare
+        enhance_prompt: Se usare GPT-5 per migliorare il prompt
         size: Dimensioni ("1024x1024", "1792x1024", "1024x1792")
         quality: Qualità ("standard" o "hd")
     
     Returns:
-        str: URL dell'immagine generata
+        tuple: (image_url, local_filename, enhanced_prompt)
     """
     
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise ValueError("OPENAI_API_KEY non configurata")
     
-    client = openai.OpenAI(api_key=api_key)
+    final_prompt = prompt
+    
+    # 1. Augmentazione prompt con GPT-5 (opzionale)
+    if enhance_prompt:
+        try:
+            gpt5_client = create_gpt5_client()
+            
+            augment_request = f"""Migliora questo prompt per DALL-E 3: "{prompt}"
+
+Aggiungi dettagli su:
+- Stile visivo e colori specifici
+- Composizione e prospettiva
+- Elementi decorativi e atmosfera
+- Qualità artistica e tecnica fotografica
+
+Rispondi solo con il prompt migliorato, max 400 caratteri."""
+
+            response = gpt5_client.invoke(augment_request)
+            final_prompt = response.text.strip()
+            print(f"✅ Prompt augmentato con GPT-5: {final_prompt}")
+            
+        except Exception as e:
+            print(f"⚠️ GPT-5 non disponibile: {e}")
+            print("🔄 Uso prompt originale")
+    
+    # 2. Generazione immagine con DALL-E 3
+    dalle_client = openai.OpenAI(api_key=api_key)
     
     try:
-        response = client.images.generate(
+        response = dalle_client.images.generate(
             model="dall-e-3",
-            prompt=prompt,
+            prompt=final_prompt,
             size=size,
             quality=quality,
             n=1
         )
-        return response.data[0].url
-    
+        
+        image_url = response.data[0].url
+        print(f"✅ Immagine generata con DALL-E 3: {image_url}")
+        
+        # 3. Download automatico in locale
+        img_response = requests.get(image_url, timeout=30)
+        img_response.raise_for_status()
+        
+        filename = f"generated_image_{int(time.time())}.png"
+        with open(filename, "wb") as f:
+            f.write(img_response.content)
+        
+        print(f"✅ Immagine salvata: {filename} ({len(img_response.content):,} bytes)")
+        
+        return image_url, filename, final_prompt
+        
     except Exception as e:
-        raise Exception(f"Errore generazione immagine: {e}")
+        raise Exception(f"Errore generazione: {e}")
 
-# Esempio d'uso
+# Esempio d'uso completo
 try:
-    image_url = generate_image("Un gatto che suona il pianoforte")
-    print(f"Immagine generata: {image_url}")
+    url, file, enhanced = generate_image_complete(
+        "Una ragazza tunisina in una strada di Tunisi",
+        enhance_prompt=True,
+        quality="hd"
+    )
+    
+    print(f"🎨 Prompt originale: Una ragazza tunisina...")
+    print(f"🚀 Prompt migliorato: {enhanced}")
+    print(f"🔗 URL: {url}")
+    print(f"📁 File locale: {file}")
+    
 except Exception as e:
-    print(f"Errore: {e}")
+    print(f"❌ Errore: {e}")
 ```
 
-### Generazione con miglioramento del prompt
+### Generazione base con solo DALL-E 3
 
 ```python
 def generate_enhanced_image(description: str):

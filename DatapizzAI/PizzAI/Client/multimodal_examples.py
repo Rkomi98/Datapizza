@@ -24,7 +24,6 @@ import requests
 from pathlib import Path
 from typing import List, Union
 from dotenv import load_dotenv
-import openai
 
 # Carica le variabili d'ambiente dal file .env nella directory parent
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -49,7 +48,7 @@ def print_subsection(title: str):
     print(f"\n--- {title} ---")
 
 
-def create_multimodal_client(provider_name: str = "openai", use_cache: bool = False):
+def create_multimodal_client(provider_name: str = "openai", use_cache: bool = False, task: str = "image"):
     """
     Crea un client che supporta contenuti multimodali
     
@@ -58,23 +57,17 @@ def create_multimodal_client(provider_name: str = "openai", use_cache: bool = Fa
         use_cache: Se abilitare la cache
     """
     
-    # Solo alcuni provider supportano multimodalità
+    # Provider che funzionano realmente per analisi immagini
     multimodal_providers = {
         "openai": {
-            "api_key_env": "OPENAI_API_KEY", 
-            "model": "gpt-4o",  # Modello con supporto visione
-            "features": ["images", "text"],
+            "api_key_env": "OPENAI_API_KEY",
+            "model": os.getenv("OPENAI_VISION_MODEL", "gpt-4o"),
+            "features": ["images", "text", "generation"],
             "cache_supported": True
         },
         "google": {
-            "api_key_env": "GOOGLE_API_KEY",
-            "model": "gemini-2.5-flash",  # Supporta analisi immagini
-            "features": ["images", "text"],
-            "cache_supported": False
-        },
-        "anthropic": {
-            "api_key_env": "ANTHROPIC_API_KEY",
-            "model": "claude-3-5-sonnet-latest",  # Supporta immagini
+            "api_key_env": "GOOGLE_API_KEY", 
+            "model": os.getenv("GOOGLE_VISION_MODEL", "gemini-2.5-flash"),
             "features": ["images", "text"],
             "cache_supported": False
         }
@@ -100,17 +93,18 @@ def create_multimodal_client(provider_name: str = "openai", use_cache: bool = Fa
         extra_kwargs["cache"] = cache
     
     try:
+        model_name = config["model"]
         client = ClientFactory.create(
             provider=provider_name,
             api_key=api_key,
-            model=config["model"],
+            model=model_name,
             system_prompt="Sei un assistente AI multimodale. Puoi analizzare immagini, audio e testo. Rispondi in italiano in modo dettagliato ma conciso.",
             temperature=0.7,
             **extra_kwargs
         )
         
         print(f"✅ Client multimodale {provider_name} creato")
-        print(f"   🎯 Modello: {config['model']}")
+        print(f"   🎯 Modello: {model_name}")
         print(f"   🔧 Supporta: {', '.join(config['features'])}")
         if cache:
             print("   📦 Cache abilitata")
@@ -442,13 +436,18 @@ def create_mediablock_from_file(file_path: str) -> MediaBlock:
     if not image_b64:
         raise ValueError(f"Impossibile caricare {file_path}")
     
-    # Determina l'extension dal file
+    # Determina l'extension dal file (senza punto per MIME type)
     file_ext = Path(file_path).suffix.lower()
     if not file_ext:
         file_ext = ".png"  # Default fallback
     
+    # Rimuovi il punto per MIME type corretto (es: "png" non ".png")
+    extension_clean = file_ext.lstrip('.')
+    
+    # Extension corretta senza punto per MIME type
+    
     media = Media(
-        extension=file_ext,
+        extension=extension_clean,
         media_type="image",
         source_type="base64",
         source=image_b64,
@@ -470,8 +469,11 @@ def create_mediablock_from_url(url: str) -> MediaBlock:
     if not file_ext:
         file_ext = ".png"  # Default fallback
     
+    # Rimuovi il punto per MIME type corretto
+    extension_clean = file_ext.lstrip('.')
+    
     media = Media(
-        extension=file_ext,
+        extension=extension_clean,
         media_type="image",
         source_type="url", 
         source=url,
@@ -486,7 +488,7 @@ def create_sample_mediablock() -> MediaBlock:
     """Crea MediaBlock con immagine di esempio"""
     sample_base64 = create_sample_image_base64()
     media = Media(
-        extension=".png",
+        extension="png",  # Senza punto per MIME type corretto
         media_type="image",
         source_type="base64",
         source=sample_base64,
@@ -503,13 +505,16 @@ def create_audio_mediablock_from_file(file_path: str) -> MediaBlock:
     if not audio_b64:
         raise ValueError(f"Impossibile caricare {file_path}")
     
-    # Determina l'extension dal file
+    # Determina l'extension dal file (senza punto per MIME type)
     file_ext = Path(file_path).suffix.lower()
     if not file_ext:
         file_ext = ".mp3"  # Default fallback
     
+    # Rimuovi il punto per MIME type corretto
+    extension_clean = file_ext.lstrip('.')
+    
     media = Media(
-        extension=file_ext,
+        extension=extension_clean,
         media_type="audio",
         source_type="base64",
         source=audio_b64
@@ -530,8 +535,11 @@ def create_audio_mediablock_from_url(url: str) -> MediaBlock:
     if not file_ext:
         file_ext = ".mp3"  # Default fallback
     
+    # Rimuovi il punto per MIME type corretto
+    extension_clean = file_ext.lstrip('.')
+    
     media = Media(
-        extension=file_ext,
+        extension=extension_clean,
         media_type="audio",
         source_type="url",
         source=url
@@ -547,13 +555,16 @@ def create_video_mediablock_from_file(file_path: str) -> MediaBlock:
     if not video_b64:
         raise ValueError(f"Impossibile caricare {file_path}")
     
-    # Determina l'extension dal file
+    # Determina l'extension dal file (senza punto per MIME type)
     file_ext = Path(file_path).suffix.lower()
     if not file_ext:
         file_ext = ".mp4"  # Default fallback
     
+    # Rimuovi il punto per MIME type corretto
+    extension_clean = file_ext.lstrip('.')
+    
     media = Media(
-        extension=file_ext,
+        extension=extension_clean,
         media_type="video",
         source_type="base64",
         source=video_b64
@@ -574,8 +585,11 @@ def create_video_mediablock_from_url(url: str) -> MediaBlock:
     if not file_ext:
         file_ext = ".mp4"  # Default fallback
     
+    # Rimuovi il punto per MIME type corretto
+    extension_clean = file_ext.lstrip('.')
+    
     media = Media(
-        extension=file_ext,
+        extension=extension_clean,
         media_type="video",
         source_type="url",
         source=url
@@ -646,7 +660,8 @@ def demo_image_analysis():
     """
     print_section("ANALISI IMMAGINE")
     
-    client = create_multimodal_client("openai", use_cache=True)
+    provider = _select_provider("openai")
+    client = create_multimodal_client(provider, use_cache=True, task="image")
     if not client:
         print("❌ Client multimodale non disponibile")
         return
@@ -673,9 +688,18 @@ def demo_image_analysis():
         print(f"❌ Errore durante l'analisi: {e}")
 
 
+def _select_provider(default: str = "openai") -> str:
+    """Selezione provider funzionanti"""
+    options = {"1": "openai", "2": "google"}
+    labels = {"1": "OpenAI (gpt-4o)", "2": "Google (gemini-2.5-flash)"}
+    print("\nSeleziona provider:")
+    for k in ["1", "2"]:
+        print(f" {k}. {labels[k]}")
+    choice = input("\nScelta (1-2, invio per OpenAI): ").strip()
+    return options.get(choice, default)
 
 
-
+# Audio e video rimossi - non supportati dal framework datapizzai
 def generate_image_with_dalle(prompt: str, api_key: str, size: str = "1024x1024", quality: str = "standard") -> str:
     """
     Genera un'immagine usando DALL-E
@@ -690,7 +714,8 @@ def generate_image_with_dalle(prompt: str, api_key: str, size: str = "1024x1024"
         URL dell'immagine generata
     """
     try:
-        client = openai.OpenAI(api_key=api_key)
+        # Rimosso uso diretto dell'SDK OpenAI: generazione immagini verrà effettuata via framework
+        raise NotImplementedError("La generazione diretta via OpenAI SDK è disabilitata. Usa demo_text_generation (PNG via framework).")
         
         response = client.images.generate(
             model="dall-e-3",
@@ -708,152 +733,169 @@ def generate_image_with_dalle(prompt: str, api_key: str, size: str = "1024x1024"
 
 def demo_text_generation():
     """
-    Genera contenuti multimediali da testo
+    Genera immagini usando GPT-5 di OpenAI (augmentazione + generazione)
     """
-    print_section("GENERAZIONE DA TESTO")
-    
-    print("Genera contenuti AI: immagini, video, audio")
-    print("")
-    
-    # Chiedi all'utente cosa vuole generare
-    print("Cosa vuoi generare?")
-    print("1. Immagine (DALL-E 3) - Generazione reale")
-    print("2. Video (prompt per RunwayML, Pika Labs, etc.)")
-    print("3. Audio (prompt per Mubert, AIVA, etc.)")
-    
-    while True:
-        try:
-            choice = input("\nScegli (1-3): ").strip()
-            if choice in ["1", "2", "3"]:
-                break
-            print("Scelta non valida!")
-        except ValueError:
-            print("Inserisci un numero valido!")
-    
-    # Chiedi la descrizione
-    description = input("\nDescrivi cosa vuoi generare: ").strip()
-    
+    print_section("GENERAZIONE IMMAGINE - GPT-5")
+
+    description = input("\nDescrivi l'immagine da generare: ").strip()
     if not description:
-        print("Descrizione vuota!")
+        print("Descrizione vuota")
         return
+
+    # Chiedi se augmentare il prompt
+    augment = input("\nVuoi augmentare il prompt? (s/n): ").strip().lower() == 's'
     
-    if choice == "1":
-        # Generazione reale con DALL-E
+    try:
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            print("Chiave OpenAI non trovata!")
+            print("❌ OPENAI_API_KEY non trovata nel file .env")
             return
-            
-        try:
-            print("\nGenerazione immagine con DALL-E 3...")
-            print("Questo potrebbe richiedere alcuni secondi...")
-            
-            # Usa la descrizione diretta dell'utente o migliora il prompt
-            use_enhanced = input("\nUsa un prompt migliorato? (s/n): ").strip().lower() == 's'
-            
-            if use_enhanced:
-                # Crea client per migliorare il prompt
-                client = create_multimodal_client("openai")
-                enhance_prompt = f"""Migliora questo prompt per DALL-E 3: "{description}"
 
-Rendi il prompt più dettagliato e specifico, includendo:
-- Stile artistico e qualità (photorealistic, 4K, detailed, etc.)
-- Lighting e mood
+        # Client per augmentazione prompt (GPT-5 via framework)
+        final_description = description
+        if augment:
+            # Usa GPT-5 per augmentazione prompt
+            gpt5_client = ClientFactory.create(
+                provider="openai",
+                api_key=api_key,
+                model="gpt-5",  # Usa GPT-5 per miglior augmentazione
+                temperature=1.0  # GPT-5 supporta solo temperature=1
+            )
+            if gpt5_client:
+                print("\n🔄 Augmentazione prompt con GPT-5...")
+                augment_prompt = f"""Migliora questo prompt per generazione immagini AI: "{description}"
+
+Aggiungi dettagli su:
+- Stile visivo e colori specifici
 - Composizione e prospettiva
-- Colori e atmosfera
+- Elementi decorativi e atmosfera
+- Qualità artistica e tecnica fotografica
 
-Rispondi SOLO con il prompt migliorato, niente altro."""
+Rispondi solo con il prompt migliorato, max 400 caratteri."""
 
-                enhanced_response = client.invoke(enhance_prompt)
-                final_prompt = enhanced_response.text.strip()
-                
-                print(f"\nPrompt migliorato:")
-                print(f'"{final_prompt}"')
-                print("")
+                augment_response = gpt5_client.invoke(augment_prompt)
+                final_description = augment_response.text.strip()
+                print(f"\nPrompt augmentato con GPT-5: {final_description}")
             else:
-                final_prompt = description
-            
-            # Genera l'immagine
-            image_url = generate_image_with_dalle(final_prompt, api_key)
-            
-            print("Immagine generata!")
-            print("=" * 50)
-            print(f"URL: {image_url}")
-            print("=" * 50)
-            
-            # Opzione per salvare l'immagine
-            save_image = input("\nVuoi salvare l'immagine localmente? (s/n): ").strip().lower() == 's'
-            
-            if save_image:
-                try:
-                    # Scarica e salva l'immagine
-                    response = requests.get(image_url)
-                    if response.status_code == 200:
-                        filename = f"generated_image_{int(time.time())}.png"
-                        with open(filename, 'wb') as f:
-                            f.write(response.content)
-                        print(f"Immagine salvata come: {filename}")
-                    else:
-                        print("Errore nel download dell'immagine")
-                except Exception as e:
-                    print(f"Errore salvataggio: {e}")
-            
-        except Exception as e:
-            print(f"Errore: {e}")
-    
-    else:
-        # Generazione prompt per altri strumenti
-        client = create_multimodal_client("openai")
-        if not client:
-            return
-        
-        prompts = {
-            "2": f"""Crea un prompt per generazione video basato su: "{description}"
+                print("⚠️ GPT-5 non disponibile, uso prompt originale")
 
-Il prompt deve includere:
-- Azione specifica e movimento
-- Durata (es: "5 seconds")  
-- Stile visivo e mood
-- Qualità (HD, cinematic, etc.)
-
-Formato: solo il prompt finale, pronto da usare.""",
-            
-            "3": f"""Crea un prompt per generazione audio basato su: "{description}"
-
-Il prompt deve specificare:
-- Genere musicale o tipo di suono
-- Durata (es: "30 seconds")
-- Mood e atmosfera
-- Strumenti/elementi specifici
-
-Formato: solo il prompt finale, pronto da usare."""
-        }
-        
-        generation_names = {
-            "2": "video", 
-            "3": "audio"
-        }
+        # Genera immagine con GPT-5 (via framework)
+        print("\n🔄 Generazione immagine con GPT-5...")
         
         try:
-            print(f"\nGenerazione prompt per {generation_names[choice]}...")
-            response = client.invoke(prompts[choice])
+            # Usa GPT-5 per generazione immagine
+            gpt5_client = ClientFactory.create(
+                provider="openai",
+                api_key=api_key,
+                model="gpt-5",  # GPT-5 per generazione
+                temperature=1.0  # GPT-5 supporta solo temperature=1
+            )
             
-            print(f"\nPrompt ottimizzato:")
-            print("=" * 50)
-            print(response.text)
-            print("=" * 50)
+            if not gpt5_client:
+                print("❌ Client GPT-5 non disponibile")
+                return
+
+            # Prompt per generazione immagine
+            generation_prompt = f"""Genera un'immagine basata su questa descrizione: "{final_description}"
+
+Crea un'immagine dettagliata e di alta qualità che rappresenti fedelmente la descrizione fornita.
+Usa colori vividi, composizione bilanciata e stile artistico professionale."""
+
+            response = gpt5_client.invoke(generation_prompt)
             
-            # Suggerimenti di strumenti
-            tools_suggestions = {
-                "2": ["RunwayML", "Pika Labs", "Stable Video Diffusion", "Synthesia"],
-                "3": ["Mubert", "AIVA", "Soundful", "Amper Music"]
-            }
-            
-            print(f"\nStrumenti consigliati: {', '.join(tools_suggestions[choice])}")
-            print("\nCopia il prompt sopra e incollalo nel tool che preferisci!")
+            # Se GPT-5 restituisce un URL di immagine
+            if "http" in response.text and ("png" in response.text.lower() or "jpg" in response.text.lower()):
+                image_url = response.text.strip()
+                print(f"✅ Immagine generata con GPT-5!")
+                print(f"🔗 URL: {image_url}")
+                
+                # Scarica e salva l'immagine in locale
+                print("\n🔄 Download immagine in corso...")
+                try:
+                    import requests
+                    
+                    # Download dell'immagine
+                    img_response = requests.get(image_url, timeout=30)
+                    img_response.raise_for_status()
+                    
+                    # Nome file con timestamp
+                    filename = f"generated_image_{int(time.time())}.png"
+                    
+                    # Salva l'immagine
+                    with open(filename, "wb") as f:
+                        f.write(img_response.content)
+                    
+                    print(f"✅ Immagine salvata: {filename}")
+                    print(f"📏 Dimensione: {len(img_response.content):,} bytes")
+                    
+                except ImportError:
+                    print("❌ Modulo 'requests' non installato per download")
+                    print("💡 Installa con: pip install requests")
+                    print(f"🔗 URL disponibile: {image_url}")
+                except Exception as e:
+                    print(f"❌ Errore download: {e}")
+                    print(f"🔗 URL disponibile: {image_url}")
+            else:
+                # GPT-5 ha restituito testo invece di URL - attiva fallback
+                print("⚠️ GPT-5 ha restituito testo invece di un'immagine:")
+                print(f"Risposta: {response.text[:200]}...")
+                print("💡 GPT-5 non supporta la generazione di immagini")
+                
+                # Attiva fallback automatico a DALL-E 3
+                print("🔄 Attivazione automatica fallback a DALL-E 3...")
+                raise Exception("GPT-5 non supporta generazione immagini - fallback a DALL-E")
             
         except Exception as e:
-            print(f"Errore: {e}")
+            print(f"❌ Errore GPT-5: {e}")
+            print("💡 Fallback a DALL-E 3...")
+            
+            # Fallback a DALL-E 3 se GPT-5 fallisce
+            try:
+                import openai
+                dalle_client = openai.OpenAI(api_key=api_key)
+                
+                response = dalle_client.images.generate(
+                    model="dall-e-3",
+                    prompt=final_description,
+                    size="1024x1024",
+                    quality="standard",
+                    n=1
+                )
+                
+                image_url = response.data[0].url
+                print(f"✅ Immagine generata con DALL-E 3 (fallback)!")
+                print(f"🔗 URL: {image_url}")
+                
+                # Scarica e salva l'immagine in locale
+                print("\n🔄 Download immagine in corso...")
+                try:
+                    import requests
+                    
+                    # Download dell'immagine
+                    img_response = requests.get(image_url, timeout=30)
+                    img_response.raise_for_status()
+                    
+                    # Nome file con timestamp
+                    filename = f"generated_image_{int(time.time())}.png"
+                    
+                    # Salva l'immagine
+                    with open(filename, "wb") as f:
+                        f.write(img_response.content)
+                    
+                    print(f"✅ Immagine salvata: {filename}")
+                    print(f"📏 Dimensione: {len(img_response.content):,} bytes")
+                    
+                except Exception as download_error:
+                    print(f"❌ Errore download: {download_error}")
+                    print(f"🔗 URL disponibile: {image_url}")
+                
+            except ImportError:
+                print("❌ Moduli 'openai' o 'requests' non installati")
+            except Exception as dalle_error:
+                print(f"❌ Errore DALL-E fallback: {dalle_error}")
+        
+    except Exception as e:
+        print(f"❌ Errore generazione: {e}")
 
 
 # ==============================================================================
@@ -1433,12 +1475,13 @@ def show_main_menu():
     print("""
 Da cosa vuoi partire?
 
-1. Analizza immagine → Carica e analizza qualsiasi immagine in dettaglio
-2. Genera immagine → Crea immagini AI professionali da testo con DALL-E 3
+1. Analizza immagine → Carica e analizza un'immagine (funziona)
+2. Genera immagine → GPT-5 + DALL-E 3 (download locale)
 
 0. Esci
 
-Due funzionalità principali per l'elaborazione di immagini con AI
+Nota: Audio/video temporaneamente non disponibili (framework in sviluppo)
+Per funzioni avanzate digita 'legacy'
     """)
 
 
@@ -1447,29 +1490,34 @@ def show_legacy_menu():
     print_section("DEMO LEGACY - Modalità MULTIMODALE")
     
     print("""
-Demo avanzate e legacy:
+Demo avanzate e sperimentali:
 
-MODALITÀ ONE-SHOT MULTIMODALE:
-1. Analisi di immagini base nella cartella (automatica)
-2. Analisi di immagini base (scelta interattiva) 
-3. Media misti (automatica)
-4. Media misti (scelta interattiva)
-5. Da immagine a codice/descrizione tecnica
+FUNZIONI SPERIMENTALI (potrebbero non funzionare):
+1. [SPER] Analisi audio → Test framework audio
+2. [SPER] Analisi video → Test framework video
+
+MODALITÀ ONE-SHOT MULTIMODALE (FUNZIONANTI):
+3. Analisi di immagini base nella cartella (automatica)
+4. Analisi di immagini base (scelta interattiva) 
+5. Media misti (automatica)
+6. Media misti (scelta interattiva)
+7. Da immagine a codice/descrizione tecnica
 
 MODALITÀ CONVERSATIONAL MULTIMODALE:
-6. Conversazione con analisi di immagini
-7. Analisi progressiva e workflow creativo
-8. Gestione avanzata memoria multimodale
+8. Conversazione con analisi di immagini
+9. Analisi progressiva e workflow creativo
+10. Gestione avanzata memoria multimodale
 
 UTILITÀ E MENU AVANZATI:
-9. Gestione file multimediali locali
-10. Test selezione immagini interattiva
-11. Esegui tutte le demo multimodali
+11. Gestione file multimediali locali
+12. Test selezione immagini interattiva
+13. Esegui tutte le demo multimodali
 
 ALTRO:
 0. Torna al menu principale
 
 Note:
+- Audio/video sono sperimentali e potrebbero fallire (framework in sviluppo)
 - Solo OpenAI (gpt-4o), Google (gemini) e Anthropic (claude) supportano multimodalità
 - Assicurati di avere le chiavi API nel file .env
     """)
@@ -1538,17 +1586,19 @@ def run_main_demo(choice: str):
 def run_legacy_demo(choice: str):
     """Esegue le demo legacy"""
     demos = {
-        "1": lambda: demo_oneshot_image_analysis(interactive_images=False),
-        "2": lambda: demo_oneshot_image_analysis(interactive_images=True),
-        "3": lambda: demo_oneshot_mixed_media(interactive_images=False),
-        "4": lambda: demo_oneshot_mixed_media(interactive_images=True),
-        "5": lambda: demo_oneshot_image_to_code(interactive_images=True),
-        "6": demo_conversational_image_analysis,
-        "7": demo_conversational_progressive_analysis,
-        "8": demo_conversational_multimodal_memory,
-        "9": demo_file_management,
-        "10": demo_interactive_image_selection,
-        "11": run_all_demos
+        "1": lambda: print("❌ Audio non supportato dal framework"),    # Placeholder
+        "2": lambda: print("❌ Video non supportato dal framework"),    # Placeholder
+        "3": lambda: demo_oneshot_image_analysis(interactive_images=False),
+        "4": lambda: demo_oneshot_image_analysis(interactive_images=True),
+        "5": lambda: demo_oneshot_mixed_media(interactive_images=False),
+        "6": lambda: demo_oneshot_mixed_media(interactive_images=True),
+        "7": lambda: demo_oneshot_image_to_code(interactive_images=True),
+        "8": demo_conversational_image_analysis,
+        "9": demo_conversational_progressive_analysis,
+        "10": demo_conversational_multimodal_memory,
+        "11": demo_file_management,
+        "12": demo_interactive_image_selection,
+        "13": run_all_demos
     }
     
     if choice in demos:
@@ -1603,8 +1653,6 @@ def main():
         multimodal_providers.append("OpenAI (gpt-4o)")
     if os.getenv("GOOGLE_API_KEY"):
         multimodal_providers.append("Google (gemini-2.5-flash)")
-    if os.getenv("ANTHROPIC_API_KEY"):
-        multimodal_providers.append("Anthropic (claude-3-5-sonnet)")
     
     if multimodal_providers:
         print(f"✅ Provider multimodali disponibili: {', '.join(multimodal_providers)}")
@@ -1614,9 +1662,8 @@ def main():
 
 Per utilizzare le funzionalità multimodali, crea un file .env nella directory PizzAI/ con:
 
-OPENAI_API_KEY=sk-your-openai-key-here     # gpt-4o supporta immagini
-GOOGLE_API_KEY=your-google-key-here        # gemini supporta immagini e audio  
-ANTHROPIC_API_KEY=sk-ant-your-key-here     # claude supporta immagini
+ OPENAI_API_KEY=sk-your-openai-key-here     # gpt-4o supporta immagini + generazione
+ GOOGLE_API_KEY=your-google-key-here        # gemini supporta immagini
 
 Almeno una di queste chiavi è necessaria per le demo multimodali.
         """)
