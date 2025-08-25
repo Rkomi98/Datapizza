@@ -704,32 +704,3 @@ if __name__ == "__main__":
     main()
 ```
 
-### Esempi demo interattive
-
-Il file `multi_agent_tools.py` include demo complete:
-
-```
-MULTI TOOL FRAMEWORK - DatapizzAI
-=================================================================
-
-Demo disponibili:
-
-1. Test strumenti individuali → Verifica funzionamento base
-2. Client specializzato → Calculator client con strumento matematico
-3. Client multi strumento → Research client con search + file
-4. Workflow complesso → Client con tutti gli strumenti
-5. Client con memoria → Conversazione multi-turno
-6. Mostra strumenti → Lista e descrizioni
-
-0. Esci
-```
-
-
-
-## Documentazione completa
-
-→ **[multi_agent_tools.py](multi_agent_tools.py)** - Script completo con esempi funzionanti
-
-→ **[GUIDA_MULTI_AGENT.md](GUIDA_MULTI_AGENT.md)** - Documentazione tecnica dettagliata (se disponibile)
-
-
