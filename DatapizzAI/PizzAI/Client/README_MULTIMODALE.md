@@ -15,11 +15,12 @@ client = ClientFactory.create(
     model="gpt-4o"
 )
 
+# Analizza immagine da URL
 media = Media(
     extension="jpg",
     media_type="image",
     source_type="url",
-    source="https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png"
+    source="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png"
 )
 
 response = client.invoke([
