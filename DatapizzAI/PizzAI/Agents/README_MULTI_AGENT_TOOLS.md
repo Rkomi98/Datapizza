@@ -2,51 +2,21 @@
 
 Guida completa per la creazione e utilizzo di client multi-tool con il framework datapizzai. I client possono utilizzare diversi strumenti per completare task complessi e automatizzare workflow attraverso l'API OpenAI.
 
-## Prerequisiti
+## Indice
 
-### 1. Ambiente di sviluppo
-```bash
-# Clona il repository e naviga nella directory
-cd PizzAI
-
-# Attiva l'ambiente virtuale
-source .venv/bin/activate
-
-# Verifica installazione datapizzai
-python -c "import datapizzai; print('✅ datapizzai disponibile')"
-```
-
-### 2. Configurazione API OpenAI
-Il framework si connette all'API OpenAI per il function calling. Configura la tua API key:
-
-```bash
-# Crea file .env nella directory PizzAI/
-echo 'OPENAI_API_KEY=sk-proj-your-key-here' > .env
-
-# Verifica configurazione
-python -c "import os; from dotenv import load_dotenv; load_dotenv(); print('✅ API Key configurata' if os.getenv('OPENAI_API_KEY') else '❌ API Key mancante')"
-```
-
-**Nota**: Il framework utilizza token OpenAI reali per:
-- Analisi delle query utente
-- Selezione automatica degli strumenti
-- Generazione di risposte contestuali
-- Function calling per l'esecuzione dei tool
-
-### 3. Test di connessione
-```bash
-# Esegui gli esempi interattivi
-cd Agents && python multi_agent_tools.py
-
-# Oppure testa singoli componenti
-python -c "
-from datapizzai.clients import ClientFactory
-import os
-client = ClientFactory.create('openai', api_key=os.getenv('OPENAI_API_KEY'), model='gpt-4o')
-response = client.invoke(input='Ciao!')
-print(f'✅ Connessione OK: {response.text}')
-"
-```
+1. [Concetti fondamentali](#concetti-fondamentali)
+2. [Struttura base di un Tool](#struttura-base-di-un-tool)
+3. [Configurazione passo-passo](#configurazione-passo-passo)
+   - [Passo 1: Definizione dei tool](#passo-1-definizione-dei-tool)
+   - [Passo 2: Creazione del client OpenAI](#passo-2-creazione-del-client-openai)
+   - [Passo 3: Configurazione ed esecuzione](#passo-3-configurazione-ed-esecuzione)
+   - [Passo 4: Agente multi-tool avanzato](#passo-4-agente-multi-tool-avanzato)
+   - [Passo 5: Memoria conversazionale](#passo-5-memoria-conversazionale)
+4. [Esempi di strumenti implementati](#esempi-di-strumenti-implementati)
+5. [Pattern di utilizzo avanzati](#pattern-di-utilizzo-avanzati)
+6. [Best practices](#best-practices)
+7. [Estensione del framework](#estensione-del-framework)
+8. [Riepilogo configurazione completa](#riepilogo-configurazione-completa)
 
 ## Concetti fondamentali
 
@@ -575,59 +545,7 @@ except Exception as e:
 - **Pulizia memoria**: Gestisci la dimensione della memoria per conversazioni lunghe
 - **Separazione ruoli**: Mantieni chiara la distinzione tra utente e assistente
 
-## Debugging e testing
 
-### Test individuale dei tool
-```python
-# Testa ogni tool individualmente
-def test_tool(tool, test_cases):
-    for test_case in test_cases:
-        result = tool.execute(test_case)
-        print(f"Input: {test_case}")
-        print(f"Success: {result.success}")
-        if result.success:
-            print(f"Result: {result.result}")
-        else:
-            print(f"Error: {result.error}")
-        print()
-
-# Test CalculatorTool
-calc_tool = CalculatorTool()
-test_cases = ["2 + 2", "10 * 5", "(15 + 5) / 4"]
-test_tool(calc_tool, test_cases)
-```
-
-### Verifica uso strumenti
-```python
-# Verifica quali strumenti sono stati utilizzati
-response = agent.invoke("Calcola e cerca informazioni")
-
-if hasattr(response, 'tool_calls') and response.tool_calls:
-    print("Strumenti utilizzati:")
-    for tool_call in response.tool_calls:
-        print(f"- {tool_call.tool_name}: {tool_call.result}")
-else:
-    print("Nessuno strumento utilizzato")
-```
-
-### Logging e monitoraggio
-```python
-# Abilita logging per debugging
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-# Monitora l'uso dei tool
-def monitor_tool_usage(agent, query):
-    print(f"Query: {query}")
-    response = agent.invoke(query)
-    
-    if hasattr(response, 'tool_calls') and response.tool_calls:
-        print(f"Tool utilizzati: {len(response.tool_calls)}")
-        for tool_call in response.tool_calls:
-            print(f"  {tool_call.tool_name}: {tool_call.result}")
-    
-    return response
-```
 
 ## Estensione del framework
 
@@ -674,161 +592,7 @@ class APITool(Tool):
         pass
 ```
 
-## Best practices e troubleshooting
 
-### Gestione degli errori
-
-```python
-def safe_tool_execution(response, tools):
-    """Esecuzione sicura dei tool con gestione errori."""
-    
-    tool_results = []
-    
-    try:
-        for block in response.content:
-            if hasattr(block, 'name') and hasattr(block, 'arguments'):
-                tool_name = block.name
-                arguments = block.arguments
-                
-                print(f"🔧 Eseguendo {tool_name}...")
-                
-                # Mappa sicura dei tool
-                tool_map = {
-                    "calcola": calcola,
-                    "cerca_informazioni": cerca_informazioni,
-                    "gestisci_file": gestisci_file
-                }
-                
-                if tool_name in tool_map:
-                    try:
-                        result = tool_map[tool_name](**arguments)
-                        tool_results.append(result)
-                        print(f"✅ {tool_name}: {result}")
-                        
-                    except Exception as tool_error:
-                        error_msg = f"❌ Errore in {tool_name}: {tool_error}"
-                        tool_results.append(error_msg)
-                        print(error_msg)
-                else:
-                    error_msg = f"❌ Tool {tool_name} non riconosciuto"
-                    tool_results.append(error_msg)
-                    print(error_msg)
-                    
-    except Exception as e:
-        print(f"❌ Errore generale nell'esecuzione tool: {e}")
-    
-    return tool_results
-```
-
-### Ottimizzazione performance
-
-```python
-def optimized_client_config():
-    """Configurazione ottimizzata per performance."""
-    
-    return ClientFactory.create(
-        provider="openai",
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o",  # Bilanciamento velocità/qualità
-        system_prompt="""Sei efficiente e preciso. 
-        Usa tool solo quando necessario.
-        Fornisci risposte concise ma complete.""",
-        # Parametri opzionali per ottimizzazione
-        temperature=0.1,  # Risposte più deterministiche
-        max_tokens=1000,  # Limita lunghezza risposta
-    )
-```
-
-### Troubleshooting comuni
-
-#### 1. Errore API Key
-```bash
-# Verifica API key
-python -c "import os; from dotenv import load_dotenv; load_dotenv(); print('API Key:', 'OK' if os.getenv('OPENAI_API_KEY') else 'MANCANTE')"
-
-# Test connessione
-python -c "
-from datapizzai.clients import ClientFactory
-import os
-client = ClientFactory.create('openai', api_key=os.getenv('OPENAI_API_KEY'), model='gpt-4o')
-response = client.invoke(input='test')
-print('Connessione:', 'OK' if response.text else 'ERRORE')
-"
-```
-
-#### 2. Tool non chiamati
-```python
-# Debug tool calling
-response = client.invoke(
-    input="Calcola 2+2",
-    tools=[calcola],
-    tool_choice="required"  # Forza uso tool
-)
-
-print(f"Blocchi risposta: {len(response.content)}")
-for i, block in enumerate(response.content):
-    print(f"  {i}: {type(block).__name__}")
-    if hasattr(block, 'name'):
-        print(f"    Tool: {block.name}")
-```
-
-#### 3. Memoria troppo grande
-```python
-def manage_memory_size(memory: Memory, max_turns: int = 10):
-    """Gestisce dimensione memoria per evitare limiti token."""
-    
-    if len(memory.memory) > max_turns:
-        # Mantieni solo gli ultimi N turni
-        memory.memory = memory.memory[-max_turns:]
-        print(f"🔄 Memoria ridotta a {max_turns} turni")
-    
-    return memory
-```
-
-### Configurazione ambiente
-
-#### File .env richiesto
-```bash
-# Directory: PizzAI/.env
-OPENAI_API_KEY=sk-proj-your-openai-key-here
-
-# Opzionali
-OPENAI_MODEL=gpt-4o
-OPENAI_MAX_TOKENS=1000
-OPENAI_TEMPERATURE=0.1
-```
-
-#### Dipendenze Python
-```bash
-# Nel ambiente virtuale PizzAI
-pip install datapizzai python-dotenv
-
-# Verifica installazione
-python -c "import datapizzai, dotenv; print('✅ Dipendenze OK')"
-```
-
-#### Test completo sistema
-```bash
-# Script test completo
-cd PizzAI/Agents
-python -c "
-import os
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.tools import Tool
-
-load_dotenv(dotenv_path='../.env')
-
-@Tool
-def test_tool(input: str) -> str:
-    return f'Tool funziona: {input}'
-
-client = ClientFactory.create('openai', api_key=os.getenv('OPENAI_API_KEY'), model='gpt-4o')
-response = client.invoke(input='test tool', tools=[test_tool], tool_choice='auto')
-
-print('✅ Sistema completamente funzionante' if response.content else '❌ Errore sistema')
-"
-```
 
 ## Riepilogo configurazione completa
 
@@ -960,40 +724,7 @@ Demo disponibili:
 0. Esci
 ```
 
-## Risoluzione problemi comuni
 
-### Error: "Client OpenAI non disponibile"
-```bash
-# Verifica file .env
-ls -la PizzAI/.env
-
-# Crea se mancante
-echo 'OPENAI_API_KEY=your-key' > PizzAI/.env
-```
-
-### Error: "Tool not found"
-```python
-# Verifica che il tool sia nella lista dell'agente
-print(f"Tool disponibili: {[t.name for t in agent.tools]}")
-
-# Assicurati di passare la lista corretta
-agent = Agent(
-    name="TestAgent",
-    client=client,
-    tools=[calculator_tool, search_tool],  # Lista non vuota
-    system_prompt="..."
-)
-```
-
-### Error: "Invalid input schema"
-```python
-# Verifica lo schema del tool
-print(f"Schema input: {tool.input_schema}")
-
-# Assicurati che l'input corrisponda allo schema
-# Per schema "string": tool.execute("testo")
-# Per schema "object": tool.execute({"key": "value"})
-```
 
 ## Documentazione completa
 
@@ -1001,18 +732,4 @@ print(f"Schema input: {tool.input_schema}")
 
 → **[GUIDA_MULTI_AGENT.md](GUIDA_MULTI_AGENT.md)** - Documentazione tecnica dettagliata (se disponibile)
 
-## Requisiti tecnici
 
-- Python 3.8+
-- Ambiente virtuale attivato
-- OPENAI_API_KEY configurata
-- Modulo datapizzai installato
-- Connessione internet per API calls
-
-## Note sui costi
-
-- **OpenAI GPT-4o**: ~$0.01 per 1K token input, ~$0.03 per 1K token output
-- **Tool execution**: Gratuito (eseguiti localmente)
-- **Memoria**: Aggiunge token al contesto, aumentando i costi per conversazioni lunghe
-
-Consultare la documentazione ufficiale OpenAI per tariffe aggiornate.
