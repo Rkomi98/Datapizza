@@ -1,6 +1,6 @@
 # DatapizzAI multimodale
 
-Guida rapida per l'utilizzo delle funzionalità di analisi e generazione immagini con framework datapizzai.
+Guida completa per l'utilizzo delle funzionalità multimodali del framework datapizzai, con focus su analisi e generazione di immagini.
 
 ## Avvio rapido
 
@@ -12,25 +12,29 @@ cd PizzAI && source .venv/bin/activate
 echo 'OPENAI_API_KEY=your-key-here' > .env
 echo 'GOOGLE_API_KEY=your-key-here' >> .env
 
-# Esegui l'esempio
+# Esegui gli esempi
 cd Client && python multimodal_examples.py
 ```
 
 ## Funzionalità principali
 
-| Funzione | Descrizione | Provider funzionanti |
+| Funzione | Descrizione | Provider supportati |
 |----------|-------------|-------------------|
-| **Analisi immagini** | Analizza immagini locali o da URL | OpenAI (gpt-4o), Google (gemini-2.5-flash) |
+| **Analisi immagini** | Analizza immagini locali o da URL con AI | OpenAI (gpt-4o), Google (gemini-2.5-flash) |
 | **Generazione immagini** | GPT-5 per augmentazione + DALL-E 3 per generazione | OpenAI (GPT-5 + DALL-E 3) |
+| **Conversazione multimodale** | Chat multi-turno con memoria e media | OpenAI (gpt-4o) |
+| **Gestione file** | Esplorazione e batch processing di immagini locali | Locale |
 
-## Esempio rapido - Analisi immagine
+## Analisi di immagini
+
+### Esempio base - Analisi da URL
 
 ```python
 from datapizzai.clients import ClientFactory
 from datapizzai.type import TextBlock, MediaBlock, Media
 import os
 
-# Setup client
+# Setup client OpenAI
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -46,17 +50,56 @@ media = Media(
 )
 
 response = client.invoke([
-    TextBlock(content="Descrivi questa immagine"),
+    TextBlock(content="Descrivi questa immagine in dettaglio"),
     MediaBlock(media=media)
 ])
 
 print(response.text)
 ```
 
-## Esempio rapido - Generazione immagine
+### Esempio avanzato - Analisi da file locale
 
 ```python
-from datapizzai.clients import ClientFactory
+import base64
+from pathlib import Path
+
+# Carica immagine locale
+def load_image_as_base64(image_path: str) -> str:
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+# Crea MediaBlock da file locale
+image_b64 = load_image_as_base64("my_image.jpg")
+file_ext = Path("my_image.jpg").suffix.lstrip('.')
+
+media = Media(
+    extension=file_ext,
+    media_type="image",
+    source_type="base64",
+    source=image_b64,
+    detail="high"
+)
+
+# Analisi con prompt specifico
+analysis_prompt = """
+Analizza questa immagine seguendo questi criteri:
+1. Descrivi gli elementi visivi principali
+2. Identifica i colori dominanti
+3. Suggerisci possibili usi o contesti
+4. Fornisci una valutazione tecnica
+"""
+
+response = client.invoke([
+    TextBlock(content=analysis_prompt),
+    MediaBlock(media=media)
+])
+```
+
+## Generazione di immagini
+
+### Flusso completo: GPT-5 + DALL-E 3
+
+```python
 import openai
 import requests
 import os
@@ -66,30 +109,136 @@ gpt5_client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
-    temperature=1.0
+    temperature=1.0  # GPT-5 supporta solo temperature=1.0
 )
 
-augmented = gpt5_client.invoke("Migliora questo prompt: un gatto che suona il pianoforte")
-print(f"Prompt migliorato: {augmented.text}")
+augment_prompt = f"""Migliora questo prompt per generazione immagini AI: "un gatto che suona il pianoforte"
+
+Aggiungi dettagli su:
+- Stile visivo e colori specifici
+- Composizione e prospettiva
+- Elementi decorativi e atmosfera
+- Qualità artistica e tecnica fotografica
+
+Rispondi solo con il prompt migliorato, max 400 caratteri."""
+
+augmented = gpt5_client.invoke(augment_prompt)
+final_prompt = augmented.text.strip()
 
 # 2. Generazione immagine con DALL-E 3
 dalle_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 response = dalle_client.images.generate(
     model="dall-e-3",
-    prompt=augmented.text,
+    prompt=final_prompt,
     size="1024x1024",
-    quality="standard"
+    quality="standard",  # o "hd" per qualità superiore
+    n=1
 )
 
-# 3. Download locale
+# 3. Download automatico
 image_url = response.data[0].url
 img_data = requests.get(image_url).content
 
-with open("generated_image.png", "wb") as f:
+filename = f"generated_image_{int(time.time())}.png"
+with open(filename, "wb") as f:
     f.write(img_data)
 
-print("✅ Immagine salvata: generated_image.png")
+print(f"✅ Immagine salvata: {filename}")
+```
+
+## Conversazione multimodale
+
+### Chat con memoria e media
+
+```python
+from datapizzai.memory import Memory
+from datapizzai.type import ROLE
+
+# Inizializza client e memoria
+client = create_multimodal_client("openai", use_cache=True)
+memory = Memory()
+
+# Turno 1: Utente invia immagine con richiesta
+image_block = create_mediablock_from_file("my_photo.jpg")
+input_blocks = [
+    TextBlock(content="Analizza questa foto e dimmi cosa vedi"),
+    image_block
+]
+
+memory.add_turn(input_blocks, ROLE.USER)
+response = client.invoke("", memory=memory)
+memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+
+# Turno 2: Follow-up senza reinviare l'immagine
+follow_up = TextBlock(content="Quali miglioramenti consiglieresti?")
+memory.add_turn([follow_up], ROLE.USER)
+
+# L'AI ricorda l'immagine precedente
+response = client.invoke("", memory=memory)
+memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+```
+
+### Gestione avanzata della memoria
+
+```python
+# Analizza il contenuto della memoria
+text_count = 0
+media_count = 0
+
+for block in memory.iter_blocks():
+    if isinstance(block, TextBlock):
+        text_count += 1
+    elif isinstance(block, MediaBlock):
+        media_count += 1
+
+print(f"Blocchi testo: {text_count}")
+print(f"Blocchi media: {media_count}")
+
+# Gestione memoria con limite dimensione
+# In un caso reale, potresti voler rimuovere i media più vecchi
+# mantenendo solo il testo per ridurre il carico
+```
+
+## Gestione file multimediali
+
+### Ricerca e batch processing
+
+```python
+from pathlib import Path
+
+def find_local_images() -> List[str]:
+    """Trova tutte le immagini nella directory corrente"""
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
+    current_dir = Path('.')
+    
+    found_images = []
+    for ext in image_extensions:
+        found_images.extend(current_dir.glob(f'*{ext}'))
+        found_images.extend(current_dir.glob(f'*{ext.upper()}'))
+    
+    return [str(img) for img in found_images]
+
+def create_media_batch(image_paths: List[str], max_images: int = 3) -> List[MediaBlock]:
+    """Crea un batch di MediaBlock da file locali"""
+    media_blocks = []
+    
+    for i, path in enumerate(image_paths[:max_images]):
+        image_b64 = load_image_as_base64(path)
+        if image_b64:
+            media = Media(
+                media_type="image", 
+                source_type="base64",
+                source=image_b64,
+                detail="high"
+            )
+            media_blocks.append(MediaBlock(media=media))
+    
+    return media_blocks
+
+# Utilizzo
+local_images = find_local_images()
+batch = create_media_batch(local_images, max_images=5)
 ```
 
 ## Configurazione
@@ -102,7 +251,7 @@ OPENAI_API_KEY=sk-your-openai-key-here
 GOOGLE_API_KEY=your-google-key-here
 ```
 
-### Provider e modelli
+### Provider e modelli supportati
 
 | Provider | Modello | Analisi immagini | Augmentazione prompt | Generazione immagini | Cache |
 |----------|---------|-----------------|-------------------|-------------------|-------|
@@ -111,55 +260,56 @@ GOOGLE_API_KEY=your-google-key-here
 | OpenAI | dall-e-3 | ❌ | ❌ | ✅ | ❌ |
 | Google | gemini-2.5-flash | ✅ | ❌ | ❌ | ❌ |
 
+### Variabili d'ambiente opzionali
+
+```bash
+# Modelli personalizzati (se diversi dai default)
+OPENAI_VISION_MODEL=gpt-4o
+GOOGLE_VISION_MODEL=gemini-2.5-flash
+```
+
 ## Menu interattivo
 
 ```
+DATAPIZZAI - Analisi e generazione immagini
+=================================================================
+
+File disponibili nella directory:
+   Immagini: X file
+
 Da cosa vuoi partire?
 
-1. Analizza immagine → Carica e analizza un'immagine (funziona)
+1. Analizza immagine → Carica e analizza un'immagine
 2. Genera immagine → GPT-5 + DALL-E 3 (download locale)
+3. Conversazione multimodale → Analisi con memoria
+4. Gestione file → Esplora immagini locali
 
 0. Esci
-
-Nota: Audio/video temporaneamente non disponibili (framework in sviluppo)
 ```
-
-### Opzioni disponibili
-
-**Analisi immagine:**
-- File locali (PNG, JPG, GIF, WebP)
-- Immagini da URL web (solo per alcuni provider)
-- Selezione provider (OpenAI/Google)
-- Domande personalizzate
-
-**Generazione immagine:**
-- **Augmentazione prompt**: GPT-5 migliora automaticamente la descrizione
-- **Generazione**: DALL-E 3 crea l'immagine (1024x1024, qualità standard/HD)
-- **Download automatico**: Salvataggio locale in formato PNG
-- **Fallback intelligente**: Se GPT-5 non disponibile, usa solo DALL-E 3
 
 ## Formati supportati
 
 ### Immagini input
 - **Estensioni**: .jpg, .jpeg, .png, .gif, .bmp, .webp
 - **Dimensione massima**: 20MB
-- **Sorgenti**: File locali, URL web
+- **Sorgenti**: File locali, URL web, base64
+- **Qualità**: "high" per analisi dettagliata
 
 ### Immagini output
 - **Formato**: PNG (raster)
 - **Risoluzione**: 1024x1024, 1792x1024, 1024x1792
 - **Qualità**: standard, HD
-- **Download**: automatico in locale
+- **Download**: automatico in locale con timestamp
 
 ## Risoluzione problemi comuni
 
 ### Error: "Unsupported MIME type"
 
 ```python
-# Problema: extension con punto
+# ❌ Problema: extension con punto
 media = Media(extension=".jpg", media_type="image", source=data)
 
-# Soluzione: extension senza punto per MIME type corretto
+# ✅ Soluzione: extension senza punto per MIME type corretto
 media = Media(extension="jpg", media_type="image", source=data)
 ```
 
@@ -176,11 +326,11 @@ echo 'OPENAI_API_KEY=your-key' > PizzAI/.env
 ### Error: "temperature does not support 0.7 with this model"
 
 ```python
-# Problema: GPT-5 supporta solo temperature=1.0
-client = ClientFactory.create(model="gpt-5", temperature=0.7)  # ❌
+# ❌ Problema: GPT-5 supporta solo temperature=1.0
+client = ClientFactory.create(model="gpt-5", temperature=0.7)
 
-# Soluzione: usa temperature=1.0 per GPT-5
-client = ClientFactory.create(model="gpt-5", temperature=1.0)  # ✅
+# ✅ Soluzione: usa temperature=1.0 per GPT-5
+client = ClientFactory.create(model="gpt-5", temperature=1.0)
 ```
 
 ### Error: "Modulo 'requests' non installato"
@@ -190,18 +340,57 @@ client = ClientFactory.create(model="gpt-5", temperature=1.0)  # ✅
 pip install requests
 ```
 
-## Documentazione completa
+### Error: "Modulo 'openai' non installato"
 
-→ **[GUIDA_MULTIMODALE.md](GUIDA_MULTIMODALE.md)** - Documentazione tecnica dettagliata con esempi completi
+```bash
+# Installa openai per DALL-E 3
+pip install openai
+```
 
-## Requisiti tecnici
+## Esempi avanzati
 
-- Python 3.8+
-- Ambiente virtuale attivato
-- OPENAI_API_KEY configurata (richiesta per tutte le funzioni)
-- GOOGLE_API_KEY configurata (opzionale, solo per analisi con Gemini)
-- Moduli: `openai`, `requests` (per download immagini)
-- Connessione internet per API calls
+### Analisi comparativa tra immagini
+
+```python
+# Carica due immagini per confronto
+image1 = create_mediablock_from_file("photo1.jpg")
+image2 = create_mediablock_from_file("photo2.jpg")
+
+comparison_input = [
+    TextBlock(content="Confronta queste due immagini e dimmi le principali differenze:"),
+    image1,
+    TextBlock(content="Prima immagine ↑"),
+    image2, 
+    TextBlock(content="Seconda immagine ↑"),
+    TextBlock(content="Fornisci un confronto dettagliato.")
+]
+
+response = client.invoke(input=comparison_input)
+```
+
+### Workflow creativo progressivo
+
+```python
+# Scenario: sviluppo progetto creativo con riferimenti visivi
+memory = Memory()
+
+# Step 1: Introduzione
+memory.add_turn([TextBlock(content="Sto lavorando su un nuovo progetto di design")], ROLE.USER)
+
+# Step 2: Riferimento visivo
+image_block = create_mediablock_from_file("inspiration.jpg")
+memory.add_turn([
+    TextBlock(content="Ecco la mia prima ispirazione. Che direzione creativa suggerisci?"),
+    image_block
+], ROLE.USER)
+
+# Step 3: Sviluppo idea
+response = client.invoke("", memory=memory)
+memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+
+# Step 4: Richiesta specifica
+memory.add_turn([TextBlock(content="Voglio creare qualcosa di moderno ma elegante")], ROLE.USER)
+```
 
 ## Note sui costi
 
@@ -211,6 +400,57 @@ pip install requests
 - **Google Gemini**: Tariffe competitive per analisi immagini
 
 Consultare la documentazione ufficiale dei provider per tariffe aggiornate.
+
+## Testing e sviluppo
+
+### Test rapido con immagine di esempio
+
+```python
+def create_sample_image_base64() -> str:
+    """Crea un'immagine di esempio in base64 (pixel 1x1 trasparente)"""
+    return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+
+# Test rapido senza file esterni
+sample_media = Media(
+    extension="png",
+    media_type="image",
+    source_type="base64",
+    source=create_sample_image_base64(),
+    detail="high"
+)
+
+response = client.invoke([
+    TextBlock(content="Descrivi questa immagine"),
+    MediaBlock(media=sample_media)
+])
+```
+
+### Debug e logging
+
+```python
+# Abilita cache per debugging
+client = create_multimodal_client("openai", use_cache=True)
+
+# Verifica token utilizzati
+print(f"Token prompt: {response.prompt_tokens_used}")
+print(f"Token completamento: {response.completion_tokens_used}")
+print(f"Token totali: {response.prompt_tokens_used + response.completion_tokens_used}")
+```
+
+## Documentazione completa
+
+→ **[GUIDA_MULTIMODALE.md](GUIDA_MULTIMODALE.md)** - Documentazione tecnica dettagliata con esempi completi
+
+→ **[Multimodal_Guide.ipynb](Multimodal_Guide.ipynb)** - Notebook interattivo con esempi e test
+
+## Requisiti tecnici
+
+- Python 3.8+
+- Ambiente virtuale attivato
+- OPENAI_API_KEY configurata (richiesta per tutte le funzioni)
+- GOOGLE_API_KEY configurata (opzionale, solo per analisi con Gemini)
+- Moduli: `openai`, `requests` (per download immagini)
+- Connessione internet per API calls
 
 ## Stato funzionalità
 
@@ -228,3 +468,11 @@ Consultare la documentazione ufficiale dei provider per tariffe aggiornate.
 3. **Generazione DALL-E 3**: Crea l'immagine PNG
 4. **Download automatico**: Salva in locale con timestamp
 5. **Fallback intelligente**: Se GPT-5 fallisce, usa solo DALL-E 3
+
+## Best practices
+
+- Usa sempre `extension` senza punto per MIME type corretto
+- Imposta `detail="high"` per analisi dettagliate
+- Gestisci la memoria per conversazioni lunghe
+- Usa cache per debugging e sviluppo
+- Testa sempre con immagini di esempio prima di usare file reali
