@@ -54,16 +54,18 @@ print(chat_turn("E per il mio caso specifico?"))  # Usa il contesto precedente
 
 ## Comparazione modalità
 
-| Scenario | One-shot | Conversational | Consiglio |
-|----------|----------|----------------|-----------|
-| **FAQ semplici** | ✅ Ideale | ❌ Overhead | One-shot |
-| **Traduzioni** | ✅ Ideale | ❌ Non necessario | One-shot |
-| **Calcoli matematici** | ✅ Ideale | ❌ Overhead | One-shot |
-| **Tutoring/Teaching** | ❌ Limitato | ✅ Necessario | Conversational |
-| **Consulenza tecnica** | ❌ Limitato | ✅ Necessario | Conversational |
-| **Brainstorming** | ❌ Limitato | ✅ Necessario | Conversational |
-| **Debug assistito** | ❌ Limitato | ✅ Necessario | Conversational |
-| **Analisi iterativa** | ❌ Limitato | ✅ Necessario | Conversational |
+| Scenario | One-shot | Conversational | Consiglio pratico |
+|----------|----------|----------------|-------------------|
+| **FAQ semplici** | ✅ Ideale | ✅ Possibile | One-shot (più efficiente) |
+| **Traduzioni** | ✅ Ideale | ✅ Possibile | One-shot (più veloce) |
+| **Calcoli matematici** | ✅ Ideale | ✅ Possibile | One-shot (più diretto) |
+| **Tutoring/Teaching** | ✅ Possibile | ✅ Ideale | Conversational (migliore esperienza) |
+| **Consulenza tecnica** | ✅ Possibile | ✅ Ideale | Conversational (contesto persistente) |
+| **Brainstorming** | ✅ Possibile | ✅ Ideale | Conversational (sviluppo idee) |
+| **Debug assistito** | ✅ Possibile | ✅ Ideale | Conversational (storia errori) |
+| **Analisi iterativa** | ✅ Possibile | ✅ Ideale | Conversational (approfondimenti) |
+
+*Nota: Entrambe le modalità supportano tutti gli scenari. I consigli sono basati su efficienza e user experience, non su limitazioni tecniche del framework.*
 
 ## Gestione memoria avanzata
 
