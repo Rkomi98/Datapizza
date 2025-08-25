@@ -20,8 +20,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # Importazioni datapizzai
 from datapizzai.clients import ClientFactory
-from datapizzai.agents import Agent
-from datapizzai.tools import Tool, ToolResult
+from datapizzai.tools import Tool
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 
@@ -38,307 +37,280 @@ def print_subsection(title: str):
     print(f"\n--- {title} ---")
 
 
+def execute_tool_calls(response, available_tools):
+    """Esegue i tool call presenti nella risposta e restituisce i risultati"""
+    tool_results = []
+    
+    for block in response.content:
+        if hasattr(block, 'name') and hasattr(block, 'arguments'):
+            tool_name = block.name
+            arguments = block.arguments
+            
+            print(f"   🔧 Strumento usato: {tool_name}")
+            print(f"   📋 Argomenti: {arguments}")
+            
+            # Mappa dei tool disponibili
+            tool_map = {
+                "calcola": calcola,
+                "cerca_informazioni": cerca_informazioni,
+                "gestisci_file": gestisci_file
+            }
+            
+            if tool_name in tool_map:
+                try:
+                    result = tool_map[tool_name](**arguments)
+                    tool_results.append(result)
+                    print(f"   ✅ Risultato: {result}")
+                except Exception as e:
+                    error_msg = f"Errore nell'esecuzione del tool {tool_name}: {e}"
+                    tool_results.append(error_msg)
+                    print(f"   ❌ {error_msg}")
+            else:
+                error_msg = f"Tool {tool_name} non riconosciuto"
+                tool_results.append(error_msg)
+                print(f"   ❌ {error_msg}")
+    
+    return tool_results
+
+
 # ==============================================================================
 # DEFINIZIONE STRUMENTI (TOOLS)
 # ==============================================================================
 
-class CalculatorTool(Tool):
-    """Strumento per calcoli matematici"""
+@Tool
+def calcola(espressione: str) -> str:
+    """Esegue calcoli matematici sicuri.
     
-    def __init__(self):
-        super().__init__(
-            name="calculator",
-            description="Esegue calcoli matematici. Input: espressione matematica come stringa",
-            input_schema={"type": "string", "description": "Espressione matematica da calcolare"}
-        )
-    
-    def execute(self, input_data: str) -> ToolResult:
-        """Esegue il calcolo matematico"""
-        try:
-            # Valida input (solo operazioni matematiche sicure)
-            allowed_chars = set('0123456789+-*/(). ')
-            if not all(c in allowed_chars for c in input_data):
-                return ToolResult(
-                    success=False,
-                    error="Caratteri non permessi. Usa solo numeri e operatori +-*/()"
-                )
-            
-            # Esegue il calcolo
-            result = eval(input_data)
-            
-            return ToolResult(
-                success=True,
-                result=f"Risultato: {result}",
-                metadata={"expression": input_data, "result": result}
-            )
-            
-        except Exception as e:
-            return ToolResult(
-                success=False,
-                error=f"Errore nel calcolo: {str(e)}"
-            )
+    Args:
+        espressione: Espressione matematica da calcolare (es: "2 + 3 * 4")
+        
+    Returns:
+        Risultato del calcolo
+    """
+    try:
+        # Valida input (solo operazioni matematiche sicure)
+        allowed_chars = set('0123456789+-*/(). ')
+        if not all(c in allowed_chars for c in espressione):
+            return "Errore: Caratteri non permessi. Usa solo numeri e operatori +-*/()"
+        
+        # Esegue il calcolo
+        result = eval(espressione)
+        return f"Risultato: {result}"
+        
+    except Exception as e:
+        return f"Errore nel calcolo: {str(e)}"
 
 
-class WebSearchTool(Tool):
-    """Strumento per ricerche web simulate"""
+@Tool
+def cerca_informazioni(query: str) -> str:
+    """Simula una ricerca web per trovare informazioni.
     
-    def __init__(self):
-        super().__init__(
-            name="web_search",
-            description="Simula una ricerca web. Input: query di ricerca",
-            input_schema={"type": "string", "description": "Query di ricerca"}
-        )
+    Args:
+        query: Query di ricerca
+        
+    Returns:
+        Risultati della ricerca simulata
+    """
+    try:
+        # Simula ricerca web con risultati fittizi
+        query_lower = query.lower()
+        
+        if "python" in query_lower:
+            results = [
+                "Python è un linguaggio di programmazione interpretato",
+                "Guida ufficiale Python: python.org",
+                "Tutorial Python per principianti disponibili online"
+            ]
+        elif "ai" in query_lower or "artificial intelligence" in query_lower:
+            results = [
+                "L'Intelligenza Artificiale è un campo dell'informatica",
+                "Machine Learning è un sottoinsieme dell'AI",
+                "Applicazioni AI: riconoscimento immagini, NLP, robotica"
+            ]
+        else:
+            results = [
+                f"Risultati per '{query}' non disponibili in questa demo",
+                "Questo è un simulatore di ricerca web",
+                "In un ambiente reale, qui ci sarebbero risultati reali"
+            ]
+        
+        return f"Risultati ricerca per '{query}':\n" + "\n".join(f"- {r}" for r in results)
+        
+    except Exception as e:
+        return f"Errore nella ricerca: {str(e)}"
+
+
+# Sistema di file simulato globale
+FILES_SYSTEM = {
+    "docs/": ["README.md", "guide.txt"],
+    "src/": ["main.py", "utils.py"],
+    "data/": ["dataset.csv", "config.json"]
+}
+
+@Tool
+def gestisci_file(comando: str, percorso: str) -> str:
+    """Gestisce file e directory in un sistema simulato.
     
-    def execute(self, input_data: str) -> ToolResult:
-        """Simula una ricerca web"""
-        try:
-            # Simula ricerca web con risultati fittizi
-            query = input_data.lower()
-            
-            if "python" in query:
-                results = [
-                    "Python è un linguaggio di programmazione interpretato",
-                    "Guida ufficiale Python: python.org",
-                    "Tutorial Python per principianti disponibili online"
-                ]
-            elif "ai" in query or "artificial intelligence" in query:
-                results = [
-                    "L'Intelligenza Artificiale è un campo dell'informatica",
-                    "Machine Learning è un sottoinsieme dell'AI",
-                    "Applicazioni AI: riconoscimento immagini, NLP, robotica"
-                ]
+    Args:
+        comando: Operazione da eseguire (list, create, delete)
+        percorso: Percorso del file o directory
+        
+    Returns:
+        Risultato dell'operazione
+    """
+    try:
+        global FILES_SYSTEM
+        
+        if comando == "list":
+            if percorso in FILES_SYSTEM:
+                files_list = FILES_SYSTEM[percorso]
+                return f"Contenuto di {percorso}:\n" + "\n".join(f"- {f}" for f in files_list)
             else:
-                results = [
-                    f"Risultati per '{input_data}' non disponibili in questa demo",
-                    "Questo è un simulatore di ricerca web",
-                    "In un ambiente reale, qui ci sarebbero risultati reali"
-                ]
+                return f"Directory {percorso} non trovata"
+        
+        elif comando == "create":
+            # Simula creazione file
+            filename = percorso.split("/")[-1] if "/" in percorso else percorso
+            directory = "/".join(percorso.split("/")[:-1]) + "/" if "/" in percorso else ""
             
-            return ToolResult(
-                success=True,
-                result=f"Risultati ricerca per '{input_data}':\n" + "\n".join(f"- {r}" for r in results),
-                metadata={"query": input_data, "results_count": len(results)}
-            )
+            if directory and directory not in FILES_SYSTEM:
+                FILES_SYSTEM[directory] = []
             
-        except Exception as e:
-            return ToolResult(
-                success=False,
-                error=f"Errore nella ricerca: {str(e)}"
-            )
-
-
-class FileManagerTool(Tool):
-    """Strumento per gestione file simulata"""
-    
-    def __init__(self):
-        super().__init__(
-            name="file_manager",
-            description="Gestisce file e directory. Input: comando (list, create, delete) e parametri",
-            input_schema={
-                "type": "object",
-                "properties": {
-                    "command": {"type": "string", "enum": ["list", "create", "delete"]},
-                    "path": {"type": "string", "description": "Percorso file/directory"}
-                }
-            }
-        )
-        self.files = {
-            "docs/": ["README.md", "guide.txt"],
-            "src/": ["main.py", "utils.py"],
-            "data/": ["dataset.csv", "config.json"]
-        }
-    
-    def execute(self, input_data: Dict[str, str]) -> ToolResult:
-        """Esegue comandi di gestione file"""
-        try:
-            command = input_data.get("command")
-            path = input_data.get("path", "")
-            
-            if command == "list":
-                if path in self.files:
-                    files_list = self.files[path]
-                    return ToolResult(
-                        success=True,
-                        result=f"Contenuto di {path}:\n" + "\n".join(f"- {f}" for f in files_list),
-                        metadata={"command": command, "path": path, "files": files_list}
-                    )
-                else:
-                    return ToolResult(
-                        success=False,
-                        error=f"Directory {path} non trovata"
-                    )
-            
-            elif command == "create":
-                # Simula creazione file
-                filename = path.split("/")[-1] if "/" in path else path
-                directory = "/".join(path.split("/")[:-1]) + "/" if "/" in path else ""
-                
-                if directory and directory not in self.files:
-                    self.files[directory] = []
-                
-                if directory:
-                    self.files[directory].append(filename)
-                else:
-                    if "root" not in self.files:
-                        self.files["root"] = []
-                    self.files["root"].append(filename)
-                
-                return ToolResult(
-                    success=True,
-                    result=f"File {filename} creato con successo",
-                    metadata={"command": command, "path": path, "created": True}
-                )
-            
-            elif command == "delete":
-                # Simula eliminazione file
-                filename = path.split("/")[-1] if "/" in path else path
-                directory = "/".join(path.split("/")[:-1]) + "/" if "/" in path else ""
-                
-                if directory and directory in self.files:
-                    if filename in self.files[directory]:
-                        self.files[directory].remove(filename)
-                        return ToolResult(
-                            success=True,
-                            result=f"File {filename} eliminato con successo",
-                            metadata={"command": command, "path": path, "deleted": True}
-                        )
-                
-                return ToolResult(
-                    success=False,
-                    error=f"File {path} non trovato"
-                )
-            
+            if directory:
+                FILES_SYSTEM[directory].append(filename)
             else:
-                return ToolResult(
-                    success=False,
-                    error=f"Comando '{command}' non supportato"
-                )
-                
-        except Exception as e:
-            return ToolResult(
-                success=False,
-                error=f"Errore nella gestione file: {str(e)}"
-            )
+                if "root/" not in FILES_SYSTEM:
+                    FILES_SYSTEM["root/"] = []
+                FILES_SYSTEM["root/"].append(filename)
+            
+            return f"File {filename} creato con successo"
+        
+        elif comando == "delete":
+            # Simula eliminazione file
+            filename = percorso.split("/")[-1] if "/" in percorso else percorso
+            directory = "/".join(percorso.split("/")[:-1]) + "/" if "/" in percorso else ""
+            
+            if directory and directory in FILES_SYSTEM:
+                if filename in FILES_SYSTEM[directory]:
+                    FILES_SYSTEM[directory].remove(filename)
+                    return f"File {filename} eliminato con successo"
+            
+            return f"File {percorso} non trovato"
+        
+        else:
+            return f"Comando '{comando}' non supportato. Usa: list, create, delete"
+            
+    except Exception as e:
+        return f"Errore nella gestione file: {str(e)}"
 
 
 # ==============================================================================
-# CREAZIONE AGENTI SPECIALIZZATI
+# CREAZIONE CLIENT CON STRUMENTI
 # ==============================================================================
 
-def create_calculator_agent() -> Agent:
-    """Crea un agente specializzato in calcoli matematici"""
+def create_calculator_client():
+    """Crea un client specializzato in calcoli matematici"""
     
     client = ClientFactory.create(
         provider="openai",
         api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o"
-    )
-    
-    if not client:
-        raise ValueError("Client OpenAI non disponibile")
-    
-    calculator_tool = CalculatorTool()
-    
-    agent = Agent(
-        name="MathAgent",
-        client=client,
-        tools=[calculator_tool],
-        system_prompt="""Sei un agente specializzato in calcoli matematici. 
-        Usa sempre lo strumento calculator per eseguire calcoli.
+        model="gpt-4o",
+        system_prompt="""Sei un assistente specializzato in calcoli matematici. 
+        Usa sempre lo strumento calcola per eseguire calcoli.
         Fornisci risposte precise e spiega i passaggi quando possibile."""
     )
     
-    return agent
+    if not client:
+        raise ValueError("Client OpenAI non disponibile")
+    
+    return client
 
 
-def create_research_agent() -> Agent:
-    """Crea un agente specializzato in ricerche e analisi"""
+def create_research_client():
+    """Crea un client specializzato in ricerche e analisi"""
     
     client = ClientFactory.create(
         provider="openai",
         api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o"
-    )
-    
-    if not client:
-        raise ValueError("Client OpenAI non disponibile")
-    
-    search_tool = WebSearchTool()
-    file_tool = FileManagerTool()
-    
-    agent = Agent(
-        name="ResearchAgent",
-        client=client,
-        tools=[search_tool, file_tool],
-        system_prompt="""Sei un agente di ricerca e analisi. 
-        Usa web_search per cercare informazioni e file_manager per gestire file.
+        model="gpt-4o",
+        system_prompt="""Sei un assistente di ricerca e analisi. 
+        Usa cerca_informazioni per cercare informazioni e gestisci_file per gestire file.
         Organizza le informazioni in modo chiaro e strutturato."""
     )
     
-    return agent
+    if not client:
+        raise ValueError("Client OpenAI non disponibile")
+    
+    return client
 
 
-def create_multi_tool_agent() -> Agent:
-    """Crea un agente con accesso a tutti gli strumenti"""
+def create_multi_tool_client():
+    """Crea un client con accesso a tutti gli strumenti"""
     
     client = ClientFactory.create(
         provider="openai",
         api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o"
-    )
-    
-    if not client:
-        raise ValueError("Client OpenAI non disponibile")
-    
-    all_tools = [
-        CalculatorTool(),
-        WebSearchTool(),
-        FileManagerTool()
-    ]
-    
-    agent = Agent(
-        name="MultiToolAgent",
-        client=client,
-        tools=all_tools,
-        system_prompt="""Sei un agente versatile con accesso a molteplici strumenti.
+        model="gpt-4o",
+        system_prompt="""Sei un assistente versatile con accesso a molteplici strumenti.
+        Hai a disposizione:
+        - calcola: per calcoli matematici
+        - cerca_informazioni: per ricerche web simulate
+        - gestisci_file: per gestione file e directory
+        
         Analizza la richiesta dell'utente e scegli lo strumento più appropriato.
         Se necessario, combina più strumenti per completare task complessi.
         Spiega sempre quale strumento stai usando e perché."""
     )
     
-    return agent
+    if not client:
+        raise ValueError("Client OpenAI non disponibile")
+    
+    return client
 
 
 # ==============================================================================
 # DEMO E ESEMPI PRATICI
 # ==============================================================================
 
-def demo_single_tool_agent():
-    """Dimostra l'uso di un agente con un singolo strumento"""
-    print_section("AGENTE SINGOLO STRUMENTO - MathAgent")
+def demo_single_tool_client():
+    """Dimostra l'uso di un client con strumento specializzato"""
+    print_section("CLIENT CON STRUMENTO SPECIALIZZATO - Calculator")
     
     try:
-        agent = create_calculator_agent()
-        print(f"✅ Agente {agent.name} creato con strumento: {[t.name for t in agent.tools]}")
+        client = create_calculator_client()
+        print(f"✅ Client matematico creato")
+        
+        # Aggiungi i tool al client
+        tools = [calcola]
         
         # Test calcoli semplici
         queries = [
             "Calcola 15 + 27 * 3",
             "Quanto fa (100 - 25) / 5?",
-            "Calcola l'area di un cerchio con raggio 7"
+            "Calcola l'area di un cerchio con raggio 7 (usa 3.14 per pi greco)"
         ]
         
         for query in queries:
             print_subsection(f"Query: {query}")
             
-            response = agent.invoke(query)
-            print(f"🤖 {agent.name}: {response.text}")
-            
-            # Mostra uso strumento
-            if hasattr(response, 'tool_calls') and response.tool_calls:
-                for tool_call in response.tool_calls:
-                    print(f"   🔧 Strumento usato: {tool_call.tool_name}")
-                    print(f"   📊 Risultato: {tool_call.result}")
+            try:
+                response = client.invoke(
+                    input=query, 
+                    tools=tools, 
+                    tool_choice="auto"
+                )
+                
+                # Esegui tool se presenti
+                tool_results = execute_tool_calls(response, tools)
+                
+                # Se c'è una risposta testuale, mostrala
+                if response.text.strip():
+                    print(f"🤖 Assistente: {response.text}")
+                elif tool_results:
+                    print(f"🤖 Assistente: Ho eseguito l'operazione: {tool_results[0]}")
+                
+            except Exception as e:
+                print(f"   ❌ Errore query: {e}")
             
             print()
             
@@ -346,17 +318,20 @@ def demo_single_tool_agent():
         print(f"❌ Errore: {e}")
 
 
-def demo_multi_tool_agent():
-    """Dimostra l'uso di un agente con più strumenti"""
-    print_section("AGENTE MULTI STRUMENTO - ResearchAgent")
+def demo_multi_tool_client():
+    """Dimostra l'uso di un client con più strumenti"""
+    print_section("CLIENT MULTI STRUMENTO - Research Assistant")
     
     try:
-        agent = create_research_agent()
-        print(f"✅ Agente {agent.name} creato con strumenti: {[t.name for t in agent.tools]}")
+        client = create_research_client()
+        print(f"✅ Client di ricerca creato")
+        
+        # Aggiungi tutti i tool
+        tools = [cerca_informazioni, gestisci_file]
         
         # Test ricerche e gestione file
         queries = [
-            "Cerca informazioni su Python e crea un file chiamato python_info.txt",
+            "Cerca informazioni su Python e poi crea un file chiamato python_info.txt nella directory docs/",
             "Lista i file nella directory docs/ e poi cerca informazioni sull'AI",
             "Crea un file chiamato research_summary.txt nella directory data/"
         ]
@@ -364,14 +339,24 @@ def demo_multi_tool_agent():
         for query in queries:
             print_subsection(f"Query: {query}")
             
-            response = agent.invoke(query)
-            print(f"🤖 {agent.name}: {response.text}")
-            
-            # Mostra uso strumenti
-            if hasattr(response, 'tool_calls') and response.tool_calls:
-                for tool_call in response.tool_calls:
-                    print(f"   🔧 Strumento: {tool_call.tool_name}")
-                    print(f"   📊 Risultato: {tool_call.result}")
+            try:
+                response = client.invoke(
+                    input=query, 
+                    tools=tools, 
+                    tool_choice="auto"
+                )
+                
+                # Esegui tool se presenti
+                tool_results = execute_tool_calls(response, tools)
+                
+                # Mostra risposta
+                if response.text.strip():
+                    print(f"🤖 Assistente: {response.text}")
+                elif tool_results:
+                    print(f"🤖 Assistente: Ho completato l'operazione: {'; '.join(tool_results[:2])}")
+                
+            except Exception as e:
+                print(f"   ❌ Errore query: {e}")
             
             print()
             
@@ -380,57 +365,71 @@ def demo_multi_tool_agent():
 
 
 def demo_complex_workflow():
-    """Dimostra un workflow complesso con agente multi-tool"""
-    print_section("WORKFLOW COMPLESSO - MultiToolAgent")
+    """Dimostra un workflow complesso con client multi-tool"""
+    print_section("WORKFLOW COMPLESSO - Multi-Tool Client")
     
     try:
-        agent = create_multi_tool_agent()
-        print(f"✅ Agente {agent.name} creato con tutti gli strumenti disponibili")
+        client = create_multi_tool_client()
+        print(f"✅ Client multi-tool creato con tutti gli strumenti disponibili")
+        
+        # Tutti i tool disponibili
+        tools = [calcola, cerca_informazioni, gestisci_file]
         
         # Workflow complesso: ricerca + calcolo + gestione file
         complex_query = """
         Esegui questo workflow:
         1. Cerca informazioni su machine learning
-        2. Calcola quanti anni sono passati dal 1990 al 2025
+        2. Calcola quanti anni sono passati dal 1990 al 2025 (2025 - 1990)
         3. Crea un file chiamato ml_summary.txt nella directory docs/
-        4. Calcola la media dei numeri: 85, 92, 78, 96, 88
+        4. Calcola la media dei numeri: 85, 92, 78, 96, 88 (somma diviso 5)
         5. Lista i file nella directory docs/ per verificare la creazione
         """
         
         print_subsection("Workflow complesso multi-step")
         print(f"Query: {complex_query.strip()}")
         
-        response = agent.invoke(complex_query)
-        print(f"\n🤖 {agent.name}: {response.text}")
-        
-        # Mostra tutti gli strumenti utilizzati
-        if hasattr(response, 'tool_calls') and response.tool_calls:
-            print(f"\n📊 Strumenti utilizzati nel workflow:")
-            for i, tool_call in enumerate(response.tool_calls, 1):
-                print(f"   {i}. {tool_call.tool_name}: {tool_call.result}")
+        try:
+            response = client.invoke(
+                input=complex_query, 
+                tools=tools, 
+                tool_choice="auto"
+            )
+            
+            # Esegui tool se presenti
+            tool_results = execute_tool_calls(response, tools)
+            
+            # Mostra risposta finale
+            if response.text.strip():
+                print(f"\n🤖 Assistente: {response.text}")
+            elif tool_results:
+                print(f"\n🤖 Assistente: Workflow completato con {len(tool_results)} operazioni")
+                    
+        except Exception as e:
+            print(f"   ❌ Errore workflow: {e}")
         
     except Exception as e:
         print(f"❌ Errore: {e}")
 
 
-def demo_agent_memory():
-    """Dimostra l'uso della memoria con agenti multi-tool"""
-    print_section("AGENTE CON MEMORIA - Conversazione Multi-Tool")
+def demo_client_memory():
+    """Dimostra l'uso della memoria con client multi-tool"""
+    print_section("CLIENT CON MEMORIA - Conversazione Multi-Tool")
     
     try:
-        agent = create_multi_tool_agent()
+        client = create_multi_tool_client()
         memory = Memory()
+        tools = [calcola, cerca_informazioni, gestisci_file]
         
-        print(f"✅ Agente {agent.name} con memoria attivata")
+        print(f"✅ Client multi-tool con memoria attivata")
         
         # Conversazione che utilizza diversi strumenti nel tempo
         conversation = [
             "Ciao! Sono Marco e sto lavorando su un progetto di AI",
             "Cerca informazioni sui framework Python per AI",
-            "Calcola quanto costa un progetto AI se spendo 500€ al mese per 2 anni",
+            "Calcola quanto costa un progetto AI se spendo 500 euro al mese per 2 anni (500 * 24)",
             "Crea un file chiamato project_plan.txt nella directory docs/",
             "Ricordi il mio nome e cosa sto facendo?",
-            "Calcola il ROI se il progetto genera 15000€ di ricavi"
+            "Calcola il ROI se il progetto genera 15000 euro di ricavi (15000 - 12000)"
         ]
         
         for i, user_input in enumerate(conversation, 1):
@@ -440,16 +439,29 @@ def demo_agent_memory():
             # Aggiungi alla memoria
             memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
             
-            # Invoca agente con memoria
-            response = agent.invoke("", memory=memory)
-            memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-            
-            print(f"🤖 {agent.name}: {response.text}")
-            
-            # Mostra strumenti usati
-            if hasattr(response, 'tool_calls') and response.tool_calls:
-                for tool_call in response.tool_calls:
-                    print(f"   🔧 Strumento: {tool_call.tool_name}")
+            try:
+                # Invoca client con memoria
+                response = client.invoke(
+                    input="", 
+                    memory=memory, 
+                    tools=tools, 
+                    tool_choice="auto"
+                )
+                memory.add_turn(response.content, ROLE.ASSISTANT)
+                
+                # Esegui tool se presenti
+                tool_results = execute_tool_calls(response, tools)
+                
+                # Mostra risposta finale
+                if response.text.strip():
+                    print(f"🤖 Assistente: {response.text}")
+                elif tool_results:
+                    print(f"🤖 Assistente: {tool_results[0]}")
+                        
+            except Exception as e:
+                print(f"   ❌ Errore turno: {e}")
+                # Aggiungi messaggio di errore alla memoria
+                memory.add_turn([TextBlock(content=f"Errore: {e}")], ROLE.ASSISTANT)
             
             print()
         
@@ -471,41 +483,38 @@ def test_tools_individually():
     print_section("TEST STRUMENTI INDIVIDUALI")
     
     # Test Calculator
-    print_subsection("Test CalculatorTool")
-    calc_tool = CalculatorTool()
+    print_subsection("Test Tool: calcola")
     test_cases = ["2 + 2", "10 * 5", "(15 + 5) / 4"]
     
     for test_case in test_cases:
-        result = calc_tool.execute(test_case)
+        result = calcola(test_case)
         print(f"Input: {test_case}")
-        print(f"Output: {result.result if result.success else result.error}")
+        print(f"Output: {result}")
         print()
     
     # Test WebSearch
-    print_subsection("Test WebSearchTool")
-    search_tool = WebSearchTool()
+    print_subsection("Test Tool: cerca_informazioni")
     test_queries = ["Python programming", "Artificial Intelligence", "Machine Learning"]
     
     for query in test_queries:
-        result = search_tool.execute(query)
+        result = cerca_informazioni(query)
         print(f"Query: {query}")
-        print(f"Output: {result.result if result.success else result.error}")
+        print(f"Output: {result}")
         print()
     
     # Test FileManager
-    print_subsection("Test FileManagerTool")
-    file_tool = FileManagerTool()
+    print_subsection("Test Tool: gestisci_file")
     test_commands = [
-        {"command": "list", "path": "docs/"},
-        {"command": "create", "path": "docs/test.txt"},
-        {"command": "list", "path": "docs/"},
-        {"command": "delete", "path": "docs/test.txt"}
+        ("list", "docs/"),
+        ("create", "docs/test.txt"),
+        ("list", "docs/"),
+        ("delete", "docs/test.txt")
     ]
     
-    for cmd in test_commands:
-        result = file_tool.execute(cmd)
-        print(f"Comando: {cmd}")
-        print(f"Output: {result.result if result.success else result.error}")
+    for comando, percorso in test_commands:
+        result = gestisci_file(comando, percorso)
+        print(f"Comando: {comando} {percorso}")
+        print(f"Output: {result}")
         print()
 
 
@@ -513,17 +522,20 @@ def show_available_tools():
     """Mostra tutti gli strumenti disponibili con descrizioni"""
     print_section("STRUMENTI DISPONIBILI")
     
-    tools = [
-        CalculatorTool(),
-        WebSearchTool(),
-        FileManagerTool()
-    ]
+    print_subsection("🔧 calcola")
+    print(f"Descrizione: {calcola.description}")
+    print(f"Nome: {calcola.name}")
+    print()
     
-    for tool in tools:
-        print_subsection(f"🔧 {tool.name}")
-        print(f"Descrizione: {tool.description}")
-        print(f"Schema input: {tool.input_schema}")
-        print()
+    print_subsection("🔧 cerca_informazioni")
+    print(f"Descrizione: {cerca_informazioni.description}")
+    print(f"Nome: {cerca_informazioni.name}")
+    print()
+    
+    print_subsection("🔧 gestisci_file")
+    print(f"Descrizione: {gestisci_file.description}")
+    print(f"Nome: {gestisci_file.name}")
+    print()
 
 
 # ==============================================================================
@@ -532,16 +544,16 @@ def show_available_tools():
 
 def show_main_menu():
     """Mostra il menu principale"""
-    print_section("MULTI AGENT-TOOL FRAMEWORK")
+    print_section("MULTI TOOL FRAMEWORK - DatapizzAI")
     
     print("""
 Demo disponibili:
 
 1. Test strumenti individuali → Verifica funzionamento base
-2. Agente singolo strumento → MathAgent con calculator
-3. Agente multi strumento → ResearchAgent con search + file
-4. Workflow complesso → MultiToolAgent con tutti gli strumenti
-5. Agente con memoria → Conversazione multi-turno
+2. Client specializzato → Calculator client con strumento matematico
+3. Client multi strumento → Research client con search + file
+4. Workflow complesso → Client con tutti gli strumenti
+5. Client con memoria → Conversazione multi-turno
 6. Mostra strumenti → Lista e descrizioni
 
 0. Esci
@@ -552,10 +564,10 @@ def run_demo(choice: str):
     """Esegue la demo selezionata"""
     demos = {
         "1": test_tools_individually,
-        "2": demo_single_tool_agent,
-        "3": demo_multi_tool_agent,
+        "2": demo_single_tool_client,
+        "3": demo_multi_tool_client,
         "4": demo_complex_workflow,
-        "5": demo_agent_memory,
+        "5": demo_client_memory,
         "6": show_available_tools
     }
     
@@ -581,11 +593,11 @@ def main():
         print("""
 ⚠️ OPENAI_API_KEY non configurata!
 
-Per utilizzare gli agenti multi-tool, crea un file .env nella directory PizzAI/ con:
+Per utilizzare i client multi-tool, crea un file .env nella directory PizzAI/ con:
 
  OPENAI_API_KEY=sk-your-openai-key-here
 
-Questa chiave è necessaria per tutte le demo degli agenti.
+Questa chiave è necessaria per tutte le demo dei client con strumenti.
         """)
         return
     
@@ -607,6 +619,9 @@ Questa chiave è necessaria per tutte le demo degli agenti.
             
         except KeyboardInterrupt:
             print("\n\n👋 Uscita forzata. Arrivederci!")
+            break
+        except EOFError:
+            print("\n👋 Input terminato. Arrivederci!")
             break
         except Exception as e:
             print(f"\n❌ Errore inaspettato: {e}")
