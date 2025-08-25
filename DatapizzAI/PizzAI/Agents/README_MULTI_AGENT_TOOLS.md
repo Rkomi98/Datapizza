@@ -307,9 +307,7 @@ response = client.invoke(
 tool_results = execute_tool_calls(response, tools)
 ```
 
-## Utilizzo del client
-
-### Invocazione base
+Ripassiamo l'invocazione base per utilizzare il client
 
 ```python
 # Query semplice con tool
@@ -462,7 +460,9 @@ response = client.invoke(
 
 ### Tool: cerca_informazioni
 **Scopo**: Simula ricerche web
+
 **Input**: Query di ricerca
+
 **Output**: Risultati simulati
 
 ```python
