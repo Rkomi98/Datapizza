@@ -6,7 +6,7 @@ Multi Agent-Tool Framework - DatapizzAI
 Questo script dimostra come creare e utilizzare agenti multi-tool con il framework datapizzai.
 Gli agenti possono utilizzare diversi strumenti per completare task complessi.
 
-Autore: Marco Calcaterra
+Autore: Mirko Calcaterra
 Data: 2025
 """
 

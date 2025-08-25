@@ -392,7 +392,7 @@ def chat_turn(user_input: str, memory: Memory, client, tools):
 
 # 4. Esempio di conversazione multi-turno
 conversation = [
-    "Ciao! Sono Marco, sto lavorando su un progetto AI",
+    "Ciao! Sono Mirko, sto lavorando su un progetto AI",
     "Cerca informazioni sui framework Python per AI",
     "Calcola il costo se spendo 500€ al mese per 2 anni",
     "Crea un file di progetto chiamato ai_project.txt",
