@@ -376,7 +376,7 @@ def demo_conversational_advanced():
         except Exception as e:
             print(f"❌ Errore: {e}")
             # Fallback per continuare la demo
-            memory.add_turn([TextBlock(content="Errore tecnico temporaneo."), ROLE.ASSISTANT)
+            memory.add_turn([TextBlock(content="Errore tecnico temporaneo.")], ROLE.ASSISTANT)
         
         print()
     
