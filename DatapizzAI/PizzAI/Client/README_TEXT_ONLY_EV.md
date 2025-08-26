@@ -73,16 +73,39 @@ print(chat_turn("And for my specific case?"))  # Uses previous context
 ```python
 def sliding_window_chat(memory: Memory, user_input: str, window_size: int = 6):
     """Keeps only the last N turns to optimize token usage"""
+    # Add user input
     memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
     
-    # Limit memory if necessary
+    # Limit memory if necessary - keep only the last N turns
     if len(memory.memory) > window_size:
         memory.memory = memory.memory[-window_size:]
     
+    # Generate response with optimized memory
     response = client.invoke("", memory=memory)
+    
+    # Add response to memory
     memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
     
     return response
+
+# Practical usage
+memory = Memory()
+conversation = [
+    "Hello! I'm a Python developer beginner.",
+    "I want to learn how to create a chatbot with Python.",
+    "Which libraries do you recommend to start with?",
+    "And how do I manage conversation memory?",
+    "Can you show me a code example?",
+    "How do I handle errors and exceptions?",
+    "And for deployment on a web server?",
+    "What are the best practices for security?"
+]
+
+for user_input in conversation:
+    response = sliding_window_chat(memory, user_input, window_size=4)
+    print(f"User: {user_input}")
+    print(f"Assistant: {response.text}")
+    print(f"Active memory: {len(memory.memory)} turns\n")
 ```
 
 ### Cache for performance
@@ -98,6 +121,94 @@ client = ClientFactory.create(
 )
 ```
 
+## Complex examples
+
+### Complete chatbot development
+```python
+def develop_chatbot_with_ai():
+    """Develops a complete chatbot with AI assistance"""
+    memory = Memory()
+    
+    # Phase 1: Requirements analysis
+    requirements = [
+        "I want to create a chatbot for a clothing e-commerce.",
+        "The chatbot must handle: customer service, product search, order management.",
+        "We'll have about 1000 customers per day and need to support 5 languages.",
+        "What are the main technical requirements?"
+    ]
+    
+    for req in requirements:
+        memory.add_turn([TextBlock(content=req)], ROLE.USER)
+        response = client.invoke("", memory=memory)
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+    
+    # Phase 2: Technical design
+    technical_questions = [
+        "How would I structure the system architecture?",
+        "What technologies do you recommend for backend and frontend?",
+        "How do I manage scalability and availability?"
+    ]
+    
+    for question in technical_questions:
+        memory.add_turn([TextBlock(content=question)], ROLE.USER)
+        response = client.invoke("", memory=memory)
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+    
+    # Phase 3: Summary and action plan
+    summary_response = client.invoke(
+        "Summarize the project and provide an action plan with the next 5 steps",
+        memory=memory
+    )
+    
+    return summary_response.text
+
+# Usage
+chatbot_plan = develop_chatbot_with_ai()
+print(chatbot_plan)
+```
+
+### Intelligent memory management
+```python
+class SmartMemory:
+    """Manages memory with advanced strategies"""
+    
+    def __init__(self, max_turns: int = 10, importance_threshold: float = 0.7):
+        self.memory = Memory()
+        self.max_turns = max_turns
+        self.importance_threshold = importance_threshold
+    
+    def add_turn(self, content: str, role: ROLE, importance: float = 0.5):
+        """Adds a turn with importance evaluation"""
+        # Add turn
+        self.memory.add_turn([TextBlock(content=content)], role)
+        
+        # Manage memory size
+        if len(self.memory.memory) > self.max_turns:
+            # Keep important turns and recent turns
+            important_turns = [t for t in self.memory.memory if hasattr(t, 'importance') and t.importance > self.importance_threshold]
+            recent_turns = self.memory.memory[-self.max_turns//2:]
+            
+            # Combine and limit
+            combined = list(set(important_turns + recent_turns))
+            self.memory.memory = combined[-self.max_turns:]
+    
+    def get_context_summary(self, client):
+        """Generates a context summary to optimize tokens"""
+        if len(self.memory.memory) > 5:
+            summary_response = client.invoke(
+                "Briefly summarize the main points of the conversation",
+                memory=self.memory
+            )
+            return summary_response.text
+        return None
+
+# Usage
+smart_memory = SmartMemory(max_turns=8)
+# ... conversation with automatic memory management
+```
+
 ## Complete documentation
 
 ➡️ **[GUIDA_TEXT_ONLY.md](GUIDA_TEXT_ONLY.md)** - Complete technical guide with advanced examples, best practices, troubleshooting and copyable code
+
+➡️ **[text_only_examples.py](text_only_examples.py)** - Complete script with all demos and practical examples

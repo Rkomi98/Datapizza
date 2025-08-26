@@ -376,7 +376,7 @@ def demo_conversational_advanced():
         except Exception as e:
             print(f"❌ Errore: {e}")
             # Fallback per continuare la demo
-            memory.add_turn([TextBlock(content="Errore tecnico temporaneo.")], ROLE.ASSISTANT)
+            memory.add_turn([TextBlock(content="Errore tecnico temporaneo."), ROLE.ASSISTANT)
         
         print()
     
@@ -512,6 +512,221 @@ def demo_conversational_memory_management():
         print(f"   ❌ Errore: {e}")
 
 
+def demo_sliding_window_chat():
+    """
+    Dimostra l'utilizzo pratico della strategia sliding window per ottimizzare i token
+    """
+    print_section("STRATEGIA SLIDING WINDOW - Ottimizzazione Token")
+    
+    client = create_client("openai")
+    if not client:
+        return
+    
+    def sliding_window_chat(memory: Memory, user_input: str, window_size: int = 6):
+        """
+        Gestisce una conversazione mantenendo solo gli ultimi N turni per ottimizzare token usage
+        
+        Args:
+            memory: Oggetto Memory per la conversazione
+            user_input: Input dell'utente
+            window_size: Numero massimo di turni da mantenere in memoria
+        
+        Returns:
+            Response object dal client
+        """
+        # Aggiungi input utente
+        memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        
+        # Limita memoria se necessario - mantieni solo gli ultimi N turni
+        if len(memory.memory) > window_size:
+            print(f"   🧹 Pulizia memoria: mantenuti solo ultimi {window_size} turni")
+            memory.memory = memory.memory[-window_size:]
+        
+        # Genera risposta con memoria ottimizzata
+        response = client.invoke("", memory=memory)
+        
+        # Aggiungi risposta alla memoria
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+        
+        return response
+    
+    # Simula una conversazione lunga con sliding window
+    print("🎭 Simulazione conversazione lunga con sliding window (max 4 turni):")
+    print("   La memoria viene automaticamente pulita per mantenere solo i turni recenti\n")
+    
+    # Crea una nuova memoria per questa demo
+    sliding_memory = Memory()
+    
+    # Conversazione di esempio
+    conversation = [
+        "Ciao! Sono un sviluppatore Python alle prime armi.",
+        "Vorrei imparare a creare un chatbot con Python.",
+        "Quali librerie mi consigli per iniziare?",
+        "E come gestisco la memoria delle conversazioni?",
+        "Puoi mostrarmi un esempio di codice?",
+        "Come gestisco gli errori e le eccezioni?",
+        "E per il deployment su un server web?",
+        "Quali sono le best practices per la sicurezza?",
+        "Come posso ottimizzare le performance?",
+        "Puoi riassumere i punti principali che abbiamo discusso?"
+    ]
+    
+    for i, user_input in enumerate(conversation, 1):
+        print(f"💬 Turno {i}: {user_input}")
+        
+        try:
+            response = sliding_window_chat(sliding_memory, user_input, window_size=4)
+            
+            print(f"🤖 Assistente: {response.text}")
+            print(f"   📊 Token: {response.prompt_tokens_used + response.completion_tokens_used}")
+            print(f"   🧠 Memoria: {len(sliding_memory.memory)} turni attivi")
+            
+        except Exception as e:
+            print(f"   ❌ Errore: {e}")
+        
+        print()
+    
+    # Mostra la memoria finale
+    print_subsection("Memoria finale dopo sliding window")
+    print(f"   📚 Turni totali nella memoria: {len(sliding_memory.memory)}")
+    print(f"   🧠 Contenuto memoria (ultimi 4 turni):")
+    for i, turn in enumerate(sliding_memory.memory):
+        role_icon = "👤" if turn.role == ROLE.USER else "🤖"
+        content_preview = turn.blocks[0].content[:60] + "..." if len(turn.blocks[0].content) > 60 else turn.blocks[0].content
+        print(f"      {role_icon} {content_preview}")
+
+
+def demo_complex_chatbot_creation():
+    """
+    Dimostra un esempio complesso: creazione di un chatbot con diverse funzionalità
+    """
+    print_section("ESEMPIO COMPLESSO - Creazione Chatbot")
+    
+    client = create_client("openai")
+    if not client:
+        return
+    
+    # Crea una memoria specializzata per il progetto chatbot
+    chatbot_memory = Memory()
+    
+    print("🤖 Simulazione sviluppo chatbot con assistente AI:")
+    print("   L'assistente aiuta a progettare e implementare un chatbot completo\n")
+    
+    # Fase 1: Analisi dei requisiti
+    print_subsection("Fase 1: Analisi Requisiti")
+    
+    requirements_conversation = [
+        "Voglio creare un chatbot per un e-commerce di abbigliamento. Puoi aiutarmi?",
+        "Il chatbot deve gestire: assistenza clienti, ricerca prodotti, gestione ordini e supporto post-vendita.",
+        "Avremo circa 1000 clienti al giorno e dobbiamo gestire 5 lingue diverse.",
+        "Quali sono i requisiti tecnici principali che devo considerare?",
+        "Come strutturerei l'architettura del sistema?",
+        "Quali tecnologie mi consigli per il backend e il frontend?",
+        "Come gestisco la scalabilità e la disponibilità del servizio?",
+        "Quali sono i costi stimati per l'infrastruttura?"
+    ]
+    
+    for i, user_input in enumerate(requirements_conversation, 1):
+        print(f"👤 Analista: {user_input}")
+        
+        # Aggiungi input alla memoria
+        chatbot_memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        
+        try:
+            response = client.invoke("", memory=chatbot_memory)
+            chatbot_memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+            
+            print(f"🤖 Consulente: {response.text}")
+            print(f"   📊 Token: {response.prompt_tokens_used + response.completion_tokens_used}")
+            
+        except Exception as e:
+            print(f"   ❌ Errore: {e}")
+        
+        print()
+    
+    # Fase 2: Progettazione tecnica
+    print_subsection("Fase 2: Progettazione Tecnica")
+    
+    technical_conversation = [
+        "Ora passiamo alla progettazione tecnica. Come strutturerei il database?",
+        "Quali API esterne mi servono per integrare i sistemi di pagamento?",
+        "Come implemento il sistema di autenticazione e autorizzazione?",
+        "Quali sono le best practices per la sicurezza dei dati personali?",
+        "Come gestisco il logging e il monitoring del sistema?",
+        "Quali test devo implementare per garantire la qualità?",
+        "Come strutturerei il deployment e il CI/CD?",
+        "Quali metriche devo monitorare per valutare le performance?"
+    ]
+    
+    for i, user_input in enumerate(technical_conversation, 1):
+        print(f"👤 Architetto: {user_input}")
+        
+        chatbot_memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        
+        try:
+            response = client.invoke("", memory=chatbot_memory)
+            chatbot_memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+            
+            print(f"🤖 Consulente: {response.text}")
+            
+        except Exception as e:
+            print(f"   ❌ Errore: {e}")
+        
+        print()
+    
+    # Fase 3: Implementazione e testing
+    print_subsection("Fase 3: Implementazione e Testing")
+    
+    implementation_conversation = [
+        "Ora passiamo all'implementazione. Puoi mostrarmi la struttura del codice?",
+        "Come implemento il sistema di gestione delle conversazioni?",
+        "Come gestisco i fallback quando l'AI non capisce la richiesta?",
+        "Come implemento il sistema di feedback e rating delle risposte?",
+        "Come gestisco l'aggiornamento del modello AI nel tempo?",
+        "Quali sono i test automatizzati che devo implementare?",
+        "Come faccio il testing con utenti reali?",
+        "Come valuto e miglioro le performance del chatbot?"
+    ]
+    
+    for i, user_input in enumerate(implementation_conversation, 1):
+        print(f"👤 Sviluppatore: {user_input}")
+        
+        chatbot_memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        
+        try:
+            response = client.invoke("", memory=chatbot_memory)
+            chatbot_memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+            
+            print(f"🤖 Consulente: {response.text}")
+            
+        except Exception as e:
+            print(f"   ❌ Errore: {e}")
+        
+        print()
+    
+    # Fase 4: Riassunto e prossimi passi
+    print_subsection("Fase 4: Riassunto e Prossimi Passi")
+    
+    try:
+        summary_response = client.invoke(
+            "Riassumi il progetto del chatbot e fornisci un piano d'azione con i prossimi 5 passi da seguire",
+            memory=chatbot_memory
+        )
+        
+        print("📋 Riassunto progetto e piano d'azione:")
+        print(f"🤖 {summary_response.text}")
+        
+    except Exception as e:
+        print(f"❌ Errore nel riassunto: {e}")
+    
+    # Statistiche finali
+    print_subsection("Statistiche Progetto Chatbot")
+    print(f"   📚 Turni totali: {len(chatbot_memory.memory)}")
+    print(f"   🎯 Fasi completate: 4 (Requisiti, Progettazione, Implementazione, Riassunto)")
+    print(f"   💬 Conversazioni simulate: {len(requirements_conversation) + len(technical_conversation) + len(implementation_conversation)}")
+    print(f"   🧠 Memoria utilizzata: {len(list(chatbot_memory.iter_blocks()))} blocchi")
+
+
 # ==============================================================================
 # FUNZIONE PRINCIPALE E MENU
 # ==============================================================================
@@ -532,9 +747,11 @@ MODALITÀ CONVERSATIONAL:
 4. Conversazione base con memoria
 5. Scenari conversazionali avanzati
 6. Gestione avanzata della memoria
+7. Strategia sliding window (ottimizzazione token)
+8. Esempio complesso: creazione chatbot
 
 ALTRO:
-7. Esegui tutte le demo
+9. Esegui tutte le demo
 0. Esci
 
 Nota: Assicurati di avere le chiavi API configurate nel file .env
@@ -550,7 +767,9 @@ def run_demo(choice: str):
         "4": demo_conversational_basic,
         "5": demo_conversational_advanced,
         "6": demo_conversational_memory_management,
-        "7": run_all_demos
+        "7": demo_sliding_window_chat,
+        "8": demo_complex_chatbot_creation,
+        "9": run_all_demos
     }
     
     if choice in demos:
@@ -575,7 +794,9 @@ def run_all_demos():
         ("Confronto provider", demo_one_shot_comparison), 
         ("Conversational base", demo_conversational_basic),
         ("Conversational avanzati", demo_conversational_advanced),
-        ("Gestione memoria", demo_conversational_memory_management)
+        ("Gestione memoria", demo_conversational_memory_management),
+        ("Sliding window", demo_sliding_window_chat),
+        ("Creazione chatbot", demo_complex_chatbot_creation)
     ]
     
     for i, (name, demo_func) in enumerate(all_demos, 1):

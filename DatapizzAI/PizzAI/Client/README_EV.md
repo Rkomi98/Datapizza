@@ -151,7 +151,7 @@ print(f"Response: {response.text}")
 ```python
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-3-5-sonnet-latest",
+    model="claude-4-sonnet-latest",
     system_prompt="You are an assistant for creative writing.",
     temperature=0.8  # More creative for writing
 )
@@ -173,7 +173,7 @@ google_client = GoogleClient(
 
 # Vertex AI configuration (enterprise deployment)
 google_vertex_client = GoogleClient(
-    model="gemini-1.5-pro",
+    model="gemini-2.5-flash",
     system_prompt="You are a business assistant.",
     temperature=0.5,
     # Vertex AI parameters
