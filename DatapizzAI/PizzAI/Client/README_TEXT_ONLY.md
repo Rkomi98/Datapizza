@@ -26,12 +26,12 @@ from datapizzai.clients import ClientFactory
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
     system_prompt=(
         "Sei un assistente utile e conciso. "
         "Rispondi in italiano, usa elenchi puntati quando opportuno."
     ),
-    temperature=0.7,
+    temperature=1,
 )
 ```
 
@@ -80,7 +80,7 @@ print(chat_turn("Ora dimmi 3 best practice per Django."))
 **Perché farlo?** Separare il “cosa” (testo utente) dal “come” (gestione memoria/invocazione) rende il codice **personalizzabile**.
 
 ## 4. Da funzione a chatbot: classe con sliding window
-La memoria cresce ad ogni turno. Per evitare costi e limiti token, usiamo una strategia a “finestra scorrevole” (sliding window) mantenendo solo gli ultimi \(N\) turni rilevanti.
+La memoria cresce ad ogni turno. Per evitare costi e limiti token, usiamo una strategia a “finestra scorrevole” (sliding window) mantenendo solo gli ultimi $N$ turni rilevanti.
 
 ```python
 from typing import Optional
@@ -134,33 +134,21 @@ Lo stile si controlla dal `system_prompt` e, all’occorrenza, da istruzioni nel
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
     system_prompt=(
         "Sei un assistente per consulenza tecnica. "
         "Sempre in italiano, risposte strutturate in massimo 5 punti, "
         "concludi con un breve 'prossimi passi'."
     ),
-    temperature=0.5,
+    temperature=1,
 )
 ```
 
 Perché: allinei lo stile del bot alle esigenze del dominio (es. supporto, consulenza, brainstorming).
 
-## 7. Gestione errori e robustezza
-Rendi la conversazione resiliente a errori di rete/configurazione.
 
-```python
-def safe_send(bot: Chatbot, user_input: str) -> str:
-    try:
-        return bot.send(user_input)
-    except Exception as e:
-        # Fallback controllato
-        return "Si è verificato un errore temporaneo. Riprova tra poco."
-```
 
-Perché: l’esperienza utente è centrale; un fallback evita interruzioni brusche.
-
-## 8. Prestazioni: cache e metriche
+## 7. Prestazioni: cache e metriche
 La cache riduce costi per richieste ripetute. Le metriche aiutano a capire l’impatto delle scelte di prompting/memoria.
 
 ```python
@@ -169,8 +157,9 @@ from datapizzai.cache import MemoryCache
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
     cache=MemoryCache(),  # supportato solo da OpenAI nel costruttore
+    temperature=1
 )
 
 # Esempio di ispezione metrica
@@ -214,12 +203,12 @@ class Chatbot:
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
     system_prompt=(
         "Sei un assistente utile e conciso. Rispondi in italiano "
         "e proponi sempre un breve elenco di prossimi passi."
     ),
-    temperature=0.6,
+    temperature=1,
 )
 
 bot = Chatbot(client, window_size=6)
@@ -261,7 +250,7 @@ import os
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
 )
 
 response = client.invoke("Spiega il machine learning in 2 frasi")
