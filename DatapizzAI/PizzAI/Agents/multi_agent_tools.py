@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Multi Agent-Tool Framework - DatapizzAI
-========================================
+Multi Tool Framework - DatapizzAI
+=================================
 
-Questo script dimostra come creare e utilizzare agenti multi-tool con il framework datapizzai.
-Gli agenti possono utilizzare diversi strumenti per completare task complessi.
+Questo script dimostra come creare e utilizzare client multi-tool con il framework datapizzai.
+I client possono utilizzare diversi strumenti per completare task complessi.
 
 Autore: Mirko Calcaterra
 Data: 2025
@@ -20,7 +20,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # Importazioni datapizzai
 from datapizzai.clients import ClientFactory
-from datapizzai.tools import Tool
+from datapizzai.tools import tool
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 
@@ -38,38 +38,35 @@ def print_subsection(title: str):
 
 
 def execute_tool_calls(response, available_tools):
-    """Esegue i tool call presenti nella risposta e restituisce i risultati"""
+    """Esegue i function call presenti nella risposta utilizzando i tool passati.
+
+    Usa response.function_calls invece di scorrere il contenuto testuale.
+    """
     tool_results = []
-    
-    for block in response.content:
-        if hasattr(block, 'name') and hasattr(block, 'arguments'):
-            tool_name = block.name
-            arguments = block.arguments
-            
-            print(f"   🔧 Strumento usato: {tool_name}")
-            print(f"   📋 Argomenti: {arguments}")
-            
-            # Mappa dei tool disponibili
-            tool_map = {
-                "calcola": calcola,
-                "cerca_informazioni": cerca_informazioni,
-                "gestisci_file": gestisci_file
-            }
-            
-            if tool_name in tool_map:
-                try:
-                    result = tool_map[tool_name](**arguments)
-                    tool_results.append(result)
-                    print(f"   ✅ Risultato: {result}")
-                except Exception as e:
-                    error_msg = f"Errore nell'esecuzione del tool {tool_name}: {e}"
-                    tool_results.append(error_msg)
-                    print(f"   ❌ {error_msg}")
-            else:
-                error_msg = f"Tool {tool_name} non riconosciuto"
+    # Crea mappa dai tool disponibili passati alla funzione
+    tool_map = {t.name: t for t in available_tools}
+
+    for call in getattr(response, "function_calls", []) or []:
+        tool_name = getattr(call, "name", None)
+        arguments = getattr(call, "arguments", {}) or {}
+
+        print(f"   🔧 Strumento usato: {tool_name}")
+        print(f"   📋 Argomenti: {arguments}")
+
+        if tool_name in tool_map:
+            try:
+                result = tool_map[tool_name](**arguments)
+                tool_results.append(result)
+                print(f"   ✅ Risultato: {result}")
+            except Exception as e:
+                error_msg = f"Errore nell'esecuzione del tool {tool_name}: {e}"
                 tool_results.append(error_msg)
                 print(f"   ❌ {error_msg}")
-    
+        else:
+            error_msg = f"Tool {tool_name} non riconosciuto"
+            tool_results.append(error_msg)
+            print(f"   ❌ {error_msg}")
+
     return tool_results
 
 
@@ -77,7 +74,7 @@ def execute_tool_calls(response, available_tools):
 # DEFINIZIONE STRUMENTI (TOOLS)
 # ==============================================================================
 
-@Tool
+@tool
 def calcola(espressione: str) -> str:
     """Esegue calcoli matematici sicuri.
     
@@ -101,7 +98,7 @@ def calcola(espressione: str) -> str:
         return f"Errore nel calcolo: {str(e)}"
 
 
-@Tool
+@tool
 def cerca_informazioni(query: str) -> str:
     """Simula una ricerca web per trovare informazioni.
     
@@ -147,7 +144,7 @@ FILES_SYSTEM = {
     "data/": ["dataset.csv", "config.json"]
 }
 
-@Tool
+@tool
 def gestisci_file(comando: str, percorso: str) -> str:
     """Gestisce file e directory in un sistema simulato.
     

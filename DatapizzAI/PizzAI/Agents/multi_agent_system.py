@@ -21,7 +21,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # Importazioni datapizzai
 from datapizzai.clients import ClientFactory
-from datapizzai.tools import Tool
+from datapizzai.tools import tool
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 
@@ -61,7 +61,7 @@ class MessageBus:
 # DEFINIZIONE STRUMENTI SPECIALIZZATI
 # ==============================================================================
 
-@Tool
+@tool
 def calcola_avanzato(espressione: str, tipo_calcolo: str = "base") -> str:
     """Esegue calcoli matematici avanzati.
     
@@ -101,7 +101,7 @@ def calcola_avanzato(espressione: str, tipo_calcolo: str = "base") -> str:
         return f"Errore calcolo: {str(e)}"
 
 
-@Tool
+@tool
 def analizza_dati(dati: str, tipo_analisi: str = "base") -> str:
     """Analizza dati e fornisce statistiche.
     
@@ -147,7 +147,7 @@ def analizza_dati(dati: str, tipo_analisi: str = "base") -> str:
         return f"Errore analisi: {str(e)}"
 
 
-@Tool
+@tool
 def cerca_informazioni_avanzate(query: str, dominio: str = "generale") -> str:
     """Cerca informazioni specializzate per dominio.
     
@@ -194,7 +194,7 @@ def cerca_informazioni_avanzate(query: str, dominio: str = "generale") -> str:
     return f"Informazioni {dominio} per '{query}': ricerca in corso..."
 
 
-@Tool
+@tool
 def genera_report(titolo: str, contenuto: str, formato: str = "markdown") -> str:
     """Genera report strutturati.
     
@@ -244,7 +244,7 @@ Generato: {timestamp}
     return f"Report '{titolo}' generato in formato {formato}"
 
 
-@Tool
+@tool
 def coordina_task(task_description: str, agenti_richiesti: str) -> str:
     """Coordina task tra più agenti.
     
@@ -340,30 +340,25 @@ class SpecializedAgent:
             return error_msg
     
     def _execute_tool_calls(self, response) -> List[str]:
-        """Esegue i tool call presenti nella risposta"""
+        """Esegue i function call presenti nella risposta usando i tool registrati."""
         tool_results = []
-        
-        # Mappa dei tool disponibili
-        tool_map = {tool.name: tool for tool in self.tools}
-        
-        for block in response.content:
-            if hasattr(block, 'name') and hasattr(block, 'arguments'):
-                tool_name = block.name
-                arguments = block.arguments
-                
-                if tool_name in tool_map:
-                    try:
-                        result = tool_map[tool_name](**arguments)
-                        tool_results.append(result)
-                        print(f"   🔧 {tool_name}: {result[:50]}...")
-                        
 
-                        
-                    except Exception as e:
-                        error_msg = f"Errore tool {tool_name}: {e}"
-                        tool_results.append(error_msg)
-                        print(f"   ❌ {error_msg}")
-        
+        tool_map = {tool.name: tool for tool in self.tools}
+
+        for call in getattr(response, "function_calls", []) or []:
+            tool_name = getattr(call, "name", None)
+            arguments = getattr(call, "arguments", {}) or {}
+
+            if tool_name in tool_map:
+                try:
+                    result = tool_map[tool_name](**arguments)
+                    tool_results.append(result)
+                    print(f"   🔧 {tool_name}: {str(result)[:50]}...")
+                except Exception as e:
+                    error_msg = f"Errore tool {tool_name}: {e}"
+                    tool_results.append(error_msg)
+                    print(f"   ❌ {error_msg}")
+
         return tool_results
     
     def send_message_to_agent(self, receiver: str, content: str, task_id: str, message_type: str = "info"):

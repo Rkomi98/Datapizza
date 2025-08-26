@@ -5,7 +5,7 @@ Complete guide for creating and using multi-tool clients with the datapizzai fra
 ## Table of contents
 
 1. [Fundamental concepts](#fundamental-concepts)
-2. [Basic structure of a Tool](#basic-structure-of-a-tool)
+2. [Basic structure of a tool](#basic-structure-of-a-tool)
 3. [Step-by-step configuration](#step-by-step-configuration)
    - [Step 1: Tool definition](#step-1-tool-definition)
    - [Step 2: OpenAI client creation](#step-2-openai-client-creation)
@@ -28,18 +28,18 @@ A client is an AI interface that can use tools to complete tasks. Each client ha
 - **Tools**: List of available tools for invocation
 
 ### Tool
-A tool is a Python function decorated with `@Tool` that the client can invoke. Each tool has:
+A tool is a Python function decorated with `@tool` that the client can invoke. Each tool has:
 - **Name**: Unique identifier
 - **Description**: Explanation of what the tool does (from docstring)
 - **Parameters**: Defined by function signature
 - **Return**: Value returned by the function
 
-## Basic structure of a Tool
+## Basic structure of a tool
 
 ```python
-from datapizzai.tools import Tool
+from datapizzai.tools import tool
 
-@Tool
+@tool
 def my_tool(parameter: str) -> str:
     """Description of what this tool does.
     
@@ -62,18 +62,18 @@ def my_tool(parameter: str) -> str:
 
 ### Step 1: Tool definition
 
-Tools are Python functions decorated with `@Tool` that the OpenAI client can invoke:
+Tools are Python functions decorated with `@tool` that the client can invoke:
 
 ```python
 import os
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
-from datapizzai.tools import Tool
+from datapizzai.tools import tool
 
 # Load environment variables
 load_dotenv()
 
-@Tool
+@tool
 def calculate(expression: str) -> str:
     """Executes safe mathematical calculations.
     
@@ -136,22 +136,23 @@ response = client.invoke(
 
 # 4. Handle results
 def execute_tool_calls(response, available_tools):
-    """Executes tool calls and returns results."""
+    """Executes function calls using the provided tools (not textual content)."""
     tool_results = []
-    
-    for block in response.content:
-        if hasattr(block, 'name') and hasattr(block, 'arguments'):
-            tool_name = block.name
-            arguments = block.arguments
-            
-            print(f"🔧 Tool called: {tool_name}")
-            print(f"📋 Arguments: {arguments}")
-            
-            # Execute the tool
-            if tool_name == "calculate":
-                result = calculate(**arguments)
-                tool_results.append(result)
-                print(f"✅ Result: {result}")
+    tool_map = {t.name: t for t in available_tools}
+
+    for call in getattr(response, "function_calls", []) or []:
+        tool_name = getattr(call, "name", None)
+        arguments = getattr(call, "arguments", {}) or {}
+
+        print(f"🔧 Tool called: {tool_name}")
+        print(f"📋 Arguments: {arguments}")
+
+        if tool_name in tool_map:
+            result = tool_map[tool_name](**arguments)
+            tool_results.append(result)
+            print(f"✅ Result: {result}")
+        else:
+            print(f"⚠️ Unknown tool: {tool_name}")
     
     return tool_results
 
@@ -165,13 +166,13 @@ elif tool_results:
     print(f"🤖 Assistant: {tool_results[0]}")
 ```
 
-### Step 4: Advanced multi-tool agent
+### Step 4: Advanced multi-tool client
 
-To create an agent with multiple tools, follow these steps:
+To create a client with multiple tools, follow these steps:
 
 ```python
 # 1. Define additional tools
-@Tool
+@tool
 def search_information(query: str) -> str:
     """Simulates a web search to find information.
     
@@ -200,7 +201,7 @@ def search_information(query: str) -> str:
     
     return f"Results for '{query}':\n" + "\n".join(f"- {r}" for r in results)
 
-@Tool  
+@tool  
 def manage_file(command: str, path: str) -> str:
     """Manages files and directories in a simulated system.
     
@@ -277,69 +278,18 @@ response = client.invoke(
 tool_results = execute_tool_calls(response, tools)
 ```
 
-Let's review the basic invocation to use the client
+<!-- Removed duplicated base invocation section to avoid redundancy -->
 
-```python
-# Simple query with tool
-response = client.invoke(
-    input="Calculate 15 + 27 * 3",
-    tools=tools,
-    tool_choice="auto"
-)
+### Step 5: Conversational flow with memory (throughline)
 
-# Tool call handling
-def execute_tool_calls(response, available_tools):
-    """Executes tool calls present in the response"""
-    tool_results = []
-    
-    for block in response.content:
-        if hasattr(block, 'name') and hasattr(block, 'arguments'):
-            tool_name = block.name
-            arguments = block.arguments
-            
-            # Map of available tools
-            tool_map = {
-                "calculate": calculate,
-                "search_information": search_information,
-                "manage_file": manage_file
-            }
-            
-            if tool_name in tool_map:
-                result = tool_map[tool_name](**arguments)
-                tool_results.append(result)
-                print(f"🔧 {tool_name}: {result}")
-    
-    return tool_results
-
-# Execute tools
-tool_results = execute_tool_calls(response, tools)
-
-# Complex query with multi-step workflow
-complex_query = """
-    Execute this workflow:
-    1. Search for information on Python
-    2. Calculate 2^10
-    3. Create a file called summary.txt
-"""
-
-response = client.invoke(
-    input=complex_query,
-    tools=tools,
-    tool_choice="auto"
-)
-execute_tool_calls(response, tools)
-```
-
-### Step 5: Conversational memory
-
-To maintain context between multiple conversation turns:
+Combine everything into a concise, usable conversational loop.
 
 ```python
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 
-def create_conversational_agent():
-    """Creates an agent with conversational memory."""
+def create_conversational_client():
+    """Creates a conversational client with memory."""
     
     # 1. Initialize memory
     memory = Memory()
@@ -357,11 +307,11 @@ def create_conversational_agent():
     return client, memory
 
 # 3. Configure multi-turn conversation
-client, memory = create_conversational_agent()
+client, memory = create_conversational_client()
 tools = [calculate, search_information, manage_file]
 
 def chat_turn(user_input: str, memory: Memory, client, tools):
-    """Handles a single conversation turn."""
+    """Handles a turn: updates memory, invokes client, executes function calls."""
     
     print(f"👤 User: {user_input}")
     
@@ -379,7 +329,7 @@ def chat_turn(user_input: str, memory: Memory, client, tools):
     # Add response to memory
     memory.add_turn(response.content, ROLE.ASSISTANT)
     
-    # Execute any tool calls
+    # Execute any function calls
     tool_results = execute_tool_calls(response, tools)
     
     # Show response
@@ -408,66 +358,7 @@ print(f"📊 Total turns: {len(memory.memory)}")
 print(f"💬 Total blocks: {len(list(memory.iter_blocks()))}")
 ```
 
-## Implemented tool examples
-
-### Tool: calculate
-**Purpose**: Executes safe mathematical calculations
-**Input**: Mathematical expression as string
-**Output**: Calculation result
-
-```python
-# Direct usage example
-result = calculate("(15 + 5) * 2")
-print(result)  # "Result: 40"
-
-# Example with client
-response = client.invoke(
-    input="Calculate the area of a square with side 5",
-    tools=[calculate],
-    tool_choice="auto"
-)
-```
-
-### Tool: search_information
-**Purpose**: Simulates web searches
-
-**Input**: Search query
-
-**Output**: Simulated results
-
-```python
-# Direct usage example
-result = search_information("Python programming")
-print(result)  # Simulated results for Python
-
-# Example with client
-response = client.invoke(
-    input="Search for information on machine learning",
-    tools=[search_information],
-    tool_choice="auto"
-)
-```
-
-### Tool: manage_file
-**Purpose**: Manages files and directories (simulated)
-**Input**: Command and path
-**Output**: Operation result
-
-```python
-# Direct usage example
-result = manage_file("list", "docs/")
-print(result)  # List files in docs/
-
-result = manage_file("create", "docs/new.txt")
-print(result)  # Creation confirmation
-
-# Example with client
-response = client.invoke(
-    input="Create a file called report.txt in the docs/ directory",
-    tools=[manage_file],
-    tool_choice="auto"
-)
-```
+<!-- Removed repetitive implemented tools section to keep the guide concise -->
 
 ## Advanced usage patterns
 
