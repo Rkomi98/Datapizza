@@ -45,7 +45,7 @@ Per costruire conversazioni, DatapizzAI usa:
 - `TextBlock`: rappresenta blocchi di testo scambiati nei turni
 - `ROLE`: indica chi parla (`ROLE.USER` o `ROLE.ASSISTANT`)
 
-Questi oggetti permettono al modello di “ricordare” il contesto.
+Questi oggetti permettono al modello di “ricordare” il contesto. Nei `TextBlock(content=...)` passa sempre stringhe; usa `response.text` per aggiungere la risposta del modello.
 
 ```python
 from datapizzai.memory import Memory
@@ -54,13 +54,14 @@ from datapizzai.type import TextBlock, ROLE
 memory = Memory()
 
 # Aggiunta di un turno utente
-memory.add_turn([TextBlock(content="Ciao, sono Marco")], ROLE.USER)
+memory.add_turn([TextBlock(content="Ciao, sono Mirko")], ROLE.USER)
 
 # Invocazione con contesto
 response = client.invoke("", memory=memory)
-# Salvataggio risposta
+# Salvataggio risposta (usa SEMPRE una stringa)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
+Nota: la risposta è un oggetto. Per salvarla in memoria devi usare `response.text` (stringa). Non passare l'oggetto risposta direttamente nei `TextBlock`, altrimenti otterrai errori di serializzazione JSON.
 
 ## 3. Step 0: una funzione `chat_turn`
 Partiamo da una funzione semplice che gestisce un turno di chat. Serve per validare che la pipeline funzioni.
@@ -76,10 +77,10 @@ print(chat_turn("Presentati in una frase."))
 print(chat_turn("Ora dimmi 3 best practice per Django."))
 ```
 
-Perché: separare il “cosa” (testo utente) dal “come” (gestione memoria/invocazione) rende il codice estendibile.
+**Perché farlo?** Separare il “cosa” (testo utente) dal “come” (gestione memoria/invocazione) rende il codice **personalizzabile**.
 
 ## 4. Da funzione a chatbot: classe con sliding window
-La memoria cresce ad ogni turno. Per evitare costi e limiti token, usiamo una strategia a “finestra scorrevole” (sliding window) mantenendo solo gli ultimi N turni rilevanti.
+La memoria cresce ad ogni turno. Per evitare costi e limiti token, usiamo una strategia a “finestra scorrevole” (sliding window) mantenendo solo gli ultimi \(N\) turni rilevanti.
 
 ```python
 from typing import Optional
@@ -282,7 +283,7 @@ def chat_turn(user_input: str) -> str:
     memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
     return response.text
 
-print(chat_turn("Ciao, sono Marco, sviluppatore Python"))
+print(chat_turn("Ciao, sono Mirko, sviluppatore Python"))
 print(chat_turn("Quali sono le best practice per Django?"))
 print(chat_turn("E per il mio caso specifico?"))
 ```

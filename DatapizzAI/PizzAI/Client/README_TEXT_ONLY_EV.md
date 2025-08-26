@@ -45,7 +45,7 @@ To build conversations, DatapizzAI uses:
 - `TextBlock`: represents pieces of text exchanged per turn
 - `ROLE`: identifies who speaks (`ROLE.USER` or `ROLE.ASSISTANT`)
 
-These enable the model to “remember” the context.
+These enable the model to “remember” the context. Always pass strings into `TextBlock(content=...)`; use `response.text` when adding the model reply to memory.
 
 ```python
 from datapizzai.memory import Memory
@@ -54,15 +54,15 @@ from datapizzai.type import TextBlock, ROLE
 memory = Memory()
 
 # Add a user turn
-memory.add_turn([TextBlock(content="Hi, I am Marco")], ROLE.USER)
+memory.add_turn([TextBlock(content="Hi, I am Mirko")], ROLE.USER)
 
 # Invoke with context
 response = client.invoke("", memory=memory)
-# Save assistant response
+# Save assistant response (always a string)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
 
-## 3. Minimum viable piece: a `chat_turn` function
+## 3. Step 0: a `chat_turn` function
 Start with a single-turn function. It validates the end-to-end pipeline.
 
 ```python
@@ -279,7 +279,7 @@ def chat_turn(user_input: str) -> str:
     memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
     return response.text
 
-print(chat_turn("Hello, I'm Marco, a Python developer"))
+print(chat_turn("Hello, I'm Mirko, a Python developer"))
 print(chat_turn("What are the best practices for Django?"))
 print(chat_turn("And for my specific case?"))
 ```
