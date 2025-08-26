@@ -69,7 +69,7 @@ openai_client = ClientFactory.create(
 anthropic_client = ClientFactory.create(
     provider=Provider.ANTHROPIC,  # o "anthropic"
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-3-5-sonnet-latest",
+    model="claude-4-sonnet-latest",
     system_prompt="Sei Claude, un assistente AI di Anthropic.",
     temperature=0.5
 )

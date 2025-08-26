@@ -1,6 +1,6 @@
 # DatapizzAI Client Configuration Guide
 
-This guide will help you configure all types of clients available in the DatapizzAI library to interact with different LLM model providers.
+This guide will help you set up all kind of clients available in the DatapizzAI library to interact with different LLM model providers.
 
 ## Prerequisites
 
@@ -69,7 +69,7 @@ openai_client = ClientFactory.create(
 anthropic_client = ClientFactory.create(
     provider=Provider.ANTHROPIC,  # or "anthropic"
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-3-5-sonnet-latest",
+    model="claude-4-sonnet-latest",
     system_prompt="You are Claude, an Anthropic AI assistant.",
     temperature=0.5
 )
