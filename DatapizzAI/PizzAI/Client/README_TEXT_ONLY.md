@@ -14,7 +14,7 @@ Questa guida ti accompagna passo‑passo alla creazione di un chatbot testuale c
 OPENAI_API_KEY=sk-...
 ```
 
-Per esempi completi consultare anche `text_only_examples.py` e la guida tecnica `GUIDA_TEXT_ONLY.md`.
+Per esempi completi consultare anche `text_only_examples.py`.
 
 ## 1. Configurazione del client (perché è importante)
 Per parlare con un modello serve un client configurato con provider, chiave e modello. Qui definisci anche lo “stile” dell’assistente (system prompt) e la creatività (temperature).
@@ -62,7 +62,7 @@ response = client.invoke("", memory=memory)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
 
-## 3. Minimo funzionante: una funzione `chat_turn`
+## 3. Step 0: una funzione `chat_turn`
 Partiamo da una funzione semplice che gestisce un turno di chat. Serve per validare che la pipeline funzioni.
 
 ```python

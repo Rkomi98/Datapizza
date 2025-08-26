@@ -14,7 +14,7 @@ This guide walks you step by step through building a text-only chatbot with Data
 OPENAI_API_KEY=sk-...
 ```
 
-For full examples, also check `text_only_examples.py` and the technical guide `GUIDA_TEXT_ONLY.md`.
+For full examples, also check `text_only_examples.py`.
 
 ## 1. Client setup (why this matters)
 To interact with the model, you need a client configured with provider, key, and model. Here you also define the assistant “style” (system prompt) and creativity (temperature).
