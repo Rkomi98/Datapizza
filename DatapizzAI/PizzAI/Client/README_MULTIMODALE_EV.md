@@ -6,7 +6,8 @@ Quick examples for using the **DatapizzAI** framework with multimedia input/outp
 
 - [1. Image analysis from URL](#1-image-analysis-from-url)
 - [2. Local image analysis](#2-local-image-analysis)
-- [3. Multimodal conversation with memory](#3-multimodal-conversation-with-memory)
+- [3. Local audio analysis](#3-local-audio-analysis)
+- [4. Multimodal conversation with memory](#4-multimodal-conversation-with-memory)
 
 ## 1. Image analysis from URL
 
@@ -87,7 +88,43 @@ print(response.text)
 
 ---
 
-## 3. Multimodal conversation with memory
+## 3. Local audio analysis
+
+**When to use**: Transcription of recordings, analysis of audio content, voice conversations.
+
+**What it does**: Sends a direct path to a local audio file for analysis. The AI can transcribe, analyze, or respond to the audio content. This method is efficient as it avoids loading the entire file into memory as base64.
+
+```python
+import os
+from pathlib import Path
+from datapizzai.clients import ClientFactory
+from datapizzai.type import Media, MediaBlock, TextBlock
+
+# It is recommended to create a dedicated client for audio analysis
+# Make sure GOOGLE_API_KEY is in your .env file
+analysis_client_google = ClientFactory.create(
+    provider="google",
+    model="gemini-1.5-flash",
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    system_prompt="You are an AI assistant specialized in audio analysis. Please respond in English.",
+    temperature=0.5
+)
+
+media = Media(
+    extension="wav",
+    media_type="audio",
+    source_type="path",      # Use 'path' for direct file access
+    source="TI0TpOD_.wav"     # <— path to the file
+)
+
+prompt = "Transcribe this audio and summarize its main content."
+response = analysis_client_google.invoke([TextBlock(content=prompt), MediaBlock(media=media)])
+print(response.text)
+```
+
+---
+
+## 4. Multimodal conversation with memory
 
 **When to use**: Progressive image analysis, visual tutoring, iterative development of creative projects
 

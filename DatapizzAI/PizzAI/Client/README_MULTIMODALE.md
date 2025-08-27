@@ -6,7 +6,8 @@ Esempi rapidi per usare il framework **DatapizzAI** con input/output multimedial
 
 - [1. Analisi immagine da URL](#1-analisi-immagine-da-url)
 - [2. Analisi immagine locale](#2-analisi-immagine-locale)
-- [3. Conversazione multimodale con memoria](#3-conversazione-multimodale-con-memoria)
+- [3. Analisi audio locale](#3-analisi-audio-locale)
+- [4. Conversazione multimodale con memoria](#4-conversazione-multimodale-con-memoria)
 
 ## 1. Analisi immagine da URL
 
@@ -87,7 +88,38 @@ print(response.text)
 
 ---
 
-## 3. Conversazione multimodale con memoria
+## 3. Analisi audio locale
+
+**Quando usare**: Trascrizione di registrazioni, analisi di contenuti audio, conversazioni vocali
+
+**Cosa fa**: Converte l'audio locale in base64 per l'invio sicuro via API. Il `MediaBlock` gestisce la codifica e trasmissione del file audio. L'AI può trascrivere, analizzare o rispondere al contenuto audio.
+
+```python
+from pathlib import Path
+from datapizzai.type import Media, MediaBlock, TextBlock
+
+analysis_client_google = client = ClientFactory.create(
+            model="gemini-2.5-flash",
+            api_key=GOOGLE_API_KEY,
+            system_prompt="Sei un assistente AI esperto nell'analisi di audio. Rispondi in italiano.",
+            temperature=0.5
+        )
+
+media = Media(
+    extension="wav",
+    media_type="audio",
+    source_type="path",
+    source="TI0TpOD_.wav"        # <— percorso al file
+)
+
+prompt = "Trascrivi questo audio e riassumi il contenuto principale."
+response = analysis_client_google.invoke([TextBlock(content=prompt), MediaBlock(media=media)])
+print(response.text)
+```
+
+---
+
+## 4. Conversazione multimodale con memoria
 
 **Quando usare**: Analisi progressive di immagini, tutoring visivo, sviluppo iterativo di progetti creativi
 

@@ -11,11 +11,10 @@ Complete guide for creating and using multi-tool clients with the datapizzai fra
    - [Step 2: OpenAI client creation](#step-2-openai-client-creation)
    - [Step 3: Configuration and execution](#step-3-configuration-and-execution)
    - [Step 4: Advanced multi-tool client](#step-4-advanced-multi-tool-client)
-   - [Step 5: Conversational flow with memory (throughline)](#step-5-conversational-flow-with-memory-throughline)
-4. [Advanced usage patterns](#advanced-usage-patterns)
-5. [Best practices](#best-practices)
-6. [Framework extension](#framework-extension)
-7. [Step-by-step guide: custom tool](#step-by-step-guide-custom-tool)
+   - [Step 5: Conversational memory](#step-5-conversational-memory)
+4. [Best practices](#best-practices)
+5. [Framework extension](#framework-extension)
+6. [Step-by-step guide: custom tool](#step-by-step-guide-custom-tool)
 
 ## Fundamental concepts
 
@@ -73,6 +72,10 @@ Tools are Python functions decorated with `@tool` that the client can invoke:
 
 ```python
 import os
+import re
+import ast
+import math
+import numpy as np
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 from datapizzai.tools import tool
@@ -80,30 +83,73 @@ from datapizzai.tools import tool
 # Load environment variables
 load_dotenv()
 
-# To use google_search_tool, add to your .env file:
-# GOOGLE_API_KEY=your-google-api-key-here
-# GOOGLE_CSE_ID=your-custom-search-engine-id  # Optional
+# Safe evaluation setup
+ALLOWED_FUNCS = {
+    # base & powers/logs
+    "sqrt": np.sqrt, "log": np.log, "log10": np.log10, "exp": np.exp,
+    "abs": abs, "round": round, "min": np.minimum, "max": np.maximum,
+    # trig
+    "sin": np.sin, "cos": np.cos, "tan": np.tan,
+    "asin": np.arcsin, "acos": np.arccos, "atan": np.arctan,
+}
+ALLOWED_CONSTS = {"pi": math.pi, "e": math.e}
+ALLOWED_BINOPS = {ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow}
+ALLOWED_UNARYOPS = {ast.UAdd, ast.USub}
+MAX_EXPR_LEN, MAX_NODES = 2000, 800
+
+def _normalize(s: str) -> str:
+    s = s.strip()
+    if len(s) > MAX_EXPR_LEN: raise ValueError("Expression is too long")
+    s = s.replace("^", "**")                # power
+    s = re.sub(r"√\s*\(", "sqrt(", s)       # root symbol → sqrt(
+    s = re.sub(r"(\d)\s*π", r"\1*pi", s)    # 2π → 2*pi
+    return s
+
+def _safe_eval(node):
+    if isinstance(node, ast.Expression): return _safe_eval(node.body)
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, (int, float, complex)): return node.value
+        raise ValueError("Non-numeric constant")
+    if isinstance(node, ast.Name):
+        if node.id in ALLOWED_CONSTS: return ALLOWED_CONSTS[node.id]
+        raise ValueError(f"Identifier not allowed: {node.id}")
+    if isinstance(node, ast.UnaryOp) and type(node.op) in ALLOWED_UNARYOPS:
+        v = _safe_eval(node.operand); return +v if isinstance(node.op, ast.UAdd) else -v
+    if isinstance(node, ast.BinOp) and type(node.op) in ALLOWED_BINOPS:
+        a, b = _safe_eval(node.left), _safe_eval(node.right)
+        if   isinstance(node.op, ast.Add): return a + b
+        elif isinstance(node.op, ast.Sub): return a - b
+        elif isinstance(node.op, ast.Mult): return a * b
+        elif isinstance(node.op, ast.Div): return a / b
+        elif isinstance(node.op, ast.FloorDiv): return a // b
+        elif isinstance(node.op, ast.Mod): return a % b
+        elif isinstance(node.op, ast.Pow):
+            if isinstance(b, int) and abs(b) > 1000: raise ValueError("Exponent is too large")
+            return a ** b
+    if isinstance(node, ast.Call):
+        if isinstance(node.func, ast.Name) and not node.keywords:
+            fn = ALLOWED_FUNCS.get(node.func.id)
+            if not fn: raise ValueError("Function not allowed")
+            args = [_safe_eval(a) for a in node.args]
+            if len(args) > 8: raise ValueError("Too many arguments")
+            return fn(*args)
+    raise ValueError("Syntax not allowed")
 
 @tool
 def calculate(expression: str) -> str:
-    """Executes safe mathematical calculations.
-    
-    Args:
-        expression: Mathematical expression (e.g., "2 + 3 * 4")
-    
-    Returns:
-        Calculation result or error message
+    """
+    Safely evaluates a mathematical expression using an Abstract Syntax Tree (AST).
+    Supports basic arithmetic, powers, roots, logarithms, and trigonometric functions.
     """
     try:
-        # Security validation
-        allowed_chars = set('0123456789+-*/(). ')
-        if not all(c in allowed_chars for c in expression):
-            return "Error: Characters not allowed"
-        
-        result = eval(expression)
-        return f"Result: {result}"
+        src = _normalize(expression)
+        tree = ast.parse(src, mode="eval")
+        # You could add a complexity check here by walking the tree
+        val = _safe_eval(tree)
+        if isinstance(val, float) and val.is_integer(): val = int(val) # clean output
+        return f"Result: {val}"
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e}"
 ```
 
 ### Step 2: OpenAI client creation
@@ -120,7 +166,8 @@ def create_calculator_client():
         model="gpt-4o",                       # OpenAI model
         system_prompt="""You are an expert mathematical assistant.
         Always use the 'calculate' tool to perform mathematical operations.
-        Provide clear and detailed explanations."""
+        Provide clear and detailed explanations.""",
+        temperature=1,
     )
     
     if not client:
@@ -140,7 +187,7 @@ tools = [calculate]
 
 # 3. Execute query with automatic tool selection
 response = client.invoke(
-    input="Calculate the area of a square with side 5",
+    input="Let $k = \\lceil{\\sqrt{m + n}}\\rceil$, where $n$ and $m$ are two distinct natural numbers less than $100$. Find the maximum value of $k$.",
     tools=tools,
     tool_choice="auto"  # OpenAI automatically chooses when to use tools
 )
@@ -191,6 +238,7 @@ from datapizzai.tools.google import google_search_tool
 # Direct usage example:
 # response = client.invoke("Who won Wimbledon 2024?", tools=[google_search_tool])
 
+
 # 2. Create multi-tool client
 def create_multi_tool_client():
     """Creates a client with access to all tools."""
@@ -219,8 +267,8 @@ client = create_multi_tool_client()
 
 complex_query = """
 Execute this workflow:
-1. Search for information on "machine learning trends 2025"
-2. Calculate how many years have passed from 1990 to 2025
+1. Calculate how many years have passed from 1990 to 2025
+2. Search for information on "machine learning trends 2025"
 """
 
 response = client.invoke(
@@ -233,11 +281,9 @@ response = client.invoke(
 tool_results = execute_tool_calls(response, tools)
 ```
 
-<!-- Removed duplicated base invocation section to avoid redundancy -->
+### Step 5: Conversational memory
 
-### Step 5: Conversational flow with memory (throughline)
-
-Combine everything into a concise, usable conversational loop.
+Combine everything into a minimal, realistic conversational loop.
 
 ```python
 from datapizzai.memory import Memory
@@ -275,36 +321,41 @@ def chat_turn(user_input: str, memory: Memory, client, tools):
     
     # Invoke client with memory and tools
     response = client.invoke(
-        input="",  # Empty input because we use memory
+        input="",
         memory=memory,
         tools=tools,
         tool_choice="auto"
     )
     
-    # IMPORTANT: do not store assistant messages with tool_calls into memory.
+    # NEVER add response.content to memory if it contains function_calls
     tool_calls = getattr(response, "function_calls", []) or []
+    
     if tool_calls:
+        # Execute tools (reuse your function)
         tool_results = execute_tool_calls(response, tools)
+    
+        # Re-invoke, passing the results as text (no tool_calls in memory)
         followup = client.invoke(
-            input=(
-                "Use these tool results to complete the answer:\n" + "\n".join(map(str, tool_results))
-            ),
+            input="Use these tool results to complete the answer:\n" + "\n".join(map(str, tool_results)),
             memory=memory,
             tools=tools,
             tool_choice="auto"
         )
+    
+        # Add only the final text to memory
         memory.add_turn([TextBlock(content=followup.text)], ROLE.ASSISTANT)
         print(f"🤖 Assistant: {followup.text}")
+    
     else:
+        # No tools: save normally
         memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         print(f"🤖 Assistant: {response.text}")
 
 # 4. Multi-turn conversation example
 conversation = [
-    "Hello! I'm Mirko, I'm working on an AI project",
-    "Search for information on Python frameworks for AI",
-    "Calculate the cost if I spend 500€ per month for 2 years",
-    "Who won Wimbledon 2024?",
+    "Hello! I'm Mike, working on an AI project.",
+    "Search for information on Python frameworks for AI.",
+    "Calculate the cost if I spend $500 per month for 2 years.",
     "Do you remember my name and what I'm doing?"
 ]
 
@@ -317,62 +368,149 @@ print(f"📊 Total turns: {len(memory.memory)}")
 print(f"💬 Total blocks: {len(list(memory.iter_blocks()))}")
 ```
 
-<!-- Removed repetitive implemented tools section to keep the guide concise -->
+## Best practices
 
-## Advanced usage patterns
+### Tool design
+- **Descriptive name**: Use clear and specific names
+- **Detailed description**: Explain exactly what the tool does
+- **Clear input schema**: Precisely define input format
+- **Error handling**: Always handle exceptions and return appropriate ToolResult
 
-### Sequential workflow
+### Agent system prompt
+- **Clear instructions**: Explain when and how to use each tool
+- **Fallback**: Define what to do if no tool is appropriate
+- **Output format**: Specify desired response format
+
+### Memory management
+- **Persistent context**: Use memory for multi-turn conversations
+- **Memory cleanup**: Manage memory size for long conversations
+- **Role separation**: Maintain clear distinction between user and assistant
+
+## Framework extension
+
+### Creating new tools
 ```python
-# The client can execute complex workflows
-workflow_query = """
-    Execute this workflow:
-    1. Search for information on machine learning
-    2. Calculate how many years have passed from 1990 to 2025
-"""
+from datapizzai.tools import Tool
+from typing import Dict
 
-response = client.invoke(
-    input=workflow_query,
-    tools=[calculate, google_search_tool],
-    tool_choice="auto"
-)
-execute_tool_calls(response, tools)
-```
-
-### Intelligent tool selection
-```python
-# The client automatically chooses the appropriate tool
-queries = [
-    "Calculate 2 + 2",                    # → calculate
-    "Search for information on AI",        # → google_search_tool
-    "How much does an AI project cost?"    # → google_search_tool + calculate
-]
-
-for query in queries:
-    response = client.invoke(
-        input=query,
-        tools=tools,
-        tool_choice="auto"
-    )
-    print(f"Query: {query}")
-    tool_results = execute_tool_calls(response, tools)
-    print(f"Tools used: {len(tool_results)}")
-```
-
-### Error handling and fallback
-```python
-# The agent handles errors and fallback automatically
-try:
-    response = agent.invoke("Calculate something complex")
+class DatabaseTool(Tool):
+    """Tool for database operations"""
     
-    # Check if tools were used
-    if hasattr(response, 'tool_calls') and response.tool_calls:
-        for tool_call in response.tool_calls:
-            print(f"Tool used: {tool_call.tool_name}")
-            print(f"Result: {tool_call.result}")
+    def __init__(self, connection_string: str):
+        super().__init__(
+            name="database",
+            description="Executes database queries",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "operation": {"type": "string", "enum": ["select", "insert", "update", "delete"]}
+                }
+            }
+        )
+        self.connection_string = connection_string
     
-except Exception as e:
-    print(f"Error in invocation: {e}")
+    def execute(self, input_data: Dict[str, str]):
+        # Implement database logic
+        pass
 ```
+
+### Tools with configuration parameters
+```python
+class APITool(Tool):
+    """Tool for external API calls"""
+    
+    def __init__(self, base_url: str, api_key: str):
+        super().__init__(
+            name="api_client",
+            description="Executes API calls",
+            input_schema={"type": "string"}
+        )
+        self.base_url = base_url
+        self.api_key = api_key
+    
+    def execute(self, endpoint: str):
+        # Implement API call
+        pass
+```
+
+## Step-by-step guide: custom tool
+
+This guide shows how to create, expose, and use a custom tool with the datapizzai library.
+
+1. Define the tool with `@tool`
+   ```python
+   from datapizzai.tools import tool
+
+   @tool
+   def extract_emails(text: str, domain: str | None = None) -> list[str]:
+       """Extracts emails from text; optionally filters by domain.
+
+       Args:
+           text: Input text
+           domain: If set, returns only emails ending with that domain
+
+       Returns:
+           A list of found emails
+       """
+       import re
+       pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+       emails = re.findall(pattern, text)
+       if domain:
+           emails = [e for e in emails if e.endswith(domain)]
+       return emails
+   ```
+
+2. Create the client
+   ```python
+   import os
+   from dotenv import load_dotenv
+   from datapizzai.clients import ClientFactory
+
+   load_dotenv()
+   client = ClientFactory.create(
+       provider="openai",
+       api_key=os.getenv("OPENAI_API_KEY"),
+       model="gpt-4o",
+       system_prompt=(
+           "You are an assistant that can use tools. If the user asks for email extraction, "
+           "always use the 'extract_emails' tool."
+       ),
+   )
+   tools = [extract_emails]
+   ```
+
+3. Invoke and handle function calls
+   ```python
+   response = client.invoke(
+       input="Find the emails in this text: Contacts: a@example.com, b@test.org",
+       tools=tools,
+       tool_choice="auto"
+   )
+
+   def execute_tool_calls(response, available_tools):
+       tool_map = {t.name: t for t in available_tools}
+       results = []
+       for call in getattr(response, "function_calls", []) or []:
+           name = getattr(call, "name", "")
+           args = getattr(call, "arguments", {}) or {}
+           res = tool_map[name](**args) if name in tool_map else f"Unknown tool: {name}"
+           results.append(f"{name}: {res}")
+       return results
+
+   tool_results = execute_tool_calls(response, tools)
+
+   # If tools were executed, re-invoke passing the results as text
+   if tool_results:
+       followup = client.invoke(
+           input="Use these tool results to complete the answer:\n" + "\n".join(tool_results),
+           tools=tools,
+           tool_choice="auto"
+       )
+       print(followup.text)
+   else:
+       print(response.text)
+   ```
 
 ### Complete example with Google Search
 
@@ -398,7 +536,7 @@ response = client.invoke(
     tools=[google_search_tool],
     tool_choice="auto"
 )
-
+    
 # Handle results as in previous examples
 tool_results = execute_tool_calls(response, [google_search_tool])
 if tool_results:
@@ -409,179 +547,7 @@ if tool_results:
     print(followup.text)
 ```
 
-## Best practices
-
-### Tool design
-- **Descriptive name**: Use clear and specific names
-- **Detailed description**: Explain exactly what the tool does
-- **Clear input schema**: Precisely define input format
-- **Error handling**: Always handle exceptions and return appropriate ToolResult
-
-### Agent system prompt
-- **Clear instructions**: Explain when and how to use each tool
-- **Fallback**: Define what to do if no tool is appropriate
-- **Output format**: Specify desired response format
-
-### Memory management
-- **Persistent context**: Use memory for multi-turn conversations
-- **Memory cleanup**: Manage memory size for long conversations
-- **Role separation**: Maintain clear distinction between user and assistant
-
-
-
-## Framework extension
-
-### Creating new tools
-```python
-class DatabaseTool(Tool):
-    """Tool for database operations"""
-    
-    def __init__(self, connection_string: str):
-        super().__init__(
-            name="database",
-            description="Executes database queries",
-            input_schema={
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string"},
-                    "operation": {"type": "string", "enum": ["select", "insert", "update", "delete"]}
-                }
-            }
-        )
-        self.connection_string = connection_string
-    
-    def execute(self, input_data: Dict[str, str]) -> ToolResult:
-        # Implement database logic
-        pass
-```
-
-### Tools with configuration parameters
-```python
-class APITool(Tool):
-    """Tool for external API calls"""
-    
-    def __init__(self, base_url: str, api_key: str):
-        super().__init__(
-            name="api_client",
-            description="Executes API calls",
-            input_schema={"type": "string"}
-        )
-        self.base_url = base_url
-        self.api_key = api_key
-    
-    def execute(self, endpoint: str) -> ToolResult:
-        # Implement API call
-        pass
-```
-
-
-
-## Complete configuration summary
-
-### Implementation checklist
-
-✅ **Environment setup**
-- [ ] Virtual environment activated
-- [ ] datapizzai library installed
-- [ ] `.env` file configured with OPENAI_API_KEY
-- [ ] OpenAI connection test completed
-
-✅ **Tool definition**
-- [ ] Tools decorated with `@Tool`
-- [ ] Complete docstrings with Args/Returns
-- [ ] Error handling implemented
-- [ ] Safe input validation
-
-✅ **Client configuration**
-- [ ] ClientFactory with provider="openai"
-- [ ] Appropriate system prompt for use case
-- [ ] Model selected (gpt-4o recommended)
-- [ ] Optimization parameters configured
-
-✅ **Tool execution**
-- [ ] `execute_tool_calls` function implemented
-- [ ] Tool map correctly configured
-- [ ] Error handling for tools not found
-- [ ] Operation logging active
-
-✅ **Conversational memory** (optional)
-- [ ] Memory object initialized
-- [ ] Turns added correctly
-- [ ] Memory size management
-- [ ] Multi-turn conversation testing
-
-### Complete template
-
-```python
-#!/usr/bin/env python3
-"""
-Complete template for multi-tool agent with datapizzAI
-"""
-
-import os
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.tools import Tool
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-
-# 1. Environment setup
-load_dotenv()
-
-# 2. Tool definition
-@Tool
-def my_tool(param: str) -> str:
-    """Tool description."""
-    try:
-        # Tool logic
-        result = f"Processed: {param}"
-        return result
-    except Exception as e:
-        return f"Error: {str(e)}"
-
-# 3. Client configuration
-def create_agent():
-    client = ClientFactory.create(
-        provider="openai",
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o",
-        system_prompt="Custom system prompt..."
-    )
-    return client
-
-# 4. Tool execution
-def execute_tool_calls(response, tools):
-    tool_results = []
-    tool_map = {"my_tool": my_tool}
-    
-    for block in response.content:
-        if hasattr(block, 'name') and hasattr(block, 'arguments'):
-            tool_name = block.name
-            if tool_name in tool_map:
-                result = tool_map[tool_name](**block.arguments)
-                tool_results.append(result)
-                print(f"🔧 {tool_name}: {result}")
-    
-    return tool_results
-
-# 5. Main execution
-def main():
-    client = create_agent()
-    tools = [my_tool]
-    
-    response = client.invoke(
-        input="User query",
-        tools=tools,
-        tool_choice="auto"
-    )
-    
-    tool_results = execute_tool_calls(response, tools)
-    
-    if response.text.strip():
-        print(f"🤖 {response.text}")
-    elif tool_results:
-        print(f"🤖 {tool_results[0]}")
-
-if __name__ == "__main__":
-    main()
-```
+Tips:
+- Always define clear docstrings (Args/Returns) and validate input.
+- Avoid `eval` in real-world cases; prefer safe libraries or explicit parsing.
+- If using conversational memory, do not add an assistant message containing tool_calls to memory without first providing the corresponding tool messages; without native support for "tool" messages, re-send the results as text (as in the example above).
