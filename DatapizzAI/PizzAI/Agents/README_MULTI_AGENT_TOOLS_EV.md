@@ -34,6 +34,14 @@ A tool is a Python function decorated with `@tool` that the client can invoke. E
 - **Parameters**: Defined by function signature
 - **Return**: Value returned by the function
 
+### Function calling at a glance
+
+Function calling lets the model "call" Python functions that you expose as tools. In practice:
+- You define Python functions and decorate them with `@tool` (name, description, argument schema).
+- Guided by the system prompt and context, the model can return a structured request to invoke a tool with specific arguments.
+- Your runtime executes the Python function with those arguments and returns the output to the model or the user.
+- With `tool_choice="auto"`, the model decides when to use tools; alternatively, you can force a specific tool.
+
 ## Basic structure of a tool
 
 ```python
@@ -173,33 +181,65 @@ To create a client with multiple tools, follow these steps:
 ```python
 # 1. Define additional tools
 @tool
-def search_information(query: str) -> str:
-    """Simulates a web search to find information.
+def search_information(query: str, max_results: int = 3, lang: str = "en") -> str:
+    """Performs a real web search (Bing Web Search API or SerpAPI).
     
     Args:
         query: Search term
+        max_results: Maximum number of results to return
+        lang: Preferred language (e.g., "en", "it")
     
     Returns:
-        Simulated search results
+        A concise list of results with title and URL
     """
-    query_lower = query.lower()
-    
-    if "python" in query_lower:
-        results = [
-            "Python is an interpreted programming language",
-            "Official documentation: python.org",
-            "Tutorials available for beginners"
-        ]
-    elif "ai" in query_lower:
-        results = [
-            "Artificial Intelligence: computer science field",
-            "Machine Learning is a subset of AI",
-            "Applications: NLP, computer vision, robotics"
-        ]
-    else:
-        results = [f"Results for '{query}' not available in demo"]
-    
-    return f"Results for '{query}':\n" + "\n".join(f"- {r}" for r in results)
+    import os
+    import requests
+
+    serpapi_key = os.getenv("SERPAPI_API_KEY")
+    bing_key = os.getenv("BING_SEARCH_API_KEY")
+
+    try:
+        results = []
+        if serpapi_key:
+            params = {
+                "engine": "google",
+                "q": query,
+                "hl": lang,
+                "num": max_results,
+                "api_key": serpapi_key,
+            }
+            r = requests.get("https://serpapi.com/search", params=params, timeout=20)
+            r.raise_for_status()
+            data = r.json()
+            for item in (data.get("organic_results") or [])[:max_results]:
+                title = item.get("title")
+                link = item.get("link")
+                if title and link:
+                    results.append(f"- {title} — {link}")
+
+        elif bing_key:
+            headers = {"Ocp-Apim-Subscription-Key": bing_key}
+            params = {"q": query, "count": max_results, "mkt": f"{lang}-{lang.upper()}"}
+            r = requests.get("https://api.bing.microsoft.com/v7.0/search", headers=headers, params=params, timeout=20)
+            r.raise_for_status()
+            data = r.json()
+            for item in (data.get("webPages", {}).get("value") or [])[:max_results]:
+                name = item.get("name")
+                url = item.get("url")
+                if name and url:
+                    results.append(f"- {name} — {url}")
+        else:
+            return (
+                "⚠️ No API key found for web search. "
+                "Configure SERPAPI_API_KEY or BING_SEARCH_API_KEY in your .env file"
+            )
+
+        if not results:
+            return f"No results for '{query}'"
+        return "Results:\n" + "\n".join(results)
+
+    except Exception as e:
+        return f"Search error: {e}"
 
 @tool  
 def manage_file(command: str, path: str) -> str:

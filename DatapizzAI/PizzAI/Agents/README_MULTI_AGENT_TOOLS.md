@@ -23,7 +23,7 @@ Guida completa per la creazione e utilizzo di client multi-tool con il framework
 ### Client con Tool
 Un client è un'interfaccia AI che può utilizzare strumenti per completare task. Ogni client ha:
 - **Provider**: Connessione al modello AI (OpenAI, Google, etc.)
-- **Model**: Modello specifico (gpt-4o, gemini, etc.)
+- **Model**: Modello specifico (gpt-5, gemini 2.5 pro, etc.)
 - **System Prompt**: Istruzioni per il comportamento del client
 - **Tools**: Lista di strumenti disponibili per l'invocazione
 
@@ -33,6 +33,14 @@ Un tool è una funzione Python decorata con `@tool` che il client può invocare.
 - **Descrizione**: Spiegazione di cosa fa il tool (dal docstring)
 - **Parametri**: Definiti dalla signature della funzione
 - **Return**: Valore restituito dalla funzione
+
+### Function calling in breve
+
+Il function calling permette al modello di "chiamare" funzioni Python dichiarate come tool. In pratica:
+- Definisci funzioni Python e le annoti con `@tool` (nome, descrizione, schema argomenti).
+- Il modello, guidato dal system prompt e dal contesto, può restituire una richiesta strutturata a invocare un tool con specifici argomenti.
+- Il runtime esegue davvero la funzione Python con quegli argomenti e restituisce l'output al modello o all'utente.
+- Con `tool_choice="auto"` il modello decide quando usare i tool; in alternativa puoi forzare un tool specifico.
 
 ## Struttura base di un tool
 
@@ -106,10 +114,11 @@ def create_calculator_client():
     client = ClientFactory.create(
         provider="openai",                    # Provider AI
         api_key=os.getenv("OPENAI_API_KEY"),  # API key da .env
-        model="gpt-4o",                       # Modello OpenAI
+        model="gpt-5",                        # Modello OpenAI
         system_prompt="""Sei un assistente matematico esperto.
         Usa sempre lo strumento 'calcolatrice' per eseguire operazioni matematiche.
-        Fornisci spiegazioni chiare e dettagliate."""
+        Fornisci spiegazioni chiare e dettagliate.""",
+        temperature=1,
     )
     
     if not client:
@@ -129,7 +138,7 @@ tools = [calcolatrice]
 
 # 3. Esegui query con tool automatico
 response = client.invoke(
-    input="Calcola l'area di un quadrato con lato 5",
+    input="Sia $k = \lceil{\sqrt{m + n}}\rceil$, dove $n$ e $m$ sono due numeri distinti naturali minori di $100$. Trova il massimo valore di $k$",
     tools=tools,
     tool_choice="auto"  # OpenAI sceglie automaticamente quando usare i tool
 )
@@ -173,33 +182,68 @@ Per creare un client con più strumenti, segui questi passaggi:
 ```python
 # 1. Definisci strumenti aggiuntivi
 @tool
-def cerca_informazioni(query: str) -> str:
-    """Simula una ricerca web per trovare informazioni.
+def cerca_informazioni(query: str, max_results: int = 3, lang: str = "it") -> str:
+    """Esegue una ricerca web reale (Bing Web Search API o SerpAPI).
     
     Args:
         query: Termine di ricerca
+        max_results: Numero massimo di risultati da restituire
+        lang: Lingua preferita (es. "it", "en")
     
     Returns:
-        Risultati della ricerca simulata
+        Un elenco sintetico di risultati con titolo e URL
     """
-    query_lower = query.lower()
-    
-    if "python" in query_lower:
-        results = [
-            "Python è un linguaggio di programmazione interpretato",
-            "Documentazione ufficiale: python.org",
-            "Tutorial disponibili per principianti"
-        ]
-    elif "ai" in query_lower:
-        results = [
-            "Intelligenza Artificiale: campo dell'informatica",
-            "Machine Learning è un sottoinsieme dell'AI",
-            "Applicazioni: NLP, computer vision, robotica"
-        ]
-    else:
-        results = [f"Risultati per '{query}' non disponibili in demo"]
-    
-    return f"Risultati per '{query}':\n" + "\n".join(f"- {r}" for r in results)
+    import os
+    import requests
+
+    # Scegli motore: SERPAPI o Bing (in base a chiave disponibile)
+    serpapi_key = os.getenv("SERPAPI_API_KEY")
+    bing_key = os.getenv("BING_SEARCH_API_KEY")
+
+    try:
+        results = []
+        if serpapi_key:
+            # SerpAPI Web Search
+            params = {
+                "engine": "google",
+                "q": query,
+                "hl": lang,
+                "num": max_results,
+                "api_key": serpapi_key,
+            }
+            r = requests.get("https://serpapi.com/search", params=params, timeout=20)
+            r.raise_for_status()
+            data = r.json()
+            for item in (data.get("organic_results") or [])[:max_results]:
+                title = item.get("title")
+                link = item.get("link")
+                if title and link:
+                    results.append(f"- {title} — {link}")
+
+        elif bing_key:
+            # Bing Web Search v7
+            headers = {"Ocp-Apim-Subscription-Key": bing_key}
+            params = {"q": query, "count": max_results, "mkt": f"{lang}-{lang.upper()}"}
+            r = requests.get("https://api.bing.microsoft.com/v7.0/search", headers=headers, params=params, timeout=20)
+            r.raise_for_status()
+            data = r.json()
+            for item in (data.get("webPages", {}).get("value") or [])[:max_results]:
+                name = item.get("name")
+                url = item.get("url")
+                if name and url:
+                    results.append(f"- {name} — {url}")
+        else:
+            return (
+                "⚠️ Nessuna chiave trovata per la ricerca web. "
+                "Configura SERPAPI_API_KEY o BING_SEARCH_API_KEY nel file .env"
+            )
+
+        if not results:
+            return f"Nessun risultato per '{query}'"
+        return "Risultati:\n" + "\n".join(results)
+
+    except Exception as e:
+        return f"Errore nella ricerca: {e}"
 
 @tool  
 def gestisci_file(comando: str, percorso: str) -> str:
