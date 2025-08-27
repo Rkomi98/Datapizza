@@ -62,7 +62,7 @@ def load_image_as_base64(path: str) -> str:
     return base64.b64encode(Path(path).read_bytes()).decode("utf-8")
 
 # Carica immagine locale e converti in base64
-image_b64 = load_image_as_base64("my_image.jpg")
+image_b64 = load_image_as_base64("Example.png")
 
 # Crea oggetto Media con metadati dell'immagine
 media = Media(
@@ -128,10 +128,10 @@ client = ClientFactory.create(
 memory = Memory()
 
 # Primo turno: utente invia immagine con richiesta
-image_block = create_mediablock_from_file("my_photo.jpg")
-memory.add_turn([TextBlock("Analizza questa foto"), image_block], ROLE.USER)
+image_block = create_mediablock_from_file("Example.png")
+memory.add_turn([TextBlock("Analizza questa foto, cosa vedi?"), image_block], ROLE.USER)
 resp = client.invoke("", memory=memory)
-memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)
+memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT) #Aggiungo risposta alla memori
 
 # Secondo turno: follow-up che si basa sull'immagine precedente
 memory.add_turn([TextBlock("Quali miglioramenti consiglieresti?")], ROLE.USER)
