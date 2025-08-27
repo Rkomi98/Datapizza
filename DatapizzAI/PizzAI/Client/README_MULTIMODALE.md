@@ -17,8 +17,10 @@ Esempi rapidi per usare il framework **DatapizzAI** con input/output multimedial
 ```python
 from datapizzai.clients import ClientFactory
 from datapizzai.type import TextBlock, MediaBlock, Media
+from dotenv import load_dotenv
 import os
 
+load_dotenv('../.env')
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -30,7 +32,7 @@ media = Media(
     extension="jpg",        # Estensione senza punto per MIME type corretto
     media_type="image",     # Tipo di media (image, audio, video)
     source_type="url",      # Fonte: url, base64, o file
-    source="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png"
+    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint"
 )
 
 # Combina testo e immagine per input multimodale
@@ -92,11 +94,37 @@ print(response.text)
 **Cosa fa**: Mantiene il contesto visivo e testuale tra i turni di conversazione. L'AI ricorda l'immagine analizzata e può fare riferimento ad essa nei turni successivi senza che l'utente la reinvii.
 
 ```python
-from datapizzai.memory import Memory
-from datapizzai.type import ROLE, TextBlock
-from datapizzai.utils import create_mediablock_from_file
+import os
+import base64
+from pathlib import Path
+from dotenv import load_dotenv
 
-client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
+from datapizzai.type import ROLE, TextBlock, Media, MediaBlock
+
+# Carica variabili d'ambiente
+load_dotenv('../.env')
+
+def create_mediablock_from_file(file_path: str) -> MediaBlock:
+    """Crea un MediaBlock da un file immagine locale (base64)."""
+    data = Path(file_path).read_bytes()
+    image_b64 = base64.b64encode(data).decode('utf-8')
+    ext = Path(file_path).suffix.lstrip('.').lower() or 'png'
+    media = Media(
+        extension=ext,
+        media_type="image",
+        source_type="base64",
+        source=image_b64,
+        detail="high",
+    )
+    return MediaBlock(media=media)
+
+client = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+)
 memory = Memory()
 
 # Primo turno: utente invia immagine con richiesta
