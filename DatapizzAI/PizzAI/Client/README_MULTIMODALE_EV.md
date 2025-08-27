@@ -2,6 +2,12 @@
 
 Quick examples for using the **DatapizzAI** framework with multimedia input/output (images + text).
 
+## Table of Contents
+
+- [1. Image analysis from URL](#1-image-analysis-from-url)
+- [2. Local image analysis](#2-local-image-analysis)
+- [3. Multimodal conversation with memory](#3-multimodal-conversation-with-memory)
+
 ## 1. Image analysis from URL
 
 **When to use**: Analysis of public images, quick tests, demos without local files
@@ -79,7 +85,7 @@ print(response.text)
 
 ---
 
-## 4. Multimodal conversation with memory
+## 3. Multimodal conversation with memory
 
 **When to use**: Progressive image analysis, visual tutoring, iterative development of creative projects
 

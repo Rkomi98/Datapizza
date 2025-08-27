@@ -6,6 +6,21 @@ This guide walks you step-by-step through building a text-only chatbot with Data
 - **Stack**: DatapizzAI (text-only mode), LLM provider (e.g., OpenAI).
 - **Outcome**: A CLI chatbot with memory, a sliding context window, error handling, metrics, and optional caching.
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [1. Client setup](#1-client-setup)
+- [2. Core Concepts: Memory, TextBlock, ROLE](#2-core-concepts-memory-textblock-role)
+- [3. Step 0: A `chat_turn` function](#3-step-0-a-chat_turn-function)
+- [4. From Function to Chatbot: A Class with a Sliding Window](#4-from-function-to-chatbot-a-class-with-a-sliding-window)
+- [5. Minimal Interactive REPL](#5-minimal-interactive-repl)
+- [6. Improving Response Style](#6-improving-response-style)
+- [7. Performance: Caching and Metrics](#7-performance-caching-and-metrics)
+- [8. Putting It All Together: Complete Chatbot](#8-putting-it-all-together-complete-chatbot)
+- [9. Recommended Extensions](#9-recommended-extensions)
+- [Useful References](#useful-references)
+- [Appendix: Available Modes](#appendix-available-modes-one-shot-vs-conversational)
+
 ## Prerequisites
 - Python 3.10+
 - Provider API key (e.g., `OPENAI_API_KEY`)
@@ -170,7 +185,7 @@ print("Stop reason:", reply.stop_reason)
 
 Measurement enables data-driven optimizations for latency, cost, and quality.
 
-## 9. Putting It All Together: Complete Chatbot
+## 8. Putting It All Together: Complete Chatbot
 Here is a summary example that combines the configuration, class, REPL, and basic metrics.
 
 ```python
@@ -223,7 +238,7 @@ while True:
         print("bot> A temporary error occurred. Please try again.")
 ```
 
-## 10. Recommended Extensions
+## 9. Recommended Extensions
 - **Persistence**: Save memory to a database or file to maintain context across sessions.
 - **Structured Data**: Instruct the model to return JSON for easier integration with other services.
 - **Evaluation**: Define benchmark prompts to compare response quality, latency, and costs across different models or prompts.

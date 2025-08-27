@@ -6,6 +6,21 @@ Questa guida ti accompagna passo‑passo alla creazione di un chatbot testuale c
 - Tecnologie: DatapizzAI (modalità text‑only), provider LLM (es. OpenAI)
 - Risultato: un chatbot a riga di comando con memoria, sliding window, gestione errori, metriche e cache opzionale
 
+## Indice
+
+- [Prerequisiti](#prerequisiti)
+- [1. Configurazione del client](#1-configurazione-del-client)
+- [2. Concetti chiave: Memory, TextBlock, ROLE](#2-concetti-chiave-memory-textblock-role)
+- [3. Step 0: una funzione `chat_turn`](#3-step-0-una-funzione-chat_turn)
+- [4. Da funzione a chatbot: classe con sliding window](#4-da-funzione-a-chatbot-classe-con-sliding-window)
+- [5. Esecuzione interattiva (REPL) minimale](#5-esecuzione-interattiva-repl-minimale)
+- [6. Migliorare lo stile delle risposte](#6-migliorare-lo-stile-delle-risposte)
+- [7. Prestazioni: cache e metriche](#7-prestazioni-cache-e-metriche)
+- [8. Mettere tutto insieme: chatbot completo](#8-mettere-tutto-insieme-chatbot-completo)
+- [9. Estensioni consigliate](#9-estensioni-consigliate)
+- [Riferimenti utili](#riferimenti-utili)
+- [Appendice: modalità disponibili](#appendice-modalità-disponibili-one-shot-vs-conversational)
+
 ## Prerequisiti
 - Python 3.10+
 - Chiave API del provider (es. `OPENAI_API_KEY`)
@@ -146,8 +161,6 @@ client = ClientFactory.create(
 
 Perché: allinei lo stile del bot alle esigenze del dominio (es. supporto, consulenza, brainstorming).
 
-
-
 ## 7. Prestazioni: cache e metriche
 La cache riduce costi per richieste ripetute. Le metriche aiutano a capire l’impatto delle scelte di prompting/memoria.
 
@@ -171,7 +184,7 @@ print("stop reason:", reply.stop_reason)
 
 Perché: la misurazione consente ottimizzazioni guidate dai dati (latency/costi/qualità).
 
-## 9. Mettere tutto insieme: chatbot completo
+## 8. Mettere tutto insieme: chatbot completo
 Qui un esempio riassuntivo che unisce configurazione, classe, REPL e metriche base.
 
 ```python
@@ -225,7 +238,7 @@ while True:
         print("bot> Si è verificato un errore temporaneo. Riprova.")
 ```
 
-## 10. Estensioni consigliate
+## 9. Estensioni consigliate
 - Persistenza: salva la memoria su database o file tra le sessioni
 - Strutture dati: chiedi risposte in JSON per integrare facilmente con servizi esterni
 - Valutazione: definisci prompt di benchmark e confronta qualità/latency/costi
