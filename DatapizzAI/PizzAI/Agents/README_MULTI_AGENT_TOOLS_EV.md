@@ -10,13 +10,12 @@ Complete guide for creating and using multi-tool clients with the datapizzai fra
    - [Step 1: Tool definition](#step-1-tool-definition)
    - [Step 2: OpenAI client creation](#step-2-openai-client-creation)
    - [Step 3: Configuration and execution](#step-3-configuration-and-execution)
-   - [Step 4: Advanced multi-tool agent](#step-4-advanced-multi-tool-agent)
-   - [Step 5: Conversational memory](#step-5-conversational-memory)
-4. [Implemented tool examples](#implemented-tool-examples)
-5. [Advanced usage patterns](#advanced-usage-patterns)
-6. [Best practices](#best-practices)
-7. [Framework extension](#framework-extension)
-8. [Complete configuration summary](#complete-configuration-summary)
+   - [Step 4: Advanced multi-tool client](#step-4-advanced-multi-tool-client)
+   - [Step 5: Conversational flow with memory (throughline)](#step-5-conversational-flow-with-memory-throughline)
+4. [Advanced usage patterns](#advanced-usage-patterns)
+5. [Best practices](#best-practices)
+6. [Framework extension](#framework-extension)
+7. [Step-by-step guide: custom tool](#step-by-step-guide-custom-tool)
 
 ## Fundamental concepts
 
@@ -366,19 +365,23 @@ def chat_turn(user_input: str, memory: Memory, client, tools):
         tool_choice="auto"
     )
     
-    # Add response to memory
-    memory.add_turn(response.content, ROLE.ASSISTANT)
-    
-    # Execute any function calls
-    tool_results = execute_tool_calls(response, tools)
-    
-    # Show response
-    if response.text.strip():
+    # IMPORTANT: do not store assistant messages with tool_calls into memory.
+    tool_calls = getattr(response, "function_calls", []) or []
+    if tool_calls:
+        tool_results = execute_tool_calls(response, tools)
+        followup = client.invoke(
+            input=(
+                "Use these tool results to complete the answer:\n" + "\n".join(map(str, tool_results))
+            ),
+            memory=memory,
+            tools=tools,
+            tool_choice="auto"
+        )
+        memory.add_turn([TextBlock(content=followup.text)], ROLE.ASSISTANT)
+        print(f"🤖 Assistant: {followup.text}")
+    else:
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         print(f"🤖 Assistant: {response.text}")
-    elif tool_results:
-        print(f"🤖 Assistant: {tool_results[0]}")
-    
-    return response
 
 # 4. Multi-turn conversation example
 conversation = [

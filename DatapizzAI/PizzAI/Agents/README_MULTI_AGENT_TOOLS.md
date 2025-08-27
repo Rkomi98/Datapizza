@@ -11,12 +11,10 @@ Guida completa per la creazione e utilizzo di client multi-tool con il framework
    - [Passo 2: Creazione del client OpenAI](#passo-2-creazione-del-client-openai)
    - [Passo 3: Configurazione ed esecuzione](#passo-3-configurazione-ed-esecuzione)
    - [Passo 4: Client multi-tool avanzato](#passo-4-client-multi-tool-avanzato)
-   - [Passo 5: Memoria conversazionale](#passo-5-conversazione-con-memoria)
-4. [Esempi di strumenti implementati](#esempi-di-strumenti-implementati)
-5. [Pattern di utilizzo avanzati](#pattern-di-utilizzo-avanzati)
-6. [Best practices](#best-practices)
-7. [Estensione del framework](#estensione-del-framework)
-8. [Riepilogo configurazione completa](#riepilogo-configurazione-completa)
+   - [Passo 5: Conversazione con memoria](#passo-5-conversazione-con-memoria)
+4. [Best practices](#best-practices)
+5. [Estensione del framework](#estensione-del-framework)
+6. [Guida passo-passo: tool custom](#guida-passo-passo-tool-custom)
 
 ## Concetti fondamentali
 
@@ -434,4 +432,87 @@ class APITool(Tool):
 ```
 
 
+
+## Guida passo-passo: tool custom
+
+Questa guida mostra come creare, esporre e usare un tool personalizzato con la libreria datapizzai.
+
+1. Definisci il tool con `@tool`
+   ```python
+   from datapizzai.tools import tool
+
+   @tool
+   def estrai_email(testo: str, dominio: str | None = None) -> list[str]:
+       """Estrae email da un testo; opzionalmente filtra per dominio.
+
+       Args:
+           testo: Testo di input
+           dominio: Se impostato, restituisce solo email che terminano con quel dominio
+
+       Returns:
+           Lista di email trovate
+       """
+       import re
+       pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+       emails = re.findall(pattern, testo)
+       if dominio:
+           emails = [e for e in emails if e.endswith(dominio)]
+       return emails
+   ```
+
+2. Crea il client
+   ```python
+   import os
+   from dotenv import load_dotenv
+   from datapizzai.clients import ClientFactory
+
+   load_dotenv()
+   client = ClientFactory.create(
+       provider="openai",
+       api_key=os.getenv("OPENAI_API_KEY"),
+       model="gpt-4o",
+       system_prompt=(
+           "Sei un assistente che può usare strumenti. Se l'utente chiede estrazione di email, "
+           "usa sempre lo strumento 'estrai_email'."
+       ),
+   )
+   tools = [estrai_email]
+   ```
+
+3. Invoca e gestisci i function call
+   ```python
+   response = client.invoke(
+       input="Trova le email in questo testo: Contatti: a@example.com, b@test.org",
+       tools=tools,
+       tool_choice="auto"
+   )
+
+   def execute_tool_calls(response, available_tools):
+       tool_map = {t.name: t for t in available_tools}
+       results = []
+       for call in getattr(response, "function_calls", []) or []:
+           name = getattr(call, "name", "")
+           args = getattr(call, "arguments", {}) or {}
+           res = tool_map[name](**args) if name in tool_map else f"Tool sconosciuto: {name}"
+           results.append(f"{name}: {res}")
+       return results
+
+   tool_results = execute_tool_calls(response, tools)
+
+   # Se sono stati eseguiti tool, re-invoca passando i risultati come testo
+   if tool_results:
+       followup = client.invoke(
+           input="Usa questi risultati degli strumenti per completare la risposta:\n" + "\n".join(tool_results),
+           tools=tools,
+           tool_choice="auto"
+       )
+       print(followup.text)
+   else:
+       print(response.text)
+   ```
+
+Suggerimenti:
+- Definisci sempre docstring chiare (Args/Returns) e valida l'input.
+- Evita `eval` per casi reali; preferisci librerie sicure o parsing esplicito.
+- Se usi memoria conversazionale, non aggiungere alla memoria un messaggio assistant contenente tool_calls senza fornire prima i relativi messaggi di tool; in mancanza del supporto nativo ai messaggi “tool”, reinvia i risultati come testo (come nell'esempio sopra).
 
