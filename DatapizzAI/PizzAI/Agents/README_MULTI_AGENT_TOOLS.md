@@ -219,19 +219,6 @@ def cerca_informazioni(query: str, max_results: int = 3, lang: str = "it") -> st
                 link = item.get("link")
                 if title and link:
                     results.append(f"- {title} — {link}")
-
-        elif bing_key:
-            # Bing Web Search v7
-            headers = {"Ocp-Apim-Subscription-Key": bing_key}
-            params = {"q": query, "count": max_results, "mkt": f"{lang}-{lang.upper()}"}
-            r = requests.get("https://api.bing.microsoft.com/v7.0/search", headers=headers, params=params, timeout=20)
-            r.raise_for_status()
-            data = r.json()
-            for item in (data.get("webPages", {}).get("value") or [])[:max_results]:
-                name = item.get("name")
-                url = item.get("url")
-                if name and url:
-                    results.append(f"- {name} — {url}")
         else:
             return (
                 "⚠️ Nessuna chiave trovata per la ricerca web. "
@@ -245,53 +232,6 @@ def cerca_informazioni(query: str, max_results: int = 3, lang: str = "it") -> st
     except Exception as e:
         return f"Errore nella ricerca: {e}"
 
-@tool  
-def gestisci_file(comando: str, percorso: str, contenuto: str = "") -> str:
-    """Gestisce file e directory reali in modo sicuro (scoped alla repo corrente).
-    
-    Args:
-        comando: Operazione da eseguire (list, create, delete)
-        percorso: Percorso relativo del file o directory (es. "docs/ml_summary.txt")
-        contenuto: Testo da scrivere in caso di create (opzionale)
-    
-    Returns:
-        Esito dell'operazione o elenco contenuti
-    """
-    import os
-    from pathlib import Path
-
-    root = Path.cwd()
-    target = (root / Path(percorso)).resolve()
-
-    # Evita path traversal fuori dalla repo corrente
-    try:
-        target.relative_to(root)
-    except Exception:
-        return "⚠️ Percorso non consentito"
-
-    try:
-        if comando == "list":
-            if target.is_dir():
-                entries = sorted(p.name for p in target.iterdir())
-                return f"Contenuto di {percorso}:\n" + ("\n".join(f"- {e}" for e in entries) or "(vuoto)")
-            return f"Directory {percorso} non trovata"
-
-        elif comando == "create":
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(contenuto or "", encoding="utf-8")
-            return f"✅ File creato: {percorso}"
-
-        elif comando == "delete":
-            if target.exists():
-                if target.is_file():
-                    target.unlink()
-                    return f"🗑️ File eliminato: {percorso}"
-                return "⚠️ Solo eliminazione file supportata in questo esempio"
-            return f"⚠️ File non trovato: {percorso}"
-
-        return f"Comando '{comando}' non supportato"
-    except Exception as e:
-        return f"Errore file: {e}"
 
 # 2. Crea client multi-tool
 def create_multi_tool_client():
@@ -305,7 +245,6 @@ def create_multi_tool_client():
 
         - calcolatrice: per operazioni matematiche
         - cerca_informazioni: per ricerche web simulate  
-        - gestisci_file: per operazioni su file e directory
 
         Analizza ogni richiesta e scegli lo strumento più appropriato.
         Per task complessi, puoi usare più strumenti in sequenza.
@@ -321,11 +260,9 @@ tools = [calcolatrice, cerca_informazioni, gestisci_file]
 client = create_multi_tool_client()
 
 complex_query = """
-Esegui questo workflow (usa obbligatoriamente lo strumento 'gestisci_file' per i punti 3 e 4):
-1. Cerca informazioni su machine learning
-2. Calcola quanti anni sono passati dal 1990 al 2025
-3. Crea un file chiamato ml_summary.txt nella directory docs/ e scrivi un breve sommario (5 righe)
-4. Lista i file nella directory docs/ per verificare
+Esegui questo workflow:
+1. Calcola quanti anni sono passati dal 1990 al 2025
+2. Cerca informazioni su machine learning
 """
 
 response = client.invoke(
@@ -340,9 +277,9 @@ tool_results = execute_tool_calls(response, tools)
 
 <!-- Sezione duplicata rimossa: l'invocazione base è già coperta nei passi precedenti -->
 
-### Passo 5: Conversazione con memoria (filo rosso)
+### Passo 5: Conversazione con memoria
 
-Ora uniamo tutto in un ciclo conversazionale essenziale e realmente utilizzabile.
+Ora uniamo tutto in un ciclo conversazionale minimal e verosimile.
 
 ```python
 from datapizzai.memory import Memory
@@ -380,25 +317,35 @@ def chat_turn(user_input: str, memory: Memory, client, tools):
     
     # Invoca il client con memoria e tool
     response = client.invoke(
-        input="",  # Input vuoto perché usiamo la memoria
+        input="",
         memory=memory,
         tools=tools,
         tool_choice="auto"
     )
     
-    # Aggiungi risposta alla memoria
-    memory.add_turn(response.content, ROLE.ASSISTANT)
+    # NON aggiungere mai response.content alla memoria se ci sono function_calls
+    tool_calls = getattr(response, "function_calls", []) or []
     
-    # Esegui eventuali function calls
-    tool_results = execute_tool_calls(response, tools)
+    if tool_calls:
+        # Esegui i tool (riusa la tua funzione)
+        tool_results = execute_tool_calls(response, tools)
     
-    # Mostra risposta
-    if response.text.strip():
+        # Re-invoca passando i risultati come testo (niente tool_calls in memoria)
+        followup = client.invoke(
+            input="Usa questi risultati degli strumenti per completare la risposta:\n" + "\n".join(map(str, tool_results)),
+            memory=memory,
+            tools=tools,
+            tool_choice="auto"
+        )
+    
+        # Aggiungi solo testo finale alla memoria
+        memory.add_turn([TextBlock(content=followup.text)], ROLE.ASSISTANT)
+        print(f"🤖 Assistente: {followup.text}")
+    
+    else:
+        # Nessun tool: salva normalmente
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         print(f"🤖 Assistente: {response.text}")
-    elif tool_results:
-        print(f"🤖 Assistente: {tool_results[0]}")
-    
-    return response
 
 # 4. Esempio di conversazione multi-turno
 conversation = [
