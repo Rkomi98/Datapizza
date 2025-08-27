@@ -221,6 +221,133 @@ print(f"Risposta: {response.text}")
 
 ---
 
+## Metodo 3: Client custom (es. Hugging Face)
+
+Se il provider non è supportato nativamente dal `ClientFactory`, puoi creare un adapter minimale che espone la stessa interfaccia (`invoke`) dei client DatapizzAI. Di seguito un esempio per Hugging Face Inference API.
+
+Prerequisiti:
+
+- Aggiungi nel file `.env`:
+```bash
+HUGGINGFACE_API_KEY=hf-...
+```
+- Installa la dipendenza HTTP:
+```bash
+pip install requests
+```
+
+Esempio di client custom e test rapido:
+
+```python
+import os
+import requests
+from typing import Optional, Union, List
+from pydantic import BaseModel
+
+# Tipi DatapizzAI per compatibilità input/memory (opzionali)
+from datapizzai.type import TextBlock
+from datapizzai.memory import Memory
+
+
+class SimpleResponse(BaseModel):
+    """Struttura minima compatibile con l'uso nei nostri esempi."""
+    text: str
+    prompt_tokens_used: int = 0
+    completion_tokens_used: int = 0
+    stop_reason: str = "stop"
+
+
+class HuggingFaceClient:
+    """Adapter minimale per Hugging Face Inference API.
+
+    Funziona con endpoint pubblici Inference API (task text-generation/text2text-generation).
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.7,
+    ):
+        self.api_key = api_key
+        self.model = model
+        self.system_prompt = system_prompt or ""
+        self.temperature = temperature
+        self.endpoint = f"https://api-inference.huggingface.co/models/{self.model}"
+
+    def _build_prompt(
+        self,
+        input: Optional[Union[str, List[TextBlock]]] = None,
+        memory: Optional[Memory] = None,
+    ) -> str:
+        parts: List[str] = []
+        if self.system_prompt:
+            parts.append(self.system_prompt)
+        if memory is not None:
+            for turn in memory.memory:
+                # Concatenazione semplice dei contenuti testuali presenti in memoria
+                msg = " ".join(getattr(b, "content", "") for b in turn.blocks)
+                parts.append(msg)
+        if isinstance(input, str) and input:
+            parts.append(input)
+        elif isinstance(input, list) and input:
+            parts.append(" ".join(b.content for b in input if isinstance(b, TextBlock)))
+        return "\n\n".join(p for p in parts if p)
+
+    def invoke(
+        self,
+        input: Optional[Union[str, List[TextBlock]]] = None,
+        memory: Optional[Memory] = None,
+    ) -> SimpleResponse:
+        prompt = self._build_prompt(input=input, memory=memory)
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+        payload = {
+            "inputs": prompt,
+            "parameters": {"temperature": self.temperature},
+        }
+        try:
+            r = requests.post(self.endpoint, headers=headers, json=payload, timeout=60)
+            r.raise_for_status()
+            data = r.json()
+            # Inference API ritorna una lista con 'generated_text' per i task di generazione
+            if isinstance(data, list) and data and isinstance(data[0], dict):
+                text = data[0].get("generated_text") or str(data[0])
+            elif isinstance(data, dict) and "generated_text" in data:
+                text = data["generated_text"]
+            else:
+                text = str(data)
+        except Exception as e:
+            text = f"Errore Hugging Face: {e}"
+        return SimpleResponse(text=text)
+
+
+# Test rapido del setup
+if __name__ == "__main__":
+    api_key = os.getenv("HUGGINGFACE_API_KEY")
+    if not api_key:
+        raise RuntimeError("Imposta HUGGINGFACE_API_KEY nel tuo .env")
+
+    # Sostituisci con un modello disponibile su HF Inference API
+    # Esempi: google/flan-t5-large (text2text), meta-llama/Llama-3.1-8B-Instruct (può richiedere accesso)
+    client = HuggingFaceClient(
+        api_key=api_key,
+        model="google/flan-t5-large",
+        system_prompt="Sei un assistente AI utile e conciso.",
+        temperature=0.7,
+    )
+
+    resp = client.invoke("Ciao! Presentati brevemente in due frasi.")
+    print(f"Risposta: {resp.text}")
+```
+
+Note:
+
+- Se usi un endpoint compatibile OpenAI (es. server self-hosted TGI/OpenAI-compatible), verifica se la tua versione di `datapizzai` supporta la configurazione di un `base_url` nel `OpenAIClient`. In tal caso, puoi riutilizzare direttamente `OpenAIClient` puntando al tuo endpoint.
+- I modelli su Hugging Face possono richiedere abilitazioni specifiche o accesso approvato.
+
+---
+
 ## Esempio completo di utilizzo
 
 ```python
