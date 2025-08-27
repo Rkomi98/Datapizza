@@ -17,8 +17,10 @@ Quick examples for using the **DatapizzAI** framework with multimedia input/outp
 ```python
 from datapizzai.clients import ClientFactory
 from datapizzai.type import TextBlock, MediaBlock, Media
+from dotenv import load_dotenv
 import os
 
+load_dotenv('../.env')
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -30,7 +32,7 @@ media = Media(
     extension="jpg",        # Extension without dot for correct MIME type
     media_type="image",     # Media type (image, audio, video)
     source_type="url",      # Source: url, base64, or file
-    source="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png"
+    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint"
 )
 
 # Combine text and image for multimodal input
@@ -60,7 +62,7 @@ def load_image_as_base64(path: str) -> str:
     return base64.b64encode(Path(path).read_bytes()).decode("utf-8")
 
 # Load local image and convert to base64
-image_b64 = load_image_as_base64("my_image.jpg")
+image_b64 = load_image_as_base64("Example.png")
 
 # Create Media object with image metadata
 media = Media(
@@ -92,18 +94,40 @@ print(response.text)
 **What it does**: Maintains visual and textual context between conversation turns. The AI remembers the analyzed image and can refer to it in subsequent turns without the user resending it.
 
 ```python
+import os
+import base64
+from pathlib import Path
+from dotenv import load_dotenv
+
+from datapizzai.clients import ClientFactory
 from datapizzai.memory import Memory
-from datapizzai.type import ROLE, TextBlock
-from datapizzai.utils import create_mediablock_from_file
+from datapizzai.type import ROLE, TextBlock, Media, MediaBlock
+
+# Load environment variables
+load_dotenv('../.env')
+
+def create_mediablock_from_file(file_path: str) -> MediaBlock:
+    """Create a MediaBlock from a local image file (base64)."""
+    data = Path(file_path).read_bytes()
+    image_b64 = base64.b64encode(data).decode('utf-8')
+    ext = Path(file_path).suffix.lstrip('.').lower() or 'png'
+    media = Media(
+        extension=ext,
+        media_type="image",
+        source_type="base64",
+        source=image_b64,
+        detail="high",
+    )
+    return MediaBlock(media=media)
 
 client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 memory = Memory()
 
 # First turn: user sends image with request
-image_block = create_mediablock_from_file("my_photo.jpg")
-memory.add_turn([TextBlock("Analyze this photo"), image_block], ROLE.USER)
+image_block = create_mediablock_from_file("Example.png")
+memory.add_turn([TextBlock("Analyze this photo, what do you see?"), image_block], ROLE.USER)
 resp = client.invoke("", memory=memory)
-memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)
+memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)  # Add assistant response to memory
 
 # Second turn: follow-up that builds on the previous image
 memory.add_turn([TextBlock("What improvements would you recommend?")], ROLE.USER)
