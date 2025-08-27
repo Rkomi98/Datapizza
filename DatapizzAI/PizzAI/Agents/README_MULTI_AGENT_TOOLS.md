@@ -79,6 +79,10 @@ from datapizzai.tools import tool
 # Carica variabili d'ambiente
 load_dotenv()
 
+# Per usare google_search_tool, aggiungi al file .env:
+# GOOGLE_API_KEY=your-google-api-key-here
+# GOOGLE_CSE_ID=your-custom-search-engine-id  # Opzionale
+
 @tool
 def calcolatrice(espressione: str) -> str:
     """Esegue calcoli matematici sicuri.
@@ -178,57 +182,14 @@ elif tool_results:
 Per creare un client con più strumenti, segui questi passaggi:
 
 ```python
-# 1. Definisci strumenti aggiuntivi
-@tool
-def cerca_informazioni(query: str, max_results: int = 3, lang: str = "it") -> str:
-    """Esegue una ricerca web reale (Bing Web Search API o SerpAPI).
-    
-    Args:
-        query: Termine di ricerca
-        max_results: Numero massimo di risultati da restituire
-        lang: Lingua preferita (es. "it", "en")
-    
-    Returns:
-        Un elenco sintetico di risultati con titolo e URL
-    """
-    import os
-    import requests
+# 1. Utilizza il tool di ricerca Google integrato
+from datapizzai.tools.google import google_search_tool
 
-    # Scegli motore: SERPAPI o Bing (in base a chiave disponibile)
-    serpapi_key = os.getenv("SERPAPI_API_KEY")
-    bing_key = os.getenv("BING_SEARCH_API_KEY")
+# Il google_search_tool è già pronto all'uso con datapizzai 3.0.8
+# Richiede GOOGLE_API_KEY nel file .env per Google Custom Search API
 
-    try:
-        results = []
-        if serpapi_key:
-            # SerpAPI Web Search
-            params = {
-                "engine": "google",
-                "q": query,
-                "hl": lang,
-                "num": max_results,
-                "api_key": serpapi_key,
-            }
-            r = requests.get("https://serpapi.com/search", params=params, timeout=20)
-            r.raise_for_status()
-            data = r.json()
-            for item in (data.get("organic_results") or [])[:max_results]:
-                title = item.get("title")
-                link = item.get("link")
-                if title and link:
-                    results.append(f"- {title} — {link}")
-        else:
-            return (
-                "⚠️ Nessuna chiave trovata per la ricerca web. "
-                "Configura SERPAPI_API_KEY o BING_SEARCH_API_KEY nel file .env"
-            )
-
-        if not results:
-            return f"Nessun risultato per '{query}'"
-        return "Risultati:\n" + "\n".join(results)
-
-    except Exception as e:
-        return f"Errore nella ricerca: {e}"
+# Esempio di utilizzo diretto:
+# response = client.invoke("Chi ha vinto Wimbledon 2024?", tools=[google_search_tool])
 
 
 # 2. Crea client multi-tool
@@ -242,7 +203,7 @@ def create_multi_tool_client():
         system_prompt="""Sei un assistente AI versatile con accesso a strumenti specializzati:
 
         - calcolatrice: per operazioni matematiche
-        - cerca_informazioni: per ricerche web simulate  
+        - google_search_tool: per ricerche web reali tramite Google
 
         Analizza ogni richiesta e scegli lo strumento più appropriato.
         Per task complessi, puoi usare più strumenti in sequenza.
@@ -252,7 +213,7 @@ def create_multi_tool_client():
     return client
 
 # 3. Configura tutti i tool
-tools = [calcolatrice, cerca_informazioni, gestisci_file]
+tools = [calcolatrice, google_search_tool]
 
 # 4. Esegui workflow complessi
 client = create_multi_tool_client()
@@ -260,7 +221,7 @@ client = create_multi_tool_client()
 complex_query = """
 Esegui questo workflow:
 1. Calcola quanti anni sono passati dal 1990 al 2025
-2. Cerca informazioni su machine learning
+2. Cerca informazioni su "machine learning trends 2025"
 """
 
 response = client.invoke(
@@ -303,7 +264,7 @@ def create_conversational_client():
 
 # 3. Configura conversazione multi-turno
 client, memory = create_conversational_client()
-tools = [calcolatrice, cerca_informazioni, gestisci_file]
+tools = [calcolatrice, google_search_tool]
 
 def chat_turn(user_input: str, memory: Memory, client, tools):
     """Gestisce un turno: aggiorna memoria, invoca il client, esegue function calls."""
@@ -350,7 +311,7 @@ conversation = [
     "Ciao! Sono Mirko, sto lavorando su un progetto AI",
     "Cerca informazioni sui framework Python per AI",
     "Calcola il costo se spendo 500€ al mese per 2 anni",
-    "Crea un file di progetto chiamato ai_project.txt",
+    "Chi ha vinto Wimbledon 2024?",
     "Ricordi il mio nome e cosa sto facendo?"
 ]
 
@@ -511,8 +472,43 @@ Questa guida mostra come creare, esporre e usare un tool personalizzato con la l
        print(response.text)
    ```
 
+### Esempio completo con Google Search
+
+```python
+import os
+from dotenv import load_dotenv
+from datapizzai.clients import ClientFactory
+from datapizzai.tools.google import google_search_tool
+
+load_dotenv()
+
+# Assicurati di avere GOOGLE_API_KEY nel file .env
+client = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="Sei un assistente che può cercare informazioni su Google."
+)
+
+# Utilizzo diretto
+response = client.invoke(
+    "Chi ha vinto Wimbledon 2024?", 
+    tools=[google_search_tool],
+    tool_choice="auto"
+)
+
+# Gestisci i risultati come negli esempi precedenti
+tool_results = execute_tool_calls(response, [google_search_tool])
+if tool_results:
+    followup = client.invoke(
+        f"Usa questi risultati per rispondere: {tool_results[0]}",
+        tools=[google_search_tool]
+    )
+    print(followup.text)
+```
+
 Suggerimenti:
 - Definisci sempre docstring chiare (Args/Returns) e valida l'input.
 - Evita `eval` per casi reali; preferisci librerie sicure o parsing esplicito.
-- Se usi memoria conversazionale, non aggiungere alla memoria un messaggio assistant contenente tool_calls senza fornire prima i relativi messaggi di tool; in mancanza del supporto nativo ai messaggi “tool”, reinvia i risultati come testo (come nell'esempio sopra).
+- Se usi memoria conversazionale, non aggiungere alla memoria un messaggio assistant contenente tool_calls senza fornire prima i relativi messaggi di tool; in mancanza del supporto nativo ai messaggi "tool", reinvia i risultati come testo (come nell'esempio sopra).
 

@@ -80,6 +80,10 @@ from datapizzai.tools import tool
 # Load environment variables
 load_dotenv()
 
+# To use google_search_tool, add to your .env file:
+# GOOGLE_API_KEY=your-google-api-key-here
+# GOOGLE_CSE_ID=your-custom-search-engine-id  # Optional
+
 @tool
 def calculate(expression: str) -> str:
     """Executes safe mathematical calculations.
@@ -178,99 +182,14 @@ elif tool_results:
 To create a client with multiple tools, follow these steps:
 
 ```python
-# 1. Define additional tools
-@tool
-def search_information(query: str, max_results: int = 3, lang: str = "en") -> str:
-    """Performs a real web search (Bing Web Search API or SerpAPI).
-    
-    Args:
-        query: Search term
-        max_results: Maximum number of results to return
-        lang: Preferred language (e.g., "en", "it")
-    
-    Returns:
-        A concise list of results with title and URL
-    """
-    import os
-    import requests
+# 1. Use the built-in Google search tool
+from datapizzai.tools.google import google_search_tool
 
-    serpapi_key = os.getenv("SERPAPI_API_KEY")
-    bing_key = os.getenv("BING_SEARCH_API_KEY")
+# The google_search_tool is ready to use with datapizzai 3.0.8
+# Requires GOOGLE_API_KEY in .env file for Google Custom Search API
 
-    try:
-        results = []
-        if serpapi_key:
-            params = {
-                "engine": "google",
-                "q": query,
-                "hl": lang,
-                "num": max_results,
-                "api_key": serpapi_key,
-            }
-            r = requests.get("https://serpapi.com/search", params=params, timeout=20)
-            r.raise_for_status()
-            data = r.json()
-            for item in (data.get("organic_results") or [])[:max_results]:
-                title = item.get("title")
-                link = item.get("link")
-                if title and link:
-                    results.append(f"- {title} — {link}")
-
-        elif bing_key:
-            headers = {"Ocp-Apim-Subscription-Key": bing_key}
-            params = {"q": query, "count": max_results, "mkt": f"{lang}-{lang.upper()}"}
-            r = requests.get("https://api.bing.microsoft.com/v7.0/search", headers=headers, params=params, timeout=20)
-            r.raise_for_status()
-            data = r.json()
-            for item in (data.get("webPages", {}).get("value") or [])[:max_results]:
-                name = item.get("name")
-                url = item.get("url")
-                if name and url:
-                    results.append(f"- {name} — {url}")
-        else:
-            return (
-                "⚠️ No API key found for web search. "
-                "Configure SERPAPI_API_KEY or BING_SEARCH_API_KEY in your .env file"
-            )
-
-        if not results:
-            return f"No results for '{query}'"
-        return "Results:\n" + "\n".join(results)
-
-    except Exception as e:
-        return f"Search error: {e}"
-
-@tool  
-def manage_file(command: str, path: str) -> str:
-    """Manages files and directories in a simulated system.
-    
-    Args:
-        command: Operation to execute (list, create, delete)
-        path: File or directory path
-    
-    Returns:
-        Operation result
-    """
-    # File system simulation
-    files_system = {
-        "docs/": ["README.md", "guide.txt"],
-        "src/": ["main.py", "utils.py"],
-        "data/": ["dataset.csv", "config.json"]
-    }
-    
-    if command == "list":
-        if path in files_system:
-            files = files_system[path]
-            return f"Content of {path}:\n" + "\n".join(f"- {f}" for f in files)
-        return f"Directory {path} not found"
-    
-    elif command == "create":
-        return f"File {path} created successfully"
-    
-    elif command == "delete":
-        return f"File {path} deleted successfully"
-    
-    return f"Command '{command}' not supported"
+# Direct usage example:
+# response = client.invoke("Who won Wimbledon 2024?", tools=[google_search_tool])
 
 # 2. Create multi-tool client
 def create_multi_tool_client():
@@ -283,8 +202,7 @@ def create_multi_tool_client():
         system_prompt="""You are a versatile AI assistant with access to specialized tools:
 
         - calculate: for mathematical operations
-        - search_information: for simulated web searches  
-        - manage_file: for file and directory operations
+        - google_search_tool: for real web searches via Google
 
         Analyze each request and choose the most appropriate tool.
         For complex tasks, you can use multiple tools in sequence.
@@ -294,17 +212,15 @@ def create_multi_tool_client():
     return client
 
 # 3. Configure all tools
-tools = [calculate, search_information, manage_file]
+tools = [calculate, google_search_tool]
 
 # 4. Execute complex workflows
 client = create_multi_tool_client()
 
 complex_query = """
 Execute this workflow:
-1. Search for information on machine learning
+1. Search for information on "machine learning trends 2025"
 2. Calculate how many years have passed from 1990 to 2025
-3. Create a file called ml_summary.txt in the docs/ directory
-4. List files in the docs/ directory to verify
 """
 
 response = client.invoke(
@@ -347,7 +263,7 @@ def create_conversational_client():
 
 # 3. Configure multi-turn conversation
 client, memory = create_conversational_client()
-tools = [calculate, search_information, manage_file]
+tools = [calculate, google_search_tool]
 
 def chat_turn(user_input: str, memory: Memory, client, tools):
     """Handles a turn: updates memory, invokes client, executes function calls."""
@@ -388,7 +304,7 @@ conversation = [
     "Hello! I'm Mirko, I'm working on an AI project",
     "Search for information on Python frameworks for AI",
     "Calculate the cost if I spend 500€ per month for 2 years",
-    "Create a project file called ai_project.txt",
+    "Who won Wimbledon 2024?",
     "Do you remember my name and what I'm doing?"
 ]
 
@@ -412,13 +328,11 @@ workflow_query = """
     Execute this workflow:
     1. Search for information on machine learning
     2. Calculate how many years have passed from 1990 to 2025
-    3. Create a file called ml_summary.txt
-    4. Verify the file was created
 """
 
 response = client.invoke(
     input=workflow_query,
-    tools=[calculate, search_information, manage_file],
+    tools=[calculate, google_search_tool],
     tool_choice="auto"
 )
 execute_tool_calls(response, tools)
@@ -429,9 +343,8 @@ execute_tool_calls(response, tools)
 # The client automatically chooses the appropriate tool
 queries = [
     "Calculate 2 + 2",                    # → calculate
-    "Search for information on AI",        # → search_information
-    "Create a file called test.txt",       # → manage_file
-    "How much does an AI project cost?"    # → search_information + calculate
+    "Search for information on AI",        # → google_search_tool
+    "How much does an AI project cost?"    # → google_search_tool + calculate
 ]
 
 for query in queries:
@@ -459,6 +372,41 @@ try:
     
 except Exception as e:
     print(f"Error in invocation: {e}")
+```
+
+### Complete example with Google Search
+
+```python
+import os
+from dotenv import load_dotenv
+from datapizzai.clients import ClientFactory
+from datapizzai.tools.google import google_search_tool
+
+load_dotenv()
+
+# Make sure you have GOOGLE_API_KEY in your .env file
+client = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="You are an assistant that can search for information on Google."
+)
+
+# Direct usage
+response = client.invoke(
+    "Who won Wimbledon 2024?", 
+    tools=[google_search_tool],
+    tool_choice="auto"
+)
+
+# Handle results as in previous examples
+tool_results = execute_tool_calls(response, [google_search_tool])
+if tool_results:
+    followup = client.invoke(
+        f"Use these results to answer: {tool_results[0]}",
+        tools=[google_search_tool]
+    )
+    print(followup.text)
 ```
 
 ## Best practices
