@@ -1,10 +1,10 @@
 # DatapizzAI Text-Only
 
-This guide walks you step by step through building a text-only chatbot with DatapizzAI. Each step explains not only what to do, but why it matters.
+This guide walks you step-by-step through building a text-only chatbot with DatapizzAI. Each section explains not only what to do but also the reasoning behind it.
 
-- Goal: build a robust, efficient conversational chatbot
-- Stack: DatapizzAI (text-only mode), LLM provider (e.g., OpenAI)
-- Outcome: a CLI chatbot with memory, sliding window, error handling, metrics, and optional caching
+- **Goal**: Build a robust, high-performance conversational chatbot.
+- **Stack**: DatapizzAI (text-only mode), LLM provider (e.g., OpenAI).
+- **Outcome**: A CLI chatbot with memory, a sliding context window, error handling, metrics, and optional caching.
 
 ## Prerequisites
 - Python 3.10+
@@ -16,8 +16,8 @@ OPENAI_API_KEY=sk-...
 
 For full examples, also check `text_only_examples.py`.
 
-## 1. Client setup (why this matters)
-To interact with the model, you need a client configured with provider, key, and model. Here you also define the assistant “style” (system prompt) and creativity (temperature).
+## 1. Client setup
+To interact with a model, you need a client configured with the provider, API key, and model name. This is also where you define the assistant’s personality (via the system prompt) and creativity (via temperature).
 
 ```python
 import os
@@ -26,26 +26,26 @@ from datapizzai.clients import ClientFactory
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
     system_prompt=(
-        "You are a helpful, concise assistant. "
-        "Respond in Italian and use bullet points when useful."
+        "You are a helpful and concise assistant. "
+        "Respond in Italian, using bullet points when appropriate."
     ),
-    temperature=0.7,
+    temperature=1,
 )
 ```
 
-- provider: choose the LLM vendor (OpenAI, Anthropic, Google, ...)
-- system_prompt: sets the bot’s default behavior
-- temperature: controls response variability
+- `provider`: The LLM vendor (e.g., OpenAI, Anthropic, Google).
+- `system_prompt`: Sets the bot’s default behavior and personality.
+- `temperature`: Controls the randomness and creativity of the responses.
 
-## 2. Core concepts: Memory, TextBlock, ROLE (why they exist)
-To build conversations, DatapizzAI uses:
-- `Memory`: stores the history of turns (user/assistant)
-- `TextBlock`: represents pieces of text exchanged per turn
-- `ROLE`: identifies who speaks (`ROLE.USER` or `ROLE.ASSISTANT`)
+## 2. Core Concepts: Memory, TextBlock, ROLE
+DatapizzAI uses a few core abstractions to manage conversations:
+- `Memory`: Stores the history of the conversation turns between the user and the assistant.
+- `TextBlock`: Represents a piece of text exchanged in a turn.
+- `ROLE`: Identifies the speaker (`ROLE.USER` or `ROLE.ASSISTANT`).
 
-These enable the model to “remember” the context. Always pass strings into `TextBlock(content=...)`; use `response.text` when adding the model reply to memory.
+These objects allow the model to retain context from previous turns. You should always pass raw strings to `TextBlock(content=...)` and use `response.text` to add the model's reply to memory.
 
 ```python
 from datapizzai.memory import Memory
@@ -53,17 +53,19 @@ from datapizzai.type import TextBlock, ROLE
 
 memory = Memory()
 
-# Add a user turn
-memory.add_turn([TextBlock(content="Hi, I am Mirko")], ROLE.USER)
+# Add a user's turn to memory
+memory.add_turn([TextBlock(content="Hi, I'm Mirko")], ROLE.USER)
 
-# Invoke with context
+# Invoke the client with the conversation context
 response = client.invoke("", memory=memory)
-# Save assistant response (always a string)
+# Save the assistant's response (use the .text attribute for the string content)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
 
-## 3. Step 0: a `chat_turn` function
-Start with a single-turn function. It validates the end-to-end pipeline.
+**Note**: The client's response is an object. To save it to memory, you must use the `.text` attribute to get the string content. Passing the entire response object to a `TextBlock` will cause a JSON serialization error.
+
+## 3. Step 0: A `chat_turn` function
+Start with a simple function that handles a single turn in a conversation. This helps validate that the basic pipeline is working correctly.
 
 ```python
 def chat_turn(user_input: str) -> str:
@@ -73,13 +75,13 @@ def chat_turn(user_input: str) -> str:
     return response.text
 
 print(chat_turn("Introduce yourself in one sentence."))
-print(chat_turn("Now give me 3 Django best practices."))
+print(chat_turn("Now give me 3 best practices for Django."))
 ```
 
-Why: separating the “what” (user text) from the “how” (memory/invocation) keeps code extensible.
+Separating the "what" (user input) from the "how" (memory management and client invocation) makes your code more modular and easier to extend.
 
-## 4. From function to chatbot: class with sliding window
-Memory grows at each turn. To avoid token limits and costs, use a sliding-window strategy that keeps only the last N relevant turns.
+## 4. From Function to Chatbot: A Class with a Sliding Window
+As the conversation continues, the memory grows. To manage costs and stay within the model's context limit, we can implement a "sliding window" strategy that retains only the last N turns.
 
 ```python
 from typing import Optional
@@ -102,14 +104,14 @@ class Chatbot:
         return response.text
 ```
 
-Why: controlling memory size preserves recent context and reduces cost/latency.
+Controlling the memory size preserves recent context while reducing costs and latency.
 
-## 5. Minimal interactive run (REPL)
-A terminal loop lets you test the chatbot with real input quickly.
+## 5. Minimal Interactive REPL
+A command-line loop lets you test the chatbot with real-time input.
 
 ```python
 bot = Chatbot(client, window_size=6)
-print("Type 'exit' to quit.")
+print("Type 'exit' or 'quit' to end the session.")
 
 while True:
     try:
@@ -124,42 +126,29 @@ while True:
         print(f"error> {e}")
 ```
 
-Why: validate end-to-end flow before adding complexity.
+This validates the end-to-end functional flow before adding more complexity.
 
-## 6. Improving answer style
-Style is controlled by the `system_prompt` and, when needed, explicit user instructions. Prefer structured output for clarity.
+## 6. Improving Response Style
+You can control the bot's style via the `system_prompt` and, if needed, by providing instructions in the user prompt. Use clear formatting and structure for better readability.
 
 ```python
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
     system_prompt=(
         "You are a technical consulting assistant. "
-        "Always in Italian, responses in at most 5 bullet points, "
-        "finish with a short 'next steps'."
+        "Always respond in Italian, structure your answers in a maximum of 5 bullet points, "
+        "and conclude with a brief 'next steps' section."
     ),
-    temperature=0.5,
+    temperature=1,
 )
 ```
 
-Why: align the bot’s tone and structure with your domain (support, consulting, brainstorming).
+This aligns the bot's tone and structure with your specific domain needs (e.g., support, consulting, brainstorming).
 
-## 7. Error handling and robustness
-Make the conversation resilient to transient failures.
-
-```python
-def safe_send(bot: Chatbot, user_input: str) -> str:
-    try:
-        return bot.send(user_input)
-    except Exception:
-        return "Si è verificato un errore temporaneo. Riprova tra poco."
-```
-
-Why: user experience first—fallbacks prevent abrupt breaks.
-
-## 8. Performance: caching and metrics
-Caching reduces cost for repeated queries. Metrics help you understand the impact of prompting/memory choices.
+## 7. Performance: Caching and Metrics
+Caching reduces costs for repeated requests. Metrics help you understand the impact of your prompting and memory strategies.
 
 ```python
 from datapizzai.cache import MemoryCache
@@ -167,20 +156,22 @@ from datapizzai.cache import MemoryCache
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
-    cache=MemoryCache(),  # only OpenAI supports cache in constructor
+    model="gpt-5",
+    cache=MemoryCache(),  # Only supported by OpenAI in the constructor
+    temperature=1
 )
 
-reply = client.invoke("Give me 3 quick tips to test a REST API")
-print("prompt tokens:", reply.prompt_tokens_used)
-print("completion tokens:", reply.completion_tokens_used)
-print("stop reason:", reply.stop_reason)
+# Example of inspecting metrics
+reply = client.invoke("Give me 3 tips for testing a REST API")
+print("Prompt tokens:", reply.prompt_tokens_used)
+print("Completion tokens:", reply.completion_tokens_used)
+print("Stop reason:", reply.stop_reason)
 ```
 
-Why: measure to optimize (latency/cost/quality).
+Measurement enables data-driven optimizations for latency, cost, and quality.
 
-## 9. Putting it all together: complete chatbot
-A concise example that combines setup, class, REPL, and basic metrics.
+## 9. Putting It All Together: Complete Chatbot
+Here is a summary example that combines the configuration, class, REPL, and basic metrics.
 
 ```python
 import os
@@ -229,26 +220,26 @@ while True:
     except KeyboardInterrupt:
         break
     except Exception:
-        print("bot> Si è verificato un errore temporaneo. Riprova.")
+        print("bot> A temporary error occurred. Please try again.")
 ```
 
-## 10. Recommended extensions
-- Persistence: store memory in a DB or file between sessions
-- Structured outputs: ask for JSON to integrate with external services
-- Evaluation: set up prompting benchmarks and compare quality/latency/cost
-- Deployment: wrap the chatbot in an API (e.g., FastAPI) or a web app
-- Security: input filters, rate limiting, length controls
+## 10. Recommended Extensions
+- **Persistence**: Save memory to a database or file to maintain context across sessions.
+- **Structured Data**: Instruct the model to return JSON for easier integration with other services.
+- **Evaluation**: Define benchmark prompts to compare response quality, latency, and costs across different models or prompts.
+- **Deployment**: Wrap the chatbot in an API (e.g., using FastAPI) or a web application.
+- **Security**: Implement input filtering, rate limiting, and length checks to handle unexpected user behavior.
 
-## Useful references
-- `text_only_examples.py`: complete examples and advanced scenarios
-- `GUIDA_TEXT_ONLY.md`: technical guide with best practices and troubleshooting
+## Useful References
+- `text_only_examples.py`: Contains complete examples and advanced scenarios.
+- `GUIDA_TEXT_ONLY.md`: A technical guide with best practices and troubleshooting tips.
 
 ---
 
-## Appendix: available modes (one-shot vs conversational)
+## Appendix: Available Modes (One-Shot vs. Conversational)
 
-### One-shot (single query)
-When to use: isolated questions, translations, calculations, independent analysis.
+### One-Shot (Single Query)
+Use this for isolated questions, translations, calculations, or any task that doesn't require conversational context.
 
 ```python
 from datapizzai.clients import ClientFactory
@@ -257,15 +248,15 @@ import os
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    model="gpt-5",
 )
 
 response = client.invoke("Explain machine learning in 2 sentences")
 print(response.text)
 ```
 
-### Conversational (multi-turn with memory)
-When to use: tutoring, consulting, assisted debugging, structured brainstorming.
+### Conversational (Multi-Turn with Memory)
+Use this for tutoring, consulting, assisted debugging, or structured brainstorming sessions where retaining context is essential.
 
 ```python
 from datapizzai.memory import Memory
@@ -279,7 +270,7 @@ def chat_turn(user_input: str) -> str:
     memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
     return response.text
 
-print(chat_turn("Hello, I'm Mirko, a Python developer"))
+print(chat_turn("Hi, I'm Mirko, a Python developer"))
 print(chat_turn("What are the best practices for Django?"))
-print(chat_turn("And for my specific case?"))
+print(chat_turn("And what about for my specific use case?"))
 ```

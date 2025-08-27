@@ -2,7 +2,19 @@
 
 This guide will help you set up all kind of clients available in the DatapizzAI library to interact with different LLM model providers.
 
+## Table of contents
+
+- [Prerequisites](#prerequisites)
+- [Basic code setup](#basic-code-setup)
+- [Method 1: Using ClientFactory (recommended)](#method-1-using-clientfactory-recommended)
+- [Method 2: Direct client configuration](#method-2-direct-client-configuration)
+- [Method 3: Local model (Gemma with Ollama)](#method-3-local-model-gemma-with-ollama)
+- [Complete usage example](#complete-usage-example)
+- [Next steps](#next-steps)
+
 ## Prerequisites
+
+This step prepares your environment by installing dependencies and configuring API keys to prevent runtime errors.
 
 ### Installing dependencies
 ```bash
@@ -24,6 +36,7 @@ AZURE_OPENAI_DEPLOYMENT=your-deployment-name
 ```
 
 ### Basic code setup
+This code block handles the minimal initialization—loading environment variables and importing the required clients—used in all examples.
 ```python
 import os
 from dotenv import load_dotenv
@@ -47,7 +60,7 @@ from datapizzai.clients.factory import Provider
 
 ## Method 1: Using ClientFactory (recommended)
 
-The `ClientFactory` is the simplest way to create clients with automatic configuration.
+The `ClientFactory` abstracts away provider-specific details, allowing you to create a consistent client quickly while reducing configuration mistakes.
 
 ### OpenAI client
 ```python
@@ -125,7 +138,7 @@ azure_client = ClientFactory.create(
 
 ## Method 2: Direct client configuration
 
-For advanced configurations, you can create clients directly.
+Direct configuration offers fine-grained control over provider-specific parameters, such as caching options or custom endpoints.
 
 ### Advanced OpenAI client
 ```python
@@ -221,7 +234,125 @@ print(f"Response: {response.text}")
 
 ---
 
+## Method 3: Local model (Gemma with Ollama)
+
+Running models locally ensures privacy, predictable costs, and low latency without relying on external services. With [Ollama](https://ollama.com), you can run Gemma on your own machine and integrate it using the same `invoke` interface as other DatapizzAI clients.
+
+Prerequisites (Linux/macOS):
+
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Start the service (in a separate terminal)
+ollama serve | cat
+
+# Pull the Gemma model (replace the tag if you use a different variant)
+ollama pull gemma3n:e2b
+```
+
+Quick CLI test:
+
+```bash
+ollama run gemma3n:e2b "Hello! Introduce yourself briefly."
+```
+
+Minimal Python adapter and quick test:
+
+```python
+import requests
+from typing import Optional, Union, List
+from pydantic import BaseModel
+
+from datapizzai.type import TextBlock
+from datapizzai.memory import Memory
+
+
+class SimpleResponse(BaseModel):
+    text: str
+    prompt_tokens_used: int = 0
+    completion_tokens_used: int = 0
+    stop_reason: str = "stop"
+
+
+class OllamaGemmaClient:
+    """Minimal adapter for Ollama Chat API with Gemma model."""
+
+    def __init__(
+        self,
+        model: str = "gemma3n:e2b",
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.7,
+        base_url: str = "http://localhost:11434",
+    ):
+        self.model = model
+        self.system_prompt = system_prompt or ""
+        self.temperature = temperature
+        self.base_url = base_url.rstrip("/")
+
+    def _build_messages(
+        self,
+        input: Optional[Union[str, List[TextBlock]]] = None,
+        memory: Optional[Memory] = None,
+    ) -> List[dict]:
+        messages: List[dict] = []
+        if self.system_prompt:
+            messages.append({"role": "system", "content": self.system_prompt})
+        if memory is not None:
+            for turn in memory.memory:
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(getattr(b, "content", "") for b in turn.blocks)
+                if content:
+                    messages.append({"role": role, "content": content})
+        if isinstance(input, str) and input:
+            messages.append({"role": "user", "content": input})
+        elif isinstance(input, list) and input:
+            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
+            if user_text:
+                messages.append({"role": "user", "content": user_text})
+        return messages
+
+    def invoke(
+        self,
+        input: Optional[Union[str, List[TextBlock]]] = None,
+        memory: Optional[Memory] = None,
+    ) -> SimpleResponse:
+        messages = self._build_messages(input=input, memory=memory)
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "stream": False,
+            "options": {"temperature": self.temperature},
+        }
+        try:
+            r = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
+            r.raise_for_status()
+            data = r.json()
+            text = data.get("message", {}).get("content") or str(data)
+        except Exception as e:
+            text = f"Ollama error: {e}"
+        return SimpleResponse(text=text)
+
+
+if __name__ == "__main__":
+    client = OllamaGemmaClient(
+        model="gemma3n:e2b",
+        system_prompt="You are a helpful and concise assistant.",
+        temperature=0.7,
+    )
+    resp = client.invoke("Hello! Introduce yourself in two sentences.")
+    print(f"Response: {resp.text}")
+```
+
+Notes:
+
+- If you expose an OpenAI‑compatible endpoint (vLLM/TGI), you can evaluate using `OpenAIClient` pointing to your endpoint if your `datapizzai` version supports `base_url`.
+
+---
+
 ## Complete usage example
+
+This complete script verifies that the setup and configuration for your chosen client work correctly end-to-end.
 
 ```python
 #!/usr/bin/env python3
@@ -264,7 +395,7 @@ if __name__ == "__main__":
 
 ## Next steps
 
-Once you've configured your client, you can explore:
+Once you have validated the basic configuration, you can explore the library's advanced features.
 
 1. **Memory management** for multi-turn conversations
 2. **Caching system** to optimize performance

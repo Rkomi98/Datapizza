@@ -2,7 +2,19 @@
 
 Questa guida ti aiuterà a configurare tutti i tipi di client disponibili nella libreria DatapizzAI per interagire con diversi provider di modelli LLM.
 
+## Indice
+
+- [Prerequisiti](#prerequisiti)
+- [Setup base del codice](#setup-base-del-codice)
+- [Metodo 1: Utilizzo del ClientFactory (raccomandato)](#metodo-1-utilizzo-del-clientfactory-raccomandato)
+- [Metodo 2: Configurazione diretta dei client](#metodo-2-configurazione-diretta-dei-client)
+- [Metodo 3: Modello locale (Gemma con Ollama)](#metodo-3-modello-locale-gemma-con-ollama)
+- [Esempio completo di utilizzo](#esempio-completo-di-utilizzo)
+- [Prossimi passi](#prossimi-passi)
+
 ## Prerequisiti
+
+Questo passaggio prepara l'ambiente, installando le dipendenze e configurando le chiavi API per evitare errori di esecuzione.
 
 ### Installazione delle dipendenze
 ```bash
@@ -24,6 +36,7 @@ AZURE_OPENAI_DEPLOYMENT=your-deployment-name
 ```
 
 ### Setup base del codice
+Questo blocco di codice definisce l'inizializzazione minima, caricando le variabili d'ambiente e importando i client necessari per tutti gli esempi.
 ```python
 import os
 from dotenv import load_dotenv
@@ -47,7 +60,7 @@ from datapizzai.clients.factory import Provider
 
 ## Metodo 1: Utilizzo del ClientFactory (raccomandato)
 
-Il `ClientFactory` è il modo più semplice per creare client con configurazione automatica.
+Il `ClientFactory` astrae i dettagli specifici del provider, permettendo di creare rapidamente un client coerente e riducendo il rischio di errori.
 
 ### OpenAI client
 ```python
@@ -125,7 +138,7 @@ azure_client = ClientFactory.create(
 
 ## Metodo 2: Configurazione diretta dei client
 
-Per configurazioni avanzate, puoi creare i client direttamente.
+La configurazione diretta offre un controllo granulare sui parametri specifici di ciascun provider, come opzioni di caching o endpoint personalizzati.
 
 ### OpenAI client avanzato
 ```python
@@ -223,7 +236,7 @@ print(f"Risposta: {response.text}")
 
 ## Metodo 3: Modello locale (Gemma con Ollama)
 
-Vediamo come puoi usare un modello locale senza dipendere da servizi esterni. Con [Ollama]("https://ollama.com") puoi eseguire Gemma in locale e integrarlo con la stessa interfaccia `invoke` usata dai client DatapizzAI.
+L'esecuzione di modelli in locale garantisce privacy, controllo dei costi e bassa latenza, senza dipendere da servizi esterni. Con [Ollama]("https://ollama.com") puoi eseguire Gemma in locale e integrarlo con la stessa interfaccia `invoke` usata dai client DatapizzAI.
 
 Prerequisiti (Linux/macOS):
 
@@ -268,7 +281,7 @@ class OllamaGemmaClient:
 
     def __init__(
         self,
-        model: str = "gemma2:2b-instruct",
+        model: str = "gemma3n:e2b",
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
         base_url: str = "http://localhost:11434",
@@ -326,7 +339,7 @@ class OllamaGemmaClient:
 # Test rapido del setup
 if __name__ == "__main__":
     client = OllamaGemmaClient(
-        model="gemma2:2b-instruct",  # Sostituisci con il tag del tuo modello Gemma locale
+        model="gemma3n:e2b",  # Sostituisci con il tag del tuo modello Gemma locale
         system_prompt="Sei un assistente AI utile e conciso.",
         temperature=0.7,
     )
@@ -334,14 +347,13 @@ if __name__ == "__main__":
     print(f"Risposta: {resp.text}")
 ```
 
-Note:
 
-- Per Gemma 3 o varianti diverse, sostituisci il tag modello (es.: `gemma3:...-instruct`) se disponibile in Ollama.
-- Se esponi un endpoint compatibile OpenAI (vLLM/TGI), puoi valutare l'uso di `OpenAIClient` puntando al tuo endpoint se la tua versione di `datapizzai` supporta `base_url`.
 
 ---
 
 ## Esempio completo di utilizzo
+
+Questo script completo permette di verificare che il setup e la configurazione del client scelto funzionino correttamente end‑to‑end.
 
 ```python
 #!/usr/bin/env python3
@@ -384,7 +396,7 @@ if __name__ == "__main__":
 
 ## Prossimi passi
 
-Una volta configurato il tuo client, puoi esplorare:
+Una volta validata la configurazione di base, è possibile esplorare le funzionalità avanzate della libreria.
 
 1. **Gestione della memoria** per conversazioni multi-turno
 2. **Sistema di cache** per ottimizzare le performance
