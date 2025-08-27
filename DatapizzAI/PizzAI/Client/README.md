@@ -221,22 +221,30 @@ print(f"Risposta: {response.text}")
 
 ---
 
-## Metodo 3: Client custom (es. Hugging Face)
+## Metodo 3: Modello locale (Gemma con Ollama)
 
-Se il provider non è supportato nativamente dal `ClientFactory`, puoi creare un adapter minimale che espone la stessa interfaccia (`invoke`) dei client DatapizzAI. Di seguito un esempio per Hugging Face Inference API.
+Vediamo come puoi usare un modello locale senza dipendere da servizi esterni. Con [Ollama]("https://ollama.com") puoi eseguire Gemma in locale e integrarlo con la stessa interfaccia `invoke` usata dai client DatapizzAI.
 
-Prerequisiti:
+Prerequisiti (Linux/macOS):
 
-- Aggiungi nel file `.env`:
 ```bash
-HUGGINGFACE_API_KEY=hf-...
-```
-- Installa la dipendenza HTTP:
-```bash
-pip install requests
+# Installa Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Avvia il servizio (in un terminale separato)
+ollama serve | cat
+
+# Scarica il modello Gemma (sostituisci il tag se usi una variante diversa)
+ollama pull gemma3n:e2b
 ```
 
-Esempio di client custom e test rapido:
+Test rapido da CLI:
+
+```bash
+ollama run gemma3n:e2b "Ciao! Presentati brevemente."
+```
+
+Esempio di adapter Python e test rapido:
 
 ```python
 import os
@@ -244,107 +252,92 @@ import requests
 from typing import Optional, Union, List
 from pydantic import BaseModel
 
-# Tipi DatapizzAI per compatibilità input/memory (opzionali)
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
 
 
 class SimpleResponse(BaseModel):
-    """Struttura minima compatibile con l'uso nei nostri esempi."""
     text: str
     prompt_tokens_used: int = 0
     completion_tokens_used: int = 0
     stop_reason: str = "stop"
 
 
-class HuggingFaceClient:
-    """Adapter minimale per Hugging Face Inference API.
-
-    Funziona con endpoint pubblici Inference API (task text-generation/text2text-generation).
-    """
+class OllamaGemmaClient:
+    """Adapter minimale per Ollama Chat API con modello Gemma."""
 
     def __init__(
         self,
-        api_key: str,
-        model: str,
+        model: str = "gemma2:2b-instruct",
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
+        base_url: str = "http://localhost:11434",
     ):
-        self.api_key = api_key
         self.model = model
         self.system_prompt = system_prompt or ""
         self.temperature = temperature
-        self.endpoint = f"https://api-inference.huggingface.co/models/{self.model}"
+        self.base_url = base_url.rstrip("/")
 
-    def _build_prompt(
+    def _build_messages(
         self,
         input: Optional[Union[str, List[TextBlock]]] = None,
         memory: Optional[Memory] = None,
-    ) -> str:
-        parts: List[str] = []
+    ) -> List[dict]:
+        messages: List[dict] = []
         if self.system_prompt:
-            parts.append(self.system_prompt)
+            messages.append({"role": "system", "content": self.system_prompt})
         if memory is not None:
             for turn in memory.memory:
-                # Concatenazione semplice dei contenuti testuali presenti in memoria
-                msg = " ".join(getattr(b, "content", "") for b in turn.blocks)
-                parts.append(msg)
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(getattr(b, "content", "") for b in turn.blocks)
+                if content:
+                    messages.append({"role": role, "content": content})
         if isinstance(input, str) and input:
-            parts.append(input)
+            messages.append({"role": "user", "content": input})
         elif isinstance(input, list) and input:
-            parts.append(" ".join(b.content for b in input if isinstance(b, TextBlock)))
-        return "\n\n".join(p for p in parts if p)
+            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
+            if user_text:
+                messages.append({"role": "user", "content": user_text})
+        return messages
 
     def invoke(
         self,
         input: Optional[Union[str, List[TextBlock]]] = None,
         memory: Optional[Memory] = None,
     ) -> SimpleResponse:
-        prompt = self._build_prompt(input=input, memory=memory)
-        headers = {"Authorization": f"Bearer {self.api_key}"}
+        messages = self._build_messages(input=input, memory=memory)
         payload = {
-            "inputs": prompt,
-            "parameters": {"temperature": self.temperature},
+            "model": self.model,
+            "messages": messages,
+            "stream": False,
+            "options": {"temperature": self.temperature},
         }
         try:
-            r = requests.post(self.endpoint, headers=headers, json=payload, timeout=60)
+            r = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
             r.raise_for_status()
             data = r.json()
-            # Inference API ritorna una lista con 'generated_text' per i task di generazione
-            if isinstance(data, list) and data and isinstance(data[0], dict):
-                text = data[0].get("generated_text") or str(data[0])
-            elif isinstance(data, dict) and "generated_text" in data:
-                text = data["generated_text"]
-            else:
-                text = str(data)
+            # Risposta attesa: {"message": {"role": "assistant", "content": "..."}, ...}
+            text = data.get("message", {}).get("content") or str(data)
         except Exception as e:
-            text = f"Errore Hugging Face: {e}"
+            text = f"Errore Ollama: {e}"
         return SimpleResponse(text=text)
 
 
 # Test rapido del setup
 if __name__ == "__main__":
-    api_key = os.getenv("HUGGINGFACE_API_KEY")
-    if not api_key:
-        raise RuntimeError("Imposta HUGGINGFACE_API_KEY nel tuo .env")
-
-    # Sostituisci con un modello disponibile su HF Inference API
-    # Esempi: google/flan-t5-large (text2text), meta-llama/Llama-3.1-8B-Instruct (può richiedere accesso)
-    client = HuggingFaceClient(
-        api_key=api_key,
-        model="google/flan-t5-large",
+    client = OllamaGemmaClient(
+        model="gemma2:2b-instruct",  # Sostituisci con il tag del tuo modello Gemma locale
         system_prompt="Sei un assistente AI utile e conciso.",
         temperature=0.7,
     )
-
     resp = client.invoke("Ciao! Presentati brevemente in due frasi.")
     print(f"Risposta: {resp.text}")
 ```
 
 Note:
 
-- Se usi un endpoint compatibile OpenAI (es. server self-hosted TGI/OpenAI-compatible), verifica se la tua versione di `datapizzai` supporta la configurazione di un `base_url` nel `OpenAIClient`. In tal caso, puoi riutilizzare direttamente `OpenAIClient` puntando al tuo endpoint.
-- I modelli su Hugging Face possono richiedere abilitazioni specifiche o accesso approvato.
+- Per Gemma 3 o varianti diverse, sostituisci il tag modello (es.: `gemma3:...-instruct`) se disponibile in Ollama.
+- Se esponi un endpoint compatibile OpenAI (vLLM/TGI), puoi valutare l'uso di `OpenAIClient` puntando al tuo endpoint se la tua versione di `datapizzai` supporta `base_url`.
 
 ---
 
