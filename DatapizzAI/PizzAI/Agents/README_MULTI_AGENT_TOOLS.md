@@ -10,7 +10,7 @@ Guida completa per la creazione e utilizzo di client multi-tool con il framework
    - [Passo 1: Definizione dei tool](#passo-1-definizione-dei-tool)
    - [Passo 2: Creazione del client OpenAI](#passo-2-creazione-del-client-openai)
    - [Passo 3: Configurazione ed esecuzione](#passo-3-configurazione-ed-esecuzione)
-   - [Passo 4: Agente multi-tool avanzato](#passo-4-agente-multi-tool-avanzato)
+   - [Passo 4: Client multi-tool avanzato](#passo-4-client-multi-tool-avanzato)
    - [Passo 5: Memoria conversazionale](#passo-5-memoria-conversazionale)
 4. [Esempi di strumenti implementati](#esempi-di-strumenti-implementati)
 5. [Pattern di utilizzo avanzati](#pattern-di-utilizzo-avanzati)
@@ -246,36 +246,52 @@ def cerca_informazioni(query: str, max_results: int = 3, lang: str = "it") -> st
         return f"Errore nella ricerca: {e}"
 
 @tool  
-def gestisci_file(comando: str, percorso: str) -> str:
-    """Gestisce file e directory in un sistema simulato.
+def gestisci_file(comando: str, percorso: str, contenuto: str = "") -> str:
+    """Gestisce file e directory reali in modo sicuro (scoped alla repo corrente).
     
     Args:
         comando: Operazione da eseguire (list, create, delete)
-        percorso: Percorso del file o directory
+        percorso: Percorso relativo del file o directory (es. "docs/ml_summary.txt")
+        contenuto: Testo da scrivere in caso di create (opzionale)
     
     Returns:
-        Risultato dell'operazione
+        Esito dell'operazione o elenco contenuti
     """
-    # Simulazione file system
-    files_system = {
-        "docs/": ["README.md", "guide.txt"],
-        "src/": ["main.py", "utils.py"],
-        "data/": ["dataset.csv", "config.json"]
-    }
-    
-    if comando == "list":
-        if percorso in files_system:
-            files = files_system[percorso]
-            return f"Contenuto di {percorso}:\n" + "\n".join(f"- {f}" for f in files)
-        return f"Directory {percorso} non trovata"
-    
-    elif comando == "create":
-        return f"File {percorso} creato con successo"
-    
-    elif comando == "delete":
-        return f"File {percorso} eliminato con successo"
-    
-    return f"Comando '{comando}' non supportato"
+    import os
+    from pathlib import Path
+
+    root = Path.cwd()
+    target = (root / Path(percorso)).resolve()
+
+    # Evita path traversal fuori dalla repo corrente
+    try:
+        target.relative_to(root)
+    except Exception:
+        return "⚠️ Percorso non consentito"
+
+    try:
+        if comando == "list":
+            if target.is_dir():
+                entries = sorted(p.name for p in target.iterdir())
+                return f"Contenuto di {percorso}:\n" + ("\n".join(f"- {e}" for e in entries) or "(vuoto)")
+            return f"Directory {percorso} non trovata"
+
+        elif comando == "create":
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(contenuto or "", encoding="utf-8")
+            return f"✅ File creato: {percorso}"
+
+        elif comando == "delete":
+            if target.exists():
+                if target.is_file():
+                    target.unlink()
+                    return f"🗑️ File eliminato: {percorso}"
+                return "⚠️ Solo eliminazione file supportata in questo esempio"
+            return f"⚠️ File non trovato: {percorso}"
+
+        return f"Comando '{comando}' non supportato"
+    except Exception as e:
+        return f"Errore file: {e}"
 
 # 2. Crea client multi-tool
 def create_multi_tool_client():
@@ -305,10 +321,10 @@ tools = [calcolatrice, cerca_informazioni, gestisci_file]
 client = create_multi_tool_client()
 
 complex_query = """
-Esegui questo workflow:
+Esegui questo workflow (usa obbligatoriamente lo strumento 'gestisci_file' per i punti 3 e 4):
 1. Cerca informazioni su machine learning
 2. Calcola quanti anni sono passati dal 1990 al 2025
-3. Crea un file chiamato ml_summary.txt nella directory docs/
+3. Crea un file chiamato ml_summary.txt nella directory docs/ e scrivi un breve sommario (5 righe)
 4. Lista i file nella directory docs/ per verificare
 """
 
