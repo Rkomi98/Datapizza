@@ -75,34 +75,72 @@ import os
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 from datapizzai.tools import tool
+import re
 
 # Carica variabili d'ambiente
 load_dotenv()
+ALLOWED_FUNCS = {
+    # base & potenze/log
+    "sqrt": np.sqrt, "log": np.log, "log10": np.log10, "exp": np.exp,
+    "abs": abs, "round": round, "min": np.minimum, "max": np.maximum,
+    # trig
+    "sin": np.sin, "cos": np.cos, "tan": np.tan,
+    "asin": np.arcsin, "acos": np.arccos, "atan": np.arctan,
+}
+ALLOWED_CONSTS = {"pi": math.pi, "e": math.e}
+ALLOWED_BINOPS = {ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow}
+ALLOWED_UNARYOPS = {ast.UAdd, ast.USub}
+MAX_EXPR_LEN, MAX_NODES = 2000, 800
 
-# Per usare google_search_tool, aggiungi al file .env:
-# GOOGLE_API_KEY=your-google-api-key-here
-# GOOGLE_CSE_ID=your-custom-search-engine-id  # Opzionale
+def _normalize(s: str) -> str:
+    s = s.strip()
+    if len(s) > MAX_EXPR_LEN: raise ValueError("Espressione troppo lunga")
+    s = s.replace("^", "**")                # potenza
+    s = re.sub(r"√\s*\(", "sqrt(", s)       # radice simbolo → sqrt(
+    s = re.sub(r"(\d)\s*π", r"\1*pi", s)    # 2π → 2*pi
+    return s
+
+def _safe_eval(node):
+    if isinstance(node, ast.Expression): return _safe_eval(node.body)
+    if isinstance(node, ast.Constant):
+        if isinstance(node.value, (int, float, complex)): return node.value
+        raise ValueError("Costante non numerica")
+    if isinstance(node, ast.Name):
+        if node.id in ALLOWED_CONSTS: return ALLOWED_CONSTS[node.id]
+        raise ValueError(f"Identificatore non permesso: {node.id}")
+    if isinstance(node, ast.UnaryOp) and type(node.op) in ALLOWED_UNARYOPS:
+        v = _safe_eval(node.operand); return +v if isinstance(node.op, ast.UAdd) else -v
+    if isinstance(node, ast.BinOp) and type(node.op) in ALLOWED_BINOPS:
+        a, b = _safe_eval(node.left), _safe_eval(node.right)
+        if   isinstance(node.op, ast.Add): return a + b
+        elif isinstance(node.op, ast.Sub): return a - b
+        elif isinstance(node.op, ast.Mult): return a * b
+        elif isinstance(node.op, ast.Div): return a / b
+        elif isinstance(node.op, ast.FloorDiv): return a // b
+        elif isinstance(node.op, ast.Mod): return a % b
+        elif isinstance(node.op, ast.Pow):
+            if isinstance(b, int) and abs(b) > 1000: raise ValueError("Esponente troppo grande")
+            return a ** b
+    if isinstance(node, ast.Call):
+        if isinstance(node.func, ast.Name) and not node.keywords:
+            fn = ALLOWED_FUNCS.get(node.func.id)
+            if not fn: raise ValueError("Funzione non permessa")
+            args = [_safe_eval(a) for a in node.args]
+            if len(args) > 8: raise ValueError("Troppe argomentazioni")
+            return fn(*args)
+    raise ValueError("Sintassi non permessa")
 
 @tool
 def calcolatrice(espressione: str) -> str:
-    """Esegue calcoli matematici sicuri.
-    
-    Args:
-        espressione: Espressione matematica (es: "2 + 3 * 4")
-    
-    Returns:
-        Risultato del calcolo o messaggio di errore
-    """
     try:
-        # Validazione sicurezza
-        allowed_chars = set('0123456789+-*/(). ')
-        if not all(c in allowed_chars for c in espressione):
-            return "Errore: Caratteri non permessi"
-        
-        result = eval(espressione)
-        return f"Risultato: {result}"
+        src = _normalize(espressione)
+        tree = ast.parse(src, mode="eval")             # guard complessità
+        val = _safe_eval(tree)
+        if isinstance(val, float) and val.is_integer(): val = int(val)  # output pulito
+        print(val)
+        return f"Risultato: {val}"
     except Exception as e:
-        return f"Errore: {str(e)}"
+        return f"Errore: {e}"
 ```
 
 ### Passo 2: Creazione del client OpenAI
@@ -264,7 +302,7 @@ def create_conversational_client():
 
 # 3. Configura conversazione multi-turno
 client, memory = create_conversational_client()
-tools = [calcolatrice, google_search_tool]
+tools = [calcolatrice, cerca_informazioni]
 
 def chat_turn(user_input: str, memory: Memory, client, tools):
     """Gestisce un turno: aggiorna memoria, invoca il client, esegue function calls."""
@@ -311,7 +349,6 @@ conversation = [
     "Ciao! Sono Mirko, sto lavorando su un progetto AI",
     "Cerca informazioni sui framework Python per AI",
     "Calcola il costo se spendo 500€ al mese per 2 anni",
-    "Chi ha vinto Wimbledon 2024?",
     "Ricordi il mio nome e cosa sto facendo?"
 ]
 
