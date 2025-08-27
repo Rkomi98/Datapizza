@@ -74,7 +74,7 @@ from datapizzai.tools import tool
 load_dotenv()
 
 @tool
-def calcola(espressione: str) -> str:
+def calcolatrice(espressione: str) -> str:
     """Esegue calcoli matematici sicuri.
     
     Args:
@@ -108,7 +108,7 @@ def create_calculator_client():
         api_key=os.getenv("OPENAI_API_KEY"),  # API key da .env
         model="gpt-4o",                       # Modello OpenAI
         system_prompt="""Sei un assistente matematico esperto.
-        Usa sempre lo strumento 'calcola' per eseguire operazioni matematiche.
+        Usa sempre lo strumento 'calcolatrice' per eseguire operazioni matematiche.
         Fornisci spiegazioni chiare e dettagliate."""
     )
     
@@ -125,7 +125,7 @@ def create_calculator_client():
 client = create_calculator_client()
 
 # 2. Definisci i tool disponibili
-tools = [calcola]
+tools = [calcolatrice]
 
 # 3. Esegui query con tool automatico
 response = client.invoke(
@@ -243,7 +243,7 @@ def create_multi_tool_client():
         model="gpt-4o",
         system_prompt="""Sei un assistente AI versatile con accesso a strumenti specializzati:
 
-        - calcola: per operazioni matematiche
+        - calcolatrice: per operazioni matematiche
         - cerca_informazioni: per ricerche web simulate  
         - gestisci_file: per operazioni su file e directory
 
@@ -255,7 +255,7 @@ def create_multi_tool_client():
     return client
 
 # 3. Configura tutti i tool
-tools = [calcola, cerca_informazioni, gestisci_file]
+tools = [calcolatrice, cerca_informazioni, gestisci_file]
 
 # 4. Esegui workflow complessi
 client = create_multi_tool_client()
@@ -308,7 +308,7 @@ def create_conversational_client():
 
 # 3. Configura conversazione multi-turno
 client, memory = create_conversational_client()
-tools = [calcola, cerca_informazioni, gestisci_file]
+tools = [calcolatrice, cerca_informazioni, gestisci_file]
 
 def chat_turn(user_input: str, memory: Memory, client, tools):
     """Gestisce un turno: aggiorna memoria, invoca il client, esegue function calls."""
@@ -375,7 +375,7 @@ workflow_query = """
 
 response = client.invoke(
     input=workflow_query,
-    tools=[calcola, cerca_informazioni, gestisci_file],
+    tools=[calcolatrice, cerca_informazioni, gestisci_file],
     tool_choice="auto"
 )
 execute_tool_calls(response, tools)
@@ -385,10 +385,10 @@ execute_tool_calls(response, tools)
 ```python
 # Il client sceglie automaticamente lo strumento appropriato
 queries = [
-    "Calcola 2 + 2",                    # → calcola
+    "Calcola 2 + 2",                    # → calcolatrice
     "Cerca informazioni su AI",          # → cerca_informazioni
     "Crea un file chiamato test.txt",    # → gestisci_file
-    "Quanto costa un progetto AI?"       # → cerca_informazioni + calcola
+    "Quanto costa un progetto AI?"       # → cerca_informazioni + calcolatrice
 ]
 
 for query in queries:
