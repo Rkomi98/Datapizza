@@ -366,7 +366,7 @@ def demo_image_analysis():
         response = client.invoke(input=analysis_input)
         
         print("\n🤖 Analisi dell'immagine:")
-        print(f"   {response.text}")
+        print(f"   {response.content}")
         
         print(f"\n📊 Token utilizzati: {response.prompt_tokens_used + response.completion_tokens_used}")
         
@@ -417,7 +417,7 @@ Aggiungi dettagli su:
 Rispondi solo con il prompt migliorato, max 400 caratteri."""
 
                     augment_response = gpt5_client.invoke(augment_prompt)
-                    final_description = augment_response.text.strip()
+                    final_description = augment_response.content.strip()
                     print(f"\nPrompt augmentato con GPT-5: {final_description}")
                 else:
                     print("⚠️ GPT-5 non disponibile, uso prompt originale")
@@ -520,9 +520,9 @@ def demo_conversational_analysis():
         
         try:
             response = client.invoke("", memory=memory)
-            memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+            memory.add_turn([TextBlock(content=response.content)], ROLE.ASSISTANT)
             
-            print(f"🤖 Assistente: {response.text}")
+            print(f"🤖 Assistente: {response.content}")
             print(f"   📊 Token: {response.prompt_tokens_used + response.completion_tokens_used}")
             
         except Exception as e:

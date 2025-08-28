@@ -161,7 +161,7 @@ def analyze_local_image(file_path: str, question: str = "Descrivi questa immagin
         MediaBlock(media=media)
     ])
     
-    return response.text
+    return response.content
 
 # Esempio d'uso
 try:
@@ -200,7 +200,7 @@ def analyze_web_image(url: str, question: str = "Descrivi questa immagine"):
         MediaBlock(media=media)
     ])
     
-    return response.text
+    return response.content
 
 # Esempio d'uso
 url = "https://example.com/image.jpg"
@@ -287,7 +287,7 @@ Aggiungi dettagli su:
 Rispondi solo con il prompt migliorato, max 400 caratteri."""
 
             response = gpt5_client.invoke(augment_request)
-            final_prompt = response.text.strip()
+            final_prompt = response.content.strip()
             print(f"✅ Prompt augmentato con GPT-5: {final_prompt}")
             
         except Exception as e:
@@ -520,7 +520,7 @@ class ImageProcessor:
             MediaBlock(media=media)
         ])
         
-        return response.text
+        return response.content
     
     def generate_image(self, description: str, enhance_prompt: bool = True, save_local: bool = False):
         """
