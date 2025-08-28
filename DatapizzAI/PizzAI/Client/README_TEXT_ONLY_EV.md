@@ -83,6 +83,7 @@ Caching reduces costs for repeated requests. Metrics help you understand the imp
 
 ```python
 from datapizzai.cache import MemoryCache
+import time
 
 client = ClientFactory.create(
     provider="openai",
@@ -93,11 +94,18 @@ client = ClientFactory.create(
 
 # Same request twice: second should hit the cache
 q = "Give me 3 advantages of TDD in one line"
-r1 = client.invoke(q)
-r2 = client.invoke(q)
 
+t0 = time.perf_counter()
+r1 = client.invoke(q)
+t1 = time.perf_counter()
 print("first:", r1.text)
+print(f"⏱️ time (first): {t1 - t0:.3f}s")
+
+t2 = time.perf_counter()
+r2 = client.invoke(q)
+t3 = time.perf_counter()
 print("second:", r2.text)
+print(f"⏱️ time (second): {t3 - t2:.3f}s")
 
 # Inspect metrics
 print("prompt tokens:", r2.prompt_tokens_used)
@@ -157,4 +165,3 @@ while True:
 
 ## Useful References
 - `text_only_examples.py`: Contains complete examples and advanced scenarios.
-- `GUIDA_TEXT_ONLY.md`: A technical guide with best practices and troubleshooting tips.

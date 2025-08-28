@@ -82,6 +82,7 @@ La cache riduce costi per richieste ripetute. Le metriche aiutano a capire l’i
 
 ```python
 from datapizzai.cache import MemoryCache
+import time
 
 client = ClientFactory.create(
     provider="openai",
@@ -93,16 +94,21 @@ client = ClientFactory.create(
 
 # Stessa richiesta 2 volte: la seconda dovrebbe colpire la cache
 q = "Dimmi 3 vantaggi del TDD in 1 riga"
+
+t0 = time.perf_counter()
 r1 = client.invoke(q)
-r2 = client.invoke(q)
-
+t1 = time.perf_counter()
 print("prima:", r1.text)
-print("seconda:", r2.text)
+print(f"⏱️ tempo (prima): {t1 - t0:.3f}s")
+#⏱️ tempo (prima): 6.340s
 
-# Esempio di ispezione metrica
-print("token prompt:", r2.prompt_tokens_used)
-print("token risposta:", r2.completion_tokens_used)
-print("stop reason:", r2.stop_reason)
+t2 = time.perf_counter()
+r2 = client.invoke(q)  # Qui avviene un cache hit, il client non viene invocato
+t3 = time.perf_counter()
+print("seconda:", r2.text)
+print(f"⏱️ tempo (seconda): {t3 - t2:.3f}s")
+#⏱️ tempo (seconda): 0.000s
+
 ```
 
 ## 4. Mettere tutto insieme: chatbot completo
@@ -138,6 +144,7 @@ client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
+    temperature=1,
 )
 
 bot = Chatbot(client, window_size=6)
@@ -155,5 +162,4 @@ while True:
 ```
 
 ## Riferimenti utili
-- `text_only_examples.py`: esempi completi e scenari avanzati
-- `GUIDA_TEXT_ONLY.md`: guida tecnica con best practice e troubleshooting
+- `text_only_examples.py`: esempi completi e scenari avanzati.

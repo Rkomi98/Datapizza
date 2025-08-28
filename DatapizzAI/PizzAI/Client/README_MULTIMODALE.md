@@ -42,7 +42,7 @@ response = client.invoke([
     MediaBlock(media=media)  # Wrapper che contiene l'immagine
 ])
 
-print(response.content)
+print(response.text)
 ```
 
 ---
@@ -83,7 +83,7 @@ response = client.invoke([
     MediaBlock(media=media)  # Wrapper per l'immagine
 ])
 
-print(response.content)
+print(response.text)
 ```
 
 ---
@@ -114,7 +114,7 @@ media = Media(
 
 prompt = "Trascrivi questo audio e riassumi il contenuto principale."
 response = analysis_client_google.invoke([TextBlock(content=prompt), MediaBlock(media=media)])
-print(response.content)
+print(response.text)
 ```
 
 ---
@@ -163,11 +163,11 @@ memory = Memory()
 image_block = create_mediablock_from_file("Example.png")
 memory.add_turn([TextBlock("Analizza questa foto, cosa vedi?"), image_block], ROLE.USER)
 resp = client.invoke("", memory=memory)
-memory.add_turn([TextBlock(resp.content)], ROLE.ASSISTANT) #Aggiungo risposta alla memori
+memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT) #Aggiungo risposta alla memori
 
 # Secondo turno: follow-up che si basa sull'immagine precedente
 memory.add_turn([TextBlock("Quali miglioramenti consiglieresti?")], ROLE.USER)
 resp = client.invoke("", memory=memory)
 
-print(resp.content)
+print(resp.text)
 ```
