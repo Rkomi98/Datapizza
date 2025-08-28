@@ -16,6 +16,7 @@ client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
+    temperature=1,
 )
 
 prompt = (
@@ -43,53 +44,51 @@ Suggerimenti:
 
 ## 2) Output tipizzato con structured_response
 
-Quando il provider lo supporta, puoi definire uno schema e ottenere un output già strutturato.
+Quando il provider lo supporta, puoi definire classi Pydantic e ottenere un output già strutturato e validato.
 
 ```python
 import os
+from typing import List
+from pydantic import BaseModel
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
+
+# Definizione delle classi Pydantic per la struttura dati
+class Task(BaseModel):
+    name: str
+    owner: str
+    eta_days: int
+
+class ProjectSummary(BaseModel):
+    title: str
+    status: str  # planned, in_progress, done
+    tasks: List[Task]
 
 load_dotenv()
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-5",
+    model="gpt-4o",
 )
 
-schema = {
-    "type": "object",
-    "properties": {
-        "title": {"type": "string"},
-        "status": {"type": "string", "enum": ["planned", "in_progress", "done"]},
-        "tasks": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "owner": {"type": "string"},
-                    "eta_days": {"type": "integer"}
-                },
-                "required": ["name", "owner", "eta_days"]
-            }
-        }
-    },
-    "required": ["title", "status", "tasks"]
-}
-
-response = client.invoke(
+# Uso del metodo structured_response con classe Pydantic
+response = client.structured_response(
     input="Riepiloga il piano progetto per il nuovo portale e-commerce",
-    structured_response=schema,
+    output_cls=ProjectSummary,
 )
 
-# A seconda del provider/SDK, il risultato può essere disponibile come
-# response.structured_response oppure response.content (tipizzato) oppure response.parsed
-structured = getattr(response, "structured_response", None) or getattr(response, "parsed", None)
-print(structured)
+# Il risultato è disponibile come response.structured_data[0] 
+structured = response.structured_data[0]
+print("Titolo:", structured.title)
+print("Status:", structured.status)
+print("Tasks:")
+for task in structured.tasks:
+    print(f"  - {task.name} (owner: {task.owner}, ETA: {task.eta_days} giorni)")
 ```
 
 Note pratiche:
-- Mantieni lo schema conciso; enum/constraint aiutano la qualità
-- In caso di fallback provider non compatibile, usa l’approccio JSON + parsing
-- Logga sia l’output grezzo sia quello strutturato per debug
+- Usa classi Pydantic per definire la struttura dati invece di JSON Schema
+- Le classi Pydantic forniscono validazione automatica e type hints
+- Il risultato è disponibile in `response.structured_data[0]` (primo oggetto strutturato)
+- In caso di provider non compatibile, usa l'approccio JSON + parsing del metodo 1
+- Logga sia l'output grezzo sia quello strutturato per debug
