@@ -1,0 +1,83 @@
+# Esempio di struttura YAML seguendo il formato richiesto dall'utente
+# Questo file dimostra la struttura modules + pipeline proposta
+
+params:
+  seconds: 20
+  sample_rate: 16000
+  audio_path: "session.wav"
+  out_path: "Pipeline/voicebot_report.md" 
+  model: "gemini-2.5-flash"
+  temperature: 0.4
+
+modules:
+  - name: data_recorder
+    module: Pipeline.components
+    type: RecordAudio
+    params: {}
+
+  - name: audio_analyzer  
+    module: Pipeline.components
+    type: GeminiAudioAnalyzer
+    params:
+      model: "gemini-2.5-flash"
+      temperature: 0.4
+      # api_key sarà inyettata dal codice Python
+
+  - name: bullet_extractor
+    module: Pipeline.components
+    type: ExtractKey
+    params:
+      key: "bullets"
+
+  - name: bullet_normalizer
+    module: Pipeline.components
+    type: BulletPointNormalizer
+    params: {}
+
+  - name: report_builder
+    module: Pipeline.components
+    type: BuildReport
+    params: {}
+
+  - name: notification_sender
+    module: Pipeline.components
+    type: SendNotification
+    params: {}
+
+pipeline:
+  # Step 1: Carica dati (registra audio)
+  - type: run
+    name: load_data
+    node: data_recorder
+    kwargs:
+      path: "session.wav"
+      seconds: 20
+      sample_rate: 16000
+
+  # Step 2: Trasforma dati (analizza audio)
+  - type: then
+    name: transform
+    node: audio_analyzer
+    target_key: audio_path
+
+  # Step 3: Estrai bullets
+  - type: then
+    name: extract_info
+    node: bullet_extractor
+    target_key: transform
+
+  # Step 4: Normalizza bullets (equivalente al foreach dell'utente)
+  - type: foreach
+    name: normalize_data
+    dependencies:
+      - node_name: extract_info
+    do: bullet_normalizer
+
+  # Step 5: Genera report finale
+  - type: then
+    name: generate_output
+    node: report_builder  
+    target_key: normalize_data
+    dependencies:
+      - node_name: transform
+        target_key: analysis

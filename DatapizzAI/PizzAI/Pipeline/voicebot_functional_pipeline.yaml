@@ -1,0 +1,55 @@
+params:
+  seconds: 20
+  sample_rate: 16000
+  audio_path: "session.wav"
+  out_path: "Pipeline/voicebot_report.md"
+  model: "gemini-2.5-flash"
+  temperature: 0.4
+
+modules:
+  - name: data_recorder
+    module: Pipeline.components
+    type: RecordAudio
+    params: {}
+
+  - name: audio_analyzer
+    module: Pipeline.components
+    type: GeminiAudioAnalyzer
+    params:
+      # api_key viene preso da .env allo startup nello script
+      model: "gemini-2.5-flash"
+      temperature: 0.4
+
+  - name: bullet_extractor
+    module: Pipeline.components
+    type: ExtractKey
+    params:
+      key: "bullets"
+
+  - name: bullet_normalizer
+    module: Pipeline.components
+    type: BulletPointNormalizer
+    params: {}
+
+  - name: report_builder
+    module: Pipeline.components
+    type: BuildReport
+    params: {}
+
+  - name: notification_sender
+    module: Pipeline.components
+    type: SendNotification
+    params: {}
+
+  - name: sentiment_checker
+    module: Pipeline.components
+    type: SentimentChecker
+    params: {}
+
+# Configurazione di esempio completa per FunctionalPipeline
+# Questa struttura dimostra l'uso di tutti i componenti principali:
+# - modules: definizione dei componenti riutilizzabili
+# - pipeline: sequenza di operazioni con run, then, foreach, branch
+
+# Nota: La pipeline sarà costruita programmaticamente nello script Python
+# poiché alcune funzionalità come lambda e branch complessi sono meglio gestite in codice
