@@ -6,6 +6,16 @@ Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libr
 
 Per un'esplorazione esaustiva di tutte le funzionalità, il file `Agents/agent_complete.py` resta il riferimento completo.
 
+## Indice
+
+- [Setup ambiente](#setup-ambiente)
+- [1. Creare un agente](#1-creare-un-agente)
+  - [Parametri di input](#parametri-di-input)
+- [2. Eseguire un agente](#2-eseguire-un-agente)
+- [3. Creare un sistema multi-agente](#3-creare-un-sistema-multi-agente)
+- [4. Esempio minimale funzionante](#4-esempio-minimale-funzionante)
+- [Informazioni aggiuntive](#informazioni-aggiuntive)
+
 ## Setup ambiente
 
 Prima di iniziare, è necessario installare le librerie e configurare le credenziali.
@@ -27,6 +37,20 @@ Prima di iniziare, è necessario installare le librerie e configurare le credenz
 ## 1. Creare un agente
 
 Un agente è un'entità autonoma che utilizza un modello linguistico (LLM) per ragionare, usare strumenti (`tools`) e mantenere una memoria conversazionale per risolvere problemi.
+
+```mermaid
+graph TD;
+    subgraph Single Agent Architecture;
+        A["User Query"] --> B{"Agent (Brain)"};
+        B --> C["LLM Client (Reasoning)"];
+        B --> D["Tools (Actions)"];
+        B --> E["Memory (Context)"];
+        C --> B;
+        D --> B;
+        E --> B;
+        B --> F["Final Response"];
+    end;
+```
 
 La sua creazione richiede la configurazione di diversi parametri che ne definiscono il comportamento.
 
@@ -86,6 +110,18 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 Per problemi complessi, è efficace combinare più agenti specializzati. Un agente "coordinatore" riceve la richiesta, la scompone e delega i sotto-compiti agli agenti più adatti.
 
 Questo si ottiene tramite il parametro `can_call`.
+
+```mermaid
+graph TD;
+    subgraph Multi-Agent System;
+        A["Complex User Query"] --> B{"Coordinator Agent"};
+        B -- Deploys Task 1 --> C["Specialist Agent 1<br>(e.g., Analyst)"];
+        B -- Deploys Task 2 --> D["Specialist Agent 2<br>(e.g., Calculator)"];
+        C -- Returns Result --> B;
+        D -- Returns Result --> B;
+        B -- Synthesizes Results --> E["Final Response"];
+    end;
+```
 
 ```python
 # Agente 1: specializzato in analisi testuale
