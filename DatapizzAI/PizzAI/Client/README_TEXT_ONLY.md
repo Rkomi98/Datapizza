@@ -11,9 +11,8 @@ Questa guida ti accompagna passo‑passo alla creazione di un chatbot testuale c
 - [Prerequisiti](#prerequisiti)
 - [1. Configurazione del client](#1-configurazione-del-client)
 - [2. Concetti chiave: Memory, TextBlock, ROLE](#2-concetti-chiave-memory-textblock-role)
-- [3. Step 0: una funzione `chat_turn`](#3-step-0-una-funzione-chat_turn)
-- [4. Prestazioni: cache e metriche](#4-prestazioni-cache-e-metriche)
-- [5. Mettere tutto insieme: chatbot completo](#5-mettere-tutto-insieme-chatbot-completo)
+- [3. Prestazioni: cache e metriche](#3-prestazioni-cache-e-metriche)
+- [4. Mettere tutto insieme: chatbot completo](#4-mettere-tutto-insieme-chatbot-completo)
 - [Riferimenti utili](#riferimenti-utili)
 
 ## Prerequisiti
@@ -27,12 +26,13 @@ OPENAI_API_KEY=sk-...
 Per esempi completi consultare anche `text_only_examples.py`.
 
 ## 1. Configurazione del client (perché è importante)
-Per parlare con un modello serve un client configurato con provider, chiave e modello.
+Per parlare con un modello serve un client configurato con provider, chiave, temperatura e modello.
 
 ```python
 import os
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
+from datapizzai.type import TextBlock
 
 # Carica variabili da .env (root progetto)
 load_dotenv()
@@ -41,13 +41,14 @@ client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
+    temperature=1
 )
 
 # Invoke sempplice (minimale)
-print(client.invoke("Di' ciao in una riga").text)
+print(client.invoke("Ciao, piacere di conoscerti").text)
 
-# Oppure
-print(client.invoke(TextBlock(content="Di' ciao in una riga")).text)
+# Oppure usando un modulo che vedremo tra un attimo
+print(client.invoke(TextBlock(content="Ciao, piacere di conoscerti")).text)
 ```
 
 - provider: scegli il vendor LLM
@@ -76,23 +77,7 @@ memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
 Nota: la risposta è un oggetto. Per salvarla in memoria devi usare `response.text` (stringa). Non passare l'oggetto risposta direttamente nei `TextBlock`, altrimenti otterrai errori di serializzazione JSON.
 
-## 3. Step 0: una funzione `chat_turn`
-Partiamo da una funzione semplice che gestisce un turno di chat. Serve per validare che la pipeline funzioni.
-
-```python
-def chat_turn(user_input: str) -> str:
-    memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-    response = client.invoke("", memory=memory)
-    memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-    return response.text
-
-print(chat_turn("Presentati in una frase."))
-print(chat_turn("Ora dimmi 3 best practice per Django."))
-```
-
-**Perché farlo?** Separare il “cosa” (testo utente) dal “come” (gestione memoria/invocazione) rende il codice **personalizzabile**.
-
-## 4. Prestazioni: cache e metriche
+## 3. Prestazioni: cache e metriche
 La cache riduce costi per richieste ripetute. Le metriche aiutano a capire l’impatto delle scelte di prompting/memoria.
 
 ```python
@@ -102,6 +87,7 @@ client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
+    temperature=1,
     cache=MemoryCache(),  # cache in-memory
 )
 
@@ -119,8 +105,8 @@ print("token risposta:", r2.completion_tokens_used)
 print("stop reason:", r2.stop_reason)
 ```
 
-## 5. Mettere tutto insieme: chatbot completo
-Qui un esempio riassuntivo che unisce configurazione, classe, REPL e metriche base.
+## 4. Mettere tutto insieme: chatbot completo
+Qui un esempio riassuntivo che unisce tutto quello visto oggi con un esempio di chatbot.
 
 ```python
 import os
