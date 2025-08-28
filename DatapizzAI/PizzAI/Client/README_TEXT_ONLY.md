@@ -45,6 +45,9 @@ client = ClientFactory.create(
 
 # Invoke sempplice (minimale)
 print(client.invoke("Di' ciao in una riga").text)
+
+# Oppure
+print(client.invoke(TextBlock(content="Di' ciao in una riga")).text)
 ```
 
 - provider: scegli il vendor LLM
