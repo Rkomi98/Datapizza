@@ -30,7 +30,12 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-5")
+client = ClientFactory.create(
+    provider="openai", 
+    api_key=os.getenv("OPENAI_API_KEY"), 
+    model="gpt-5",
+    temperature=1
+    )
 
 response = client.invoke(
     "Set a timer for 5 minutes",
@@ -72,8 +77,10 @@ def cerca_informazioni(query: str) -> str:
 ### Esecuzione
 
 ```python
-# Client
+# Client e Memory  
 from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
+from datapizzai.type import FunctionCallResultBlock, ROLE
 from dotenv import load_dotenv
 import os
 
@@ -81,20 +88,25 @@ load_dotenv()
 client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 tools = [calcolatrice, cerca_informazioni]
+memory = Memory()
 
 response = client.invoke(
     input="Calcola (25 * 4) + 10 e cerca informazioni su Python type hints",
     tools=tools,
-    tool_choice="auto"
+    tool_choice="auto",
+    memory=memory
 )
 
 # Esecuzione iterativa dei function call
-from datapizzai.type import FunctionCallResultBlock
-
-while getattr(response, "function_calls", []):
+while hasattr(response, "function_calls") and response.function_calls:
+    # Aggiungi la risposta dell'assistant alla memoria
+    memory.add_turn(response.content, ROLE.ASSISTANT)
+    
+    # Crea i risultati dei tool e aggiungili uno per volta alla memoria
     for f_call in response.function_calls:
         tool_name = f_call.name
         args = f_call.arguments or {}
+        
         if tool_name == "calcolatrice":
             result = calcolatrice(**args)
         elif tool_name == "cerca_informazioni":
@@ -102,19 +114,22 @@ while getattr(response, "function_calls", []):
         else:
             result = f"Tool sconosciuto: {tool_name}"
 
-        block = FunctionCallResultBlock(
+        tool_result_block = FunctionCallResultBlock(
             id=f_call.id,
             tool=tool_name,
             result=result,
         )
+        
+        # Aggiungi ogni tool result come turn separato con ruolo TOOL
+        memory.add_turn([tool_result_block], ROLE.TOOL)
 
-        # Re‑invoca con i risultati dei tool
-        response = client.invoke(
-            input="",
-            tools=tools,
-            tool_choice="auto",
-            tool_results=[block]
-        )
+    # Re-invoca con la memoria aggiornata
+    response = client.invoke(
+        input="",
+        tools=tools,
+        tool_choice="auto",
+        memory=memory
+    )
 
 print(response.text)
 ```
