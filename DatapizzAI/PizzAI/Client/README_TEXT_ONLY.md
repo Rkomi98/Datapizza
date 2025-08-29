@@ -80,6 +80,8 @@ Nota: la risposta è un oggetto. Per salvarla in memoria devi usare `response.te
 ## 3. Prestazioni: cache e metriche
 La cache riduce costi per richieste ripetute. Le metriche aiutano a capire l’impatto delle scelte di prompting/memoria.
 
+Nota importante sulla cache: la cache è implementata dalla libreria `datapizzai` (non dal provider). Puoi usare `MemoryCache` (in‑process) oppure `RedisCache` per ambienti distribuiti. La logica di cache si basa su un hash del contenuto della richiesta.
+
 ```python
 from datapizzai.cache import MemoryCache
 import time
@@ -89,7 +91,7 @@ client = ClientFactory.create(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
     temperature=1,
-    cache=MemoryCache(),  # cache in-memory
+    cache=MemoryCache(),  # cache in-memory gestita da datapizzai
 )
 
 # Stessa richiesta 2 volte: la seconda dovrebbe colpire la cache
@@ -109,7 +111,20 @@ print("seconda:", r2.text)
 print(f"⏱️ tempo (seconda): {t3 - t2:.3f}s")
 #⏱️ tempo (seconda): 0.000s
 
+# Alternativa: usare Redis come cache condivisa
+from datapizzai.cache import RedisCache
+redis_cache = RedisCache(host="localhost", port=6379, db=0)
+client_redis = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-5",
+    cache=redis_cache,
+)
+
 ```
+
+### Nota: strategia sliding window (perché c’è nella classe)
+La funzione privata `_apply_sliding_window` è una semplice policy per limitare la memoria ai soli ultimi `N` turni, mantenendo bassi i token e i costi. È una delle tante policy possibili (vedi anche esempio di riassunto periodico più sotto).
 
 ## 4. Mettere tutto insieme: chatbot completo
 Qui un esempio riassuntivo che unisce tutto quello visto oggi con un esempio di chatbot.
@@ -160,6 +175,55 @@ while True:
     except Exception:
         print("bot> Si è verificato un errore temporaneo. Riprova.")
 ```
+
+## 5. Custom memoria: riassunto ogni 5 turni
+Ecco un esempio di come implementare una policy che ogni 5 turni crea un riassunto della conversazione e “riparte” da lì. Questo riduce il contesto mantenendo però i punti chiave.
+
+```python
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock, ROLE
+
+class SummarizingChat:
+    def __init__(self, client, summarize_every: int = 5, max_summary_len: int = 6):
+        self.client = client
+        self.memory = Memory()
+        self.turns = 0
+        self.summarize_every = summarize_every
+        self.max_summary_len = max_summary_len
+
+    def _summarize(self):
+        # Chiede al modello un riassunto della conversazione corrente
+        prompt = (
+            f"Riassumi la conversazione in {self.max_summary_len} frasi, "
+            "mettendo in evidenza decisioni e TODO."
+        )
+        summary_resp = self.client.invoke(prompt, memory=self.memory)
+        summary = summary_resp.text.strip()
+        # Resetta la memoria mantenendo solo il riassunto come punto di partenza
+        new_mem = Memory()
+        new_mem.add_turn([TextBlock(content=f"[Riassunto] {summary}")], ROLE.ASSISTANT)
+        self.memory = new_mem
+
+    def send(self, user_input: str) -> str:
+        self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        resp = self.client.invoke("", memory=self.memory)
+        self.memory.add_turn([TextBlock(content=resp.text)], ROLE.ASSISTANT)
+        self.turns += 1
+        if self.turns % self.summarize_every == 0:
+            self._summarize()
+        return resp.text
+
+# Uso:
+# chat = SummarizingChat(client, summarize_every=5)
+# print(chat.send("Iniziamo a progettare una REST API per un e‑commerce."))
+```
+
+Punti d’estensione consigliati (facili da implementare):
+- Pre‑processing input (es. riscrittura prompt, filtri di sicurezza)
+- Post‑processing output (es. normalizzazione formato, estrazione bullet/JSON)
+- Policy memoria (sliding window, riassunti, pin di messaggi)
+- Scelta provider dinamica (fallback se un provider è lento o in errore)
+- Cache strategy (in‑process vs Redis)
 
 ## Riferimenti utili
 - `text_only_examples.py`: esempi completi e scenari avanzati.

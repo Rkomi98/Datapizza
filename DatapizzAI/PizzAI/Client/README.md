@@ -8,7 +8,8 @@ Questa guida ti aiuterà a configurare tutti i tipi di client disponibili nella 
 - [Setup base del codice](#setup-base-del-codice)
 - [Metodo 1: Utilizzo del ClientFactory (raccomandato)](#metodo-1-utilizzo-del-clientfactory-raccomandato)
 - [Metodo 2: Configurazione diretta dei client](#metodo-2-configurazione-diretta-dei-client)
-- [Metodo 3: Modello locale (Gemma con Ollama)](#metodo-3-modello-locale-gemma-con-ollama)
+- [Metodo 3: Provider personalizzato via API (es. DeepSeek)](#metodo-3-provider-personalizzato-via-api-es-deepseek)
+- [Metodo 4: Modello locale (Ollama/Gemma)](#metodo-4-modello-locale-ollamagemma)
 - [Esempio completo di utilizzo](#esempio-completo-di-utilizzo)
 - [Prossimi passi](#prossimi-passi)
 
@@ -234,9 +235,128 @@ print(f"Risposta: {response.text}")
 
 ---
 
-## Metodo 3: Modello locale (Gemma con Ollama)
+## Metodo 3: Provider personalizzato via API (es. DeepSeek)
 
-L'esecuzione di modelli in locale garantisce privacy, controllo dei costi e bassa latenza, senza dipendere da servizi esterni. Con [Ollama]("https://ollama.com") puoi eseguire Gemma in locale e integrarlo con la stessa interfaccia `invoke` usata dai client DatapizzAI.
+Se vuoi collegarti a un provider non ancora incluso nel framework, puoi creare un adapter minimale che chiama le sue API HTTP e restituisce una struttura semplice con `text` e metriche basiche. L'approccio resta identico anche per altri provider OpenAI‑compatibili.
+
+Esempio generico (DeepSeek come riferimento):
+
+```python
+import os
+import requests
+from typing import Optional, Union, List
+from pydantic import BaseModel
+
+from datapizzai.type import TextBlock
+from datapizzai.memory import Memory
+
+
+class SimpleResponse(BaseModel):
+    text: str
+    prompt_tokens_used: int = 0
+    completion_tokens_used: int = 0
+    stop_reason: str = "stop"
+
+
+class GenericRESTClient:
+    """Adapter minimale per API chat‑completions compatibili (es. DeepSeek)."""
+
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str,
+        model: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.7,
+        endpoint: str = "/chat/completions",
+        headers: Optional[dict] = None,
+    ):
+        self.base_url = base_url.rstrip("/")
+        self.api_key = api_key
+        self.model = model
+        self.system_prompt = system_prompt or ""
+        self.temperature = temperature
+        self.endpoint = endpoint
+        self._headers = headers or {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+    def _build_messages(
+        self,
+        input: Optional[Union[str, List[TextBlock]]] = None,
+        memory: Optional[Memory] = None,
+    ) -> List[dict]:
+        msgs: List[dict] = []
+        if self.system_prompt:
+            msgs.append({"role": "system", "content": self.system_prompt})
+        if memory is not None:
+            for turn in memory.memory:
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(getattr(b, "content", "") for b in turn.blocks if hasattr(b, "content"))
+                if content:
+                    msgs.append({"role": role, "content": content})
+        if isinstance(input, str) and input:
+            msgs.append({"role": "user", "content": input})
+        elif isinstance(input, list) and input:
+            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
+            if user_text:
+                msgs.append({"role": "user", "content": user_text})
+        return msgs
+
+    def invoke(
+        self,
+        input: Optional[Union[str, List[TextBlock]]] = None,
+        memory: Optional[Memory] = None,
+    ) -> SimpleResponse:
+        payload = {
+            "model": self.model,
+            "messages": self._build_messages(input, memory),
+            "temperature": self.temperature,
+            # Aggiungi altri campi se richiesti dal provider
+        }
+        url = f"{self.base_url}{self.endpoint}"
+        try:
+            r = requests.post(url, json=payload, headers=self._headers, timeout=120)
+            r.raise_for_status()
+            data = r.json()
+            # Estrarre il testo secondo il formato del provider (OpenAI‑like):
+            # { choices: [ { message: { content: "..." } } ] }
+            text = (
+                data.get("choices", [{}])[0]
+                .get("message", {})
+                .get("content")
+            ) or str(data)
+            # Metriche se disponibili (opzionali)
+            usage = data.get("usage") or {}
+            return SimpleResponse(
+                text=text,
+                prompt_tokens_used=usage.get("prompt_tokens", 0),
+                completion_tokens_used=usage.get("completion_tokens", 0),
+                stop_reason=(data.get("choices", [{}])[0].get("finish_reason") or "stop"),
+            )
+        except Exception as e:
+            return SimpleResponse(text=f"Errore chiamata REST: {e}")
+
+
+# Esempio di utilizzo con DeepSeek (valori segnaposto)
+if __name__ == "__main__":
+    client = GenericRESTClient(
+        base_url="https://api.deepseek.com/v1",  # esempio
+        api_key=os.getenv("DEEPSEEK_API_KEY", "<inserisci-chiave>"),
+        model="deepseek-chat",
+        system_prompt="Sei un assistente conciso e utile.",
+    )
+    print(client.invoke("Spiegami il concetto di overfitting in 3 frasi.").text)
+```
+
+Note pratiche:
+- Se il provider espone un endpoint OpenAI‑compatibile, potresti valutare l'uso di `OpenAIClient` con `base_url` (se supportato dalla tua versione), altrimenti usa l'adapter sopra.
+- Mantieni l'interfaccia `invoke(input, memory)` per coerenza con il resto del codice.
+
+## Metodo 4: Modello locale (Ollama/Gemma)
+
+L'esecuzione di modelli in locale garantisce privacy, controllo dei costi e bassa latenza, senza dipendere da servizi esterni. Con [Ollama](https://ollama.com) puoi eseguire Gemma (o altri modelli) in locale e integrarlo con la stessa interfaccia `invoke`.
 
 Prerequisiti (Linux/macOS):
 
@@ -257,10 +377,9 @@ Test rapido da CLI:
 ollama run gemma3n:e2b "Ciao! Presentati brevemente."
 ```
 
-Esempio di adapter Python e test rapido:
+Adapter Python minimale (stesso schema del provider personalizzato):
 
 ```python
-import os
 import requests
 from typing import Optional, Union, List
 from pydantic import BaseModel
@@ -276,75 +395,38 @@ class SimpleResponse(BaseModel):
     stop_reason: str = "stop"
 
 
-class OllamaGemmaClient:
-    """Adapter minimale per Ollama Chat API con modello Gemma."""
-
-    def __init__(
-        self,
-        model: str = "gemma3n:e2b",
-        system_prompt: Optional[str] = None,
-        temperature: float = 0.7,
-        base_url: str = "http://localhost:11434",
-    ):
+class OllamaClient:
+    def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434"):
         self.model = model
-        self.system_prompt = system_prompt or ""
-        self.temperature = temperature
         self.base_url = base_url.rstrip("/")
 
-    def _build_messages(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> List[dict]:
-        messages: List[dict] = []
-        if self.system_prompt:
-            messages.append({"role": "system", "content": self.system_prompt})
+    def _build_messages(self, input=None, memory: Optional[Memory] = None):
+        msgs = []
         if memory is not None:
             for turn in memory.memory:
                 role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
                 content = " ".join(getattr(b, "content", "") for b in turn.blocks)
                 if content:
-                    messages.append({"role": role, "content": content})
+                    msgs.append({"role": role, "content": content})
         if isinstance(input, str) and input:
-            messages.append({"role": "user", "content": input})
-        elif isinstance(input, list) and input:
-            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
-            if user_text:
-                messages.append({"role": "user", "content": user_text})
-        return messages
+            msgs.append({"role": "user", "content": input})
+        return msgs
 
-    def invoke(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> SimpleResponse:
-        messages = self._build_messages(input=input, memory=memory)
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "stream": False,
-            "options": {"temperature": self.temperature},
-        }
+    def invoke(self, input=None, memory: Optional[Memory] = None) -> SimpleResponse:
+        payload = {"model": self.model, "messages": self._build_messages(input, memory), "stream": False}
         try:
             r = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
             r.raise_for_status()
             data = r.json()
-            # Risposta attesa: {"message": {"role": "assistant", "content": "..."}, ...}
             text = data.get("message", {}).get("content") or str(data)
         except Exception as e:
             text = f"Errore Ollama: {e}"
         return SimpleResponse(text=text)
 
 
-# Test rapido del setup
 if __name__ == "__main__":
-    client = OllamaGemmaClient(
-        model="gemma3n:e2b",  # Sostituisci con il tag del tuo modello Gemma locale
-        system_prompt="Sei un assistente AI utile e conciso.",
-        temperature=0.7,
-    )
-    resp = client.invoke("Ciao! Presentati brevemente in due frasi.")
-    print(f"Risposta: {resp.text}")
+    client = OllamaClient()
+    print(client.invoke("Ciao! Riassumi in una frase il teorema di Pitagora.").text)
 ```
 
 
@@ -398,10 +480,17 @@ if __name__ == "__main__":
 
 Una volta validata la configurazione di base, è possibile esplorare le funzionalità avanzate della libreria.
 
-1. **Gestione della memoria** per conversazioni multi-turno
-2. **Sistema di cache** per ottimizzare le performance
+1. **Gestione della memoria** per conversazioni multi‑turno
+2. **Cache lato libreria** (`MemoryCache`, `RedisCache`) per ottimizzare costi/latency
 3. **Tools e function calling** per funzionalità avanzate
 4. **Risposte strutturate** con modelli Pydantic
 5. **Streaming** per risposte in tempo reale
+
+Suggerimenti di personalizzazione ad alto impatto:
+- Pre‑processing del prompt: normalizzazione, iniezione di contesto, safety filters
+- Policy di memoria: sliding‑window, riassunti periodici (es. ogni 5 turni), pin di messaggi chiave
+- Cache: passare da `MemoryCache` a `RedisCache` per ambienti multi‑istanza
+- Error handling: retry con backoff, fallback cross‑provider
+- Logging/metrics: hook post‑invoke per telemetria e valutazioni
 
 Questa guida copre tutti gli aspetti della configurazione dei client. Per funzionalità avanzate, consulta la documentazione completa di DatapizzAI.

@@ -8,7 +8,8 @@ This guide will help you set up all kind of clients available in the DatapizzAI 
 - [Basic code setup](#basic-code-setup)
 - [Method 1: Using ClientFactory (recommended)](#method-1-using-clientfactory-recommended)
 - [Method 2: Direct client configuration](#method-2-direct-client-configuration)
-- [Method 3: Local model (Gemma with Ollama)](#method-3-local-model-gemma-with-ollama)
+- [Method 3: Custom provider via API (e.g., DeepSeek)](#method-3-custom-provider-via-api-eg-deepseek)
+- [Method 4: Local model (Ollama/Gemma)](#method-4-local-model-ollamagemma)
 - [Complete usage example](#complete-usage-example)
 - [Next steps](#next-steps)
 
@@ -234,9 +235,107 @@ print(f"Response: {response.text}")
 
 ---
 
-## Method 3: Local model (Gemma with Ollama)
+## Method 3: Custom provider via API (e.g., DeepSeek)
 
-Running models locally ensures privacy, predictable costs, and low latency without relying on external services. With [Ollama](https://ollama.com), you can run Gemma on your own machine and integrate it using the same `invoke` interface as other DatapizzAI clients.
+If you need a provider not supported yet, create a minimal adapter that calls its HTTP API and returns a small response object with `text` and basic metrics. The same pattern works for any OpenAI‑style provider.
+
+Generic example (DeepSeek as reference):
+
+```python
+import os
+import requests
+from typing import Optional, Union, List
+from pydantic import BaseModel
+
+from datapizzai.type import TextBlock
+from datapizzai.memory import Memory
+
+
+class SimpleResponse(BaseModel):
+    text: str
+    prompt_tokens_used: int = 0
+    completion_tokens_used: int = 0
+    stop_reason: str = "stop"
+
+
+class GenericRESTClient:
+    """Minimal adapter for OpenAI‑compatible chat‑completions APIs (e.g., DeepSeek)."""
+
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str,
+        model: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.7,
+        endpoint: str = "/chat/completions",
+        headers: Optional[dict] = None,
+    ):
+        self.base_url = base_url.rstrip("/")
+        self.api_key = api_key
+        self.model = model
+        self.system_prompt = system_prompt or ""
+        self.temperature = temperature
+        self.endpoint = endpoint
+        self._headers = headers or {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+    def _build_messages(self, input: Optional[Union[str, List[TextBlock]]] = None, memory: Optional[Memory] = None) -> List[dict]:
+        msgs: List[dict] = []
+        if self.system_prompt:
+            msgs.append({"role": "system", "content": self.system_prompt})
+        if memory is not None:
+            for turn in memory.memory:
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(getattr(b, "content", "") for b in turn.blocks if hasattr(b, "content"))
+                if content:
+                    msgs.append({"role": role, "content": content})
+        if isinstance(input, str) and input:
+            msgs.append({"role": "user", "content": input})
+        elif isinstance(input, list) and input:
+            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
+            if user_text:
+                msgs.append({"role": "user", "content": user_text})
+        return msgs
+
+    def invoke(self, input: Optional[Union[str, List[TextBlock]]] = None, memory: Optional[Memory] = None) -> SimpleResponse:
+        payload = {"model": self.model, "messages": self._build_messages(input, memory), "temperature": self.temperature}
+        url = f"{self.base_url}{self.endpoint}"
+        try:
+            r = requests.post(url, json=payload, headers=self._headers, timeout=120)
+            r.raise_for_status()
+            data = r.json()
+            text = (data.get("choices", [{}])[0].get("message", {}).get("content")) or str(data)
+            usage = data.get("usage") or {}
+            return SimpleResponse(
+                text=text,
+                prompt_tokens_used=usage.get("prompt_tokens", 0),
+                completion_tokens_used=usage.get("completion_tokens", 0),
+                stop_reason=(data.get("choices", [{}])[0].get("finish_reason") or "stop"),
+            )
+        except Exception as e:
+            return SimpleResponse(text=f"REST call error: {e}")
+
+
+if __name__ == "__main__":
+    client = GenericRESTClient(
+        base_url="https://api.deepseek.com/v1",  # example
+        api_key=os.getenv("DEEPSEEK_API_KEY", "<insert-key>"),
+        model="deepseek-chat",
+        system_prompt="You are a concise and helpful assistant.",
+    )
+    print(client.invoke("Explain overfitting in 3 sentences.").text)
+```
+
+Practical notes:
+- If the provider exposes an OpenAI‑compatible endpoint, you may use `OpenAIClient` with `base_url` (if supported by your version); otherwise, use the adapter above.
+- Keep the `invoke(input, memory)` interface for consistency.
+
+## Method 4: Local model (Ollama/Gemma)
+
+Running locally ensures privacy, predictable costs, and low latency. With [Ollama](https://ollama.com), you can run Gemma (or others) locally and integrate it with the same `invoke` interface.
 
 Prerequisites (Linux/macOS):
 
@@ -257,7 +356,7 @@ Quick CLI test:
 ollama run gemma3n:e2b "Hello! Introduce yourself briefly."
 ```
 
-Minimal Python adapter and quick test:
+Minimal adapter (same shape as the custom provider):
 
 ```python
 import requests
@@ -275,55 +374,25 @@ class SimpleResponse(BaseModel):
     stop_reason: str = "stop"
 
 
-class OllamaGemmaClient:
-    """Minimal adapter for Ollama Chat API with Gemma model."""
-
-    def __init__(
-        self,
-        model: str = "gemma3n:e2b",
-        system_prompt: Optional[str] = None,
-        temperature: float = 0.7,
-        base_url: str = "http://localhost:11434",
-    ):
+class OllamaClient:
+    def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434"):
         self.model = model
-        self.system_prompt = system_prompt or ""
-        self.temperature = temperature
         self.base_url = base_url.rstrip("/")
 
-    def _build_messages(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> List[dict]:
-        messages: List[dict] = []
-        if self.system_prompt:
-            messages.append({"role": "system", "content": self.system_prompt})
+    def _build_messages(self, input=None, memory: Optional[Memory] = None):
+        msgs = []
         if memory is not None:
             for turn in memory.memory:
                 role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
                 content = " ".join(getattr(b, "content", "") for b in turn.blocks)
                 if content:
-                    messages.append({"role": role, "content": content})
+                    msgs.append({"role": role, "content": content})
         if isinstance(input, str) and input:
-            messages.append({"role": "user", "content": input})
-        elif isinstance(input, list) and input:
-            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
-            if user_text:
-                messages.append({"role": "user", "content": user_text})
-        return messages
+            msgs.append({"role": "user", "content": input})
+        return msgs
 
-    def invoke(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> SimpleResponse:
-        messages = self._build_messages(input=input, memory=memory)
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "stream": False,
-            "options": {"temperature": self.temperature},
-        }
+    def invoke(self, input=None, memory: Optional[Memory] = None) -> SimpleResponse:
+        payload = {"model": self.model, "messages": self._build_messages(input, memory), "stream": False}
         try:
             r = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
             r.raise_for_status()
@@ -335,18 +404,9 @@ class OllamaGemmaClient:
 
 
 if __name__ == "__main__":
-    client = OllamaGemmaClient(
-        model="gemma3n:e2b",
-        system_prompt="You are a helpful and concise assistant.",
-        temperature=0.7,
-    )
-    resp = client.invoke("Hello! Introduce yourself in two sentences.")
-    print(f"Response: {resp.text}")
+    client = OllamaClient()
+    print(client.invoke("Summarize the Pythagorean theorem in one sentence.").text)
 ```
-
-Notes:
-
-- If you expose an OpenAI‑compatible endpoint (vLLM/TGI), you can evaluate using `OpenAIClient` pointing to your endpoint if your `datapizzai` version supports `base_url`.
 
 ---
 
@@ -397,8 +457,8 @@ if __name__ == "__main__":
 
 Once you have validated the basic configuration, you can explore the library's advanced features.
 
-1. **Memory management** for multi-turn conversations
-2. **Caching system** to optimize performance
+1. **Memory management** for multi‑turn conversations
+2. **Library‑side cache** (`MemoryCache`, `RedisCache`) to optimize cost/latency
 3. **Tools and function calling** for advanced features
 4. **Structured responses** with Pydantic models
 5. **Streaming** for real-time responses

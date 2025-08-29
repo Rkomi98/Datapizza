@@ -81,6 +81,8 @@ Note: the client's response is an object. Save `response.text` (a string) to mem
 ## 3. Performance: Caching and Metrics
 Caching reduces costs for repeated requests. Metrics help you understand the impact of your prompting and memory strategies.
 
+Important note on caching: caching is implemented by the `datapizzai` library (not by the provider). You can use in‑process `MemoryCache` or a shared `RedisCache` in distributed environments. The cache key is computed from the request content.
+
 ```python
 from datapizzai.cache import MemoryCache
 import time
@@ -89,7 +91,7 @@ client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
-    cache=MemoryCache(),  # in-memory cache
+    cache=MemoryCache(),  # in-memory cache provided by datapizzai
 )
 
 # Same request twice: second should hit the cache
@@ -107,6 +109,16 @@ t3 = time.perf_counter()
 print("second:", r2.text)
 print(f"⏱️ time (second): {t3 - t2:.3f}s")
 
+# Alternative: share cache via Redis
+from datapizzai.cache import RedisCache
+redis_cache = RedisCache(host="localhost", port=6379, db=0)
+client_redis = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-5",
+    cache=redis_cache,
+)
+
 # Inspect metrics
 print("prompt tokens:", r2.prompt_tokens_used)
 print("completion tokens:", r2.completion_tokens_used)
@@ -114,6 +126,9 @@ print("stop reason:", r2.stop_reason)
 ```
 
 Measurement enables data-driven optimizations for latency, cost, and quality.
+
+### Note: sliding window strategy (why it exists)
+The `_apply_sliding_window` helper is a simple policy that keeps only the last `N` turns to control token usage and cost. It’s just one policy; see also the periodic summarization example below.
 
 ## 4. Putting It All Together: Complete Chatbot
 Here is a summary example that combines the configuration, class, REPL, and basic metrics.
@@ -162,6 +177,49 @@ while True:
     except Exception:
         print("bot> A temporary error occurred. Please try again.")
 ```
+
+## 5. Custom memory: summarize every 5 turns
+Here’s how to implement a policy that summarizes the conversation every 5 turns and continues from the summary, preserving key context at lower cost.
+
+```python
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock, ROLE
+
+class SummarizingChat:
+    def __init__(self, client, summarize_every: int = 5, max_summary_len: int = 6):
+        self.client = client
+        self.memory = Memory()
+        self.turns = 0
+        self.summarize_every = summarize_every
+        self.max_summary_len = max_summary_len
+
+    def _summarize(self):
+        prompt = (
+            f"Summarize the conversation in {self.max_summary_len} sentences, "
+            "highlighting decisions and TODOs."
+        )
+        summary_resp = self.client.invoke(prompt, memory=self.memory)
+        summary = summary_resp.text.strip()
+        new_mem = Memory()
+        new_mem.add_turn([TextBlock(content=f"[Summary] {summary}")], ROLE.ASSISTANT)
+        self.memory = new_mem
+
+    def send(self, user_input: str) -> str:
+        self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        resp = self.client.invoke("", memory=self.memory)
+        self.memory.add_turn([TextBlock(content=resp.text)], ROLE.ASSISTANT)
+        self.turns += 1
+        if self.turns % self.summarize_every == 0:
+            self._summarize()
+        return resp.text
+```
+
+Recommended extension points (easy to customize):
+- Input pre‑processing (prompt rewrite, safety filters)
+- Output post‑processing (format normalization, bullet/JSON extraction)
+- Memory policy (sliding window, periodic summaries, pin key messages)
+- Dynamic provider selection (fallback if a provider is slow/errors)
+- Cache strategy (in‑process vs Redis)
 
 ## Useful References
 - `text_only_examples.py`: Contains complete examples and advanced scenarios.

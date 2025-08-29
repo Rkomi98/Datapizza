@@ -155,43 +155,58 @@ def create_conversational_client():
 client, memory = create_conversational_client()
 tools = [calcolatrice, cerca_informazioni]
 
-def chat_turn(user_input: str, memory: Memory, client, tools):
-    """Gestisce un turno: aggiorna memoria, invoca il client, esegue function calls."""
-    
+def chat_turn(user_input, memory, client, tools):
+    """Gestisce un singolo turno di conversazione con tools"""
     print(f"👤 Utente: {user_input}")
     
     # Aggiungi input utente alla memoria
     memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
     
-    # Invoca il client con memoria e tool
+    # Prima chiamata al modello
     response = client.invoke(
-        input="",
+        input="",  # Input vuoto perché usiamo la memory
         memory=memory,
         tools=tools,
         tool_choice="auto"
     )
     
-    # Esecuzione tool iterativa finché necessario
-    while getattr(response, "function_calls", []):
+    # Gestione iterativa dei function calls
+    while hasattr(response, "function_calls") and response.function_calls:
+        print("🔧 Esecuzione tool calls...")
+        
+        # Aggiungi la risposta dell'assistant alla memoria
+        memory.add_turn(response.content, ROLE.ASSISTANT)
+        
+        # Esegui ogni function call
         for f_call in response.function_calls:
+            print(f"   📞 {f_call.name}({f_call.arguments})")
+            
+            # Esegui il tool (il tuo codice esistente va bene)
             result = {
                 "calcolatrice": calcolatrice,
                 "cerca_informazioni": cerca_informazioni,
             }.get(f_call.name, lambda **_: f"Tool sconosciuto: {f_call.name}")(**(f_call.arguments or {}))
-
-            block = FunctionCallResultBlock(id=f_call.id, tool=f_call.name, result=result)
-
-            response = client.invoke(
-                input="",
-                memory=memory,
-                tools=tools,
-                tool_choice="auto",
-                tool_results=[block]
+            
+            print(f"   ✅ {result}")
+            
+            # Crea il blocco risultato
+            tool_result_block = FunctionCallResultBlock(
+                id=f_call.id, 
+                tool=f_call.name, 
+                result=result
             )
-
-    # Nessun tool: salva normalmente
-    memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-    print(f"🤖 Assistente: {response.text}")
+            memory.add_turn([tool_result_block], ROLE.TOOL)
+        response = client.invoke(
+            input="",
+            memory=memory,
+            tools=tools,
+            tool_choice="auto"
+        )
+    
+    # Aggiungi la risposta finale alla memoria
+    if response.text:
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+        print(f"🤖 Assistant: {response.text}")
 
 # 4. Esempio di conversazione multi-turno
 conversation = [
@@ -226,72 +241,6 @@ print(f"💬 Blocchi totali: {len(list(memory.iter_blocks()))}")
 - **Pulizia memoria**: Gestisci la dimensione della memoria per conversazioni lunghe
 - **Separazione ruoli**: Mantieni chiara la distinzione tra utente e assistente
 
-
-
- 
-## Guida passo‑passo: tool custom
-
-Questa guida mostra come creare, esporre e usare un tool personalizzato con la libreria datapizzai.
-
-1. Definisci il tool con `@tool`
-   ```python
-   from datapizzai.tools import tool
-
-   @tool
-   def estrai_email(testo: str, dominio: str | None = None) -> list[str]:
-       """Estrae email da un testo; opzionalmente filtra per dominio.
-
-       Args:
-           testo: Testo di input
-           dominio: Se impostato, restituisce solo email che terminano con quel dominio
-
-       Returns:
-           Lista di email trovate
-       """
-       import re
-       pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
-       emails = re.findall(pattern, testo)
-       if dominio:
-           emails = [e for e in emails if e.endswith(dominio)]
-       return emails
-   ```
-
-2. Crea il client
-   ```python
-   import os
-   from dotenv import load_dotenv
-   from datapizzai.clients import ClientFactory
-
-   load_dotenv()
-   client = ClientFactory.create(
-       provider="openai",
-       api_key=os.getenv("OPENAI_API_KEY"),
-       model="gpt-4o",
-   )
-   tools = [estrai_email]
-   ```
-
-3. Invoca e gestisci i function call
-   ```python
-   response = client.invoke(
-       input="Trova le email in questo testo: Contatti: a@example.com, b@test.org",
-       tools=tools,
-       tool_choice="auto"
-   )
-
-   from datapizzai.type import FunctionCallResultBlock
-   while getattr(response, "function_calls", []):
-       for f_call in response.function_calls:
-           res = estrai_email(**(f_call.arguments or {}))
-           response = client.invoke(
-               input="",
-               tools=tools,
-               tool_choice="auto",
-               tool_results=[FunctionCallResultBlock(id=f_call.id, tool=f_call.name, result=res)]
-           )
-   print(response.text)
-   ```
-
 ### Esempio completo con Google Search
 
 ```python
@@ -304,28 +253,13 @@ load_dotenv()
 
 # Assicurati di avere GOOGLE_API_KEY nel file .env
 client = ClientFactory.create(
-    provider="openai",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    provider="google",
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-2.0-flash",
 )
 
-# Utilizzo diretto
-response = client.invoke(
-    "Chi ha vinto Wimbledon 2024?", 
-    tools=[google_search_tool],
-    tool_choice="auto"
-)
+response = client.invoke("Quando iniziano le olimpiadi invernali?", tools=[google_search_tool])
 
-from datapizzai.type import FunctionCallResultBlock
-while getattr(response, "function_calls", []):
-    for f_call in response.function_calls:
-        res = google_search_tool(**(f_call.arguments or {}))
-        response = client.invoke(
-            input="",
-            tools=[google_search_tool],
-            tool_choice="auto",
-            tool_results=[FunctionCallResultBlock(id=f_call.id, tool=f_call.name, result=res)]
-        )
 print(response.text)
 ```
 

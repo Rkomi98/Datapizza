@@ -33,7 +33,8 @@ media = Media(
     extension="jpg",        # Extension without dot for correct MIME type
     media_type="image",     # Media type (image, audio, video)
     source_type="url",      # Source: url, base64, or file
-    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint"
+    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint",
+    detail="high"           # Detail level (low|high|auto, if supported)
 )
 
 # Combine text and image for multimodal input
