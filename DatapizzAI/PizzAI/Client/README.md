@@ -488,7 +488,7 @@ Una volta validata la configurazione di base, è possibile esplorare le funziona
 
 Suggerimenti di personalizzazione ad alto impatto:
 - Pre‑processing del prompt: normalizzazione, iniezione di contesto, safety filters
-- Policy di memoria: sliding‑window, riassunti periodici (es. ogni 5 turni), pin di messaggi chiave
+- Policy di memoria: riassunti periodici (es. ogni 5 turni), pin di messaggi chiave
 - Cache: passare da `MemoryCache` a `RedisCache` per ambienti multi‑istanza
 - Error handling: retry con backoff, fallback cross‑provider
 - Logging/metrics: hook post‑invoke per telemetria e valutazioni

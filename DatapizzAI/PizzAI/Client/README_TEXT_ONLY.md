@@ -123,9 +123,6 @@ client_redis = ClientFactory.create(
 
 ```
 
-### Nota: strategia sliding window (perché c’è nella classe)
-La funzione privata `_apply_sliding_window` è una semplice policy per limitare la memoria ai soli ultimi `N` turni, mantenendo bassi i token e i costi. È una delle tante policy possibili (vedi anche esempio di riassunto periodico più sotto).
-
 ## 4. Mettere tutto insieme: chatbot completo
 Qui un esempio riassuntivo che unisce tutto quello visto oggi con un esempio di chatbot.
 
@@ -136,18 +133,12 @@ from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 
 class Chatbot:
-    def __init__(self, client, window_size: int = 6):
+    def __init__(self, client):
         self.client = client
         self.memory = Memory()
-        self.window_size = window_size
-
-    def _apply_sliding_window(self):
-        if len(self.memory.memory) > self.window_size:
-            self.memory.memory = self.memory.memory[-self.window_size:]
 
     def send(self, user_input: str) -> str:
         self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-        self._apply_sliding_window()
         response = self.client.invoke("", memory=self.memory)
         self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         # Stampa metriche minime (opzionale)
@@ -162,7 +153,7 @@ client = ClientFactory.create(
     temperature=1,
 )
 
-bot = Chatbot(client, window_size=6)
+bot = Chatbot(client)
 print("Chat pronta. Digita 'esci' per terminare.")
 while True:
     try:
@@ -221,7 +212,7 @@ class SummarizingChat:
 Punti d’estensione consigliati (facili da implementare):
 - Pre‑processing input (es. riscrittura prompt, filtri di sicurezza)
 - Post‑processing output (es. normalizzazione formato, estrazione bullet/JSON)
-- Policy memoria (sliding window, riassunti, pin di messaggi)
+- Policy memoria (riassunti periodici, pin di messaggi)
 - Scelta provider dinamica (fallback se un provider è lento o in errore)
 - Cache strategy (in‑process vs Redis)
 

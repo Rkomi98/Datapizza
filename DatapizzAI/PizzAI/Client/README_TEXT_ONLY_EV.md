@@ -127,9 +127,6 @@ print("stop reason:", r2.stop_reason)
 
 Measurement enables data-driven optimizations for latency, cost, and quality.
 
-### Note: sliding window strategy (why it exists)
-The `_apply_sliding_window` helper is a simple policy that keeps only the last `N` turns to control token usage and cost. It’s just one policy; see also the periodic summarization example below.
-
 ## 4. Putting It All Together: Complete Chatbot
 Here is a summary example that combines the configuration, class, REPL, and basic metrics.
 
@@ -140,18 +137,12 @@ from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 
 class Chatbot:
-    def __init__(self, client, window_size: int = 6):
+    def __init__(self, client):
         self.client = client
         self.memory = Memory()
-        self.window_size = window_size
-
-    def _apply_sliding_window(self):
-        if len(self.memory.memory) > self.window_size:
-            self.memory.memory = self.memory.memory[-self.window_size:]
 
     def send(self, user_input: str) -> str:
         self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-        self._apply_sliding_window()
         response = self.client.invoke("", memory=self.memory)
         self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         total_tokens = (response.prompt_tokens_used or 0) + (response.completion_tokens_used or 0)
@@ -164,7 +155,7 @@ client = ClientFactory.create(
     model="gpt-5",
 )
 
-bot = Chatbot(client, window_size=6)
+bot = Chatbot(client)
 print("Chat ready. Type 'exit' to quit.")
 while True:
     try:
@@ -217,7 +208,7 @@ class SummarizingChat:
 Recommended extension points (easy to customize):
 - Input pre‑processing (prompt rewrite, safety filters)
 - Output post‑processing (format normalization, bullet/JSON extraction)
-- Memory policy (sliding window, periodic summaries, pin key messages)
+- Memory policy (periodic summaries, pin key messages)
 - Dynamic provider selection (fallback if a provider is slow/errors)
 - Cache strategy (in‑process vs Redis)
 

@@ -457,7 +457,7 @@ if __name__ == "__main__":
 
 Once you have validated the basic configuration, you can explore the library's advanced features.
 
-1. **Memory management** for multi‑turn conversations
+1. **Memory management** for multi‑turn conversations (e.g., periodic summaries)
 2. **Library‑side cache** (`MemoryCache`, `RedisCache`) to optimize cost/latency
 3. **Tools and function calling** for advanced features
 4. **Structured responses** with Pydantic models
