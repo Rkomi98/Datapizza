@@ -218,12 +218,14 @@ RIASSUNTO:"""
             return None
             
         try:
-            cached = self.cache.get(f"summary_{content_hash}")
+            # Assicurati che content_hash sia una stringa
+            hash_key = f"summary_{str(content_hash)}"
+            cached = self.cache.get(hash_key)
             if cached:
-                logger.info(f"Summary trovato in cache: {content_hash[:8]}...")
+                logger.info(f"Summary trovato in cache: {str(content_hash)[:8]}...")
                 return cached
         except Exception as e:
-            logger.warning(f"Errore accesso cache: {e}")
+            logger.warning(f"Errore accesso cache per key {content_hash}: {e}")
             
         return None
     
@@ -233,10 +235,12 @@ RIASSUNTO:"""
             return
             
         try:
-            self.cache.set(f"summary_{content_hash}", summary)
-            logger.info(f"Summary salvato in cache: {content_hash[:8]}...")
+            # Assicurati che tutte le chiavi siano stringhe
+            hash_key = f"summary_{str(content_hash)}"
+            self.cache.set(hash_key, summary)
+            logger.info(f"Summary salvato in cache: {str(content_hash)[:8]}...")
         except Exception as e:
-            logger.warning(f"Errore salvataggio cache: {e}")
+            logger.warning(f"Errore salvataggio cache per key {content_hash}: {e}")
     
     def _apply_strategy_full_summary(self) -> str:
         """Strategia: riassunto completo di tutta la memoria."""
@@ -571,14 +575,25 @@ def demo_advanced_memory():
     
     print("=== Demo Advanced Memory Management ===\n")
     
-    # Configurazione
-    client = ClientFactory.create(
-        provider="openai",
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o-mini",  # Modello più economico per la demo
-        temperature=0.7,
-        cache=MemoryCache()  # Cache per le risposte
-    )
+    # Configurazione con gestione errori cache
+    try:
+        client = ClientFactory.create(
+            provider="openai",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model="gpt-4o-mini",  # Modello più economico per la demo
+            temperature=0.7,
+            cache=MemoryCache()  # Cache per le risposte
+        )
+        print("✅ Client con cache inizializzato")
+    except Exception as e:
+        print(f"⚠️ Problema cache, uso client base: {e}")
+        client = ClientFactory.create(
+            provider="openai",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model="gpt-4o-mini",
+            temperature=0.7
+            # Nessuna cache
+        )
     
     # Configurazione del memory manager
     config = SummaryConfig(

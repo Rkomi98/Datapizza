@@ -357,14 +357,25 @@ def demo_improved_memory():
     print("🚀 Demo Improved Memory Summary")
     print("="*40)
     
-    # Client con cache
-    client = ClientFactory.create(
-        provider="openai",
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o-mini",  # Modello economico per demo
-        temperature=0.7,
-        cache=MemoryCache()
-    )
+    # Client con cache (gestione robusta)
+    try:
+        client = ClientFactory.create(
+            provider="openai",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model="gpt-4o-mini",  # Modello economico per demo
+            temperature=0.7,
+            cache=MemoryCache()
+        )
+        logger.info("✅ Client con cache inizializzato correttamente")
+    except Exception as cache_error:
+        logger.warning(f"⚠️ Problema con cache, uso client senza cache: {cache_error}")
+        client = ClientFactory.create(
+            provider="openai",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model="gpt-4o-mini",
+            temperature=0.7
+            # Nessuna cache per evitare il bug
+        )
     
     # Configurazione per demo (trigger frequente)
     config = MemoryConfig(

@@ -172,6 +172,36 @@ while True:
 
 ## Cache Redis per produzione
 
+### Gestione errori cache
+⚠️ **Nota importante**: La libreria `datapizzai` v3.0.8 ha un bug nel sistema di cache che può causare warning del tipo:
+```
+WARNING: Error generating cache key for invoke: can only concatenate str (not "int") to str
+```
+
+Gli esempi includono gestione robusta degli errori per questo problema:
+
+```python
+# Client con fallback su errori cache
+try:
+    client = ClientFactory.create(
+        provider="openai", 
+        api_key=os.getenv("OPENAI_API_KEY"),
+        model="gpt-4o",
+        cache=MemoryCache()
+    )
+    print("✅ Cache attiva")
+except Exception as e:
+    print(f"⚠️ Cache disabilitata per errore: {e}")
+    client = ClientFactory.create(
+        provider="openai",
+        api_key=os.getenv("OPENAI_API_KEY"), 
+        model="gpt-4o"
+        # Senza cache
+    )
+```
+
+### Redis per produzione
+
 Per applicazioni distribuite, usa Redis come cache condivisa:
 
 ```python
@@ -338,6 +368,7 @@ cleanup_old_memory_files(days_old=30)
 
 ### Limitazioni correnti
 - Strategia `HIERARCHICAL` non ancora implementata
+- **Bug cache libreria**: `datapizzai` v3.0.8 ha problemi di type concatenation nelle chiavi cache
 - Cache Redis richiede server Redis separato
 - Stima token approssimativa (chars/4), non precisa come tiktoken
 
