@@ -4,18 +4,18 @@ Esempio avanzato per la gestione intelligente del summary della memoria con Data
 
 ## Indice
 
-- Differenze con l'esempio base
-- Strategie di summarization disponibili
-- Configurazione
-- Configurazioni per scenari specifici
-- Utilizzo base
-- Cache Redis per produzione
-- Monitoraggio e debug
-- Gestione errori e recovery
-- Best practices per produzione
-- Confronto prestazioni
-- Limitazioni e sviluppi futuri
-- Demo ed esempi
+- [Differenze con l'esempio base](#differenze-con-lesempio-base)
+- [Strategie di summarization disponibili](#strategie-di-summarization-disponibili)
+- [Configurazione](#configurazione)
+- [Configurazioni per scenari specifici](#configurazioni-per-scenari-specifici)
+- [Utilizzo base](#utilizzo-base)
+- [Cache Redis per produzione](#cache-redis-per-produzione)
+- [Monitoraggio e debug](#monitoraggio-e-debug)
+- [Gestione errori e recovery](#gestione-errori-e-recovery)
+- [Best practices per produzione](#best-practices-per-produzione)
+- [Confronto prestazioni](#confronto-prestazioni)
+- [Limitazioni e sviluppi futuri](#limitazioni-e-sviluppi-futuri)
+- [Demo ed esempi](#demo-ed-esempi)
 
 ## Differenze con l'esempio base
 
@@ -372,28 +372,3 @@ cleanup_old_memory_files(days_old=30)
 - Cache Redis richiede server Redis separato
 - Stima token approssimativa (chars/4), non precisa come tiktoken
 
-### Roadmap
-- [ ] Summary gerarchico per conversazioni molto lunghe
-- [ ] Integrazione tiktoken per conteggio preciso
-- [ ] Compressione automatica dei file memoria
-- [ ] Dashboard web per monitoring
-- [ ] Plugin per diversi LLM provider
-
-## Demo ed esempi
-
-Esegui la demo completa:
-```bash
-cd Client/
-python advanced_memory_summary.py
-```
-
-La demo simula una conversazione di progettazione e-commerce mostrando:
-- Trigger automatico del summary
-- Riduzione dei token
-- Persistenza della memoria
-- Uso della cache
-- Metriche in tempo reale
-
----
-
-**Note**: per la documentazione rispetta i principi [[memory:6554780]] e [[memory:6599825]] mantenendo un tono tecnico e professionale con esempi pratici e informazioni accurate.
