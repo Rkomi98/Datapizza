@@ -55,11 +55,11 @@ print(client.invoke(TextBlock(content="Say hi in one line")).text)
 
 ## 2. Core Concepts: Memory, TextBlock, ROLE
 DatapizzAI uses a few core abstractions to manage conversations:
-- `Memory`: Stores the history of the conversation turns between the user and the assistant.
-- `TextBlock`: Represents a piece of text exchanged in a turn.
-- `ROLE`: Identifies the speaker (`ROLE.USER` or `ROLE.ASSISTANT`).
+- `Memory`: Stores the history of conversation turns (user/assistant)
+- `TextBlock`: Represents text blocks exchanged in turns
+- `ROLE`: Identifies the speaker (`ROLE.USER` or `ROLE.ASSISTANT`)
 
-These objects allow the model to retain context from previous turns. You should always pass raw strings to `TextBlock(content=...)` and use `response.text` to add the model's reply to memory.
+These objects allow the model to retain context. Always pass raw strings to `TextBlock(content=...)` and use `response.text` to add the model's reply to memory.
 
 ```python
 from datapizzai.memory import Memory
@@ -67,16 +67,14 @@ from datapizzai.type import TextBlock, ROLE
 
 memory = Memory()
 
-# Add a user's turn to memory
+# Add a user's turn
 memory.add_turn([TextBlock(content="Hi, I'm Mirko")], ROLE.USER)
 
-# Invoke the client with the conversation context
+# Invoke with context
 response = client.invoke("", memory=memory)
-# Save the assistant's response (use the .text attribute for the string content)
+# Save assistant reply (always a string)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
-
-Note: the client's response is an object. Save `response.text` (a string) to memory. Passing the full response object to a `TextBlock` will cause JSON serialization errors.
 
 ## 3. Performance: Caching and Metrics
 Caching reduces costs for repeated requests. Metrics help you understand the impact of your prompting and memory strategies.
@@ -128,7 +126,7 @@ print("stop reason:", r2.stop_reason)
 Measurement enables data-driven optimizations for latency, cost, and quality.
 
 ## 4. Putting It All Together: Complete Chatbot
-Here is a summary example that combines the configuration, class, REPL, and basic metrics.
+Here is a summary example that combines configuration, a simple class, REPL, and basic metrics, using memory for multi-turn context.
 
 ```python
 import os
@@ -169,48 +167,7 @@ while True:
         print("bot> A temporary error occurred. Please try again.")
 ```
 
-## 5. Custom memory: summarize every 5 turns
-Here’s how to implement a policy that summarizes the conversation every 5 turns and continues from the summary, preserving key context at lower cost.
-
-```python
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-
-class SummarizingChat:
-    def __init__(self, client, summarize_every: int = 5, max_summary_len: int = 6):
-        self.client = client
-        self.memory = Memory()
-        self.turns = 0
-        self.summarize_every = summarize_every
-        self.max_summary_len = max_summary_len
-
-    def _summarize(self):
-        prompt = (
-            f"Summarize the conversation in {self.max_summary_len} sentences, "
-            "highlighting decisions and TODOs."
-        )
-        summary_resp = self.client.invoke(prompt, memory=self.memory)
-        summary = summary_resp.text.strip()
-        new_mem = Memory()
-        new_mem.add_turn([TextBlock(content=f"[Summary] {summary}")], ROLE.ASSISTANT)
-        self.memory = new_mem
-
-    def send(self, user_input: str) -> str:
-        self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-        resp = self.client.invoke("", memory=self.memory)
-        self.memory.add_turn([TextBlock(content=resp.text)], ROLE.ASSISTANT)
-        self.turns += 1
-        if self.turns % self.summarize_every == 0:
-            self._summarize()
-        return resp.text
-```
-
-Recommended extension points (easy to customize):
-- Input pre‑processing (prompt rewrite, safety filters)
-- Output post‑processing (format normalization, bullet/JSON extraction)
-- Memory policy (periodic summaries, pin key messages)
-- Dynamic provider selection (fallback if a provider is slow/errors)
-- Cache strategy (in‑process vs Redis)
+ 
 
 ## Useful References
 - `text_only_examples.py`: Contains complete examples and advanced scenarios.
