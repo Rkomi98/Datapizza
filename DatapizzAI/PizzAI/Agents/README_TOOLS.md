@@ -236,11 +236,6 @@ print(f"💬 Blocchi totali: {len(list(memory.iter_blocks()))}")
 - **Schema input chiaro**: Definisci precisamente il formato di input
 - **Gestione errori**: Gestisci sempre le eccezioni e restituisci ToolResult appropriati
 
-### Gestione della memoria
-- **Contesto persistente**: Usa la memoria per conversazioni multi-turno
-- **Pulizia memoria**: Gestisci la dimensione della memoria per conversazioni lunghe
-- **Separazione ruoli**: Mantieni chiara la distinzione tra utente e assistente
-
 ### Esempio completo con Google Search
 
 ```python
@@ -262,8 +257,3 @@ response = client.invoke("Quando iniziano le olimpiadi invernali?", tools=[googl
 
 print(response.text)
 ```
-
-Suggerimenti:
-- Definisci sempre docstring chiare (Args/Returns) e valida l'input.
-- Evita `eval` per casi reali; preferisci librerie sicure o parsing esplicito.
-- Esegui iterativamente i function call finché non terminano, passando i risultati come blocchi `FunctionCallResultBlock`.
