@@ -293,6 +293,25 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .company-links {
+            margin-top: 0.35rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .company-links a {
+            color: #a78bfa; /* violet-400 */
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            border-radius: 999px;
+        }
+        .company-links a:hover {
+            background: rgba(139, 92, 246, 0.25);
+        }
+
         /* Sector Analysis */
         .sector-grid {
             display: grid;
@@ -684,6 +703,22 @@
             </div>
         </div>
 
+        <!-- Company Catalog by Category -->
+        <div class="top-companies" id="companyCatalog">
+            <h2>📚 Aziende per Categoria</h2>
+            <div class="tabs" id="companyCatalogTabs">
+                <div class="tab active" onclick="switchCategoryTab(event, 'finance')">💰 Finance</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'technology')">💻 Technology & Digital</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'physical')">🏭 Physical Goods</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'professional')">💼 Professional Services</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'health')">🏥 Health & Life</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'energy')">⚡ Energy & Real Estate</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'education')">🎓 Education & Public</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'emerging')">🚀 Emerging High-Growth</div>
+            </div>
+            <div id="companyCatalogList" class="company-list"></div>
+        </div>
+
         <!-- Tabs for Additional Info -->
         <div class="tabs">
             <div class="tab active" onclick="switchTab(event, 'insights')">🎯 Key Insights</div>
@@ -944,6 +979,160 @@
                 createScoreChart();
                 createGeoChart();
             })();
+
+            // --- Company catalog (from Markdown dataset) ---
+            const companiesByCategory = {
+                finance: [
+                    { name: 'Scalapay', hq: 'Milano', stage: 'Scale-up', funding: '$497M (Dec 2023)', techHC: '150-200', techPct: '65%', roles: '15+', score: 74, links: 'scalapay.com/careers' },
+                    { name: 'Satispay', hq: 'Milano', stage: 'Scale-up', funding: '€320M (Sep 2022)', techHC: '200-250', techPct: '45%', roles: '20+', score: 88, links: 'jobs.ashbyhq.com/satispay' },
+                    { name: 'Nexi Group', hq: 'Milano', stage: 'Corporate', funding: '€220M EIB (2024)', techHC: '1500-2000', techPct: '35%', roles: '56+', score: 74, links: 'nexigroup.com/careers' },
+                    { name: 'illimity Bank', hq: 'Milano', stage: 'Corporate', funding: '€200M EIB (2023)', techHC: '250-300', techPct: '32%', roles: 'Active', score: 74, links: 'careers.illimity.com' },
+                    { name: 'Young Platform', hq: 'Torino', stage: 'Scale-up', funding: '€16M (2022)', techHC: '60-70', techPct: '60%', roles: 'Active', score: 60, links: 'LinkedIn company page' },
+                    { name: 'Banca Sella', hq: 'Biella', stage: 'Corporate', funding: 'N/A', techHC: '400-500', techPct: '22%', roles: 'Active', score: 74, links: 'join.sellagroup.eu' },
+                    { name: 'Credimi', hq: 'Milano', stage: 'Scale-up', funding: '€8.4M', techHC: '25-35', techPct: '55%', roles: 'Active', score: 52, links: 'LinkedIn company page' },
+                    { name: 'Fabrick', hq: 'Milano', stage: 'Scale-up', funding: 'N/A', techHC: '60-90', techPct: '70%', roles: 'Active', score: 52, links: 'fabrick.com/join-us' },
+                    { name: 'YOLO Group', hq: 'Milano', stage: 'Scale-up', funding: '€10M IPO (2022)', techHC: '30-50', techPct: '45%', roles: '4+', score: 60, links: 'careers.yolo.com' },
+                ],
+                technology: [
+                    { name: 'Cleafy', hq: 'Milano', stage: 'Scale-up', funding: 'Recent growth', techHC: '80-120', techPct: '80%', roles: '5-10', score: 86, links: 'cleafy.com/careers' },
+                    { name: 'Prima', hq: 'Milano', stage: 'Scale-up', funding: '$117M', techHC: '400-500', techPct: '45%', roles: '15-20', score: 78, links: 'helloprima.com/carriere' },
+                    { name: 'Cubbit', hq: 'Bologna', stage: 'Scale-up', funding: '$12.5M (Jul 2024)', techHC: '40', techPct: '80%', roles: '3-8', score: 90, links: 'cubbit.io/careers' },
+                    { name: 'TeamSystem', hq: 'Pesaro', stage: 'Corporate', funding: '€1B (2023)', techHC: '2000+', techPct: '40%', roles: '50+', score: 66, links: 'teamsystem.com' },
+                    { name: 'Datrix', hq: 'Milano', stage: 'Scale-up', funding: 'Listed', techHC: '80-120', techPct: '75%', roles: '5-15', score: 66, links: 'datrixgroup.com' },
+                    { name: 'Vedrai', hq: 'Milano', stage: 'Scale-up', funding: '€40M (Apr 2022)', techHC: '70-80', techPct: '75%', roles: '5-10', score: 78, links: 'company.vedrai.com' },
+                    { name: 'Reply', hq: 'Torino', stage: 'Corporate', funding: 'Listed', techHC: '10000+', techPct: '70%', roles: '100+', score: 68, links: 'reply.com/careers' },
+                    { name: 'Talent Garden', hq: 'Milano', stage: 'Scale-up', funding: 'N/A', techHC: '200-300', techPct: '50%', roles: '15-25', score: 78, links: 'talentgarden.com' },
+                ],
+                physical: [
+                    { name: 'Ferrari', hq: 'Maranello', stage: 'Corporate', funding: 'Listed', techHC: '800-1000', techPct: '18%', roles: '15+', score: 87, links: 'ferrari.com/career; jobs.ferrari.com' },
+                    { name: 'EssilorLuxottica', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '5000-7000', techPct: '3-4%', roles: '25+', score: 91, links: 'careers.essilorluxottica.com' },
+                    { name: 'Barilla', hq: 'Parma', stage: 'Corporate', funding: '€4.9B revenue', techHC: '400-600', techPct: '6%', roles: '12+', score: 79, links: 'jobs.barillagroup.com' },
+                    { name: 'Lamborghini', hq: "Sant'Agata", stage: 'Corporate', funding: 'VW Group', techHC: '300-400', techPct: '18%', roles: '10+', score: 85, links: 'lamborghini.com/careers' },
+                    { name: 'Campari', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '200-300', techPct: '5%', roles: '8+', score: 74, links: 'people.camparigroup.com' },
+                    { name: 'Moncler', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '200-250', techPct: '7%', roles: '6+', score: 79, links: 'jobs.moncler.com' },
+                ],
+                professional: [
+                    { name: 'Bending Spoons', hq: 'Milano', stage: 'Corporate', funding: '$665M (2024)', techHC: '480+', techPct: '80%', roles: 'YES', score: 100, links: 'bendingspoons.com/careers' },
+                    { name: 'Reply', hq: 'Torino', stage: 'Corporate', funding: 'Listed', techHC: '7000+', techPct: '70%', roles: '50+', score: 80, links: 'reply.com/careers' },
+                    { name: 'illimity Bank', hq: 'Milano', stage: 'Corporate', funding: '$50M (2023)', techHC: '180+', techPct: '30%', roles: '15+', score: 86, links: 'careers.illimity.com' },
+                    { name: 'Fabrick', hq: 'Milano', stage: 'Scale-up', funding: '$43M (2023)', techHC: '210+', techPct: '60%', roles: '10+', score: 60, links: 'fabrick.com/platform' },
+                    { name: 'Talent Garden', hq: 'Milano', stage: 'Scale-up', funding: '$46M (2023)', techHC: '140+', techPct: '70%', roles: '20+', score: 74, links: 'talentgarden.com' },
+                    { name: 'Engineering', hq: 'Roma', stage: 'Corporate', funding: 'N/A', techHC: '8400+', techPct: '70%', roles: '109+', score: 80, links: 'eng.it/careers' },
+                    { name: 'McKinsey', hq: 'Milano', stage: 'Corporate', funding: 'N/A', techHC: '120+', techPct: '40%', roles: '15+', score: 100, links: 'mckinsey.com/careers' },
+                    { name: 'Accenture', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '10500+', techPct: '70%', roles: '215+', score: 94, links: 'accenture.com/careers' },
+                ],
+                health: [
+                    { name: 'Chiesi', hq: 'Parma', stage: 'Corporate', funding: 'N/A', techHC: '950', techPct: '15%', roles: '25+', score: 85, links: 'careers.chiesi.com' },
+                    { name: 'Recordati', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '458', techPct: '10%', roles: '15+', score: 76, links: 'recordati.com/careers' },
+                    { name: 'Technogym', hq: 'Cesena', stage: 'Corporate', funding: 'Listed', techHC: '500', techPct: '20%', roles: '20+', score: 87, links: 'careers.technogym.com' },
+                    { name: 'Bracco', hq: 'Milano', stage: 'Corporate', funding: '€1.5B revenue', techHC: '555', techPct: '15%', roles: '18+', score: 76, links: 'bracco.com/careers' },
+                    { name: 'Dompé', hq: 'Milano', stage: 'Corporate', funding: 'N/A', techHC: '80', techPct: '10%', roles: '12+', score: 76, links: 'dompe.com/careers' },
+                    { name: 'Menarini', hq: 'Firenze', stage: 'Corporate', funding: '$4.98B revenue', techHC: '1700', techPct: '10%', roles: '20+', score: 67, links: 'menarini.com/careers' },
+                    { name: 'Resalis', hq: 'Torino', stage: 'Scale-up', funding: 'Sanofi (Oct 2024)', techHC: '15', techPct: '60%', roles: '8+', score: 82, links: 'resalistherapeutics.com' },
+                    { name: 'AAVantgarde', hq: 'Milano', stage: 'Scale-up', funding: '€61M (Jun 2023)', techHC: '28', techPct: '70%', roles: '15+', score: 85, links: 'aavantgarde.com/careers' },
+                ],
+                energy: [
+                    { name: 'Casavo', hq: 'Milano', stage: 'Scale-up', funding: '$20M (Mar 2024)', techHC: '150-160', techPct: '38%', roles: '30+', score: 85, links: 'casavo.com/careers' },
+                    { name: 'ENI', hq: 'Roma/Milano', stage: 'Corporate', funding: 'Listed', techHC: '3200-3800', techPct: '12%', roles: '45+', score: 92, links: 'eni.com/careers' },
+                    { name: 'Enel', hq: 'Roma', stage: 'Corporate', funding: 'Listed', techHC: '4500-5200', techPct: '8%', roles: '25+', score: 82, links: 'jobs.enel.com' },
+                    { name: 'A2A', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '1200-1400', techPct: '11%', roles: '134 total', score: 79, links: 'gruppoa2a.it/careers' },
+                    { name: 'Energy Dome', hq: 'Milano', stage: 'Scale-up', funding: '$72.5M (2023-24)', techHC: '55-65', techPct: '65%', roles: '15+', score: 78, links: 'energydome.com/careers' },
+                    { name: 'Plenitude', hq: 'Milano', stage: 'Corporate', funding: '€500M (2023)', techHC: '200-250', techPct: '15%', roles: '20+', score: 82, links: 'eniplenitude.com' },
+                    { name: 'Edison', hq: 'Milano', stage: 'Corporate', funding: 'EDF Group', techHC: '350-450', techPct: '9%', roles: '15+', score: 70, links: 'edison.it/work-with-us' },
+                    { name: 'MetaCasa', hq: 'Bologna', stage: 'Scale-up', funding: '€740K', techHC: '12-15', techPct: '75%', roles: '5+', score: 60, links: 'Italian PropTech Network' },
+                ],
+                education: [
+                    { name: 'Futura', hq: 'Milano', stage: 'Scale-up', funding: '€14M (May 2024)', techHC: '15-20', techPct: '40-50%', roles: '8+', score: 70, links: 'futura.study' },
+                    { name: 'WeSchool', hq: 'Milano', stage: 'Scale-up', funding: '€6.4M', techHC: '40-60', techPct: '40%', roles: '4+', score: 81, links: 'weschool.com' },
+                    { name: 'Wibo', hq: 'Torino', stage: 'Scale-up', funding: '€500K (Jun 2025)', techHC: '5-8', techPct: '35-40%', roles: '5 planned', score: 68, links: 'EU-Startups article' },
+                    { name: 'Faba', hq: 'Treviso', stage: 'Scale-up', funding: '€4.5M (Aug 2025)', techHC: '15-20', techPct: '35-40%', roles: '20 planned', score: 60, links: 'EU-Startups article' },
+                    { name: 'Algor', hq: 'Torino', stage: 'Scale-up', funding: '€1.4M (2024)', techHC: '6-10', techPct: '60-70%', roles: 'Expansion', score: 60, links: 'i3p.it' },
+                    { name: 'Olivetti', hq: 'Ivrea/Milano', stage: 'Corporate', funding: 'TIM Group', techHC: '400-600', techPct: '40-60%', roles: 'Active', score: 71, links: 'olivetti.com/careers' },
+                ],
+                emerging: [
+                    { name: 'Jet HR', hq: 'Milano', stage: 'Scale-up', funding: '€16.5M (Jun 2023)', techHC: '72+', techPct: '60%', roles: 'YES', score: 76, links: 'jethr.com/careers' },
+                    { name: 'Qomodo', hq: 'Milano', stage: 'Scale-up', funding: '€48M (2023)', techHC: '43+', techPct: '50%', roles: 'YES', score: 72, links: 'qomodo.me' },
+                    { name: 'Volta', hq: 'Milano', stage: 'Scale-up', funding: '€6.5M (2024)', techHC: '32+', techPct: '70%', roles: 'YES', score: 68, links: 'voltasoftware.com' },
+                    { name: 'D-Orbit', hq: 'Milano', stage: 'Scale-up', funding: '€100M (Jan 2024)', techHC: '275+', techPct: '70%', roles: 'YES', score: 85, links: 'dorbit.space/careers' },
+                    { name: 'IdentifAI', hq: 'Cesena', stage: 'Scale-up', funding: '€2.2M (2024)', techHC: '20+', techPct: '80%', roles: 'YES', score: 70, links: 'identifai.net' },
+                    { name: 'ALKemist Bio', hq: 'Torino', stage: 'Scale-up', funding: '€6.9M (2023)', techHC: '28+', techPct: '80%', roles: 'YES', score: 74, links: 'alkemistbio.com' },
+                    { name: 'Limenet', hq: 'Lecco', stage: 'Scale-up', funding: '€7.4M (2023)', techHC: '22+', techPct: '75%', roles: 'YES', score: 69, links: 'limenet.tech' },
+                ],
+            };
+
+            function switchCategoryTab(event, key) {
+                const container = document.getElementById('companyCatalog');
+                if (!container) return;
+                container.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                renderCategory(key);
+            }
+
+            function renderCategory(key) {
+                const list = document.getElementById('companyCatalogList');
+                if (!list) return;
+                const items = companiesByCategory[key] || [];
+                if (!items.length) { list.innerHTML = '<div style="color:#94a3b8">Nessuna azienda disponibile.</div>'; return; }
+                list.innerHTML = items.map((c, i) => companyItemHTML(c, i)).join('');
+            }
+
+            function companyItemHTML(c, i) {
+                const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                const details = [c.hq, c.stage].filter(Boolean).join(' • ');
+                const links = linksHTML(c.links);
+                return `
+                    <div class="company-item">
+                        <div class="rank ${rankClass}">${i + 1}</div>
+                        <div class="company-info">
+                            <div class="company-name">${escapeHtml(c.name)}</div>
+                            <div class="company-details">${escapeHtml(details)}${c.funding ? ' • ' + escapeHtml(c.funding) : ''}</div>
+                            ${links}
+                        </div>
+                        <div class="company-score">${c.score}/100</div>
+                    </div>
+                `;
+            }
+
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>\"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s]));
+            }
+
+            function linksHTML(raw) {
+                const urls = normalizeLinks(raw);
+                if (!urls.length) return '';
+                const items = urls.map(u => `<a href="${u}" target="_blank" rel="noopener">🔗 ${escapeHtml(linkLabel(u))}</a>`);
+                return `<div class="company-links">${items.join('')}</div>`;
+            }
+
+            function normalizeLinks(raw) {
+                if (!raw) return [];
+                const parts = String(raw)
+                    .split(/[,;\s]+/)
+                    .map(s => s.trim())
+                    .filter(Boolean);
+                const urlLike = /^(https?:\/\/)?([\w\-]+\.)+[a-z]{2,}(\/[^\s]*)?$/i;
+                const normalized = [];
+                for (const p of parts) {
+                    if (!urlLike.test(p)) continue; // skip non-url tokens
+                    const u = p.startsWith('http') ? p : `https://${p}`;
+                    if (!normalized.includes(u)) normalized.push(u);
+                }
+                return normalized.slice(0, 4); // avoid overflow
+            }
+
+            function linkLabel(u) {
+                try {
+                    const url = new URL(u);
+                    const path = url.pathname.replace(/\/$/, '');
+                    const label = url.hostname.replace(/^www\./, '') + (path && path !== '' ? path : '');
+                    return label.length > 32 ? label.slice(0, 29) + '…' : label;
+                } catch {
+                    return u.length > 32 ? u.slice(0, 29) + '…' : u;
+                }
+            }
+
+            // Initial render
+            renderCategory('finance');
         </script>
     </div>
 </body>
