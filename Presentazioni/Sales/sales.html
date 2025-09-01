@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Branding Tech Italia 2025 - Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+            animation: gradientShift 20s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-20px, -20px) rotate(120deg); }
+            66% { transform: translate(20px, -10px) rotate(240deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        /* Key Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .metric-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            animation: fadeInUp 0.8s ease 0.4s both;
+            position: relative;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Ensure canvases fill their wrapper (avoids 0px height issues) */
+        .chart-wrapper > canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* Top Companies Section */
+        .top-companies {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .top-companies h2 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .company-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .company-item {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .company-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(10px);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .rank {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+        }
+
+        .rank.gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        }
+
+        .rank.silver {
+            background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+            box-shadow: 0 0 20px rgba(156, 163, 175, 0.5);
+        }
+
+        .rank.bronze {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            box-shadow: 0 0 20px rgba(251, 146, 60, 0.4);
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+
+        .company-details {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .company-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Sector Analysis */
+        .sector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease 0.8s both;
+        }
+
+        .sector-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sector-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .sector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .sector-name {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .sector-score {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sector-stats {
+            display: flex;
+            justify-content: space-between;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Animated Elements */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s ease infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                height: 300px;
+            }
+            
+            .company-item {
+                grid-template-columns: 40px 1fr;
+            }
+            
+            .company-score {
+                display: none;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Employer Branding Tech Italia 2025</h1>
+            <div class="subtitle">Dashboard Interattiva - Analisi Completa dell'Ecosistema Tech Italiano</div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    🏢
+                </div>
+                <div class="metric-value">62</div>
+                <div class="metric-label">Aziende Identificate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    💰
+                </div>
+                <div class="metric-value">€8.2B+</div>
+                <div class="metric-label">Funding Totale</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #f59e0b, #dc2626);">
+                    🦄
+                </div>
+                <div class="metric-value">4</div>
+                <div class="metric-label">Unicorni Italiani</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+                    👨‍💻
+                </div>
+                <div class="metric-value">147K+</div>
+                <div class="metric-label">Tech Headcount</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);">
+                    📊
+                </div>
+                <div class="metric-value">77.8</div>
+                <div class="metric-label">Score Medio EB</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">
+                    🎯
+                </div>
+                <div class="metric-value">1,200+</div>
+                <div class="metric-label">Posizioni Tech Aperte</div>
+            </div>
+        </div>
+
+        <!-- Top 10 Companies -->
+        <div class="top-companies">
+            <h2>🏆 Top 10 Aziende per Employer Branding Score</h2>
+            <div class="company-list">
+                <div class="company-item">
+                    <div class="rank gold">1</div>
+                    <div class="company-info">
+                        <div class="company-name">Bending Spoons</div>
+                        <div class="company-details">Milano • Professional Services • Unicorn</div>
+                    </div>
+                    <div class="company-score">100/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank gold">2</div>
+                    <div class="company-info">
+                        <div class="company-name">McKinsey Italia</div>
+                        <div class="company-details">Milano • Professional Services • Global</div>
+                    </div>
+                    <div class="company-score">100/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank silver">3</div>
+                    <div class="company-info">
+                        <div class="company-name">Accenture Italia</div>
+                        <div class="company-details">Milano • Professional Services • 15K dipendenti</div>
+                    </div>
+                    <div class="company-score">94/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank bronze">4</div>
+                    <div class="company-info">
+                        <div class="company-name">ENI</div>
+                        <div class="company-details">Roma/Milano • Energy • LinkedIn Awards Winner</div>
+                    </div>
+                    <div class="company-score">92/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">5</div>
+                    <div class="company-info">
+                        <div class="company-name">EssilorLuxottica</div>
+                        <div class="company-details">Milano • Physical Goods • Smart Eyewear Lab</div>
+                    </div>
+                    <div class="company-score">91/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">6</div>
+                    <div class="company-info">
+                        <div class="company-name">Cubbit</div>
+                        <div class="company-details">Bologna • Technology • €12.5M funding 2024</div>
+                    </div>
+                    <div class="company-score">90/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">7</div>
+                    <div class="company-info">
+                        <div class="company-name">Satispay</div>
+                        <div class="company-details">Milano • Finance • Unicorn payments</div>
+                    </div>
+                    <div class="company-score">88/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">8</div>
+                    <div class="company-info">
+                        <div class="company-name">Ferrari</div>
+                        <div class="company-details">Maranello • Physical Goods • F1 Engineering</div>
+                    </div>
+                    <div class="company-score">87/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">9</div>
+                    <div class="company-info">
+                        <div class="company-name">Technogym</div>
+                        <div class="company-details">Cesena • Health • 232K LinkedIn followers</div>
+                    </div>
+                    <div class="company-score">87/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">10</div>
+                    <div class="company-info">
+                        <div class="company-name">Cleafy</div>
+                        <div class="company-details">Milano • Technology • Cybersecurity leader</div>
+                    </div>
+                    <div class="company-score">86/100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>📊 Distribuzione per Settore</h3>
+                <div class="chart-wrapper">
+                    <canvas id="sectorChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>📈 Score Medio per Settore</h3>
+                <div class="chart-wrapper">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Distribution -->
+        <div class="chart-container">
+            <h3>🗺️ Distribuzione Geografica degli Hub Tech</h3>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="geoChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Sector Analysis Cards -->
+        <div class="sector-grid">
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">💰 Finance</span>
+                    <span class="sector-score">71.3</span>
+                </div>
+                <div class="sector-stats">
+                    <span>9 aziende</span>
+                    <span>Satispay, Scalapay leader</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">💻 Technology</span>
+                    <span class="sector-score">76.3</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>Cubbit, Cleafy top</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">🏭 Physical Goods</span>
+                    <span class="sector-score">83.3</span>
+                </div>
+                <div class="sector-stats">
+                    <span>6 aziende</span>
+                    <span>Ferrari, Luxottica</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">💼 Professional Services</span>
+                    <span class="sector-score">85.5</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>Bending Spoons #1</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">🏥 Health & Life</span>
+                    <span class="sector-score">79.1</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>Technogym, Chiesi</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">⚡ Energy & Real Estate</span>
+                    <span class="sector-score">79.4</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>ENI, Casavo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs for Additional Info -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(event, 'insights')">🎯 Key Insights</div>
+            <div class="tab" onclick="switchTab(event, 'trends')">📈 Market Trends</div>
+            <div class="tab" onclick="switchTab(event, 'salary')">💰 Salary Benchmark</div>
+            <div class="tab" onclick="switchTab(event, 'unicorns')">🦄 Unicorni</div>
+        </div>
+
+        <div id="insights" class="tab-content active">
+            <div class="chart-container">
+                <h3>🎯 Insights Principali</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 10px; border-left: 4px solid #6366f1;">
+                        <strong>Milano domina l'ecosistema:</strong> 56% delle aziende tech con HQ nel capoluogo lombardo
+                    </div>
+                    <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border-left: 4px solid #10b981;">
+                        <strong>Professional Services al top:</strong> Score medio EB di 85.5/100, il più alto tra tutti i settori
+                    </div>
+                    <div style="padding: 1rem; background: rgba(236, 72, 153, 0.1); border-radius: 10px; border-left: 4px solid #ec4899;">
+                        <strong>Remote work adoption:</strong> 78% delle aziende offre modalità remote/hybrid post-COVID
+                    </div>
+                    <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 10px; border-left: 4px solid #f59e0b;">
+                        <strong>Talent shortage critico:</strong> 45% delle aziende riporta difficoltà nell'hiring di profili tech
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="trends" class="tab-content">
+            <div class="chart-container">
+                <h3>📈 Market Trends 2025</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 10px;">
+                        <strong>Series A+ rounds:</strong> 23+ round sopra €5M nel 2024
+                    </div>
+                    <div style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 10px;">
+                        <strong>International VC:</strong> 65% dei round include investitori esteri
+                    </div>
+                    <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 10px;">
+                        <strong>CDP Venture Capital:</strong> Presente nel 40% delle scale-up
+                    </div>
+                    <div style="padding: 1rem; background: rgba(236, 72, 153, 0.1); border-radius: 10px;">
+                        <strong>Crescita headcount:</strong> +18% anno su anno in media
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="salary" class="tab-content">
+            <div class="chart-container">
+                <h3>💰 Salary Benchmarking 2025</h3>
+                <canvas id="salaryChart"></canvas>
+            </div>
+        </div>
+
+        <div id="unicorns" class="tab-content">
+            <div class="chart-container">
+                <h3>🦄 Unicorni Italiani</h3>
+                <div style="display: grid; gap: 1.5rem;">
+                    <div style="padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 15px; border: 1px solid rgba(99, 102, 241, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">Bending Spoons</h4>
+                            <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: #1e293b; font-weight: 600;">UNICORN</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Valuation:</strong> $2.55B (2024)</p>
+                            <p><strong>Score EB:</strong> 100/100</p>
+                            <p><strong>Focus:</strong> Mobile app empire, acquisition strategy</p>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 15px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">Satispay</h4>
+                            <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: #1e293b; font-weight: 600;">UNICORN</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Funding:</strong> €320M (2022)</p>
+                            <p><strong>Score EB:</strong> 88/100</p>
+                            <p><strong>Focus:</strong> European payment network leader, 5M+ utenti</p>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(236, 72, 153, 0.1); border-radius: 15px; border: 1px solid rgba(236, 72, 153, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">Scalapay</h4>
+                            <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: #1e293b; font-weight: 600;">UNICORN</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Funding:</strong> $497M (2023)</p>
+                            <p><strong>Score EB:</strong> 74/100</p>
+                            <p><strong>Focus:</strong> BNPL global expansion</p>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 15px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">D-Orbit</h4>
+                            <span style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: white; font-weight: 600;">EMERGING</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Funding:</strong> €100M (2024)</p>
+                            <p><strong>Score EB:</strong> 85/100</p>
+                            <p><strong>Focus:</strong> Space logistics pioneer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script>
+            // --- Tabs & Chart orchestration ---
+            const createdCharts = {};
+
+            function switchTab(event, id) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                const el = document.getElementById(id);
+                if (el) el.classList.add('active');
+
+                // Lazy init charts inside hidden tabs
+                if (id === 'salary' && !createdCharts.salary) {
+                    createSalaryChart();
+                }
+                // Ensure any visible chart resizes correctly after tab switch
+                setTimeout(() => {
+                    Object.values(createdCharts).forEach(ch => ch && ch.resize && ch.resize());
+                }, 50);
+            }
+
+            // Chart.js global defaults for dark theme
+            if (window.Chart) {
+                Chart.defaults.color = '#cbd5e1';
+                Chart.defaults.borderColor = 'rgba(255,255,255,0.1)';
+                // Grid color (applied when present)
+                Chart.defaults.scales = Chart.defaults.scales || {};
+                // Legend labels color
+                if (Chart.defaults.plugins && Chart.defaults.plugins.legend && Chart.defaults.plugins.legend.labels) {
+                    Chart.defaults.plugins.legend.labels.color = '#e2e8f0';
+                }
+            }
+
+            // Helpers
+            function getCanvas(id) { return document.getElementById(id); }
+            function getCtx(id) { const c = getCanvas(id); return c ? c.getContext('2d') : null; }
+            function drawPlaceholder(id, text) {
+                const c = getCanvas(id);
+                if (!c) return;
+                // Ensure a reasonable height if none (especially when hidden)
+                if (!c.height) c.height = 300;
+                const ctx = c.getContext('2d');
+                const { width, height } = c;
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(148,163,184,0.6)';
+                ctx.font = '16px system-ui, -apple-system, Segoe UI, Roboto';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, width / 2, height / 2);
+            }
+
+            // Chart creators
+            function createSectorChart() {
+                const id = 'sectorChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Finance', 'Technology', 'Physical Goods', 'Professional Services', 'Health & Life', 'Energy & Real Estate'],
+                        datasets: [{
+                            data: [9, 8, 6, 8, 8, 8],
+                            backgroundColor: ['#10b981','#8b5cf6','#f59e0b','#6366f1','#ec4899','#06b6d4'],
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                });
+                createdCharts.sector = ch; return ch;
+            }
+
+            function createScoreChart() {
+                const id = 'scoreChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Finance', 'Technology', 'Physical Goods', 'Professional Services', 'Health & Life', 'Energy & Real Estate'],
+                        datasets: [{
+                            label: 'Score medio',
+                            data: [71.3, 76.3, 83.3, 85.5, 79.1, 79.4],
+                            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                            borderColor: '#6366f1',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+                });
+                createdCharts.score = ch; return ch;
+            }
+
+            function createGeoChart() {
+                const id = 'geoChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Milano', 'Roma', 'Torino', 'Bologna', 'Padova'],
+                        datasets: [{
+                            label: 'Quota aziende (%)',
+                            data: [56, 18, 10, 8, 8],
+                            backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: { indexAxis: 'y', responsive: true, scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+                });
+                createdCharts.geo = ch; return ch;
+            }
+
+            function createSalaryChart() {
+                const id = 'salaryChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Backend', 'Frontend', 'Data', 'DevOps', 'Mobile', 'Security'],
+                        datasets: [{
+                            label: 'RAL mediana (k€)',
+                            data: [48, 42, 50, 55, 45, 58],
+                            backgroundColor: 'rgba(236, 72, 153, 0.6)',
+                            borderColor: '#ec4899',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+                createdCharts.salary = ch; return ch;
+            }
+
+            // Init charts that are visible on load
+            (function init() {
+                if (!window.Chart) {
+                    // CDN non raggiungibile: disegno placeholder
+                    ['sectorChart','scoreChart','geoChart'].forEach(id => drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'));
+                    return;
+                }
+                createSectorChart();
+                createScoreChart();
+                createGeoChart();
+            })();
+        </script>
+    </div>
+</body>
+</html>
