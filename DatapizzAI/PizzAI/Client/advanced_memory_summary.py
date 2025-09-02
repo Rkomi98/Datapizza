@@ -226,6 +226,13 @@ RIASSUNTO:"""
                 return cached
         except Exception as e:
             logger.warning(f"Errore accesso cache per key {content_hash}: {e}")
+            # Fallback automatico a MemoryCache per evitare warning ripetuti
+            try:
+                self.cache = ObservableCache(MemoryCache())
+                self.summary_cache_observer = self.cache
+                logger.info("Fallback a MemoryCache per i summary (cache locale)")
+            except Exception:
+                pass
             
         return None
     
@@ -241,6 +248,15 @@ RIASSUNTO:"""
             logger.info(f"Summary salvato in cache: {str(content_hash)[:8]}...")
         except Exception as e:
             logger.warning(f"Errore salvataggio cache per key {content_hash}: {e}")
+            # Fallback automatico a MemoryCache e ritenta una volta
+            try:
+                self.cache = ObservableCache(MemoryCache())
+                self.summary_cache_observer = self.cache
+                logger.info("Fallback a MemoryCache per i summary (cache locale)")
+                hash_key = f"summary_{str(content_hash)}"
+                self.cache.set(hash_key, summary)
+            except Exception:
+                pass
     
     def _apply_strategy_full_summary(self) -> str:
         """Strategia: riassunto completo di tutta la memoria."""
@@ -310,7 +326,8 @@ RIASSUNTO:"""
         for i in range(len(self.memory) - self.config.keep_recent_turns, len(self.memory)):
             turn = self.memory[i]
             new_memory.add_turn(turn.blocks.copy(), turn.role)
-        
+        # Applica la nuova memoria
+        self.memory = new_memory
         return summary
     
     def _apply_strategy_importance_based(self) -> str:
@@ -353,7 +370,8 @@ RIASSUNTO:"""
         for turn_idx in sorted(important_turns):
             turn = self.memory[turn_idx]
             new_memory.add_turn(turn.blocks.copy(), turn.role)
-        
+        # Applica la nuova memoria
+        self.memory = new_memory
         return summary
     
     def apply_summary_strategy(self) -> Optional[str]:

@@ -131,7 +131,6 @@ client = ClientFactory.create(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
     temperature=0.7,
-    cache=MemoryCache()
 )
 
 # Configurazione
@@ -168,66 +167,6 @@ while True:
             
     except Exception as e:
         print(f"Errore: {e}")
-```
-
-## Cache Redis per produzione
-
-### Gestione errori cache
-⚠️ **Nota importante**: La libreria `datapizzai` v3.0.8 ha un bug nel sistema di cache che può causare warning del tipo:
-```
-WARNING: Error generating cache key for invoke: can only concatenate str (not "int") to str
-```
-
-Gli esempi includono gestione robusta degli errori per questo problema:
-
-```python
-# Client con fallback su errori cache
-try:
-    client = ClientFactory.create(
-        provider="openai", 
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o",
-        cache=MemoryCache()
-    )
-    print("✅ Cache attiva")
-except Exception as e:
-    print(f"⚠️ Cache disabilitata per errore: {e}")
-    client = ClientFactory.create(
-        provider="openai",
-        api_key=os.getenv("OPENAI_API_KEY"), 
-        model="gpt-4o"
-        # Senza cache
-    )
-```
-
-### Redis per produzione
-
-Per applicazioni distribuite, usa Redis come cache condivisa:
-
-```python
-from datapizzai.cache import RedisCache
-
-# Redis cache
-redis_cache = RedisCache(
-    host="localhost", 
-    port=6379, 
-    db=0,
-    expiration_time=7200  # 2 ore
-)
-
-client = ClientFactory.create(
-    provider="openai",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
-    cache=redis_cache
-)
-
-manager = AdvancedMemoryManager(
-    client=client,
-    config=config,
-    memory_file="memory.json",
-    cache_type="redis"  # Cache Redis anche per i summary
-)
 ```
 
 ## Monitoraggio e debug
@@ -278,97 +217,15 @@ logging.basicConfig(
 # - Errori e fallback
 ```
 
-## Gestione errori e recovery
-
-Il manager gestisce automaticamente:
-
-- **Errori di API**: fallback senza perdere la memoria
-- **Problemi di cache**: continua senza cache
-- **File corrotti**: crea backup automatici
-- **Summary falliti**: mantiene memoria originale
-
-```python
-# Backup manuale prima di operazioni rischiose
-backup_memory = manager.memory.copy()
-
-try:
-    # Operazione potenzialmente pericolosa
-    risky_operation()
-except Exception as e:
-    # Ripristino automatico
-    manager.memory = backup_memory
-    logger.error(f"Ripristinato backup dopo errore: {e}")
-
-# Reset completo se necessario (richiede conferma)
-success = manager.reset_memory(confirm=True)
-```
-
-## Best practices per produzione
-
-### 1. Configurazione del trigger
-```python
-# Per conversazioni brevi (< 20 messaggi)
-config = SummaryConfig(trigger_turns=12, trigger_tokens=4000)
-
-# Per conversazioni lunghe (sessioni di lavoro)  
-config = SummaryConfig(trigger_turns=25, trigger_tokens=10000)
-
-# Per applicazioni con vincoli di token strict
-config = SummaryConfig(trigger_turns=6, trigger_tokens=2000)
-```
-
-### 2. Scelta della strategia
-- **Customer service**: `KEEP_RECENT` (mantiene contesto immediato)
-- **Consulenza tecnica**: `IMPORTANCE_BASED` (preserva info tecniche)
-- **Chatbot generico**: `FULL_SUMMARY` (massima efficienza)
-
-### 3. Monitoring in produzione
-```python
-# Metriche periodiche per monitoraggio
-def log_metrics_periodically(manager):
-    stats = manager.get_memory_stats()
-    
-    # Log per sistemi di monitoring
-    logger.info("METRICS", extra={
-        'turns': stats['current_metrics']['total_turns'],
-        'tokens': stats['current_metrics']['estimated_tokens'], 
-        'summaries': stats['summary_history_count'],
-        'strategy': stats['current_strategy']
-    })
-```
-
-### 4. Gestione della persistenza
-```python
-# File diversi per utente/sessione
-memory_file = f"memory_{user_id}_{session_id}.json"
-manager = AdvancedMemoryManager(
-    client=client,
-    config=config, 
-    memory_file=memory_file
-)
-
-# Cleanup periodico dei file vecchi
-cleanup_old_memory_files(days_old=30)
-```
-
 ## Confronto prestazioni
 
-| Funzionalità | Esempio base | Esempio avanzato |
-|--------------|--------------|------------------|
-| Strategie | 1 (riassunto completo) | 3+ (configurabili) |
-| Persistenza | ❌ | ✅ Automatica con backup |
-| Cache | ❌ | ✅ Memory/Redis |
-| Metriche | ❌ | ✅ Dettagliate |
-| Error handling | ❌ | ✅ Robusto |
-| Logging | ❌ | ✅ Professionale |
-| Configurazione | Hard-coded | ✅ Flessibile |
-| Recovery | ❌ | ✅ Backup automatici |
-
-## Limitazioni e sviluppi futuri
-
-### Limitazioni correnti
-- Strategia `HIERARCHICAL` non ancora implementata
-- **Bug cache libreria**: `datapizzai` v3.0.8 ha problemi di type concatenation nelle chiavi cache
-- Cache Redis richiede server Redis separato
-- Stima token approssimativa (chars/4), non precisa come tiktoken
-
+| Funzionalità   |       Esempio base     |      Esempio avanzato    |
+|----------------|------------------------|--------------------------|
+| Strategie      | 1 (riassunto completo) | 3+ (configurabili)       |
+| Persistenza    |            ❌          | ✅ Automatica con backup |
+| Cache          |            ❌          | ✅ Memory/Redis          |
+| Metriche       |            ❌          | ✅ Dettagliate           |
+| Error handling |            ❌          | ✅ Robusto               |
+| Logging        |            ❌          | ✅ Professionale         |
+| Configurazione |         Hard-coded     | ✅ Flessibile            |
+| Recovery       |            ❌          | ✅ Backup automatici     |
