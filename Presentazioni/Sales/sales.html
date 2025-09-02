@@ -472,6 +472,58 @@
             display: block;
             animation: fadeInUp 0.5s ease;
         }
+
+        /* Modal for Sources */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal {
+            width: min(900px, 92vw);
+            max-height: 80vh;
+            overflow: auto;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+        .modal-close {
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06);
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 0.4rem 0.65rem;
+            cursor: pointer;
+        }
+        .modal-content {
+            color: #94a3b8;
+        }
+        .sources-list {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .sources-list a { color: #a78bfa; text-decoration: none; }
+        .sources-list a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -873,6 +925,19 @@
                             <p><strong>Focus:</strong> Space logistics pioneer</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Fonti per Azienda -->
+        <div id="sourcesModal" class="modal-overlay" onclick="if(event.target===this) hideSources()">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title" id="sourcesTitle">Fonti</div>
+                    <button class="modal-close" onclick="hideSources()">Chiudi ✕</button>
+                </div>
+                <div class="modal-content">
+                    <div id="sourcesBody" class="sources-list"></div>
                 </div>
             </div>
         </div>
@@ -1293,7 +1358,7 @@
                 const details = [c.hq, c.stage].filter(Boolean).join(' • ');
                 const links = linksHTML(c.links);
                 return `
-                    <div class="company-item">
+                    <div class="company-item" role="button" tabindex="0" data-company="${escapeHtml(c.name)}" onclick="showSources(this)" onkeypress="if(event.key==='Enter') showSources(this)">
                         <div class="rank ${rankClass}">${i + 1}</div>
                         <div class="company-info">
                             <div class="company-name">${escapeHtml(c.name)}</div>
@@ -1341,6 +1406,191 @@
                 } catch {
                     return u.length > 32 ? u.slice(0, 29) + '…' : u;
                 }
+            }
+
+            // Mapping: Fonti per Azienda
+            const sourcesByCompany = {
+                'Satispay': [
+                    'https://www.fintechfutures.com/2022/09/satispay-becomes-a-unicorn-with-e320m-in-series-d-funding/',
+                    'https://thepaypers.com/payments/news/satispay-raises-eur-320-million-and-becomes-a-fintech-unicorn',
+                    'https://www.pymnts.com/news/investment-tracker/2022/payments-startup-is-italys-newest-unicorn-following-e320m-series-d/',
+                    'https://www.eu-startups.com/2022/09/milan-based-payment-network-satispay-exceed-e1-billion-valuation-and-becomes-an-italian-unicorn/',
+                    'https://www.eu-startups.com/2024/11/milan-based-satispay-secures-e60-million-to-expand-its-mobile-payments-and-employee-benefits-platform/',
+                    'https://tech.eu/2022/09/28/italy-s-second-unicorn-satispay-rings-up-320-million-at-1-billion-valuation',
+                    'https://techcrunch.com/2022/09/28/italys-satispay-raises-e320m-at-a-e1b-valuation-with-backing-from-block-tencent-and-more-for-its-indy-payment-network/',
+                    'https://www.linkedin.com/company/satispay/',
+                    'https://www.linkedin.com/company/satispay/jobs/'
+                ],
+                'Scalapay': [
+                    'https://www.prnewswire.com/news-releases/scalapay-now-a-unicorn-raises-497m-series-b-and-enters-the-checkout-market-301487923.html',
+                    'https://ibsintelligence.com/ibsi-news/scalapay-now-a-unicorn-announced-raising-497m-in-a-series-b-funding-round/'
+                ],
+                'Nexi Group': [
+                    'https://tracxn.com/d/geographies/italy/__KHa0o50NZX-ONw7JrgYYD6rLUmfZbg6TCWGX8eCemN0',
+                    'https://www.startupblink.com/top-startups/italy'
+                ],
+                'illimity Bank': [
+                    'https://www.illimity.com/en/who-we-are'
+                ],
+                'Young Platform': [
+                    'https://www.i3p.it/en/news/fintech-startup-young-platform-closes-a-16-euro-million-funding-round',
+                    'https://www.examinecrypto.com/post/young-platform-an-italian-crypto-exchange-raise-2-65m-from-azimut-bringing-its-total-raise-to-1'
+                ],
+                'Credimi': [
+                    'https://www.unibocconi.it/en/news/credimi-lending-platform-attracting-talent-back-italy'
+                ],
+                'Fabrick': [
+                    'https://www.fabrick.com/en-gb/corporate/platform-open-finance/',
+                    'https://tracxn.com/d/companies/fabrick/__YO2qGNkEMk0yb3_OcaTUAu7N3OoG--IEo4JZk2R2Ho4',
+                    'https://sifted.eu/articles/fabrick-raises-40m-mastercard-news'
+                ],
+                'YOLO Group': [
+                    'https://www.euronext.com/en/about/media/euronext-press-releases/yolo-group-spa-lists-euronext-growth-milan',
+                    'https://news.europawire.eu/the-first-italian-digital-insurance-services-and-brokerage-yolo-gets-investment-from-intesa-sanpaolo-group-9029237432/eu-press-release/2019/01/29/18/47/02/70851/'
+                ],
+                'Cubbit': [
+                    'https://www.finsmes.com/2024/07/cubbit-raises-12-5m-in-funding.html'
+                ],
+                'Cleafy': [
+                    'https://www.linkedin.com/company/cleafy',
+                    'https://startupsavant.com/startups-to-watch/italy'
+                ],
+                'TeamSystem': [
+                    'https://www.teamsystem.com/il-gruppo/'
+                ],
+                'Engineering': [
+                    'https://it.linkedin.com/jobs/engineering-ingegneria-informatica-spa-offerte-di-lavoro',
+                    'https://www.eng.it/en/careers/life-at-eng'
+                ],
+                'Bending Spoons': [
+                    'https://bendingspoons.com/careers',
+                    'https://tech.eu/2024/05/23/10-italian-startups-to-watch-in-2024/',
+                    'https://www.francescatabor.com/articles/2025/7/28/bending-spoons-a-different-kind-of-tech-company',
+                    'https://www.linkedin.com/company/bendingspoons',
+                    'https://sifted.eu/articles/bending-spoons-italy-startup-ipo',
+                    'https://www.eu-startups.com/2025/08/italys-bending-spoons-raises-over-e500-million-to-turbocharge-tech-acquisitions/',
+                    'https://money.usnews.com/investing/news/articles/2024-10-21/italian-tech-company-bending-spoons-has-eye-on-us-for-potential-ipo',
+                    'https://finance.yahoo.com/news/italian-tech-company-bending-spoons-095257001.html',
+                    'https://www.siliconrepublic.com/business/bending-spoons-italy-milan-debt-raise-500m-acquisitions'
+                ],
+                'McKinsey': [
+                    'https://www.mckinsey.com/careers/tech',
+                    'https://www.mckinsey.com/careers/students',
+                    'https://www.mckinsey.com/industries/technology-media-and-telecommunications/our-insights/cracking-the-code-on-digital-talent'
+                ],
+                'Accenture': [
+                    'https://www.linkedin.com/jobs/accenture-jobs-milan?trk=guest_job_search_related_jserp_link'
+                ],
+                'Ferrari': [
+                    'https://www.ferrari.com/en-EN/corporate/career',
+                    'https://www.ferrari.com/en-EN/ferrari-f1-engineering-academy',
+                    'https://www.ferrari.com/en-EN/ferrari-engineering-academy-2024',
+                    'https://www.linkedin.com/company/ferrari/jobs'
+                ],
+                'EssilorLuxottica': [
+                    'https://www.essilorluxottica.com/en/careers/smart-eyewear-lab/',
+                    'https://careers.essilorluxottica.com/job/Agordo-Operations-Talent-Program-Italy/1231002601/',
+                    'https://www.essilorluxottica.com/en/careers/operations-talent-program/'
+                ],
+                'Bracco': [
+                    'https://careers.braccomedtech.com/',
+                    'https://www.bracco.com/careers',
+                    'https://www.bracco.com/en-us/fulvio-renoldi-bracco',
+                    'https://www.bracco.com/',
+                    'https://en.wikipedia.org/wiki/Bracco_(Company)'
+                ],
+                'Chiesi': [
+                    'https://it.linkedin.com/company/chiesi-group/jobs',
+                    'https://www.linkedin.com/company/chiesi-group',
+                    'https://www.linkedin.com/company/chiesi-usa'
+                ],
+                'Dompé': [
+                    'https://www.linkedin.com/company/dompe',
+                    'https://www.dompe.com/',
+                    'https://www.dompe.com/who-we-are/about-us/leadershipversioneb/',
+                    'https://www.dompe.com/media/stories/unleashing-innovation-dompe-s-journey-into-the-digital-age-of-pharma/',
+                    'https://www.dompe.com/who-we-are/about-us/'
+                ],
+                'Menarini': [
+                    'https://www.menarini.com/en-us/careers/available-positions.html',
+                    'https://en.wikipedia.org/wiki/Menarini',
+                    'https://www.drugdiscoverytrends.com/2025-pharma50/menarini/'
+                ],
+                'Resalis': [
+                    'https://it.linkedin.com/company/resalistherapeutics',
+                    'https://www.resalistherapeutics.com/about-us/our-team/',
+                    'https://www.businesswire.com/news/home/20230222005054/en/Resalis-Therapeutics-Announces-Seed-Financing-of-%E2%82%AC10-Million-to-Fund-Non-coding-RNA-based-Therapeutics-for-Metabolic-Diseases',
+                    'https://www.crunchbase.com/organization/resalis-therapeutics',
+                    'https://www.businesswire.com/news/home/20241028943917/en/Resalis-Therapeutics-Gains-Strategic-Equity-Investment-from-Sanofi'
+                ],
+                'Recordati': [
+                    'https://www.recordati.com/en/join_us/',
+                    'https://recordati.com/',
+                    'https://www.linkedin.com/company/recordati/'
+                ],
+                'Technogym': [
+                    'https://www.linkedin.com/company/technogym/',
+                    'https://careers.technogym.com/job/Bracknell-Marketing-Specialist-BRC/1168001301/'
+                ],
+                'Casavo': [
+                    'https://siliconcanals.com/italian-proptech-scale-up-casavo-lands-e20m/'
+                ],
+                'ENI': [
+                    'https://business.linkedin.com/talent-solutions/case-studies/manufacturing/eni'
+                ],
+                'Energy Dome': [
+                    'https://energydome.com/energy-dome-announces-funding-commitments-from-breakthrough-energy-catalyst-and-the-european-investment-bank-to-support-construction-of-its-first-standard-commercial-scale-co2-battery/',
+                    'https://www.energy-storage.news/eu-breakthrough-energy-partnership-invests-e60-million-in-long-duration-co2-battery-project-in-italy/',
+                    'https://energydome.com/news-energy-dome-series-a-funding/',
+                    'https://tech.eu/2024/05/23/10-italian-startups-to-watch-in-2024/',
+                    'https://technologywealth.com/startups/energy-dome/',
+                    'https://energydome.com/energy-dome-and-engie-sign-pioneering-storage-offtake-agreement/'
+                ],
+                'Futura': [
+                    'https://www.eu-startups.com/2024/05/milan-based-edtech-futura-raises-e14-million-series-a-to-make-the-world-learn-faster-and-better/'
+                ],
+                'WeSchool': [
+                    'https://www.linkedin.com/company/weschool',
+                    'https://app.welcometothejungle.com/companies/WeSchool',
+                    'https://www.works-hub.com/companies/weschool'
+                ],
+                'Wibo': [
+                    'https://www.eu-startups.com/2025/06/italian-edtech-startup-wibo-raises-e500k-for-its-upskilling-and-leadership-programmes'
+                ],
+                'Faba': [
+                    'https://www.eu-startups.com/2025/08/italys-edtech-startup-faba-gets-serious-with-e4-5-million-to-expand-its-screen-free-storytelling-magic-in-spain/'
+                ],
+                'Algor': [
+                    'https://www.i3p.it/en/news/international-investment-1-4-million-euro-italian-edtech-startup-algor-education-ai-learning-tools'
+                ],
+                'Olivetti': [
+                    'https://www.linkedin.com/company/olivetti',
+                    'https://www.olivetti.com/en/corporate/about-us'
+                ],
+                'D-Orbit': [
+                    'https://www.electronicsweekly.com/news/business/space-tech-d-orbit-raises-e100m-series-c-funding-2024-01/'
+                ],
+            };
+
+            function showSources(elOrName) {
+                const name = typeof elOrName === 'string' ? elOrName : (elOrName?.dataset?.company || '').trim();
+                const modal = document.getElementById('sourcesModal');
+                const title = document.getElementById('sourcesTitle');
+                const body = document.getElementById('sourcesBody');
+                if (!modal || !title || !body) return;
+                title.textContent = `Fonti – ${name}`;
+                const urls = sourcesByCompany[name] || [];
+                if (!urls.length) {
+                    body.innerHTML = `<div>Nessuna fonte disponibile per ${escapeHtml(name)}.</div>`;
+                } else {
+                    body.innerHTML = urls.map(u => `<div>• <a href="${u}" target="_blank" rel="noopener">${escapeHtml(u)}</a></div>`).join('');
+                }
+                modal.style.display = 'flex';
+            }
+
+            function hideSources() {
+                const modal = document.getElementById('sourcesModal');
+                if (modal) modal.style.display = 'none';
             }
 
             // Initial render
