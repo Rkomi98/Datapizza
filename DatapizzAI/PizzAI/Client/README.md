@@ -237,122 +237,13 @@ print(f"Risposta: {response.text}")
 
 ## Metodo 3: Provider personalizzato via API (es. DeepSeek)
 
-Se vuoi collegarti a un provider non ancora incluso nel framework, puoi creare un adapter minimale che chiama le sue API HTTP e restituisce una struttura semplice con `text` e metriche basiche. L'approccio resta identico anche per altri provider OpenAI‑compatibili.
+#TODO (con AI eng):
+- Definire design dell'adapter REST per provider custom (schema richieste/risposte, headers, retry, timeouts).
+- Standardizzare il payload e la risposta per allinearsi a `invoke(input, memory)` del framework.
+- Gestire errori/transitori (HTTP, rate limit, parsing) e metriche (`usage`).
+- Scrivere esempi minimi e test end‑to‑end con provider reale.
 
-Esempio generico (DeepSeek come riferimento):
-
-```python
-import os
-import requests
-from typing import Optional, Union, List
-from pydantic import BaseModel
-
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-
-
-class SimpleResponse(BaseModel):
-    text: str
-    prompt_tokens_used: int = 0
-    completion_tokens_used: int = 0
-    stop_reason: str = "stop"
-
-
-class GenericRESTClient:
-    """Adapter minimale per API chat‑completions compatibili (es. DeepSeek)."""
-
-    def __init__(
-        self,
-        base_url: str,
-        api_key: str,
-        model: str,
-        system_prompt: Optional[str] = None,
-        temperature: float = 0.7,
-        endpoint: str = "/chat/completions",
-        headers: Optional[dict] = None,
-    ):
-        self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
-        self.model = model
-        self.system_prompt = system_prompt or ""
-        self.temperature = temperature
-        self.endpoint = endpoint
-        self._headers = headers or {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-
-    def _build_messages(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> List[dict]:
-        msgs: List[dict] = []
-        if self.system_prompt:
-            msgs.append({"role": "system", "content": self.system_prompt})
-        if memory is not None:
-            for turn in memory.memory:
-                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
-                content = " ".join(getattr(b, "content", "") for b in turn.blocks if hasattr(b, "content"))
-                if content:
-                    msgs.append({"role": role, "content": content})
-        if isinstance(input, str) and input:
-            msgs.append({"role": "user", "content": input})
-        elif isinstance(input, list) and input:
-            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
-            if user_text:
-                msgs.append({"role": "user", "content": user_text})
-        return msgs
-
-    def invoke(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> SimpleResponse:
-        payload = {
-            "model": self.model,
-            "messages": self._build_messages(input, memory),
-            "temperature": self.temperature,
-            # Aggiungi altri campi se richiesti dal provider
-        }
-        url = f"{self.base_url}{self.endpoint}"
-        try:
-            r = requests.post(url, json=payload, headers=self._headers, timeout=120)
-            r.raise_for_status()
-            data = r.json()
-            # Estrarre il testo secondo il formato del provider (OpenAI‑like):
-            # { choices: [ { message: { content: "..." } } ] }
-            text = (
-                data.get("choices", [{}])[0]
-                .get("message", {})
-                .get("content")
-            ) or str(data)
-            # Metriche se disponibili (opzionali)
-            usage = data.get("usage") or {}
-            return SimpleResponse(
-                text=text,
-                prompt_tokens_used=usage.get("prompt_tokens", 0),
-                completion_tokens_used=usage.get("completion_tokens", 0),
-                stop_reason=(data.get("choices", [{}])[0].get("finish_reason") or "stop"),
-            )
-        except Exception as e:
-            return SimpleResponse(text=f"Errore chiamata REST: {e}")
-
-
-# Esempio di utilizzo con DeepSeek (valori segnaposto)
-if __name__ == "__main__":
-    client = GenericRESTClient(
-        base_url="https://api.deepseek.com/v1",  # esempio
-        api_key=os.getenv("DEEPSEEK_API_KEY", "<inserisci-chiave>"),
-        model="deepseek-chat",
-        system_prompt="Sei un assistente conciso e utile.",
-    )
-    print(client.invoke("Spiegami il concetto di overfitting in 3 frasi.").text)
-```
-
-Note pratiche:
-- Se il provider espone un endpoint OpenAI‑compatibile, potresti valutare l'uso di `OpenAIClient` con `base_url` (se supportato dalla tua versione), altrimenti usa l'adapter sopra.
-- Mantieni l'interfaccia `invoke(input, memory)` per coerenza con il resto del codice.
+Nota: per ora, si consiglia l’uso di `ClientFactory` o client nativi già inclusi. L’implementazione dell’adapter custom sarà aggiunta insieme al team AI Engineering.
 
 ## Metodo 4: Modello locale (Ollama/Gemma)
 
