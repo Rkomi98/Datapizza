@@ -185,7 +185,7 @@ class MetadataExtractor(PipelineComponent):
         metadata = {
             "total_reviews": len(reviews),
             "avg_length": sum(len(r) for r in reviews) / len(reviews),
-            "timestamp": "2024-01-01"
+            "timestamp": "2025-09-15"
         }
         return {"metadata": metadata}
     async def _a_run(self, reviews, **kwargs):
@@ -334,8 +334,14 @@ class DataLoader(PipelineComponent):
 
 class Classifier(PipelineComponent):
     def _run(self, documents, **kwargs):
+        # Accetta sia dict {"documents": [...]} sia lista di dict
+        if isinstance(documents, dict) and "documents" in documents:
+            documents = documents["documents"]
+        elif documents is None:
+            documents = []
+        
         # Classifica documenti per urgenza
-        urgent_docs = [d for d in documents if d["priority"] == "urgent"]
+        urgent_docs = [d for d in documents if isinstance(d, dict) and d.get("priority") == "urgent"]
         has_urgent = len(urgent_docs) > 0
         
         return {
@@ -351,7 +357,7 @@ class NotificationSender(PipelineComponent):
         return {
             "notification_sent": True,
             "message": "⚠️ Documenti urgenti rilevati! Notifica inviata al team.",
-            "timestamp": "2024-01-01T10:00:00Z"
+            "timestamp": "2025-09-15T10:00:00Z"
         }
     async def _a_run(self, **kwargs):
         return self._run(**kwargs)
@@ -363,7 +369,7 @@ class DocumentProcessor(PipelineComponent):
             **document,
             "processed": True,
             "word_count": len(document["content"].split()),
-            "processing_time": "2024-01-01T10:00:00Z"
+            "processing_time": "2025-09-15T10:00:00Z"
         }
         return processed
     async def _a_run(self, document, **kwargs):
