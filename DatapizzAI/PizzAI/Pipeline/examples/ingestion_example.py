@@ -13,14 +13,24 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from datapizzai.pipeline import IngestionPipeline
-from datapizzai.modules.parsers import TextParser
-from datapizzai.modules.splitters import RecursiveSplitter
+from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import ClientEmbedder
 from datapizzai.vectorstores import QdrantVectorstore
 from datapizzai.clients import OpenAIClient
+from datapizzai.core.models import PipelineComponent
 
 # Carica variabili d'ambiente
 load_dotenv()
+
+# Componente personalizzato per leggere file di testo
+class FileReader(PipelineComponent):
+    def _run(self, file_path: str, **kwargs) -> str:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    
+    async def _a_run(self, file_path: str, **kwargs) -> str:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
 
 def create_sample_documents():
     """Crea alcuni documenti di esempio per il test."""
@@ -70,14 +80,14 @@ def main():
     # Configura client per embeddings
     openai_client = OpenAIClient(
         api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o-mini"
+        model="text-embedding-3-small"  # Modello per embeddings
     )
     
     # Configura componenti della pipeline
     components = [
-        TextParser(),  # Parsing del testo
-        RecursiveSplitter(chunk_size=200, chunk_overlap=50),  # Divisione in chunks
-        ClientEmbedder(client=openai_client, model="text-embedding-3-small")  # Embeddings
+        FileReader(),  # Lettura del file
+        TextSplitter(max_char=200, overlap=50),  # Divisione in chunks
+        ClientEmbedder(client=openai_client, model_name="text-embedding-3-small")  # Embeddings
     ]
     
     # Configura vector store (opzionale - se None restituisce solo i chunks)

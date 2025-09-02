@@ -52,25 +52,39 @@ L'IngestionPipeline è progettata per processare documenti e ingerirli in vector
 ### Esempio pratico
 
 ```python
+import os
 from datapizzai.pipeline import IngestionPipeline
-from datapizzai.modules.parsers import TextParser
-from datapizzai.modules.splitters import RecursiveSplitter
+from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import ClientEmbedder
 from datapizzai.clients import OpenAIClient
+from datapizzai.core.models import PipelineComponent
 
-# 1. Configura client per embeddings
-client = OpenAIClient(api_key="your_key", model="gpt-4o-mini")
+# Componente personalizzato per leggere file di testo
+class FileReader(PipelineComponent):
+    def _run(self, file_path: str, **kwargs) -> str:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    
+    async def _a_run(self, file_path: str, **kwargs) -> str:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+
+# 1. Configura client per embeddings  
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"), 
+    model="text-embedding-3-small"  # Modello per embeddings
+)
 
 # 2. Definisci componenti della pipeline in ordine di esecuzione
 components = [
-    TextParser(),  # Estrae testo puro dai documenti
-    RecursiveSplitter(
-        chunk_size=200,      # Dimensione massima di ogni chunk in caratteri
-        chunk_overlap=50     # Sovrapposizione tra chunks consecutivi
+    FileReader(),          # Legge il contenuto del file
+    TextSplitter(
+        max_char=200,      # Dimensione massima di ogni chunk in caratteri
+        overlap=50         # Sovrapposizione tra chunks consecutivi
     ),
     ClientEmbedder(
-        client=client,                      # Client LLM per generare embeddings
-        model="text-embedding-3-small"      # Modello specifico per embeddings
+        client=client,                    # Client per generare embeddings
+        model_name="text-embedding-3-small"  # Nome del modello embedding
     )
 ]
 
@@ -93,9 +107,10 @@ print(f"Generati {len(chunks)} chunks dal documento")
 
 ### Parametri dettagliati
 
-- **chunk_size**: numero massimo di caratteri per chunk. Chunks più piccoli = maggiore precisione, più chunks
-- **chunk_overlap**: caratteri condivisi tra chunks consecutivi per mantenere contesto
+- **max_char**: numero massimo di caratteri per chunk. Chunks più piccoli = maggiore precisione, più chunks
+- **overlap**: caratteri condivisi tra chunks consecutivi per mantenere contesto
 - **metadata**: dizionario opzionale allegato a tutti i chunks. Utile per tracciare fonte, data, categoria, etc.
+- **model_name**: nome del modello embedding da usare (deve essere supportato dal client)
 - **vector_store**: se `None` restituisce i chunks, altrimenti li salva automaticamente nel database
 - **collection_name**: obbligatorio solo se si specifica un vector_store
 

@@ -52,25 +52,39 @@ The IngestionPipeline is designed to process documents and ingest them into vect
 ### Practical example
 
 ```python
+import os
 from datapizzai.pipeline import IngestionPipeline
-from datapizzai.modules.parsers import TextParser
-from datapizzai.modules.splitters import RecursiveSplitter
+from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import ClientEmbedder
 from datapizzai.clients import OpenAIClient
+from datapizzai.core.models import PipelineComponent
 
-# 1. Configure client for embeddings
-client = OpenAIClient(api_key="your_key", model="gpt-4o-mini")
+# Custom component to read text files
+class FileReader(PipelineComponent):
+    def _run(self, file_path: str, **kwargs) -> str:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    
+    async def _a_run(self, file_path: str, **kwargs) -> str:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+
+# 1. Configure client for embeddings  
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"), 
+    model="text-embedding-3-small"  # Model for embeddings
+)
 
 # 2. Define pipeline components in execution order
 components = [
-    TextParser(),  # Extracts raw text from documents
-    RecursiveSplitter(
-        chunk_size=200,      # Maximum chunk size in characters
-        chunk_overlap=50     # Overlap between consecutive chunks
+    FileReader(),          # Reads file content
+    TextSplitter(
+        max_char=200,      # Maximum chunk size in characters
+        overlap=50         # Overlap between consecutive chunks
     ),
     ClientEmbedder(
-        client=client,                        # LLM client to generate embeddings
-        model="text-embedding-3-small"      # Specific model for embeddings
+        client=client,                    # Client to generate embeddings
+        model_name="text-embedding-3-small"  # Embedding model name
     )
 ]
 
@@ -93,9 +107,10 @@ print(f"Generated {len(chunks)} chunks from document")
 
 ### Detailed parameters
 
-- **chunk_size**: maximum number of characters per chunk. Smaller chunks = higher precision, more chunks
-- **chunk_overlap**: shared characters between consecutive chunks to maintain context
+- **max_char**: maximum number of characters per chunk. Smaller chunks = higher precision, more chunks
+- **overlap**: shared characters between consecutive chunks to maintain context
 - **metadata**: optional dictionary attached to all chunks. Useful for tracking source, date, category, etc.
+- **model_name**: name of the embedding model to use (must be supported by the client)
 - **vector_store**: if `None` returns chunks, otherwise saves them automatically to the database
 - **collection_name**: required only if a vector_store is specified
 

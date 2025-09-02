@@ -23,7 +23,15 @@ load_dotenv()
 class DataLoader(PipelineComponent):
     """Carica e prepara documenti di esempio."""
     
-    def run(self, **kwargs) -> Dict[str, Any]:
+    def _run(self, **kwargs) -> Dict[str, Any]:
+        documents = [
+            {"id": 1, "title": "Bug Critical", "content": "Sistema in crash", "priority": "urgent"},
+            {"id": 2, "title": "Feature Request", "content": "Nuova funzionalità", "priority": "normal"},
+            {"id": 3, "title": "Security Issue", "content": "Vulnerabilità trovata", "priority": "urgent"}
+        ]
+        return {"documents": documents}
+    
+    async def _a_run(self, **kwargs) -> Dict[str, Any]:
         documents = [
             {"id": 1, "title": "Bug Critical", "content": "Sistema in crash", "priority": "urgent"},
             {"id": 2, "title": "Feature Request", "content": "Nuova funzionalità", "priority": "normal"},
@@ -34,7 +42,18 @@ class DataLoader(PipelineComponent):
 class Classifier(PipelineComponent):
     """Classifica documenti per urgenza."""
     
-    def run(self, documents: List[Dict], **kwargs) -> Dict[str, Any]:
+    def _run(self, documents: List[Dict], **kwargs) -> Dict[str, Any]:
+        # Classifica documenti per urgenza
+        urgent_docs = [d for d in documents if d["priority"] == "urgent"]
+        has_urgent = len(urgent_docs) > 0
+        
+        return {
+            "classified_documents": documents,
+            "urgent_documents": urgent_docs,
+            "has_urgent": has_urgent
+        }
+    
+    async def _a_run(self, documents: List[Dict], **kwargs) -> Dict[str, Any]:
         # Classifica documenti per urgenza
         urgent_docs = [d for d in documents if d["priority"] == "urgent"]
         has_urgent = len(urgent_docs) > 0
@@ -48,7 +67,14 @@ class Classifier(PipelineComponent):
 class NotificationSender(PipelineComponent):
     """Invia notifica per documenti urgenti."""
     
-    def run(self, **kwargs) -> Dict[str, Any]:
+    def _run(self, **kwargs) -> Dict[str, Any]:
+        return {
+            "notification_sent": True,
+            "message": "⚠️ Documenti urgenti rilevati! Notifica inviata al team.",
+            "timestamp": "2024-01-01T10:00:00Z"
+        }
+    
+    async def _a_run(self, **kwargs) -> Dict[str, Any]:
         return {
             "notification_sent": True,
             "message": "⚠️ Documenti urgenti rilevati! Notifica inviata al team.",
@@ -58,7 +84,17 @@ class NotificationSender(PipelineComponent):
 class DocumentProcessor(PipelineComponent):
     """Processa un singolo documento."""
     
-    def run(self, document: Dict, **kwargs) -> Dict[str, Any]:
+    def _run(self, document: Dict, **kwargs) -> Dict[str, Any]:
+        # Processa un singolo documento
+        processed = {
+            **document,
+            "processed": True,
+            "word_count": len(document["content"].split()),
+            "processing_time": "2024-01-01T10:00:00Z"
+        }
+        return processed
+    
+    async def _a_run(self, document: Dict, **kwargs) -> Dict[str, Any]:
         # Processa un singolo documento
         processed = {
             **document,
@@ -71,7 +107,33 @@ class DocumentProcessor(PipelineComponent):
 class ReportGenerator(PipelineComponent):
     """Genera report finale."""
     
-    def run(self, classified_documents: List[Dict], **kwargs) -> Dict[str, Any]:
+    def _run(self, classified_documents: List[Dict], **kwargs) -> Dict[str, Any]:
+        # Genera report finale
+        total = len(classified_documents)
+        urgent_count = sum(1 for d in classified_documents if d.get("priority") == "urgent")
+        normal_count = total - urgent_count
+        
+        report = f"""
+DOCUMENTO ANALYSIS REPORT
+========================
+Totale documenti: {total}
+Documenti urgenti: {urgent_count}
+Documenti normali: {normal_count}
+
+DETTAGLI:
+{chr(10).join(f"- {d['title']}: {d['priority']}" for d in classified_documents)}
+        """
+        
+        return {
+            "final_report": report.strip(),
+            "statistics": {
+                "total": total,
+                "urgent": urgent_count,
+                "normal": normal_count
+            }
+        }
+    
+    async def _a_run(self, classified_documents: List[Dict], **kwargs) -> Dict[str, Any]:
         # Genera report finale
         total = len(classified_documents)
         urgent_count = sum(1 for d in classified_documents if d.get("priority") == "urgent")

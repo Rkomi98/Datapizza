@@ -24,7 +24,11 @@ load_dotenv()
 class DataLoader(PipelineComponent):
     """Carica dati di esempio."""
     
-    def run(self, **kwargs) -> Dict[str, Any]:
+    def _run(self, **kwargs) -> Dict[str, Any]:
+        reviews = ["Prodotto eccellente!", "Non mi piace", "Nella media"]
+        return {"reviews": reviews}
+    
+    async def _a_run(self, **kwargs) -> Dict[str, Any]:
         reviews = ["Prodotto eccellente!", "Non mi piace", "Nella media"]
         return {"reviews": reviews}
 
@@ -48,11 +52,35 @@ class SentimentAnalyzer(PipelineComponent):
             analyzed.append({"text": review, "sentiment": sentiment})
         
         return {"sentiment_results": analyzed}
+    
+    async def _a_run(self, reviews: list, **kwargs) -> Dict[str, Any]:
+        analyzed = []
+        for review in reviews:
+            # Simulazione analisi sentiment semplificata per l'esempio
+            if "eccellente" in review:
+                sentiment = "positive"
+            elif "non" in review.lower():
+                sentiment = "negative"
+            else:
+                sentiment = "neutral"
+                
+            analyzed.append({"text": review, "sentiment": sentiment})
+        
+        return {"sentiment_results": analyzed}
 
 class StatisticsCalculator(PipelineComponent):
     """Calcola statistiche sui sentiment."""
     
-    def run(self, sentiment_results: list, **kwargs) -> Dict[str, Any]:
+    def _run(self, sentiment_results: list, **kwargs) -> Dict[str, Any]:
+        sentiments = [r["sentiment"] for r in sentiment_results]
+        stats = {
+            "positive": sentiments.count("positive"),
+            "negative": sentiments.count("negative"), 
+            "neutral": sentiments.count("neutral")
+        }
+        return {"statistics": stats}
+    
+    async def _a_run(self, sentiment_results: list, **kwargs) -> Dict[str, Any]:
         sentiments = [r["sentiment"] for r in sentiment_results]
         stats = {
             "positive": sentiments.count("positive"),
@@ -64,7 +92,15 @@ class StatisticsCalculator(PipelineComponent):
 class MetadataExtractor(PipelineComponent):
     """Estrae metadata dai reviews."""
     
-    def run(self, reviews: list, **kwargs) -> Dict[str, Any]:
+    def _run(self, reviews: list, **kwargs) -> Dict[str, Any]:
+        metadata = {
+            "total_reviews": len(reviews),
+            "avg_length": sum(len(r) for r in reviews) / len(reviews),
+            "timestamp": "2024-01-01"
+        }
+        return {"metadata": metadata}
+    
+    async def _a_run(self, reviews: list, **kwargs) -> Dict[str, Any]:
         metadata = {
             "total_reviews": len(reviews),
             "avg_length": sum(len(r) for r in reviews) / len(reviews),
@@ -75,7 +111,23 @@ class MetadataExtractor(PipelineComponent):
 class ReportGenerator(PipelineComponent):
     """Genera report finale combinando tutti i dati."""
     
-    def run(self, sentiment_results: list, statistics: dict, metadata: dict, **kwargs) -> Dict[str, Any]:
+    def _run(self, sentiment_results: list, statistics: dict, metadata: dict, **kwargs) -> Dict[str, Any]:
+        report = f"""
+REPORT ANALISI - {metadata['timestamp']}
+Recensioni totali: {metadata['total_reviews']}
+Lunghezza media: {metadata['avg_length']:.1f}
+
+SENTIMENT:
+- Positive: {statistics['positive']}
+- Negative: {statistics['negative']}
+- Neutral: {statistics['neutral']}
+
+DETTAGLI:
+{chr(10).join(f"- {r['text']}: {r['sentiment']}" for r in sentiment_results)}
+        """
+        return {"final_report": report.strip()}
+    
+    async def _a_run(self, sentiment_results: list, statistics: dict, metadata: dict, **kwargs) -> Dict[str, Any]:
         report = f"""
 REPORT ANALISI - {metadata['timestamp']}
 Recensioni totali: {metadata['total_reviews']}
