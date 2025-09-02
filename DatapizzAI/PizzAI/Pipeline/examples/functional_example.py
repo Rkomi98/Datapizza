@@ -19,189 +19,129 @@ from datapizzai.clients import OpenAIClient
 # Carica variabili d'ambiente
 load_dotenv()
 
-# Componenti personalizzati per l'esempio
-class DocumentLoader(PipelineComponent):
+# Componenti personalizzati - implementazione completa come nel README
+class DataLoader(PipelineComponent):
     """Carica e prepara documenti di esempio."""
     
     def run(self, **kwargs) -> Dict[str, Any]:
         documents = [
-            {
-                "id": 1,
-                "title": "Guida Python",
-                "content": "Python è un linguaggio di programmazione versatile e potente, ideale per principianti.",
-                "category": "programming"
-            },
-            {
-                "id": 2, 
-                "title": "Ricetta Carbonara",
-                "content": "La carbonara è un piatto tradizionale romano con uova, pecorino e guanciale.",
-                "category": "cooking"
-            },
-            {
-                "id": 3,
-                "title": "Machine Learning Basics", 
-                "content": "Il machine learning è una branca dell'intelligenza artificiale che permette ai computer di imparare.",
-                "category": "programming"
-            }
+            {"id": 1, "title": "Bug Critical", "content": "Sistema in crash", "priority": "urgent"},
+            {"id": 2, "title": "Feature Request", "content": "Nuova funzionalità", "priority": "normal"},
+            {"id": 3, "title": "Security Issue", "content": "Vulnerabilità trovata", "priority": "urgent"}
         ]
-        
         return {"documents": documents}
 
-class DocumentClassifier(PipelineComponent):
-    """Classifica documenti usando LLM."""
-    
-    def __init__(self, client: OpenAIClient):
-        self.client = client
+class Classifier(PipelineComponent):
+    """Classifica documenti per urgenza."""
     
     def run(self, documents: List[Dict], **kwargs) -> Dict[str, Any]:
-        classified_docs = []
-        
-        for doc in documents:
-            # Usa LLM per classificazione più accurata
-            messages = [{
-                "role": "user",
-                "content": f"Classifica questo documento in una di queste categorie: 'technical', 'lifestyle', 'educational'. Rispondi solo con la categoria.\n\nTitolo: {doc['title']}\nContenuto: {doc['content']}"
-            }]
-            
-            response = self.client.complete(messages=messages, max_tokens=10)
-            ai_category = response.choices[0].message.content.strip().lower()
-            
-            classified_docs.append({
-                **doc,
-                "ai_category": ai_category
-            })
-        
-        return {"classified_documents": classified_docs}
-
-class TechnicalDocumentProcessor(PipelineComponent):
-    """Processa specificamente documenti tecnici."""
-    
-    def __init__(self, client: OpenAIClient):
-        self.client = client
-    
-    def run(self, document: Dict, **kwargs) -> Dict[str, Any]:
-        # Genera keywords tecniche
-        messages = [{
-            "role": "user", 
-            "content": f"Estrai 3-5 keywords tecniche da questo documento:\n{document['content']}\nRispondi con una lista separata da virgole."
-        }]
-        
-        response = self.client.complete(messages=messages, max_tokens=50)
-        keywords = [kw.strip() for kw in response.choices[0].message.content.split(",")]
+        # Classifica documenti per urgenza
+        urgent_docs = [d for d in documents if d["priority"] == "urgent"]
+        has_urgent = len(urgent_docs) > 0
         
         return {
-            **document,
-            "technical_keywords": keywords,
-            "processed_by": "TechnicalProcessor"
+            "classified_documents": documents,
+            "urgent_documents": urgent_docs,
+            "has_urgent": has_urgent
         }
 
-class GeneralDocumentProcessor(PipelineComponent):
-    """Processa documenti generali."""
-    
-    def run(self, document: Dict, **kwargs) -> Dict[str, Any]:
-        return {
-            **document,
-            "word_count": len(document["content"].split()),
-            "processed_by": "GeneralProcessor"
-        }
-
-class KeywordNormalizer(PipelineComponent):
-    """Normalizza keywords (usato nel foreach)."""
-    
-    def run(self, keyword: str, **kwargs) -> str:
-        return keyword.lower().strip()
-
-class ReportBuilder(PipelineComponent):
-    """Costruisce report finale."""
-    
-    def run(self, classified_documents: List[Dict], **kwargs) -> Dict[str, Any]:
-        report = []
-        report.append("=== DOCUMENT ANALYSIS REPORT ===\n")
-        
-        # Statistiche per categoria
-        categories = {}
-        for doc in classified_documents:
-            cat = doc.get("ai_category", "unknown")
-            categories[cat] = categories.get(cat, 0) + 1
-        
-        report.append("📊 CATEGORIA DISTRIBUTION:")
-        for cat, count in categories.items():
-            report.append(f"  {cat}: {count} documenti")
-        report.append("")
-        
-        # Dettaglio documenti
-        report.append("📄 DOCUMENT DETAILS:")
-        for doc in classified_documents:
-            report.append(f"\n🔸 {doc['title']}")
-            report.append(f"   Categoria AI: {doc['ai_category']}")
-            report.append(f"   Processato da: {doc.get('processed_by', 'N/A')}")
-            
-            if "technical_keywords" in doc:
-                report.append(f"   Keywords tecniche: {', '.join(doc['technical_keywords'])}")
-            if "word_count" in doc:
-                report.append(f"   Parole: {doc['word_count']}")
-        
-        final_report = "\n".join(report)
-        return {"report": final_report}
-
-class SendNotification(PipelineComponent):
-    """Invia notifica per documenti tecnici."""
+class NotificationSender(PipelineComponent):
+    """Invia notifica per documenti urgenti."""
     
     def run(self, **kwargs) -> Dict[str, Any]:
-        return {"notification_sent": True, "message": "Nuovo documento tecnico rilevato!"}
+        return {
+            "notification_sent": True,
+            "message": "⚠️ Documenti urgenti rilevati! Notifica inviata al team.",
+            "timestamp": "2024-01-01T10:00:00Z"
+        }
+
+class DocumentProcessor(PipelineComponent):
+    """Processa un singolo documento."""
+    
+    def run(self, document: Dict, **kwargs) -> Dict[str, Any]:
+        # Processa un singolo documento
+        processed = {
+            **document,
+            "processed": True,
+            "word_count": len(document["content"].split()),
+            "processing_time": "2024-01-01T10:00:00Z"
+        }
+        return processed
+
+class ReportGenerator(PipelineComponent):
+    """Genera report finale."""
+    
+    def run(self, classified_documents: List[Dict], **kwargs) -> Dict[str, Any]:
+        # Genera report finale
+        total = len(classified_documents)
+        urgent_count = sum(1 for d in classified_documents if d.get("priority") == "urgent")
+        normal_count = total - urgent_count
+        
+        report = f"""
+DOCUMENTO ANALYSIS REPORT
+========================
+Totale documenti: {total}
+Documenti urgenti: {urgent_count}
+Documenti normali: {normal_count}
+
+DETTAGLI:
+{chr(10).join(f"- {d['title']}: {d['priority']}" for d in classified_documents)}
+        """
+        
+        return {
+            "final_report": report.strip(),
+            "statistics": {
+                "total": total,
+                "urgent": urgent_count,
+                "normal": normal_count
+            }
+        }
 
 def main():
-    # Configura client
-    client = OpenAIClient(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o-mini"
-    )
+    # Rimuovo client LLM per semplificare l'esempio come nel README
     
-    # Sottopipeline per notifica (documenti tecnici)
+    # Sottopipeline per notifiche (documenti urgenti)
     notification_pipeline = FunctionalPipeline().run(
         name="send_notification",
-        node=SendNotification()
+        node=NotificationSender()
     )
     
-    # Sottopipeline per processamento generale
-    general_processing = (
+    # Sottopipeline per processamento standard (documenti normali)
+    standard_processing_pipeline = (
         FunctionalPipeline()
         .foreach(
-            name="process_general",
-            dependencies=[Dependency(node_name="classified_documents")],
-            do=GeneralDocumentProcessor()
+            name="process_documents",
+            dependencies=[Dependency(node_name="classified_documents", target_key=None)],
+            do=DocumentProcessor()
         )
         .then(
-            name="build_report",
-            node=ReportBuilder(),
+            name="generate_report",
+            node=ReportGenerator(),
             target_key="classified_documents",
-            dependencies=[Dependency(node_name="classify")]
+            dependencies=[Dependency(node_name="classify", target_key="classified_documents")]
         )
     )
     
-    # Pipeline principale
+    # Pipeline principale con branching condizionale
     pipeline = (
         FunctionalPipeline()
-        # 1. Carica documenti
+        # Carica documenti
         .run(
-            name="load_documents",
-            node=DocumentLoader()
+            name="load_data", 
+            node=DataLoader()
         )
-        # 2. Classifica con AI
+        # Classifica per urgenza
         .then(
-            name="classify", 
-            node=DocumentClassifier(client=client),
-            target_key="documents"
+            name="classify",
+            node=Classifier(),
+            target_key="documents"  # Passa risultato di "load_data" come parametro "documents"
         )
-        # 3. Branch condizionale basato su presenza di documenti tecnici
+        # Branch condizionale basato su presenza documenti urgenti
         .branch(
-            condition=lambda ctx: any(
-                doc.get("ai_category") == "technical" 
-                for doc in ctx.get("classify", {}).get("classified_documents", [])
-            ),
+            condition=lambda ctx: ctx.get("classify", {}).get("has_urgent", False),
             dependencies=[Dependency(node_name="classify")],
-            if_true=notification_pipeline,  # Se ci sono doc tecnici -> notifica
-            if_false=general_processing     # Altrimenti -> processamento normale
+            if_true=notification_pipeline,      # Se urgenti -> invia notifica
+            if_false=standard_processing_pipeline  # Altrimenti -> processa normalmente
         )
     )
     
@@ -212,19 +152,20 @@ def main():
     
     print("✅ Pipeline completata!")
     
-    # Mostra risultati
+    # Mostra risultati in base al branch eseguito
     if "send_notification" in results:
-        print(f"\n🔔 {results['send_notification']['message']}")
+        print("BRANCH URGENTE ESEGUITO:")
+        print(results["send_notification"]["message"])
+    else:
+        print("BRANCH STANDARD ESEGUITO:")
+        print(results["generate_report"]["final_report"])
     
-    if "build_report" in results:
-        print(f"\n{results['build_report']['report']}")
-    
-    # Mostra struttura pipeline
+    # Mostra struttura pipeline (coerente con README)
     print("\n" + "="*60)
     print("🏗️  STRUTTURA DELLA PIPELINE:")
-    print("load_documents → classify → branch")
-    print("                              ├─ technical docs → send_notification")
-    print("                              └─ other docs → foreach → build_report")
+    print("load_data → classify → branch")
+    print("                        ├─ urgent docs → send_notification")
+    print("                        └─ normal docs → foreach → generate_report")
 
 if __name__ == "__main__":
     main()

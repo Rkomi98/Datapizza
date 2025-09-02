@@ -58,34 +58,55 @@ from datapizzai.modules.splitters import RecursiveSplitter
 from datapizzai.embedders import ClientEmbedder
 from datapizzai.clients import OpenAIClient
 
-# Configura componenti
+# 1. Configura client per embeddings
 client = OpenAIClient(api_key="your_key", model="gpt-4o-mini")
+
+# 2. Definisci componenti della pipeline in ordine di esecuzione
 components = [
-    TextParser(),
-    RecursiveSplitter(chunk_size=200, chunk_overlap=50),
-    ClientEmbedder(client=client, model="text-embedding-3-small")
+    TextParser(),  # Estrae testo puro dai documenti
+    RecursiveSplitter(
+        chunk_size=200,      # Dimensione massima di ogni chunk in caratteri
+        chunk_overlap=50     # Sovrapposizione tra chunks consecutivi
+    ),
+    ClientEmbedder(
+        client=client,                      # Client LLM per generare embeddings
+        model="text-embedding-3-small"      # Modello specifico per embeddings
+    )
 ]
 
-# Crea pipeline
-pipeline = IngestionPipeline(modules=components)
+# 3. Crea pipeline senza vector store (restituisce chunks processati)
+pipeline = IngestionPipeline(
+    modules=components,    # Lista dei componenti da eseguire
+    vector_store=None,     # None = non salva automaticamente
+    collection_name=None   # Nome collezione nel vector store (non usato se vector_store=None)
+)
 
-# Esegui processamento
-chunks = pipeline.run("documento.txt", metadata={"source": "esempio"})
+# 4. Esegui processamento con metadata opzionale
+chunks = pipeline.run(
+    file_path="documento.txt",           # Percorso del documento da processare
+    metadata={"source": "esempio"}      # Metadata aggiuntivo da allegare ai chunks (OPZIONALE)
+)
+
+# Il risultato è una lista di oggetti Chunk con testo, embeddings e metadata
+print(f"Generati {len(chunks)} chunks dal documento")
 ```
+
+### Parametri dettagliati
+
+- **chunk_size**: numero massimo di caratteri per chunk. Chunks più piccoli = maggiore precisione, più chunks
+- **chunk_overlap**: caratteri condivisi tra chunks consecutivi per mantenere contesto
+- **metadata**: dizionario opzionale allegato a tutti i chunks. Utile per tracciare fonte, data, categoria, etc.
+- **vector_store**: se `None` restituisce i chunks, altrimenti li salva automaticamente nel database
+- **collection_name**: obbligatorio solo se si specifica un vector_store
 
 ### Diagramma di flusso
 
 ```mermaid
 graph TD
-    A[Documento] --> B[TextParser]
-    B --> C[RecursiveSplitter]
-    C --> D[ClientEmbedder]
-    D --> E[Vector Store]
-    
-    B --> F[Estrazione testo]
-    C --> G[Divisione chunks]
-    D --> H[Generazione embeddings]
-    E --> I[Archiviazione]
+    A[Documento] -->|file path| B[TextParser]
+    B -->|raw text| C[RecursiveSplitter]
+    C -->|text chunks| D[ClientEmbedder]
+    D -->|chunks + embeddings| E[Vector Store]
 ```
 
 ### Script completo
@@ -111,48 +132,138 @@ La DagPipeline permette di creare grafi di dipendenze (DAG - Directed Acyclic Gr
 from datapizzai.pipeline import DagPipeline
 from datapizzai.core.models import PipelineComponent
 
+# 1. Definisci tutti i componenti del grafo
 class DataLoader(PipelineComponent):
     def run(self, **kwargs):
-        return {"data": ["testo1", "testo2", "testo3"]}
+        return {"reviews": ["Prodotto eccellente!", "Non mi piace", "Nella media"]}
 
 class SentimentAnalyzer(PipelineComponent):
-    def run(self, data, **kwargs):
-        # Logica di analisi sentiment
-        return {"results": [{"text": t, "sentiment": "positive"} for t in data]}
+    def run(self, reviews, **kwargs):
+        # Simula analisi sentiment
+        analyzed = [{"text": r, "sentiment": "positive" if "eccellente" in r else "negative" if "non" in r.lower() else "neutral"} for r in reviews]
+        return {"sentiment_results": analyzed}
 
-# Crea pipeline DAG
+class StatisticsCalculator(PipelineComponent):
+    def run(self, sentiment_results, **kwargs):
+        sentiments = [r["sentiment"] for r in sentiment_results]
+        stats = {
+            "positive": sentiments.count("positive"),
+            "negative": sentiments.count("negative"), 
+            "neutral": sentiments.count("neutral")
+        }
+        return {"statistics": stats}
+
+class MetadataExtractor(PipelineComponent):
+    def run(self, reviews, **kwargs):
+        metadata = {
+            "total_reviews": len(reviews),
+            "avg_length": sum(len(r) for r in reviews) / len(reviews),
+            "timestamp": "2024-01-01"
+        }
+        return {"metadata": metadata}
+
+class ReportGenerator(PipelineComponent):
+    def run(self, sentiment_results, statistics, metadata, **kwargs):
+        report = f"""
+REPORT ANALISI - {metadata['timestamp']}
+Recensioni totali: {metadata['total_reviews']}
+Lunghezza media: {metadata['avg_length']:.1f}
+
+SENTIMENT:
+- Positive: {statistics['positive']}
+- Negative: {statistics['negative']}
+- Neutral: {statistics['neutral']}
+
+DETTAGLI:
+{chr(10).join(f"- {r['text']}: {r['sentiment']}" for r in sentiment_results)}
+        """
+        return {"final_report": report.strip()}
+
+# 2. Crea pipeline DAG
 pipeline = DagPipeline()
-pipeline.add_module("loader", DataLoader())
-pipeline.add_module("analyzer", SentimentAnalyzer())
 
-# Definisci connessioni
+# 3. Aggiungi tutti i nodi
+pipeline.add_module("data_loader", DataLoader())
+pipeline.add_module("sentiment_analyzer", SentimentAnalyzer())
+pipeline.add_module("statistics_calculator", StatisticsCalculator())
+pipeline.add_module("metadata_extractor", MetadataExtractor())
+pipeline.add_module("report_generator", ReportGenerator())
+
+# 4. Definisci connessioni (come nel diagramma)
+# DataLoader -> SentimentAnalyzer
 pipeline.connect(
-    source_node="loader",
-    target_node="analyzer",
-    source_key="data",
-    target_key="data"
+    source_node="data_loader",
+    target_node="sentiment_analyzer",
+    source_key="reviews",      # Chiave nel risultato del nodo sorgente
+    target_key="reviews"       # Parametro del nodo destinazione
 )
 
-# Esegui
+# SentimentAnalyzer -> StatisticsCalculator  
+pipeline.connect(
+    source_node="sentiment_analyzer",
+    target_node="statistics_calculator",
+    source_key="sentiment_results",
+    target_key="sentiment_results"
+)
+
+# DataLoader -> MetadataExtractor
+pipeline.connect(
+    source_node="data_loader",
+    target_node="metadata_extractor",
+    source_key="reviews",
+    target_key="reviews"
+)
+
+# Tutti convergono in ReportGenerator
+pipeline.connect(
+    source_node="sentiment_analyzer",
+    target_node="report_generator",
+    source_key="sentiment_results",
+    target_key="sentiment_results"
+)
+
+pipeline.connect(
+    source_node="statistics_calculator",
+    target_node="report_generator", 
+    source_key="statistics",
+    target_key="statistics"
+)
+
+pipeline.connect(
+    source_node="metadata_extractor",
+    target_node="report_generator",
+    source_key="metadata",
+    target_key="metadata"
+)
+
+# 5. Esegui pipeline
 results = pipeline.run({})
+print(results["report_generator"]["final_report"])
 ```
+
+### Parametri dettagliati
+
+- **source_key**: chiave specifica nel dizionario restituito dal nodo sorgente. Se `None`, passa tutto il risultato
+- **target_key**: nome del parametro nel metodo `run()` del nodo destinazione
+- **add_module()**: registra un componente nel grafo con un nome univoco
+- **connect()**: crea una dipendenza direzionale tra due nodi esistenti
 
 ### Diagramma di flusso
 
 ```mermaid
 graph TD
-    A[DataLoader] --> B[SentimentAnalyzer]
-    B --> C[StatisticsCalculator]
-    A --> D[MetadataExtractor]
-    B --> E[ReportGenerator]
-    C --> E
-    D --> E
+    A[DataLoader] -->|reviews| B[SentimentAnalyzer]
+    B -->|sentiment_results| C[StatisticsCalculator]
+    A -->|reviews| D[MetadataExtractor]
+    B -->|sentiment_results| E[ReportGenerator]
+    C -->|statistics| E
+    D -->|metadata| E
     
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#f3e5f5
-    style D fill:#f3e5f5
-    style E fill:#e8f5e8
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style D fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    style E fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
 ```
 
 ### Script completo
@@ -176,51 +287,163 @@ La FunctionalPipeline offre un approccio funzionale alla costruzione di pipeline
 
 ```python
 from datapizzai.pipeline import FunctionalPipeline, Dependency
+from datapizzai.core.models import PipelineComponent
 
-# Sottopipeline per notifiche
+# 1. Definisci tutti i componenti necessari
+class DataLoader(PipelineComponent):
+    def run(self, **kwargs):
+        documents = [
+            {"id": 1, "title": "Bug Critical", "content": "Sistema in crash", "priority": "urgent"},
+            {"id": 2, "title": "Feature Request", "content": "Nuova funzionalità", "priority": "normal"},
+            {"id": 3, "title": "Security Issue", "content": "Vulnerabilità trovata", "priority": "urgent"}
+        ]
+        return {"documents": documents}
+
+class Classifier(PipelineComponent):
+    def run(self, documents, **kwargs):
+        # Classifica documenti per urgenza
+        urgent_docs = [d for d in documents if d["priority"] == "urgent"]
+        has_urgent = len(urgent_docs) > 0
+        
+        return {
+            "classified_documents": documents,
+            "urgent_documents": urgent_docs,
+            "has_urgent": has_urgent
+        }
+
+class NotificationSender(PipelineComponent):
+    def run(self, **kwargs):
+        return {
+            "notification_sent": True,
+            "message": "⚠️ Documenti urgenti rilevati! Notifica inviata al team.",
+            "timestamp": "2024-01-01T10:00:00Z"
+        }
+
+class DocumentProcessor(PipelineComponent):
+    def run(self, document, **kwargs):
+        # Processa un singolo documento
+        processed = {
+            **document,
+            "processed": True,
+            "word_count": len(document["content"].split()),
+            "processing_time": "2024-01-01T10:00:00Z"
+        }
+        return processed
+
+class ReportGenerator(PipelineComponent):
+    def run(self, classified_documents, **kwargs):
+        # Genera report finale
+        total = len(classified_documents)
+        urgent_count = sum(1 for d in classified_documents if d.get("priority") == "urgent")
+        normal_count = total - urgent_count
+        
+        report = f"""
+DOCUMENTO ANALYSIS REPORT
+========================
+Totale documenti: {total}
+Documenti urgenti: {urgent_count}
+Documenti normali: {normal_count}
+
+DETTAGLI:
+{chr(10).join(f"- {d['title']}: {d['priority']}" for d in classified_documents)}
+        """
+        
+        return {
+            "final_report": report.strip(),
+            "statistics": {
+                "total": total,
+                "urgent": urgent_count,
+                "normal": normal_count
+            }
+        }
+
+# 2. Crea sottopipeline per notifiche (documenti urgenti)
 notification_pipeline = FunctionalPipeline().run(
-    name="notify",
+    name="send_notification",
     node=NotificationSender()
 )
 
-# Pipeline principale con branching
-pipeline = (
+# 3. Crea sottopipeline per processamento standard (documenti normali)
+standard_processing_pipeline = (
     FunctionalPipeline()
-    .run(name="load", node=DataLoader())
-    .then(name="classify", node=Classifier(), target_key="data")
-    .branch(
-        condition=lambda ctx: ctx.get("classify", {}).get("has_urgent", False),
-        dependencies=[Dependency(node_name="classify")],
-        if_true=notification_pipeline,
-        if_false=standard_processing_pipeline
+    .foreach(
+        name="process_documents",
+        dependencies=[Dependency(node_name="classified_documents", target_key=None)],
+        do=DocumentProcessor()
+    )
+    .then(
+        name="generate_report",
+        node=ReportGenerator(),
+        target_key="classified_documents",
+        dependencies=[Dependency(node_name="classify", target_key="classified_documents")]
     )
 )
 
-# Esegui
+# 4. Pipeline principale con branching condizionale
+pipeline = (
+    FunctionalPipeline()
+    # Carica documenti
+    .run(
+        name="load_data", 
+        node=DataLoader()
+    )
+    # Classifica per urgenza
+    .then(
+        name="classify",
+        node=Classifier(),
+        target_key="documents"  # Passa risultato di "load_data" come parametro "documents"
+    )
+    # Branch condizionale basato su presenza documenti urgenti
+    .branch(
+        condition=lambda ctx: ctx.get("classify", {}).get("has_urgent", False),
+        dependencies=[Dependency(node_name="classify")],
+        if_true=notification_pipeline,      # Se urgenti -> invia notifica
+        if_false=standard_processing_pipeline  # Altrimenti -> processa normalmente
+    )
+)
+
+# 5. Esegui pipeline
 results = pipeline.execute()
+
+# 6. Mostra risultati in base al branch eseguito
+if "send_notification" in results:
+    print("BRANCH URGENTE ESEGUITO:")
+    print(results["send_notification"]["message"])
+else:
+    print("BRANCH STANDARD ESEGUITO:")
+    print(results["generate_report"]["final_report"])
 ```
+
+### Parametri dettagliati
+
+- **target_key**: chiave usata per passare il risultato del nodo precedente. Il valore diventa parametro del nodo successivo
+- **dependencies**: lista di `Dependency` che specifica da quali nodi dipendere e come mappare i dati
+- **Dependency(node_name, target_key)**: mappa risultato di `node_name` al parametro `target_key` del nodo corrente
+- **condition**: funzione lambda che riceve il contesto completo e restituisce True/False per il branching
+- **foreach**: esegue il componente `do` per ogni elemento della collezione specificata dalle dipendenze
+- **execute()**: avvia l'esecuzione e restituisce dizionario con risultati di tutti i nodi eseguiti
 
 ### Diagramma di flusso
 
 ```mermaid
 graph TD
-    A[DataLoader] --> B[Classifier]
-    B --> C{Condizione}
-    C -->|True| D[NotificationPipeline]
-    C -->|False| E[StandardProcessing]
+    A[DataLoader] -->|documents| B[Classifier]
+    B -->|has_urgent| C{Condizione<br/>has_urgent?}
+    C -->|True<br/>urgent docs| D[NotificationPipeline]
+    C -->|False<br/>normal docs| E[StandardProcessing]
     
-    D --> F[SendNotification]
-    E --> G[ProcessGeneral]
-    G --> H[BuildReport]
+    D -->|notification| F[SendNotification]
+    E -->|classified_documents| G[ProcessDocuments<br/>foreach]
+    G -->|processed_docs| H[GenerateReport]
     
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#ffebee
-    style E fill:#f1f8e9
-    style F fill:#ffebee
-    style G fill:#f1f8e9
-    style H fill:#e8f5e8
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style D fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
+    style E fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    style F fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px,color:#000
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px,color:#000
+    style H fill:#dcedc8,stroke:#689f38,stroke-width:2px,color:#000
 ```
 
 ### Script completo

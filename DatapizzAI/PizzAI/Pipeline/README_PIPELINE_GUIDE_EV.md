@@ -58,34 +58,55 @@ from datapizzai.modules.splitters import RecursiveSplitter
 from datapizzai.embedders import ClientEmbedder
 from datapizzai.clients import OpenAIClient
 
-# Configure components
+# 1. Configure client for embeddings
 client = OpenAIClient(api_key="your_key", model="gpt-4o-mini")
+
+# 2. Define pipeline components in execution order
 components = [
-    TextParser(),
-    RecursiveSplitter(chunk_size=200, chunk_overlap=50),
-    ClientEmbedder(client=client, model="text-embedding-3-small")
+    TextParser(),  # Extracts raw text from documents
+    RecursiveSplitter(
+        chunk_size=200,      # Maximum chunk size in characters
+        chunk_overlap=50     # Overlap between consecutive chunks
+    ),
+    ClientEmbedder(
+        client=client,                        # LLM client to generate embeddings
+        model="text-embedding-3-small"      # Specific model for embeddings
+    )
 ]
 
-# Create pipeline
-pipeline = IngestionPipeline(modules=components)
+# 3. Create pipeline without vector store (returns processed chunks)
+pipeline = IngestionPipeline(
+    modules=components,    # List of components to execute
+    vector_store=None,     # None = doesn't save automatically
+    collection_name=None   # Collection name in vector store (not used if vector_store=None)
+)
 
-# Execute processing
-chunks = pipeline.run("document.txt", metadata={"source": "example"})
+# 4. Execute processing with optional metadata
+chunks = pipeline.run(
+    file_path="document.txt",           # Path to document to process
+    metadata={"source": "example"}     # Additional metadata to attach to chunks (OPTIONAL)
+)
+
+# Result is a list of Chunk objects with text, embeddings and metadata
+print(f"Generated {len(chunks)} chunks from document")
 ```
+
+### Detailed parameters
+
+- **chunk_size**: maximum number of characters per chunk. Smaller chunks = higher precision, more chunks
+- **chunk_overlap**: shared characters between consecutive chunks to maintain context
+- **metadata**: optional dictionary attached to all chunks. Useful for tracking source, date, category, etc.
+- **vector_store**: if `None` returns chunks, otherwise saves them automatically to the database
+- **collection_name**: required only if a vector_store is specified
 
 ### Flow diagram
 
 ```mermaid
 graph TD
-    A[Document] --> B[TextParser]
-    B --> C[RecursiveSplitter]
-    C --> D[ClientEmbedder]
-    D --> E[Vector Store]
-    
-    B --> F[Text extraction]
-    C --> G[Chunk division]
-    D --> H[Embeddings generation]
-    E --> I[Storage]
+    A[Document] -->|file path| B[TextParser]
+    B -->|raw text| C[RecursiveSplitter]
+    C -->|text chunks| D[ClientEmbedder]
+    D -->|chunks + embeddings| E[Vector Store]
 ```
 
 ### Complete script

@@ -20,94 +20,76 @@ from datapizzai.clients import OpenAIClient
 # Carica variabili d'ambiente
 load_dotenv()
 
-# Componenti personalizzati per l'esempio
+# Componenti personalizzati - implementazione completa come nel README
 class DataLoader(PipelineComponent):
     """Carica dati di esempio."""
     
     def run(self, **kwargs) -> Dict[str, Any]:
-        sample_data = [
-            {"id": 1, "text": "Questo prodotto è fantastico! Lo consiglio vivamente.", "user": "Alice"},
-            {"id": 2, "text": "Non mi è piaciuto per niente, deludente.", "user": "Bob"},
-            {"id": 3, "text": "Prodotto nella media, niente di eccezionale.", "user": "Charlie"},
-            {"id": 4, "text": "Servizio clienti eccellente, molto soddisfatto!", "user": "Diana"},
-            {"id": 5, "text": "Pessima esperienza, non acquisterò mai più.", "user": "Eve"}
-        ]
-        return {"reviews": sample_data}
+        reviews = ["Prodotto eccellente!", "Non mi piace", "Nella media"]
+        return {"reviews": reviews}
 
 class SentimentAnalyzer(PipelineComponent):
-    """Analizza il sentiment dei testi usando LLM."""
+    """Analizza il sentiment dei testi."""
     
     def __init__(self, client: OpenAIClient):
         self.client = client
     
     def run(self, reviews: list, **kwargs) -> Dict[str, Any]:
-        analyzed_reviews = []
-        
+        analyzed = []
         for review in reviews:
-            # Prompt per analisi sentiment
-            messages = [{
-                "role": "user", 
-                "content": f"Analizza il sentiment di questo testo e rispondi solo con 'positivo', 'negativo' o 'neutro': '{review['text']}'"
-            }]
-            
-            response = self.client.complete(messages=messages, max_tokens=10)
-            sentiment = response.choices[0].message.content.strip().lower()
-            
-            analyzed_reviews.append({
-                **review,
-                "sentiment": sentiment
-            })
+            # Simulazione analisi sentiment semplificata per l'esempio
+            if "eccellente" in review:
+                sentiment = "positive"
+            elif "non" in review.lower():
+                sentiment = "negative"
+            else:
+                sentiment = "neutral"
+                
+            analyzed.append({"text": review, "sentiment": sentiment})
         
-        return {"analyzed_reviews": analyzed_reviews}
+        return {"sentiment_results": analyzed}
 
 class StatisticsCalculator(PipelineComponent):
     """Calcola statistiche sui sentiment."""
     
-    def run(self, analyzed_reviews: list, **kwargs) -> Dict[str, Any]:
-        sentiments = [review["sentiment"] for review in analyzed_reviews]
-        
+    def run(self, sentiment_results: list, **kwargs) -> Dict[str, Any]:
+        sentiments = [r["sentiment"] for r in sentiment_results]
         stats = {
-            "total_reviews": len(sentiments),
-            "positive_count": sentiments.count("positivo"),
-            "negative_count": sentiments.count("negativo"),
-            "neutral_count": sentiments.count("neutro")
+            "positive": sentiments.count("positive"),
+            "negative": sentiments.count("negative"), 
+            "neutral": sentiments.count("neutral")
         }
-        
-        # Calcola percentuali
-        total = stats["total_reviews"]
-        stats["positive_percentage"] = (stats["positive_count"] / total) * 100
-        stats["negative_percentage"] = (stats["negative_count"] / total) * 100
-        stats["neutral_percentage"] = (stats["neutral_count"] / total) * 100
-        
         return {"statistics": stats}
 
-class ReportGenerator(PipelineComponent):
-    """Genera report finale."""
+class MetadataExtractor(PipelineComponent):
+    """Estrae metadata dai reviews."""
     
-    def run(self, analyzed_reviews: list, statistics: dict, **kwargs) -> Dict[str, Any]:
-        report = []
-        report.append("=== SENTIMENT ANALYSIS REPORT ===\n")
-        
-        # Statistiche generali
-        stats = statistics
-        report.append(f"Totale recensioni: {stats['total_reviews']}")
-        report.append(f"Positive: {stats['positive_count']} ({stats['positive_percentage']:.1f}%)")
-        report.append(f"Negative: {stats['negative_count']} ({stats['negative_percentage']:.1f}%)")
-        report.append(f"Neutrali: {stats['neutral_count']} ({stats['neutral_percentage']:.1f}%)")
-        report.append("")
-        
-        # Dettaglio recensioni
-        report.append("=== DETTAGLIO RECENSIONI ===\n")
-        for review in analyzed_reviews:
-            sentiment_emoji = {"positivo": "😊", "negativo": "😠", "neutro": "😐"}.get(review["sentiment"], "❓")
-            report.append(f"👤 {review['user']} {sentiment_emoji}")
-            report.append(f"💬 {review['text']}")
-            report.append(f"📊 Sentiment: {review['sentiment'].upper()}")
-            report.append("-" * 50)
-        
-        final_report = "\n".join(report)
-        
-        return {"report": final_report}
+    def run(self, reviews: list, **kwargs) -> Dict[str, Any]:
+        metadata = {
+            "total_reviews": len(reviews),
+            "avg_length": sum(len(r) for r in reviews) / len(reviews),
+            "timestamp": "2024-01-01"
+        }
+        return {"metadata": metadata}
+
+class ReportGenerator(PipelineComponent):
+    """Genera report finale combinando tutti i dati."""
+    
+    def run(self, sentiment_results: list, statistics: dict, metadata: dict, **kwargs) -> Dict[str, Any]:
+        report = f"""
+REPORT ANALISI - {metadata['timestamp']}
+Recensioni totali: {metadata['total_reviews']}
+Lunghezza media: {metadata['avg_length']:.1f}
+
+SENTIMENT:
+- Positive: {statistics['positive']}
+- Negative: {statistics['negative']}
+- Neutral: {statistics['neutral']}
+
+DETTAGLI:
+{chr(10).join(f"- {r['text']}: {r['sentiment']}" for r in sentiment_results)}
+        """
+        return {"final_report": report.strip()}
 
 def main():
     # Configura client OpenAI
@@ -119,43 +101,58 @@ def main():
     # Crea pipeline DAG
     pipeline = DagPipeline()
     
-    # Aggiungi nodi
+    # Aggiungi tutti i nodi (coerente con il diagramma)
     pipeline.add_module("data_loader", DataLoader())
     pipeline.add_module("sentiment_analyzer", SentimentAnalyzer(client=client))
     pipeline.add_module("statistics_calculator", StatisticsCalculator())
+    pipeline.add_module("metadata_extractor", MetadataExtractor())
     pipeline.add_module("report_generator", ReportGenerator())
     
-    # Definisci connessioni (grafo delle dipendenze)
-    # data_loader -> sentiment_analyzer
+    # Definisci connessioni (come nel diagramma README)
+    # DataLoader -> SentimentAnalyzer
     pipeline.connect(
         source_node="data_loader",
-        target_node="sentiment_analyzer", 
+        target_node="sentiment_analyzer",
         source_key="reviews",
         target_key="reviews"
     )
     
-    # sentiment_analyzer -> statistics_calculator
+    # SentimentAnalyzer -> StatisticsCalculator  
     pipeline.connect(
         source_node="sentiment_analyzer",
         target_node="statistics_calculator",
-        source_key="analyzed_reviews", 
-        target_key="analyzed_reviews"
+        source_key="sentiment_results",
+        target_key="sentiment_results"
     )
     
-    # sentiment_analyzer -> report_generator (per le recensioni)
+    # DataLoader -> MetadataExtractor
+    pipeline.connect(
+        source_node="data_loader",
+        target_node="metadata_extractor",
+        source_key="reviews",
+        target_key="reviews"
+    )
+    
+    # Tutti convergono in ReportGenerator
     pipeline.connect(
         source_node="sentiment_analyzer",
         target_node="report_generator",
-        source_key="analyzed_reviews",
-        target_key="analyzed_reviews"
+        source_key="sentiment_results",
+        target_key="sentiment_results"
     )
     
-    # statistics_calculator -> report_generator (per le statistiche)
     pipeline.connect(
         source_node="statistics_calculator",
         target_node="report_generator", 
         source_key="statistics",
         target_key="statistics"
+    )
+    
+    pipeline.connect(
+        source_node="metadata_extractor",
+        target_node="report_generator",
+        source_key="metadata",
+        target_key="metadata"
     )
     
     print("🔄 Eseguendo DagPipeline per analisi sentiment...")
@@ -166,14 +163,14 @@ def main():
     # Mostra risultati
     print("✅ Pipeline completata!")
     print("\n" + "="*60)
-    print(results["report_generator"]["report"])
+    print(results["report_generator"]["final_report"])
     
-    # Mostra struttura del grafo
+    # Mostra struttura del grafo (coerente con diagramma README)
     print("\n" + "="*60)
     print("🏗️  STRUTTURA DEL GRAFO:")
-    print("data_loader → sentiment_analyzer → statistics_calculator")
-    print("                    ↓")
-    print("                report_generator")
+    print("data_loader ──┬──> sentiment_analyzer ──> statistics_calculator ──┐")
+    print("              │                      ↓                          │")
+    print("              └──> metadata_extractor ──> report_generator <──────┘")
 
 if __name__ == "__main__":
     main()
