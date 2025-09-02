@@ -16,18 +16,18 @@ ASCII (fallback)
 
 ```
 ┌──────────────┐     ┌───────────────────────┐     ┌──────────────┐     ┌──────────────────────┐
-│ RecordAudio  │ ─→  │ GeminiAudioAnalyzer   │ ─→  │ ExtractKey    │ ─→  │ Foreach: Normalize    │
-│ (mic → .wav) │     │ (ASR+bullets+sentim.) │     │ (bullets[])   │     │ BulletPointNormalizer │
+│ RecordAudio  │ ─→  │ GeminiAudioAnalyzer   │ ─→  │ ExtractKey   │ ─→  │ Foreach: Normalize   │
+│ (mic → .wav) │     │ (ASR+bullets+sentim.) │     │ (bullets[])  │     │ BulletPointNormalizer│
 └──────────────┘     └───────────────────────┘     └──────────────┘     └─────────┬────────────┘
-                                                                               ┌───▼───────────────┐
-                                                                               │ Branch sentiment  │
-                                                                               │ angry ?           │
-                                                                               └───┬───────────┬───┘
-                                                                                   │           │
-                                                                                   │           │
-                                                                       ┌───────────▼──┐   ┌────▼───────────┐
-                                                                       │ SendNotification│ │ BuildReport MD │
-                                                                       └────────────────┘ └────────────────┘
+                                                                              ┌───▼───────────────┐
+                                                                              │ Branch sentiment  │
+                                                                              │ angry ?           │
+                                                                              └───┬───────────┬───┘
+                                                                                  │           │
+                                                                                  │           │
+                                                                      ┌───────────▼──┐   ┌────▼───────────┐
+                                                                      │ SendNotification│ │ BuildReport MD │
+                                                                      └────────────────┘ └────────────────┘
 ```
 
 Mermaid (opzionale)
