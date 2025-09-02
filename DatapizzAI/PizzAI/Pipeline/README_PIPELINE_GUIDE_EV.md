@@ -154,11 +154,11 @@ from datapizzai.pipeline import DagPipeline
 from datapizzai.core.models import PipelineComponent
 
 class DataLoader(PipelineComponent):
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         return {"data": ["text1", "text2", "text3"]}
 
 class SentimentAnalyzer(PipelineComponent):
-    def run(self, data, **kwargs):
+    def _run(self, data, **kwargs):
         # Sentiment analysis logic
         return {"results": [{"text": t, "sentiment": "positive"} for t in data]}
 
@@ -367,7 +367,7 @@ pipeline:
 ```python
 # Always handle exceptions in components
 class SafeProcessor(PipelineComponent):
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         try:
             return self.process_data(kwargs)
         except Exception as e:

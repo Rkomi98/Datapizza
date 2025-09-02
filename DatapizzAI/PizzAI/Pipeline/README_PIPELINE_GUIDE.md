@@ -155,17 +155,17 @@ from datapizzai.core.models import PipelineComponent
 
 # 1. Definisci tutti i componenti del grafo
 class DataLoader(PipelineComponent):
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         return {"reviews": ["Prodotto eccellente!", "Non mi piace", "Nella media"]}
 
 class SentimentAnalyzer(PipelineComponent):
-    def run(self, reviews, **kwargs):
+    def _run(self, reviews, **kwargs):
         # Simula analisi sentiment
         analyzed = [{"text": r, "sentiment": "positive" if "eccellente" in r else "negative" if "non" in r.lower() else "neutral"} for r in reviews]
         return {"sentiment_results": analyzed}
 
 class StatisticsCalculator(PipelineComponent):
-    def run(self, sentiment_results, **kwargs):
+    def _run(self, sentiment_results, **kwargs):
         sentiments = [r["sentiment"] for r in sentiment_results]
         stats = {
             "positive": sentiments.count("positive"),
@@ -175,7 +175,7 @@ class StatisticsCalculator(PipelineComponent):
         return {"statistics": stats}
 
 class MetadataExtractor(PipelineComponent):
-    def run(self, reviews, **kwargs):
+    def _run(self, reviews, **kwargs):
         metadata = {
             "total_reviews": len(reviews),
             "avg_length": sum(len(r) for r in reviews) / len(reviews),
@@ -184,7 +184,7 @@ class MetadataExtractor(PipelineComponent):
         return {"metadata": metadata}
 
 class ReportGenerator(PipelineComponent):
-    def run(self, sentiment_results, statistics, metadata, **kwargs):
+    def _run(self, sentiment_results, statistics, metadata, **kwargs):
         report = f"""
 REPORT ANALISI - {metadata['timestamp']}
 Recensioni totali: {metadata['total_reviews']}
@@ -312,7 +312,7 @@ from datapizzai.core.models import PipelineComponent
 
 # 1. Definisci tutti i componenti necessari
 class DataLoader(PipelineComponent):
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         documents = [
             {"id": 1, "title": "Bug Critical", "content": "Sistema in crash", "priority": "urgent"},
             {"id": 2, "title": "Feature Request", "content": "Nuova funzionalità", "priority": "normal"},
@@ -321,7 +321,7 @@ class DataLoader(PipelineComponent):
         return {"documents": documents}
 
 class Classifier(PipelineComponent):
-    def run(self, documents, **kwargs):
+    def _run(self, documents, **kwargs):
         # Classifica documenti per urgenza
         urgent_docs = [d for d in documents if d["priority"] == "urgent"]
         has_urgent = len(urgent_docs) > 0
@@ -333,7 +333,7 @@ class Classifier(PipelineComponent):
         }
 
 class NotificationSender(PipelineComponent):
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         return {
             "notification_sent": True,
             "message": "⚠️ Documenti urgenti rilevati! Notifica inviata al team.",
@@ -341,7 +341,7 @@ class NotificationSender(PipelineComponent):
         }
 
 class DocumentProcessor(PipelineComponent):
-    def run(self, document, **kwargs):
+    def _run(self, document, **kwargs):
         # Processa un singolo documento
         processed = {
             **document,
@@ -352,7 +352,7 @@ class DocumentProcessor(PipelineComponent):
         return processed
 
 class ReportGenerator(PipelineComponent):
-    def run(self, classified_documents, **kwargs):
+    def _run(self, classified_documents, **kwargs):
         # Genera report finale
         total = len(classified_documents)
         urgent_count = sum(1 for d in classified_documents if d.get("priority") == "urgent")
@@ -560,7 +560,7 @@ pipeline:
 ```python
 # Sempre gestire eccezioni nei componenti
 class SafeProcessor(PipelineComponent):
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         try:
             return self.process_data(kwargs)
         except Exception as e:
