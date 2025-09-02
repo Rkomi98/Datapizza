@@ -6,18 +6,35 @@ This guide provides practical examples for using the three pipeline types availa
 - **DagPipeline**: for creating dependency graphs between components  
 - **FunctionalPipeline**: for functional pipelines with branching, loops, and dependencies
 
-## Installation
+## Table of Contents
 
-```bash
-pip install datapizzai python-dotenv pyyaml
-```
-
-Configure the `.env` file with the necessary API keys:
-
-```env
-OPENAI_API_KEY=your_openai_key
-GOOGLE_API_KEY=your_google_key
-```
+- [1. Ingestion pipeline](#1-ingestion-pipeline)
+  - [Description](#description)
+  - [Main components](#main-components)
+  - [Practical example](#practical-example)
+  - [Flow diagram](#flow-diagram)
+  - [Complete script](#complete-script)
+- [2. Dag pipeline](#2-dag-pipeline)
+  - [Description](#description-1)
+  - [Main features](#main-features)
+  - [Practical example](#practical-example-1)
+  - [Flow diagram](#flow-diagram-1)
+  - [Complete script](#complete-script-1)
+- [3. Functional pipeline](#3-functional-pipeline)
+  - [Description](#description-2)
+  - [Advanced features](#advanced-features)
+  - [Practical example](#practical-example-2)
+  - [Flow diagram](#flow-diagram-2)
+  - [Complete script](#complete-script-2)
+- [YAML configuration](#yaml-configuration)
+  - [Example for DagPipeline](#example-for-dagpipeline)
+  - [Example for FunctionalPipeline](#example-for-functionalpipeline)
+- [Pipeline comparison](#pipeline-comparison)
+- [Best practices](#best-practices)
+  - [Pipeline selection](#pipeline-selection)
+  - [Error handling](#error-handling)
+  - [Performance](#performance)
+- [Complete examples](#complete-examples)
 
 ## 1. Ingestion pipeline
 

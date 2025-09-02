@@ -6,18 +6,35 @@ Questa guida fornisce esempi pratici per utilizzare le tre tipologie di pipeline
 - **DagPipeline**: per creare grafi di dipendenze tra componenti  
 - **FunctionalPipeline**: per pipeline funzionali con branching, cicli e dipendenze
 
-## Installazione
+## Indice
 
-```bash
-pip install datapizzai python-dotenv pyyaml
-```
-
-Configura il file `.env` con le chiavi API necessarie:
-
-```env
-OPENAI_API_KEY=your_openai_key
-GOOGLE_API_KEY=your_google_key
-```
+- [1. Ingestion pipeline](#1-ingestion-pipeline)
+  - [Descrizione](#descrizione)
+  - [Componenti principali](#componenti-principali)
+  - [Esempio pratico](#esempio-pratico)
+  - [Diagramma di flusso](#diagramma-di-flusso)
+  - [Script completo](#script-completo)
+- [2. Dag pipeline](#2-dag-pipeline)
+  - [Descrizione](#descrizione-1)
+  - [Caratteristiche principali](#caratteristiche-principali)
+  - [Esempio pratico](#esempio-pratico-1)
+  - [Diagramma di flusso](#diagramma-di-flusso-1)
+  - [Script completo](#script-completo-1)
+- [3. Functional pipeline](#3-functional-pipeline)
+  - [Descrizione](#descrizione-2)
+  - [Caratteristiche avanzate](#caratteristiche-avanzate)
+  - [Esempio pratico](#esempio-pratico-2)
+  - [Diagramma di flusso](#diagramma-di-flusso-2)
+  - [Script completo](#script-completo-2)
+- [Configurazione YAML](#configurazione-yaml)
+  - [Esempio per DagPipeline](#esempio-per-dagpipeline)
+  - [Esempio per FunctionalPipeline](#esempio-per-functionalpipeline)
+- [Confronto delle pipeline](#confronto-delle-pipeline)
+- [Best practices](#best-practices)
+  - [Scelta della pipeline](#scelta-della-pipeline)
+  - [Gestione degli errori](#gestione-degli-errori)
+  - [Performance](#performance)
+- [Esempi completi](#esempi-completi)
 
 ## 1. Ingestion pipeline
 
