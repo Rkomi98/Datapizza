@@ -156,11 +156,15 @@ from datapizzai.core.models import PipelineComponent
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
         return {"data": ["text1", "text2", "text3"]}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 
 class SentimentAnalyzer(PipelineComponent):
     def _run(self, data, **kwargs):
         # Sentiment analysis logic
         return {"results": [{"text": t, "sentiment": "positive"} for t in data]}
+    async def _a_run(self, data, **kwargs):
+        return self._run(data=data, **kwargs)
 
 # Create DAG pipeline
 pipeline = DagPipeline()
@@ -372,6 +376,8 @@ class SafeProcessor(PipelineComponent):
             return self.process_data(kwargs)
         except Exception as e:
             return {"error": str(e), "success": False}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 ```
 
 ### Performance

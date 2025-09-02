@@ -157,12 +157,16 @@ from datapizzai.core.models import PipelineComponent
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
         return {"reviews": ["Prodotto eccellente!", "Non mi piace", "Nella media"]}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 
 class SentimentAnalyzer(PipelineComponent):
     def _run(self, reviews, **kwargs):
         # Simula analisi sentiment
         analyzed = [{"text": r, "sentiment": "positive" if "eccellente" in r else "negative" if "non" in r.lower() else "neutral"} for r in reviews]
         return {"sentiment_results": analyzed}
+    async def _a_run(self, reviews, **kwargs):
+        return self._run(reviews=reviews, **kwargs)
 
 class StatisticsCalculator(PipelineComponent):
     def _run(self, sentiment_results, **kwargs):
@@ -173,6 +177,8 @@ class StatisticsCalculator(PipelineComponent):
             "neutral": sentiments.count("neutral")
         }
         return {"statistics": stats}
+    async def _a_run(self, sentiment_results, **kwargs):
+        return self._run(sentiment_results=sentiment_results, **kwargs)
 
 class MetadataExtractor(PipelineComponent):
     def _run(self, reviews, **kwargs):
@@ -182,6 +188,8 @@ class MetadataExtractor(PipelineComponent):
             "timestamp": "2024-01-01"
         }
         return {"metadata": metadata}
+    async def _a_run(self, reviews, **kwargs):
+        return self._run(reviews=reviews, **kwargs)
 
 class ReportGenerator(PipelineComponent):
     def _run(self, sentiment_results, statistics, metadata, **kwargs):
@@ -199,6 +207,8 @@ DETTAGLI:
 {chr(10).join(f"- {r['text']}: {r['sentiment']}" for r in sentiment_results)}
         """
         return {"final_report": report.strip()}
+    async def _a_run(self, sentiment_results, statistics, metadata, **kwargs):
+        return self._run(sentiment_results=sentiment_results, statistics=statistics, metadata=metadata, **kwargs)
 
 # 2. Crea pipeline DAG
 pipeline = DagPipeline()
@@ -319,6 +329,8 @@ class DataLoader(PipelineComponent):
             {"id": 3, "title": "Security Issue", "content": "Vulnerabilità trovata", "priority": "urgent"}
         ]
         return {"documents": documents}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 
 class Classifier(PipelineComponent):
     def _run(self, documents, **kwargs):
@@ -331,6 +343,8 @@ class Classifier(PipelineComponent):
             "urgent_documents": urgent_docs,
             "has_urgent": has_urgent
         }
+    async def _a_run(self, documents, **kwargs):
+        return self._run(documents=documents, **kwargs)
 
 class NotificationSender(PipelineComponent):
     def _run(self, **kwargs):
@@ -339,6 +353,8 @@ class NotificationSender(PipelineComponent):
             "message": "⚠️ Documenti urgenti rilevati! Notifica inviata al team.",
             "timestamp": "2024-01-01T10:00:00Z"
         }
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 
 class DocumentProcessor(PipelineComponent):
     def _run(self, document, **kwargs):
@@ -350,6 +366,8 @@ class DocumentProcessor(PipelineComponent):
             "processing_time": "2024-01-01T10:00:00Z"
         }
         return processed
+    async def _a_run(self, document, **kwargs):
+        return self._run(document=document, **kwargs)
 
 class ReportGenerator(PipelineComponent):
     def _run(self, classified_documents, **kwargs):
@@ -377,6 +395,8 @@ DETTAGLI:
                 "normal": normal_count
             }
         }
+    async def _a_run(self, classified_documents, **kwargs):
+        return self._run(classified_documents=classified_documents, **kwargs)
 
 # 2. Crea sottopipeline per notifiche (documenti urgenti)
 notification_pipeline = FunctionalPipeline().run(
@@ -565,6 +585,8 @@ class SafeProcessor(PipelineComponent):
             return self.process_data(kwargs)
         except Exception as e:
             return {"error": str(e), "success": False}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 ```
 
 ### Performance
