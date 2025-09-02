@@ -288,64 +288,89 @@ graph TD
 
 See `examples/functional_example.py` for a complete example with branching and foreach.
 
+### Complete YAML example
+
+Loading FunctionalPipeline from external YAML configuration:
+
+```python
+import os
+import sys
+from pathlib import Path
+from datapizzai.pipeline import FunctionalPipeline
+
+# Load pipeline from YAML file
+pipeline = FunctionalPipeline.from_yaml("functional_pipeline_config.yaml")
+
+# Execute pipeline
+results = pipeline.execute()
+
+# Show results
+if "build_report" in results:
+    print(results["build_report"]["final_report"])
+
+print("Pipeline executed via YAML configuration!")
+```
+
+**Execution**:
+```bash
+cd examples
+python3 yaml_pipeline_example.py
+```
+
+The `functional_pipeline_config.yaml` file defines a complete pipeline with 4 external modules (`DocumentLoader`, `TextProcessor`, `DataValidator`, `ReportBuilder`) and their dependencies.
+
+This example demonstrates:
+- Loading external modules from custom packages (`mymodules/`)
+- Parameter configuration for each module via YAML
+- Dependency definition between nodes with `target_key`
+- Multi-step pipeline completely configured externally
+- Python script that loads and executes the configuration
+
+#### YAML flow diagram
+
+```mermaid
+graph TD
+    A[📄 YAML Config] --> B[FunctionalPipeline.from_yaml]
+    B --> C[Load Modules]
+    C --> D[DocumentLoader]
+    C --> E[TextProcessor] 
+    C --> F[DataValidator]
+    C --> G[ReportBuilder]
+    
+    H[Pipeline Execution] --> I[load_data]
+    I -->|documents| J[process]
+    J -->|processed_documents| K[validate]
+    K -->|validation_results| L[build_report]
+    
+    D --> I
+    E --> J
+    F --> K
+    G --> L
+    
+    L --> M[📊 Final Report]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+```
+
 ## YAML configuration
 
-All pipelines support YAML configuration for greater flexibility and reusability.
+Pipelines support configuration via external YAML files for greater flexibility. See example scripts for loading YAML configurations:
 
-### Example for DagPipeline
-
-```yaml
-dag_pipeline:
-  clients:
-    openai_client:
-      provider: "openai"
-      api_key: "${OPENAI_API_KEY}"
-      model: "gpt-4o-mini"
-  
-  modules:
-    - name: "data_loader"
-      module: "mymodules.loaders"
-      type: "CSVLoader"
-      params:
-        file_path: "data.csv"
-    
-    - name: "analyzer"
-      module: "mymodules.analysis"
-      type: "TextAnalyzer"
-      params:
-        client: "openai_client"
-  
-  connections:
-    - from: "data_loader"
-      to: "analyzer"
-      source_key: "data"
-      target_key: "texts"
+```python
+# For FunctionalPipeline
+pipeline = FunctionalPipeline.from_yaml("config_file.yaml")
+results = pipeline.execute()
 ```
 
-### Example for FunctionalPipeline
+YAML configuration files are available in the `examples/` directory along with scripts that use them. This approach allows you to:
 
-```yaml
-modules:
-  - name: "loader"
-    module: "mymodules.loaders"
-    type: "DocumentLoader"
-  
-  - name: "processor"
-    module: "mymodules.processors"  
-    type: "TextProcessor"
-
-pipeline:
-  - type: "run"
-    name: "load_data"
-    node: "loader"
-  
-  - type: "then"
-    name: "process"
-    node: "processor"
-    target_key: "documents"
-    dependencies:
-      - node_name: "load_data"
-```
+- Separate business logic from configuration
+- Modify pipelines without changing code
+- Reuse configurations in different contexts
+- Manage parameters and dependencies externally
 
 ## Pipeline comparison
 
@@ -390,8 +415,34 @@ class SafeProcessor(PipelineComponent):
 
 Complete and functional example scripts are available in:
 
-- `examples/ingestion_example.py`
-- `examples/dag_example.py`  
-- `examples/functional_example.py`
+- `examples/ingestion_example.py` - IngestionPipeline with FileReader and TextSplitter
+- `examples/dag_example.py` - DagPipeline with complex 5-node graph
+- `examples/functional_example.py` - FunctionalPipeline with conditional branching
+- `examples/yaml_pipeline_example.py` - FunctionalPipeline loaded from YAML with external modules
 
-Each script includes sample data and can be run directly to test functionality.
+### Support files
+
+- `examples/functional_pipeline_config.yaml` - External YAML configuration for `yaml_pipeline_example.py`
+- `examples/mymodules/` - Custom modules loaded via YAML:
+  - `loaders.py` - DocumentLoader and CSVLoader
+  - `processors.py` - TextProcessor, DataValidator, ReportBuilder
+
+Each script includes sample data and can be run directly. The YAML example demonstrates how to separate configuration from Python code.
+
+### Quick test of all examples
+
+```bash
+cd Pipeline/examples
+
+# Test IngestionPipeline (requires API key)
+python3 ingestion_example.py
+
+# Test DagPipeline (requires API key for SentimentAnalyzer)
+python3 dag_example.py
+
+# Test FunctionalPipeline (requires API key)
+python3 functional_example.py
+
+# Test YAML Pipeline (self-contained, no API key required)
+python3 yaml_pipeline_example.py
+```

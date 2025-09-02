@@ -26,9 +26,8 @@ Questa guida fornisce esempi pratici per utilizzare le tre tipologie di pipeline
   - [Esempio pratico](#esempio-pratico-2)
   - [Diagramma di flusso](#diagramma-di-flusso-2)
   - [Script completo](#script-completo-2)
+  - [Esempio YAML completo](#esempio-yaml-completo)
 - [Configurazione YAML](#configurazione-yaml)
-  - [Esempio per DagPipeline](#esempio-per-dagpipeline)
-  - [Esempio per FunctionalPipeline](#esempio-per-functionalpipeline)
 - [Confronto delle pipeline](#confronto-delle-pipeline)
 - [Best practices](#best-practices)
   - [Scelta della pipeline](#scelta-della-pipeline)
@@ -503,64 +502,89 @@ graph TD
 
 Vedi `examples/functional_example.py` per un esempio completo con branching e foreach.
 
+### Esempio YAML completo
+
+Caricamento di FunctionalPipeline da configurazione YAML esterna:
+
+```python
+import os
+import sys
+from pathlib import Path
+from datapizzai.pipeline import FunctionalPipeline
+
+# Carica pipeline da file YAML
+pipeline = FunctionalPipeline.from_yaml("functional_pipeline_config.yaml")
+
+# Esegui pipeline
+results = pipeline.execute()
+
+# Mostra risultati
+if "build_report" in results:
+    print(results["build_report"]["final_report"])
+
+print("Pipeline eseguita tramite YAML configuration!")
+```
+
+**Esecuzione**:
+```bash
+cd examples
+python3 yaml_pipeline_example.py
+```
+
+Il file `functional_pipeline_config.yaml` definisce una pipeline completa con 4 moduli esterni (`DocumentLoader`, `TextProcessor`, `DataValidator`, `ReportBuilder`) e le loro dipendenze.
+
+Questo esempio dimostra:
+- Caricamento moduli esterni da package personalizzati (`mymodules/`)
+- Configurazione parametri per ogni modulo via YAML
+- Definizione dipendenze tra nodi con `target_key`
+- Pipeline multi-step completamente configurata esternamente
+- Script Python che carica e esegue la configurazione
+
+#### Diagramma flusso YAML
+
+```mermaid
+graph TD
+    A[📄 YAML Config] --> B[FunctionalPipeline.from_yaml]
+    B --> C[Load Modules]
+    C --> D[DocumentLoader]
+    C --> E[TextProcessor] 
+    C --> F[DataValidator]
+    C --> G[ReportBuilder]
+    
+    H[Pipeline Execution] --> I[load_data]
+    I -->|documents| J[process]
+    J -->|processed_documents| K[validate]
+    K -->|validation_results| L[build_report]
+    
+    D --> I
+    E --> J
+    F --> K
+    G --> L
+    
+    L --> M[📊 Final Report]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+```
+
 ## Configurazione YAML
 
-Tutte le pipeline supportano la configurazione tramite file YAML per maggiore flessibilità e riutilizzo.
+Le pipeline supportano configurazione tramite file YAML esterni per maggiore flessibilità. Vedi gli script di esempio per caricare configurazioni YAML:
 
-### Esempio per DagPipeline
-
-```yaml
-dag_pipeline:
-  clients:
-    openai_client:
-      provider: "openai"
-      api_key: "${OPENAI_API_KEY}"
-      model: "gpt-4o-mini"
-  
-  modules:
-    - name: "data_loader"
-      module: "mymodules.loaders"
-      type: "CSVLoader"
-      params:
-        file_path: "data.csv"
-    
-    - name: "analyzer"
-      module: "mymodules.analysis"
-      type: "TextAnalyzer"
-      params:
-        client: "openai_client"
-  
-  connections:
-    - from: "data_loader"
-      to: "analyzer"
-      source_key: "data"
-      target_key: "texts"
+```python
+# Per FunctionalPipeline
+pipeline = FunctionalPipeline.from_yaml("config_file.yaml")
+results = pipeline.execute()
 ```
 
-### Esempio per FunctionalPipeline
+I file YAML di configurazione sono disponibili nella directory `examples/` insieme agli script che li utilizzano. Questo approccio permette di:
 
-```yaml
-modules:
-  - name: "loader"
-    module: "mymodules.loaders"
-    type: "DocumentLoader"
-  
-  - name: "processor"
-    module: "mymodules.processors"  
-    type: "TextProcessor"
-
-pipeline:
-  - type: "run"
-    name: "load_data"
-    node: "loader"
-  
-  - type: "then"
-    name: "process"
-    node: "processor"
-    target_key: "documents"
-    dependencies:
-      - node_name: "load_data"
-```
+- Separare logica di business dalla configurazione
+- Modificare pipeline senza cambiare codice
+- Riutilizzare configurazioni in contesti diversi  
+- Gestire parametri e dipendenze esternamente
 
 ## Confronto delle pipeline
 
@@ -605,8 +629,34 @@ class SafeProcessor(PipelineComponent):
 
 Gli script di esempio completi e funzionanti sono disponibili in:
 
-- `examples/ingestion_example.py`
-- `examples/dag_example.py`  
-- `examples/functional_example.py`
+- `examples/ingestion_example.py` - IngestionPipeline con FileReader e TextSplitter
+- `examples/dag_example.py` - DagPipeline con grafo complesso a 5 nodi
+- `examples/functional_example.py` - FunctionalPipeline con branching condizionale
+- `examples/yaml_pipeline_example.py` - FunctionalPipeline caricata da YAML con moduli esterni
 
-Ogni script include dati di esempio e può essere eseguito direttamente per testare le funzionalità.
+### File di supporto
+
+- `examples/functional_pipeline_config.yaml` - Configurazione YAML esterna per `yaml_pipeline_example.py`
+- `examples/mymodules/` - Moduli personalizzati caricati via YAML:
+  - `loaders.py` - DocumentLoader e CSVLoader
+  - `processors.py` - TextProcessor, DataValidator, ReportBuilder
+
+Ogni script include dati di esempio e può essere eseguito direttamente. L'esempio YAML dimostra come separare configurazione dal codice Python.
+
+### Test rapido di tutti gli esempi
+
+```bash
+cd Pipeline/examples
+
+# Test IngestionPipeline (richiede API key)
+python3 ingestion_example.py
+
+# Test DagPipeline (richiede API key per SentimentAnalyzer)
+python3 dag_example.py
+
+# Test FunctionalPipeline (richiede API key)
+python3 functional_example.py
+
+# Test YAML Pipeline (autocontenuto, nessuna API key richiesta)
+python3 yaml_pipeline_example.py
+```

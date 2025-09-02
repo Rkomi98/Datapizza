@@ -1,0 +1,52 @@
+# Configurazione YAML per FunctionalPipeline
+# Esempio completo di pipeline di processamento documenti
+
+modules:
+  - name: "loader"
+    module: "mymodules.loaders"
+    type: "DocumentLoader"
+    params:
+      source: "yaml_config"
+
+  - name: "processor"
+    module: "mymodules.processors"
+    type: "TextProcessor"
+    params:
+      min_length: 5
+      add_metadata: true
+
+  - name: "validator"
+    module: "mymodules.processors"
+    type: "DataValidator"
+    params:
+      required_fields: ["id", "title", "content"]
+
+  - name: "reporter"
+    module: "mymodules.processors"
+    type: "ReportBuilder"
+
+pipeline:
+  - type: "run"
+    name: "load_data"
+    node: "loader"
+
+  - type: "run"
+    name: "process"
+    node: "processor"
+    dependencies:
+      - node_name: "load_data"
+        target_key: "documents"
+
+  - type: "run"
+    name: "validate"
+    node: "validator"
+    dependencies:
+      - node_name: "process"
+        target_key: "processed_documents"
+
+  - type: "run"
+    name: "build_report"
+    node: "reporter"
+    dependencies:
+      - node_name: "validate"
+        target_key: "validation_results"
