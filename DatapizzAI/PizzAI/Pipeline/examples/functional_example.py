@@ -42,24 +42,40 @@ class DataLoader(PipelineComponent):
 class Classifier(PipelineComponent):
     """Classifica documenti per urgenza."""
     
-    def _run(self, documents: List[Dict], **kwargs) -> Dict[str, Any]:
+    def _run(self, documents, **kwargs) -> Dict[str, Any]:
+        # Gestisce sia lista diretta che dizionario dal nodo precedente
+        if isinstance(documents, dict) and "documents" in documents:
+            doc_list = documents["documents"]
+        elif isinstance(documents, list):
+            doc_list = documents
+        else:
+            doc_list = documents
+        
         # Classifica documenti per urgenza
-        urgent_docs = [d for d in documents if d["priority"] == "urgent"]
+        urgent_docs = [d for d in doc_list if d["priority"] == "urgent"]
         has_urgent = len(urgent_docs) > 0
         
         return {
-            "classified_documents": documents,
+            "classified_documents": doc_list,
             "urgent_documents": urgent_docs,
             "has_urgent": has_urgent
         }
     
-    async def _a_run(self, documents: List[Dict], **kwargs) -> Dict[str, Any]:
+    async def _a_run(self, documents, **kwargs) -> Dict[str, Any]:
+        # Gestisce sia lista diretta che dizionario dal nodo precedente
+        if isinstance(documents, dict) and "documents" in documents:
+            doc_list = documents["documents"]
+        elif isinstance(documents, list):
+            doc_list = documents
+        else:
+            doc_list = documents
+        
         # Classifica documenti per urgenza
-        urgent_docs = [d for d in documents if d["priority"] == "urgent"]
+        urgent_docs = [d for d in doc_list if d["priority"] == "urgent"]
         has_urgent = len(urgent_docs) > 0
         
         return {
-            "classified_documents": documents,
+            "classified_documents": doc_list,
             "urgent_documents": urgent_docs,
             "has_urgent": has_urgent
         }

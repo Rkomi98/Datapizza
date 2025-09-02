@@ -265,6 +265,21 @@ graph TD
     style H fill:#e8f5e8
 ```
 
+### Detailed parameters
+
+- **target_key**: name of the parameter in the next node where to pass the entire result of the previous node
+- **dependencies**: list of `Dependency` specifying which nodes to depend on and how to map data
+- **Dependency(node_name, target_key)**: maps the entire result of `node_name` to the parameter `target_key` of the current node
+- **condition**: lambda function that receives the complete context and returns True/False for branching
+- **foreach**: executes the `do` component for each element in the collection specified by dependencies
+- **execute()**: starts execution and returns dictionary with results from all executed nodes
+
+### Data flow notes
+
+- **Data passing**: in FunctionalPipeline, `target_key="documents"` passes the ENTIRE result of the previous node (e.g. `{"documents": [...]}`) to the `documents` parameter of the next node
+- **Input handling**: components should handle both dictionaries and lists as input to be flexible
+- **Context access**: use `lambda ctx: ctx.get("node_name", {}).get("key")` to access data in branching
+
 ### Complete script
 
 See `examples/functional_example.py` for a complete example with branching and foreach.

@@ -38,7 +38,7 @@ class SentimentAnalyzer(PipelineComponent):
     def __init__(self, client: OpenAIClient):
         self.client = client
     
-    def run(self, reviews: list, **kwargs) -> Dict[str, Any]:
+    def _run(self, reviews: list, **kwargs) -> Dict[str, Any]:
         analyzed = []
         for review in reviews:
             # Simulazione analisi sentiment semplificata per l'esempio

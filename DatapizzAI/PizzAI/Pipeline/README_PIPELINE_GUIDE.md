@@ -115,7 +115,7 @@ print(f"Generati {len(chunks)} chunks dal documento")
 - **collection_name**: obbligatorio solo se si specifica un vector_store
 
 ### Note importanti
-
+Ci sono alcune precisazioni che pensiamo siano importanti prima di procedere alla prossima tipologia di Pipeline
 - **NodeEmbedder vs ClientEmbedder**: usa `NodeEmbedder` nelle pipeline perché lavora con liste di oggetti `Chunk`. `ClientEmbedder` è per singole stringhe.
 - **Metadata**: vengono applicati dall'`IngestionPipeline.run()` dopo la creazione dei chunks, non durante lo splitting
 - **Embeddings**: `NodeEmbedder` aggiunge gli embeddings agli oggetti `Chunk` esistenti, non crea nuovi oggetti
@@ -437,12 +437,18 @@ else:
 
 ### Parametri dettagliati
 
-- **target_key**: chiave usata per passare il risultato del nodo precedente. Il valore diventa parametro del nodo successivo
+- **target_key**: nome del parametro nel nodo successivo dove passare l'intero risultato del nodo precedente
 - **dependencies**: lista di `Dependency` che specifica da quali nodi dipendere e come mappare i dati
-- **Dependency(node_name, target_key)**: mappa risultato di `node_name` al parametro `target_key` del nodo corrente
+- **Dependency(node_name, target_key)**: mappa l'intero risultato di `node_name` al parametro `target_key` del nodo corrente
 - **condition**: funzione lambda che riceve il contesto completo e restituisce True/False per il branching
 - **foreach**: esegue il componente `do` per ogni elemento della collezione specificata dalle dipendenze
 - **execute()**: avvia l'esecuzione e restituisce dizionario con risultati di tutti i nodi eseguiti
+
+### Note sul flusso dati
+
+- **Passaggio dati**: nella FunctionalPipeline, `target_key="documents"` passa l'INTERO risultato del nodo precedente (es. `{"documents": [...]}`) al parametro `documents` del nodo successivo
+- **Gestione input**: i componenti devono gestire sia dizionari che liste come input per essere flessibili
+- **Context access**: usa `lambda ctx: ctx.get("node_name", {}).get("key")` per accedere ai dati nel branching
 
 ### Diagramma di flusso
 
