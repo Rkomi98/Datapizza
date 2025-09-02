@@ -513,46 +513,56 @@ Tutte le pipeline supportano la configurazione tramite file YAML per maggiore fl
 Caricamento e utilizzo di DagPipeline da configurazione YAML:
 
 ```python
+import os
+import sys
 from datapizzai.pipeline import DagPipeline
 
-# Carica pipeline complessa da file YAML
-dag_pipeline = DagPipeline.from_yaml("dag_config.yaml")
+# Setup path per trovare mymodules (necessario per notebook)
+examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/DatapizzAI/PizzAI/Pipeline/examples"
+sys.path.insert(0, examples_dir)
 
-# Esegui pipeline con dati iniziali
-results = dag_pipeline.run({"input_file": "data.csv"})
+# Crea istanza DagPipeline e carica configurazione YAML
+dag_pipeline = DagPipeline()
+dag_pipeline.from_yaml(os.path.join(examples_dir, "dag_config.yaml"))
+
+# Esegui pipeline (dati generati automaticamente dai moduli)
+results = dag_pipeline.run({})
 
 # Accedi ai risultati di ogni nodo
-print(f"Dati caricati: {results['data_loader']['rows_count']}")
-print(f"Analisi completata: {results['analyzer']['summary']}")
+print(f"Nodi eseguiti: {list(results.keys())}")
+for node_name, result in results.items():
+    print(f"{node_name}: {result}")
 ```
 
-Il file YAML definisce clients OpenAI, moduli personalizzati (`CSVLoader`, `TextAnalyzer`) e le loro connessioni automatiche.
+Il file YAML `examples/dag_config.yaml` definisce moduli personalizzati (`DocumentLoader`, `TextProcessor`) e le loro connessioni automatiche.
+
+**Esecuzione**:
+```bash
+cd Pipeline/examples
+python3 dag_yaml_example.py
+```
 
 #### Diagramma flusso DagPipeline YAML
 
 ```mermaid
 graph TD
     A[📄 dag_config.yaml] --> B[DagPipeline.from_yaml]
-    B --> C[Load Clients]
-    B --> D[Load Modules]
+    B --> C[Load Modules]
+    C --> D[DocumentLoader]
+    C --> E[TextProcessor]
     
-    C --> E[OpenAI Client]
-    D --> F[CSVLoader]
-    D --> G[TextAnalyzer]
+    F[Pipeline Execution] --> G[data_loader]
+    G -->|documents| H[processor]
     
-    H[Pipeline Execution] --> I[data_loader]
-    I -->|data| J[analyzer]
+    D --> G
+    E --> H
     
-    F --> I
-    G --> J
-    E --> J
-    
-    J --> K[📊 Analysis Results]
+    H --> I[📊 Processed Results]
     
     style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
     style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style K fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    style F fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style I fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
 ```
 
 ### Esempio per FunctionalPipeline
@@ -560,10 +570,16 @@ graph TD
 Caricamento e utilizzo di FunctionalPipeline da configurazione YAML:
 
 ```python
+import os
+import sys
 from datapizzai.pipeline import FunctionalPipeline
 
+# Setup path per trovare mymodules (necessario per notebook)
+examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/DatapizzAI/PizzAI/Pipeline/examples"
+sys.path.insert(0, examples_dir)
+
 # Carica pipeline funzionale da file YAML
-pipeline = FunctionalPipeline.from_yaml("functional_pipeline_config.yaml")
+pipeline = FunctionalPipeline.from_yaml(os.path.join(examples_dir, "functional_pipeline_config.yaml"))
 
 # Esegui pipeline completa
 results = pipeline.execute()
@@ -653,11 +669,13 @@ Gli script di esempio completi e funzionanti sono disponibili in:
 
 - `examples/ingestion_example.py` - IngestionPipeline con FileReader e TextSplitter
 - `examples/dag_example.py` - DagPipeline con grafo complesso a 5 nodi
+- `examples/dag_yaml_example.py` - DagPipeline caricata da YAML con moduli esterni
 - `examples/functional_example.py` - FunctionalPipeline con branching condizionale
 - `examples/yaml_pipeline_example.py` - FunctionalPipeline caricata da YAML con moduli esterni
 
 ### File di supporto
 
+- `examples/dag_config.yaml` - Configurazione YAML esterna per `dag_yaml_example.py`
 - `examples/functional_pipeline_config.yaml` - Configurazione YAML esterna per `yaml_pipeline_example.py`
 - `examples/mymodules/` - Moduli personalizzati caricati via YAML:
   - `loaders.py` - DocumentLoader e CSVLoader
@@ -676,9 +694,12 @@ python3 ingestion_example.py
 # Test DagPipeline (richiede API key per SentimentAnalyzer)
 python3 dag_example.py
 
+# Test DagPipeline con YAML (autocontenuto, nessuna API key richiesta)
+python3 dag_yaml_example.py
+
 # Test FunctionalPipeline (richiede API key)
 python3 functional_example.py
 
-# Test YAML Pipeline (autocontenuto, nessuna API key richiesta)
+# Test FunctionalPipeline con YAML (autocontenuto, nessuna API key richiesta)
 python3 yaml_pipeline_example.py
 ```

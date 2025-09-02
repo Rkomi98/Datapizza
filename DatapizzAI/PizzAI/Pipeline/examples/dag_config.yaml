@@ -1,0 +1,20 @@
+dag_pipeline:
+  modules:
+    - name: "data_loader"
+      module: "mymodules.loaders"
+      type: "DocumentLoader"
+      params:
+        source: "dag_example"
+    
+    - name: "processor"
+      module: "mymodules.processors"
+      type: "TextProcessor"
+      params:
+        min_length: 5
+        add_metadata: true
+  
+  connections:
+    - from: "data_loader"
+      to: "processor"
+      source_key: "documents"
+      target_key: "documents"
