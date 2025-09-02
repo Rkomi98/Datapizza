@@ -1,0 +1,20 @@
+
+1. Dimostrazione: ho analizzato un paper sull’ottimizzazione convessa con un problema aperto e ho chiesto a GPT-5-pro di risolverlo. Il modello ha ottenuto un vincolo più ampio di quello proposto nel lavoro originale, e ne ho verificato la correttezza.
+
+2. Dimostrazione: partendo da un problema aperto in un paper di ottimizzazione convessa, ho coinvolto GPT-5-pro. Il modello ha derivato un vincolo più forte rispetto a quello noto e ho controllato la validità della dimostrazione.
+
+3. Dimostrazione: ho fornito a GPT-5-pro un problema aperto di ottimizzazione convessa. Il modello ha individuato un vincolo migliorato rispetto a quello riportato in letteratura, e ne ho confermato la correttezza.
+
+4. Dimostrazione: partendo da un problema aperto in un articolo sull’ottimizzazione convessa, ho chiesto a GPT-5-pro di lavorarci. Ha trovato un vincolo più favorevole rispetto a quello originale, con dimostrazione corretta.
+
+5. Dimostrazione: ho chiesto a GPT-5-pro di affrontare un problema aperto di ottimizzazione convessa. Il modello ha prodotto un vincolo più generale rispetto a quello noto, che ho poi verificato.
+
+6. Dimostrazione: un problema aperto di ottimizzazione convessa è stato analizzato da GPT-5-pro, che ha ricavato un vincolo più ampio e rigoroso di quello presentato nell’articolo.
+
+7. Dimostrazione: fornendo a GPT-5-pro un problema aperto di ottimizzazione convessa, il modello ha derivato un vincolo più stringente rispetto a quello precedente, confermandone la correttezza.
+
+8. Dimostrazione: ho affidato a GPT-5-pro un problema aperto di ottimizzazione convessa. Ha proposto un vincolo migliorativo rispetto alla letteratura, con dimostrazione verificata.
+
+9. Dimostrazione: a partire da un problema aperto di ottimizzazione convessa, GPT-5-pro ha determinato un vincolo più preciso rispetto a quello riportato nel paper originale, e ne ho validato la dimostrazione.
+
+10. Dimostrazione: ho fornito a GPT-5-pro un problema aperto in ottimizzazione convessa; il modello ha trovato un vincolo ottimizzato rispetto a quello proposto e ho verificato che la dimostrazione fosse corretta.

@@ -55,7 +55,7 @@ The IngestionPipeline is designed to process documents and ingest them into vect
 import os
 from datapizzai.pipeline import IngestionPipeline
 from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import ClientEmbedder
+from datapizzai.embedders import NodeEmbedder
 from datapizzai.clients import OpenAIClient
 from datapizzai.core.models import PipelineComponent
 
@@ -82,7 +82,7 @@ components = [
         max_char=200,      # Maximum chunk size in characters
         overlap=50         # Overlap between consecutive chunks
     ),
-    ClientEmbedder(
+    NodeEmbedder(
         client=client,                    # Client to generate embeddings
         model_name="text-embedding-3-small"  # Embedding model name
     )
@@ -109,10 +109,16 @@ print(f"Generated {len(chunks)} chunks from document")
 
 - **max_char**: maximum number of characters per chunk. Smaller chunks = higher precision, more chunks
 - **overlap**: shared characters between consecutive chunks to maintain context
-- **metadata**: optional dictionary attached to all chunks. Useful for tracking source, date, category, etc.
+- **metadata**: optional dictionary attached to all chunks by the `run()` method. Useful for tracking source, date, category, etc.
 - **model_name**: name of the embedding model to use (must be supported by the client)
-- **vector_store**: if `None` returns chunks, otherwise saves them automatically to the database
+- **vector_store**: if `None` returns processed chunks, otherwise saves them automatically to the database
 - **collection_name**: required only if a vector_store is specified
+
+### Important notes
+
+- **NodeEmbedder vs ClientEmbedder**: use `NodeEmbedder` in pipelines because it works with lists of `Chunk` objects. `ClientEmbedder` is for single strings.
+- **Metadata**: applied by `IngestionPipeline.run()` after chunk creation, not during splitting
+- **Embeddings**: `NodeEmbedder` adds embeddings to existing `Chunk` objects, doesn't create new ones
 
 ### Flow diagram
 

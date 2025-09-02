@@ -14,7 +14,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from datapizzai.pipeline import IngestionPipeline
 from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import ClientEmbedder
+from datapizzai.embedders import NodeEmbedder
 from datapizzai.vectorstores import QdrantVectorstore
 from datapizzai.clients import OpenAIClient
 from datapizzai.core.models import PipelineComponent
@@ -87,7 +87,7 @@ def main():
     components = [
         FileReader(),  # Lettura del file
         TextSplitter(max_char=200, overlap=50),  # Divisione in chunks
-        ClientEmbedder(client=openai_client, model_name="text-embedding-3-small")  # Embeddings
+        NodeEmbedder(client=openai_client, model_name="text-embedding-3-small")  # Embeddings
     ]
     
     # Configura vector store (opzionale - se None restituisce solo i chunks)

@@ -55,7 +55,7 @@ L'IngestionPipeline è progettata per processare documenti e ingerirli in vector
 import os
 from datapizzai.pipeline import IngestionPipeline
 from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import ClientEmbedder
+from datapizzai.embedders import NodeEmbedder
 from datapizzai.clients import OpenAIClient
 from datapizzai.core.models import PipelineComponent
 
@@ -82,7 +82,7 @@ components = [
         max_char=200,      # Dimensione massima di ogni chunk in caratteri
         overlap=50         # Sovrapposizione tra chunks consecutivi
     ),
-    ClientEmbedder(
+    NodeEmbedder(
         client=client,                    # Client per generare embeddings
         model_name="text-embedding-3-small"  # Nome del modello embedding
     )
@@ -109,10 +109,16 @@ print(f"Generati {len(chunks)} chunks dal documento")
 
 - **max_char**: numero massimo di caratteri per chunk. Chunks più piccoli = maggiore precisione, più chunks
 - **overlap**: caratteri condivisi tra chunks consecutivi per mantenere contesto
-- **metadata**: dizionario opzionale allegato a tutti i chunks. Utile per tracciare fonte, data, categoria, etc.
+- **metadata**: dizionario opzionale allegato a tutti i chunks dal metodo `run()`. Utile per tracciare fonte, data, categoria, etc.
 - **model_name**: nome del modello embedding da usare (deve essere supportato dal client)
-- **vector_store**: se `None` restituisce i chunks, altrimenti li salva automaticamente nel database
+- **vector_store**: se `None` restituisce i chunks processati, altrimenti li salva automaticamente nel database
 - **collection_name**: obbligatorio solo se si specifica un vector_store
+
+### Note importanti
+
+- **NodeEmbedder vs ClientEmbedder**: usa `NodeEmbedder` nelle pipeline perché lavora con liste di oggetti `Chunk`. `ClientEmbedder` è per singole stringhe.
+- **Metadata**: vengono applicati dall'`IngestionPipeline.run()` dopo la creazione dei chunks, non durante lo splitting
+- **Embeddings**: `NodeEmbedder` aggiunge gli embeddings agli oggetti `Chunk` esistenti, non crea nuovi oggetti
 
 ### Diagramma di flusso
 
