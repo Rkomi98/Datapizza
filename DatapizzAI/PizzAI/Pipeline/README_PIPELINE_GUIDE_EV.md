@@ -357,20 +357,107 @@ graph TD
 
 ## YAML configuration
 
-Pipelines support configuration via external YAML files for greater flexibility. See example scripts for loading YAML configurations:
+All pipelines support YAML configuration for greater flexibility and reusability.
+
+### Example for DagPipeline
+
+Loading and using DagPipeline from YAML configuration:
 
 ```python
-# For FunctionalPipeline
-pipeline = FunctionalPipeline.from_yaml("config_file.yaml")
-results = pipeline.execute()
+from datapizzai.pipeline import DagPipeline
+
+# Load complex pipeline from YAML file
+dag_pipeline = DagPipeline.from_yaml("dag_config.yaml")
+
+# Execute pipeline with initial data
+results = dag_pipeline.run({"input_file": "data.csv"})
+
+# Access results from each node
+print(f"Data loaded: {results['data_loader']['rows_count']}")
+print(f"Analysis completed: {results['analyzer']['summary']}")
 ```
 
-YAML configuration files are available in the `examples/` directory along with scripts that use them. This approach allows you to:
+The YAML file defines OpenAI clients, custom modules (`CSVLoader`, `TextAnalyzer`) and their automatic connections.
 
-- Separate business logic from configuration
-- Modify pipelines without changing code
-- Reuse configurations in different contexts
-- Manage parameters and dependencies externally
+#### DagPipeline YAML flow diagram
+
+```mermaid
+graph TD
+    A[📄 dag_config.yaml] --> B[DagPipeline.from_yaml]
+    B --> C[Load Clients]
+    B --> D[Load Modules]
+    
+    C --> E[OpenAI Client]
+    D --> F[CSVLoader]
+    D --> G[TextAnalyzer]
+    
+    H[Pipeline Execution] --> I[data_loader]
+    I -->|data| J[analyzer]
+    
+    F --> I
+    G --> J
+    E --> J
+    
+    J --> K[📊 Analysis Results]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style K fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+```
+
+### Example for FunctionalPipeline
+
+Loading and using FunctionalPipeline from YAML configuration:
+
+```python
+from datapizzai.pipeline import FunctionalPipeline
+
+# Load functional pipeline from YAML file
+pipeline = FunctionalPipeline.from_yaml("functional_pipeline_config.yaml")
+
+# Execute complete pipeline
+results = pipeline.execute()
+
+# Show flow results
+if "build_report" in results:
+    print(results["build_report"]["final_report"])
+else:
+    print("Pipeline completed successfully!")
+
+print(f"Executed modules: {list(results.keys())}")
+```
+
+The YAML file defines external modules (`DocumentLoader`, `TextProcessor`, `DataValidator`, `ReportBuilder`) and dependencies between steps with `target_key`.
+
+#### FunctionalPipeline YAML flow diagram
+
+```mermaid
+graph TD
+    A[📄 functional_pipeline_config.yaml] --> B[FunctionalPipeline.from_yaml]
+    B --> C[Load Modules]
+    C --> D[DocumentLoader]
+    C --> E[TextProcessor] 
+    C --> F[DataValidator]
+    C --> G[ReportBuilder]
+    
+    H[Pipeline Execution] --> I[load_data]
+    I -->|documents| J[process]
+    J -->|processed_documents| K[validate]
+    K -->|validation_results| L[build_report]
+    
+    D --> I
+    E --> J
+    F --> K
+    G --> L
+    
+    L --> M[📊 Final Report]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+```
 
 ## Pipeline comparison
 

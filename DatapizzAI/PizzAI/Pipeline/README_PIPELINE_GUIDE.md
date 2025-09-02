@@ -26,8 +26,9 @@ Questa guida fornisce esempi pratici per utilizzare le tre tipologie di pipeline
   - [Esempio pratico](#esempio-pratico-2)
   - [Diagramma di flusso](#diagramma-di-flusso-2)
   - [Script completo](#script-completo-2)
-  - [Esempio YAML completo](#esempio-yaml-completo)
 - [Configurazione YAML](#configurazione-yaml)
+  - [Esempio per DagPipeline](#esempio-per-dagpipeline)
+  - [Esempio per FunctionalPipeline](#esempio-per-functionalpipeline)
 - [Confronto delle pipeline](#confronto-delle-pipeline)
 - [Best practices](#best-practices)
   - [Scelta della pipeline](#scelta-della-pipeline)
@@ -114,7 +115,8 @@ print(f"Generati {len(chunks)} chunks dal documento")
 - **collection_name**: obbligatorio solo se si specifica un vector_store
 
 ### Note importanti
-Ci sono alcune precisazioni che pensiamo siano importanti prima di procedere alla prossima tipologia di Pipeline
+
+Ci sono alcune precisazioni che pensiamo siano importanti prima di procedere alla prossima tipologia di Pipeline:
 - **NodeEmbedder vs ClientEmbedder**: usa `NodeEmbedder` nelle pipeline perché lavora con liste di oggetti `Chunk`. `ClientEmbedder` è per singole stringhe.
 - **Metadata**: vengono applicati dall'`IngestionPipeline.run()` dopo la creazione dei chunks, non durante lo splitting
 - **Embeddings**: `NodeEmbedder` aggiunge gli embeddings agli oggetti `Chunk` esistenti, non crea nuovi oggetti
@@ -502,49 +504,86 @@ graph TD
 
 Vedi `examples/functional_example.py` per un esempio completo con branching e foreach.
 
-### Esempio YAML completo
+## Configurazione YAML
 
-Caricamento di FunctionalPipeline da configurazione YAML esterna:
+Tutte le pipeline supportano la configurazione tramite file YAML per maggiore flessibilità e riutilizzo.
+
+### Esempio per DagPipeline
+
+Caricamento e utilizzo di DagPipeline da configurazione YAML:
 
 ```python
-import os
-import sys
-from pathlib import Path
-from datapizzai.pipeline import FunctionalPipeline
+from datapizzai.pipeline import DagPipeline
 
-# Carica pipeline da file YAML
-pipeline = FunctionalPipeline.from_yaml("functional_pipeline_config.yaml")
+# Carica pipeline complessa da file YAML
+dag_pipeline = DagPipeline.from_yaml("dag_config.yaml")
 
-# Esegui pipeline
-results = pipeline.execute()
+# Esegui pipeline con dati iniziali
+results = dag_pipeline.run({"input_file": "data.csv"})
 
-# Mostra risultati
-if "build_report" in results:
-    print(results["build_report"]["final_report"])
-
-print("Pipeline eseguita tramite YAML configuration!")
+# Accedi ai risultati di ogni nodo
+print(f"Dati caricati: {results['data_loader']['rows_count']}")
+print(f"Analisi completata: {results['analyzer']['summary']}")
 ```
 
-**Esecuzione**:
-```bash
-cd examples
-python3 yaml_pipeline_example.py
-```
+Il file YAML definisce clients OpenAI, moduli personalizzati (`CSVLoader`, `TextAnalyzer`) e le loro connessioni automatiche.
 
-Il file `functional_pipeline_config.yaml` definisce una pipeline completa con 4 moduli esterni (`DocumentLoader`, `TextProcessor`, `DataValidator`, `ReportBuilder`) e le loro dipendenze.
-
-Questo esempio dimostra:
-- Caricamento moduli esterni da package personalizzati (`mymodules/`)
-- Configurazione parametri per ogni modulo via YAML
-- Definizione dipendenze tra nodi con `target_key`
-- Pipeline multi-step completamente configurata esternamente
-- Script Python che carica e esegue la configurazione
-
-#### Diagramma flusso YAML
+#### Diagramma flusso DagPipeline YAML
 
 ```mermaid
 graph TD
-    A[📄 YAML Config] --> B[FunctionalPipeline.from_yaml]
+    A[📄 dag_config.yaml] --> B[DagPipeline.from_yaml]
+    B --> C[Load Clients]
+    B --> D[Load Modules]
+    
+    C --> E[OpenAI Client]
+    D --> F[CSVLoader]
+    D --> G[TextAnalyzer]
+    
+    H[Pipeline Execution] --> I[data_loader]
+    I -->|data| J[analyzer]
+    
+    F --> I
+    G --> J
+    E --> J
+    
+    J --> K[📊 Analysis Results]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style K fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+```
+
+### Esempio per FunctionalPipeline
+
+Caricamento e utilizzo di FunctionalPipeline da configurazione YAML:
+
+```python
+from datapizzai.pipeline import FunctionalPipeline
+
+# Carica pipeline funzionale da file YAML
+pipeline = FunctionalPipeline.from_yaml("functional_pipeline_config.yaml")
+
+# Esegui pipeline completa
+results = pipeline.execute()
+
+# Mostra risultati del flusso
+if "build_report" in results:
+    print(results["build_report"]["final_report"])
+else:
+    print("Pipeline completata con successo!")
+
+print(f"Moduli eseguiti: {list(results.keys())}")
+```
+
+Il file YAML definisce moduli esterni (`DocumentLoader`, `TextProcessor`, `DataValidator`, `ReportBuilder`) e le dipendenze tra step con `target_key`.
+
+#### Diagramma flusso FunctionalPipeline YAML
+
+```mermaid
+graph TD
+    A[📄 functional_pipeline_config.yaml] --> B[FunctionalPipeline.from_yaml]
     B --> C[Load Modules]
     C --> D[DocumentLoader]
     C --> E[TextProcessor] 
@@ -568,23 +607,6 @@ graph TD
     style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
     style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
 ```
-
-## Configurazione YAML
-
-Le pipeline supportano configurazione tramite file YAML esterni per maggiore flessibilità. Vedi gli script di esempio per caricare configurazioni YAML:
-
-```python
-# Per FunctionalPipeline
-pipeline = FunctionalPipeline.from_yaml("config_file.yaml")
-results = pipeline.execute()
-```
-
-I file YAML di configurazione sono disponibili nella directory `examples/` insieme agli script che li utilizzano. Questo approccio permette di:
-
-- Separare logica di business dalla configurazione
-- Modificare pipeline senza cambiare codice
-- Riutilizzare configurazioni in contesti diversi  
-- Gestire parametri e dipendenze esternamente
 
 ## Confronto delle pipeline
 
