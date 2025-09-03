@@ -97,7 +97,7 @@ pipeline = IngestionPipeline(
 
 # 4. Esegui processamento con metadata opzionale
 chunks = pipeline.run(
-    file_path="documento.txt",           # Percorso del documento da processare
+    file_path="document.txt",            # Percorso del documento da processare
     metadata={"source": "esempio"}      # Metadata aggiuntivo da allegare ai chunks (OPZIONALE)
 )
 

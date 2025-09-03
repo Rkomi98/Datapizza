@@ -237,101 +237,13 @@ print(f"Response: {response.text}")
 
 ## Method 3: Custom provider via API (e.g., DeepSeek)
 
-If you need a provider not supported yet, create a minimal adapter that calls its HTTP API and returns a small response object with `text` and basic metrics. The same pattern works for any OpenAI‑style provider.
+#TODO (with AI eng):
+- Define the REST adapter design for custom providers (request/response schema, headers, retry, timeouts).
+- Standardize payload and response to match the framework’s `invoke(input, memory)` interface.
+- Handle transient/HTTP errors (rate limits, parsing) and expose metrics (`usage`).
+- Write minimal examples and end‑to‑end tests with a real provider.
 
-Generic example (DeepSeek as reference):
-
-```python
-import os
-import requests
-from typing import Optional, Union, List
-from pydantic import BaseModel
-
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-
-
-class SimpleResponse(BaseModel):
-    text: str
-    prompt_tokens_used: int = 0
-    completion_tokens_used: int = 0
-    stop_reason: str = "stop"
-
-
-class GenericRESTClient:
-    """Minimal adapter for OpenAI‑compatible chat‑completions APIs (e.g., DeepSeek)."""
-
-    def __init__(
-        self,
-        base_url: str,
-        api_key: str,
-        model: str,
-        system_prompt: Optional[str] = None,
-        temperature: float = 0.7,
-        endpoint: str = "/chat/completions",
-        headers: Optional[dict] = None,
-    ):
-        self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
-        self.model = model
-        self.system_prompt = system_prompt or ""
-        self.temperature = temperature
-        self.endpoint = endpoint
-        self._headers = headers or {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-
-    def _build_messages(self, input: Optional[Union[str, List[TextBlock]]] = None, memory: Optional[Memory] = None) -> List[dict]:
-        msgs: List[dict] = []
-        if self.system_prompt:
-            msgs.append({"role": "system", "content": self.system_prompt})
-        if memory is not None:
-            for turn in memory.memory:
-                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
-                content = " ".join(getattr(b, "content", "") for b in turn.blocks if hasattr(b, "content"))
-                if content:
-                    msgs.append({"role": role, "content": content})
-        if isinstance(input, str) and input:
-            msgs.append({"role": "user", "content": input})
-        elif isinstance(input, list) and input:
-            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
-            if user_text:
-                msgs.append({"role": "user", "content": user_text})
-        return msgs
-
-    def invoke(self, input: Optional[Union[str, List[TextBlock]]] = None, memory: Optional[Memory] = None) -> SimpleResponse:
-        payload = {"model": self.model, "messages": self._build_messages(input, memory), "temperature": self.temperature}
-        url = f"{self.base_url}{self.endpoint}"
-        try:
-            r = requests.post(url, json=payload, headers=self._headers, timeout=120)
-            r.raise_for_status()
-            data = r.json()
-            text = (data.get("choices", [{}])[0].get("message", {}).get("content")) or str(data)
-            usage = data.get("usage") or {}
-            return SimpleResponse(
-                text=text,
-                prompt_tokens_used=usage.get("prompt_tokens", 0),
-                completion_tokens_used=usage.get("completion_tokens", 0),
-                stop_reason=(data.get("choices", [{}])[0].get("finish_reason") or "stop"),
-            )
-        except Exception as e:
-            return SimpleResponse(text=f"REST call error: {e}")
-
-
-if __name__ == "__main__":
-    client = GenericRESTClient(
-        base_url="https://api.deepseek.com/v1",  # example
-        api_key=os.getenv("DEEPSEEK_API_KEY", "<insert-key>"),
-        model="deepseek-chat",
-        system_prompt="You are a concise and helpful assistant.",
-    )
-    print(client.invoke("Explain overfitting in 3 sentences.").text)
-```
-
-Practical notes:
-- If the provider exposes an OpenAI‑compatible endpoint, you may use `OpenAIClient` with `base_url` (if supported by your version); otherwise, use the adapter above.
-- Keep the `invoke(input, memory)` interface for consistency.
+Note: for now, prefer using `ClientFactory` or the native clients already included. The custom adapter implementation will be added together with the AI Engineering team.
 
 ## Method 4: Local model (Ollama/Gemma)
 
