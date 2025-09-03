@@ -65,6 +65,33 @@ docker run -p 6333:6333 qdrant/qdrant
 # Dashboard disponibile su: http://localhost:6333/dashboard
 ```
 
+### Quick Start Pattern
+
+Ecco il pattern base per usare DatapizzAI con Qdrant:
+
+```python
+# 1. Setup Qdrant
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+from datapizzai.vectorstores import QdrantVectorstore
+
+client = QdrantClient(host="localhost", port=6333)
+client.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(size=384, distance=Distance.COSINE)
+)
+
+vectorstore = QdrantVectorstore(host="localhost", port=6333, https=False)
+
+# 2. Usa DatapizzAI per RAG
+vectorstore.add(embedded_chunks, collection_name="documents")
+results = vectorstore.search(
+    query_embedding=query_embedding,
+    collection_name="documents",
+    top_k=5
+)
+```
+
 ### Dipendenze Python
 
 Prima di iniziare, assicurarsi di avere installato datapizzai e le dipendenze necessarie:
@@ -301,57 +328,38 @@ Il vector store memorizza i chunk con i loro embedding per il retrieval efficien
 ```python
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
+from datapizzai.vectorstores import QdrantVectorstore
 
 # 1. PRIMA: assicurati che Qdrant server sia attivo
 # Avvia con: docker run -p 6333:6333 qdrant/qdrant
 
-# 2. Crea collezione (OBBLIGATORIO, fai UNA SOLA VOLTA)
-def create_collection_if_not_exists(collection_name, vector_size=384):
-    """Crea collezione Qdrant se non esiste già."""
-    client = QdrantClient(host="localhost", port=6333)
-    
-    # Verifica collezioni esistenti
-    collections = [c.name for c in client.get_collections().collections]
-    
-    if collection_name not in collections:
-        client.create_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(
-                size=vector_size,      # Dimensione embedding (es. 384 per text-embedding-3-small)
-                distance=Distance.COSINE  # Metrica di similarità
-            )
-        )
-        print(f"✅ Collezione '{collection_name}' creata")
-    else:
-        print(f"✅ Collezione '{collection_name}' già esistente")
+# 2. Connetti a Qdrant
+client = QdrantClient(host="localhost", port=6333)
 
-# 3. Setup collezione
-collection_name = "my_documents"
-vector_dimension = 384  # Deve corrispondere alla dimensione dei tuoi embeddings
-create_collection_if_not_exists(collection_name, vector_dimension)
-
-# 4. Configurazione vectorstore
-vectorstore = QdrantVectorstore(
-    host="localhost",
-    port=6333,
-    https=False,  # HTTP locale, non HTTPS
-    api_key=None  # Opzionale per istanze locali
+# 3. Crea collezione (una sola volta)
+client.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(
+        size=384,  # Dimensione dei tuoi embeddings
+        distance=Distance.COSINE
+    )
 )
 
-# 5. Aggiunta dei chunk al vector store
-try:
-    vectorstore.add(embedded_chunks, collection_name=collection_name)
-    print(f"✅ {len(embedded_chunks)} chunk aggiunti al vectorstore")
-except Exception as e:
-    print(f"❌ Errore aggiunta chunk: {e}")
-    print("💡 Verifica che la collezione esista e Qdrant sia attivo")
+# 4. Configurazione vectorstore DatapizzAI
+vectorstore = QdrantVectorstore(
+    host="localhost", 
+    port=6333,
+    https=False  # HTTP locale
+)
 
-# 6. Ricerca (con parametri corretti)
-query_embedding = [0.1, 0.2, ...]  # Il tuo embedding di query
+# 5. Aggiungi dati
+vectorstore.add(embedded_chunks, collection_name="documents")
+
+# 6. Ricerca
 results = vectorstore.search(
-    query_embedding=query_embedding,  # ← Parametro corretto
-    collection_name=collection_name,
-    top_k=10                          # ← Parametro corretto (non k)
+    query_embedding=query_embedding,   # ← parametro corretto
+    collection_name="documents",
+    top_k=5                            # ← parametro corretto
 )
 ```
 
@@ -415,13 +423,17 @@ reranker = CohereReranker(
     threshold=0.7   # soglia di rilevanza
 )
 
-# Esempio di utilizzo
+# Esempio di utilizzo con DatapizzAI
+from datapizzai.embedders import ClientEmbedder
+from datapizzai.vectorstores import QdrantVectorstore
+
 query = "machine learning applications"
 
-# Prima genera embedding per la query
+# Genera embedding per la query
 query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
 query_embedding = query_embedder.embed(query)
 
+# Usa DatapizzAI vectorstore
 retrieved_chunks = vectorstore.search(
     query_embedding=query_embedding,  # ← Parametro corretto
     collection_name="documents", 
@@ -514,30 +526,23 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     embedder = NodeEmbedder(client=client)
     embedded_chunks = embedder.invoke(chunks)
     
-    # 7. Vector Store - Setup completo e funzionante
+    # 7. Vector Store - DatapizzAI
     from qdrant_client import QdrantClient
     from qdrant_client.models import Distance, VectorParams
+    from datapizzai.vectorstores import QdrantVectorstore
     
-    # Setup collezione (OBBLIGATORIO)
-    collection_name = "documents"
-    vector_dimension = 384  # Dimensione embedding del modello
+    # Connetti a Qdrant e crea collezione
+    client = QdrantClient(host="localhost", port=6333)
+    client.create_collection(
+        collection_name="documents",
+        vectors_config=VectorParams(size=384, distance=Distance.COSINE)
+    )
     
-    client_qdrant = QdrantClient(host="localhost", port=6333)
-    collections = [c.name for c in client_qdrant.get_collections().collections]
-    
-    if collection_name not in collections:
-        client_qdrant.create_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=vector_dimension, distance=Distance.COSINE)
-        )
-        print(f"✅ Collezione '{collection_name}' creata")
-    
-    # Crea vectorstore
+    # Usa DatapizzAI vectorstore
     vectorstore = QdrantVectorstore(host="localhost", port=6333, https=False)
     
     # Aggiungi chunk
-    vectorstore.add(embedded_chunks, collection_name=collection_name)
-    print(f"✅ {len(embedded_chunks)} chunk aggiunti")
+    vectorstore.add(embedded_chunks, collection_name="documents")
     
     # 8. Query processing
     query = "Qual è il contenuto principale del documento?"
@@ -548,7 +553,7 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     
     results = vectorstore.search(
         query_embedding=query_embedding,  # ← Parametro corretto
-        collection_name=collection_name,
+        collection_name="documents",
         top_k=10  # ← Parametro corretto
     )
     
