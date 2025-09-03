@@ -53,11 +53,14 @@ The IngestionPipeline is designed to process documents and ingest them into vect
 
 ```python
 import os
+from dotenv import load_dotenv
 from datapizzai.pipeline import IngestionPipeline
 from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import NodeEmbedder
 from datapizzai.clients import OpenAIClient
 from datapizzai.core.models import PipelineComponent
+
+load_dotenv()
 
 # Custom component to read text files
 class FileReader(PipelineComponent):

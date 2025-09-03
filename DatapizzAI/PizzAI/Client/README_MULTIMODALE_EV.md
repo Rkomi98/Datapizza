@@ -98,11 +98,13 @@ print(response.text)
 ```python
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 from datapizzai.type import Media, MediaBlock, TextBlock
 
 # It is recommended to create a dedicated client for audio analysis
 # Make sure GOOGLE_API_KEY is in your .env file
+load_dotenv()
 analysis_client_google = ClientFactory.create(
     provider="google",
     model="gemini-1.5-flash",
