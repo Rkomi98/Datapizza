@@ -6,8 +6,10 @@ Implementazione rapida di un sistema RAG utilizzando la libreria datapizzai.
 
 - `AZURE_SERVICES_GUIDE.md` - **LEGGI PRIMA**: Differenze tra servizi Azure
 - `test_azure_openai.py` - **TEST FIRST**: Verifica configurazione Azure OpenAI
+- `text_parser_example.py` - **NUOVO**: Esempio con TextParser (più semplice)
+- `improved_treebuilder_example.py` - **NUOVO**: Risolve errori TreeBuilder
 - `simple_rag_example.py` - **START HERE**: Esempio funzionante solo con Azure OpenAI
-- `README_RAG_COMPLETE_GUIDE.md` - Guida completa con tutti i dettagli
+- `README_RAG_COMPLETE_GUIDE.md` - Guida completa aggiornata con TextParser
 - `rag_example.py` - Esempio completo con Azure Document Intelligence
 - `component_examples.py` - Esempi specifici per ogni componente
 - `azure_openai_config.example.env` - Configurazione solo Azure OpenAI
@@ -73,48 +75,71 @@ python simple_rag_example.py
 | Reranker | Riordino risultati per rilevanza | ⚠️ Facoltativo |
 | PromptTemplate | Template per generazione | ⚠️ Facoltativo |
 
-## Esempio minimo (solo Azure OpenAI)
+## Esempio minimo con TextParser
 
 ```python
-# Installa: pip install PyPDF2 python-dotenv
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
-from datapizzai.clients import OpenAIClient
+from datapizzai.modules.parsers.text_parser import parse_text
 from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import NodeEmbedder
 from datapizzai.vectorstores import QdrantVectorstore
+from datapizzai.clients import OpenAIClient
 
-# Parser semplice per PDF (sostituisce AzureParser)
-import PyPDF2
-from datapizzai.type.type import Node, NodeType
+# Testo di esempio
+text = """Il machine learning è una branca dell'intelligenza artificiale.
 
-def simple_pdf_parser(file_path):
-    with open(file_path, 'rb') as f:
-        pdf_reader = PyPDF2.PdfReader(f)
-        text = "".join([page.extract_text() for page in pdf_reader.pages])
-    
-    return Node(
-        children=[],
-        content=text,
-        node_type=NodeType.DOCUMENT,
-        metadata={"source": file_path}
-    )
+Permette ai computer di apprendere dai dati senza essere programmati esplicitamente.
+Utilizza algoritmi statistici per identificare pattern nei dati."""
 
 # Setup
-splitter = TextSplitter(max_char=1000, overlap=100)
+client = OpenAIClient(api_key="your_key")
+splitter = TextSplitter(max_char=500, overlap=50)
 embedder = NodeEmbedder(client=client, model_name="text-embedding-3-small")
 vectorstore = QdrantVectorstore(host="localhost")
 
 # Processo
-document = simple_pdf_parser("RAG/document.pdf")  # Usa parser semplice
-chunks = splitter.invoke(document.content)
+document = parse_text(text)  # Parser semplice per testo
+chunks = splitter.invoke(text)  # Usa direttamente il testo
 embedded_chunks = embedder.invoke(chunks)
 
 # Storage
 for chunk in embedded_chunks:
     vectorstore.add(chunk, collection_name="docs")
+```
+
+## Problemi comuni TreeBuilder
+
+### 1. TypeError (risolto)
+**NON** passare il nodo ma il testo:
+
+```python
+# ❌ SBAGLIATO (causa TypeError)
+restructured_node = tree_builder.invoke(document_node)
+
+# ✅ CORRETTO
+restructured_node = tree_builder.build_tree(text)
+```
+
+### 2. XML parsing failed (nuovo)
+Se vedi errori come `XML parsing failed after cleaning`, l'LLM non produce XML valido:
+
+```python
+# ✅ SOLUZIONE ROBUSTA
+def safe_tree_building(client, text):
+    try:
+        tree_builder = LLMTreeBuilder(client=client)
+        result = tree_builder.build_tree(text)
+        
+        # Controlla se ha usato fallback
+        if result.metadata.get('llm_fallback'):
+            print("TreeBuilder fallback - uso TextParser invece")
+            return parse_text(text)
+        
+        return result
+    except Exception:
+        return parse_text(text)  # Fallback sicuro
+
+# ✅ ANCORA PIÙ SEMPLICE: salta TreeBuilder per iniziare
+document = parse_text(text)  # Più affidabile
 ```
 
 Per esempi dettagliati e configurazioni avanzate, consultare la guida completa.

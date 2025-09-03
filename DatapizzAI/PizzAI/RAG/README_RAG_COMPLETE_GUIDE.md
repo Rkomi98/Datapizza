@@ -48,37 +48,66 @@ from datapizzai.clients import OpenAIClient
 
 ## 2. Parsing dei documenti
 
-Il parser converte documenti in strutture gerarchiche di nodi.
+I parser convertono testi e documenti in strutture gerarchiche di nodi.
 
-### AzureParser
+### TextParser (raccomandato per iniziare)
 
-Il `AzureParser` utilizza Azure AI Document Intelligence per parsing avanzato di PDF e altri documenti:
+Il `TextParser` è il parser più semplice per testi puri, perfetto per iniziare:
 
 ```python
-# Configurazione del parser
+from datapizzai.modules.parsers.text_parser import TextParser, parse_text
+
+# Metodo 1: Usando la classe
+parser = TextParser()
+text = """Il machine learning è una branca dell'intelligenza artificiale.
+
+Permette ai computer di apprendere dai dati senza essere programmati esplicitamente.
+Utilizza algoritmi statistici per identificare pattern nei dati."""
+
+document_node = parser.parse(text, metadata={"source": "example"})
+
+# Metodo 2: Funzione di convenienza (più semplice)
+document_node = parse_text(text)
+```
+
+**Vantaggi:**
+- Nessuna API key richiesta
+- Funziona offline
+- Parsing intelligente in paragrafi e frasi
+- Struttura gerarchica: documento → paragrafi → frasi
+
+**Output:** oggetto `Node` con struttura `DOCUMENT` → `PARAGRAPH` → `SENTENCE`.
+
+### AzureParser (per PDF complessi)
+
+Per documenti PDF con layout complessi, tabelle e immagini:
+
+```python
+from datapizzai.modules.parsers import AzureParser
+
+# Richiede Azure Document Intelligence (servizio separato)
 parser = AzureParser(
-    api_key="your_azure_api_key",
-    endpoint="https://your-endpoint.cognitiveservices.azure.com/",
-    result_type="markdown"  # oppure "text"
+    api_key="your_azure_document_intelligence_key",  # NON Azure OpenAI!
+    endpoint="https://your-doc-intel-endpoint.cognitiveservices.azure.com/",
+    result_type="markdown"
 )
 
-# Parsing di un documento
 document_node = parser.invoke("path/to/document.pdf")
 ```
 
-**Parametri principali:**
-- `api_key`: chiave API per Azure Document Intelligence
-- `endpoint`: endpoint del servizio Azure
-- `result_type`: formato di output ("markdown" o "text")
-
-**Output:** restituisce un oggetto `Node` con struttura gerarchica (documento → pagine → paragrafi → righe → parole).
+**Quando usarlo:**
+- PDF con layout complessi
+- Estrazione tabelle precise
+- OCR di documenti scansionati
+- Analisi immagini integrate
 
 ## 3. Tree builder (facoltativo)
 
-Il tree builder ristruttura i nodi per ottimizzare la comprensione del documento.
+Il tree builder ristruttura i nodi per ottimizzare la comprensione del documento usando un LLM.
 
 ```python
 from datapizzai.clients import OpenAIClient
+from datapizzai.modules.treebuilder import LLMTreeBuilder
 
 # Configurazione client LLM
 client = OpenAIClient(api_key="your_openai_key")
@@ -89,13 +118,73 @@ tree_builder = LLMTreeBuilder(
     system_prompt="Riorganizza la struttura del documento per migliorare la comprensione."
 )
 
+# IMPORTANTE: usa build_tree() con il testo, NON invoke() con il nodo!
+# Estrai il testo dal nodo parsato
+text_content = document_node.content or _extract_text_from_node(document_node)
+
 # Applicazione del tree builder
-restructured_node = tree_builder.invoke(document_node)
+restructured_node = tree_builder.build_tree(text_content)
+
+# Funzione helper per estrarre testo da nodi complessi
+def _extract_text_from_node(node):
+    text_parts = []
+    if hasattr(node, 'content') and node.content:
+        text_parts.append(node.content)
+    if hasattr(node, 'children'):
+        for child in node.children:
+            child_text = _extract_text_from_node(child)
+            if child_text:
+                text_parts.append(child_text)
+    return "\n".join(text_parts)
 ```
 
 **Parametri:**
 - `client`: client LLM per la ristrutturazione
 - `system_prompt`: prompt per guidare la ristrutturazione
+
+**Metodi principali:**
+- `build_tree(text)`: ristruttura un testo usando LLM
+- `invoke(file_path)`: legge un file e lo ristruttura (per file su disco)
+
+**⚠️ Problemi comuni e soluzioni:**
+
+Il TreeBuilder può fallire se l'LLM non produce XML valido. Errori tipici:
+```
+XML parsing failed after cleaning: not well-formed (invalid token)
+```
+
+**Soluzioni:**
+
+1. **Usa il sistema di fallback automatico** (già integrato):
+```python
+# Il TreeBuilder ha fallback automatico - controlla i metadata
+if result.metadata.get('llm_fallback'):
+    print("TreeBuilder ha usato fallback - risultato comunque valido")
+```
+
+2. **Approccio più robusto**:
+```python
+def safe_tree_building(client, text):
+    try:
+        tree_builder = LLMTreeBuilder(client=client)
+        result = tree_builder.build_tree(text)
+        
+        # Controlla se ha funzionato davvero
+        if not result.metadata.get('llm_fallback'):
+            return result
+        else:
+            print("TreeBuilder fallback - uso TextParser")
+            return parse_text(text)
+    except Exception as e:
+        print(f"TreeBuilder fallito: {e}")
+        return parse_text(text)  # Fallback sicuro
+```
+
+3. **Salta il TreeBuilder per iniziare**:
+```python
+# Per la maggior parte dei casi, TextParser è sufficiente
+document = parse_text(text)  # Più affidabile
+```
 
 ## 4. Captioning delle immagini e tabelle
 
@@ -295,30 +384,33 @@ formatted_prompt = prompt_template.format(
 
 ## 12. Esempio completo end-to-end
 
-Ecco un esempio che integra tutti i componenti:
+Ecco un esempio che integra tutti i componenti usando il `TextParser`:
 
 ```python
 import asyncio
 from datapizzai.clients import OpenAIClient
+from datapizzai.modules.parsers.text_parser import parse_text
 
 async def rag_pipeline_example():
     # 1. Setup
     client = OpenAIClient(api_key="your_key")
     
-    # 2. Parsing
-    parser = AzureParser(
-        api_key="azure_key",
-        endpoint="azure_endpoint"
-    )
-    document = parser.invoke("document.pdf")
+    # 2. Parsing (con TextParser)
+    text = """Il machine learning è una branca dell'intelligenza artificiale.
     
-    # 3. Captioning
-    captioner = LLMCaptioner(client=client)
-    captioned_doc = captioner.invoke(document)
+Permette ai computer di apprendere dai dati senza essere programmati esplicitamente.
+Utilizza algoritmi statistici per identificare pattern nei dati."""
+    
+    document = parse_text(text)
+    
+    # 3. Tree building (opzionale)
+    tree_builder = LLMTreeBuilder(client=client)
+    restructured_doc = tree_builder.build_tree(text)
     
     # 4. Splitting
     splitter = TextSplitter(max_char=1000, overlap=100)
-    text_content = captioned_doc.content or ""
+    # Estrai testo dal nodo
+    text_content = _extract_text_from_node(restructured_doc)
     chunks = splitter.invoke(text_content)
     
     # 5. Metatagger
