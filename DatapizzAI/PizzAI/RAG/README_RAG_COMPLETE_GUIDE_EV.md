@@ -48,11 +48,39 @@ from datapizzai.clients import OpenAIClient
 
 ## 2. Document Parsing
 
-The parser converts documents into hierarchical node structures.
+Parsers convert texts and documents into hierarchical node structures.
 
-### AzureParser
+### TextParser (recommended to start)
 
-`AzureParser` uses Azure AI Document Intelligence for advanced parsing of PDFs and other documents:
+`TextParser` is the simplest parser for plain text, perfect to get started:
+
+```python
+from datapizzai.modules.parsers.text_parser import TextParser, parse_text
+
+# Method 1: Using the class
+parser = TextParser()
+text = """Machine learning is a branch of artificial intelligence.
+
+It enables computers to learn from data without being explicitly programmed.
+It uses statistical algorithms to identify patterns in data."""
+
+document_node = parser.parse(text, metadata={"source": "example"})
+
+# Method 2: Convenience function (simpler)
+document_node = parse_text(text)
+```
+
+Advantages:
+- No API key required
+- Works offline
+- Smart parsing into paragraphs and sentences
+- Hierarchical structure: document → paragraphs → sentences
+
+Output: `Node` object with `DOCUMENT` → `PARAGRAPH` → `SENTENCE` structure.
+
+### AzureParser (for complex PDFs)
+
+For PDF documents with complex layouts, tables and images:
 
 ```python
 import os
@@ -80,10 +108,11 @@ Output: returns a `Node` with a hierarchical structure (document → pages → p
 
 ## 3. Tree Builder (optional)
 
-The tree builder restructures nodes to optimize document understanding.
+The tree builder restructures content to optimize document understanding using an LLM.
 
 ```python
 from datapizzai.clients import OpenAIClient
+from datapizzai.modules.treebuilder import LLMTreeBuilder
 import os
 from dotenv import load_dotenv
 
@@ -95,16 +124,34 @@ client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"))
 # Tree builder
 tree_builder = LLMTreeBuilder(
     client=client,
-    system_prompt="Reorganize the document structure to improve comprehension."
 )
 
-# Apply tree builder
-restructured_node = tree_builder.invoke(document_node)
+# IMPORTANT: use build_tree() with TEXT, NOT invoke() with the node!
+# Extract text from the parsed node
+text_content = document_node.content or _extract_text_from_node(document_node)
+
+# Apply the tree builder
+restructured_node = tree_builder.build_tree(text_content)
+
+# Helper function to extract text from complex nodes
+def _extract_text_from_node(node):
+    text_parts = []
+    if hasattr(node, 'content') and node.content:
+        text_parts.append(node.content)
+    if hasattr(node, 'children'):
+        for child in node.children:
+            child_text = _extract_text_from_node(child)
+            if child_text:
+                text_parts.append(child_text)
+    return "\n".join(text_parts)
 ```
 
 Parameters:
-- `client`: LLM client used for restructuring
-- `system_prompt`: prompt to guide restructuring
+- `client`: LLM client (OpenAI, Google, etc.)
+
+Main methods:
+- `build_tree(text)`: refactors a text using the selected client
+- `invoke(file_path)`: reads a text file from path and refactors it
 
 ## 4. Captioning Images and Tables
 
@@ -119,7 +166,7 @@ captioner = LLMCaptioner(
 )
 
 # Apply captioner
-captioned_node = captioner.invoke(document_node)
+captioned_node = captioner(document_node)
 ```
 
 Parameters:
@@ -153,24 +200,42 @@ Output: list of `Chunk` objects with unique IDs and metadata.
 
 ## 6. Metatagger
 
-The metatagger adds tags and metadata to chunks to improve retrieval.
+The metatagger extracts keywords and attaches them to chunk metadata to improve retrieval and categorization.
 
 ```python
+from datapizzai.modules.metatagger import KeywordMetatagger
+
 metatagger = KeywordMetatagger(
-    num_keywords=5  # number of keywords to extract
+    client=client,                 # LLM client for extraction
+    max_workers=3,                 # Concurrent threads
+    system_prompt=(
+        "Extract up to 5 relevant keywords per chunk; avoid duplicates."
+    ),
+    user_prompt=(
+        "Prefer short, specific terms; no full sentences."
+    ),
+    keyword_name="keywords"        # Metadata field name
 )
 
-# Apply metatagger to chunks
+# Apply metatagger to chunks (preserves content and IDs)
 tagged_chunks = []
 for chunk in chunks:
-    tagged_chunk = metatagger.invoke(chunk.text)
+    tagged_chunk = metatagger.invoke(chunk)  # pass the whole Chunk
     tagged_chunks.append(tagged_chunk)
 ```
 
 Parameters:
-- `num_keywords`: number of keywords to extract per chunk
+- `client (Client)`: LLM client for keyword extraction
+- `max_workers (int)`: concurrent processing threads (default: 3)
+- `system_prompt (str, optional)`: instructions for keyword extraction
+- `user_prompt (str, optional)`: additional user context
+- `keyword_name (str)`: metadata field name for keywords (default: `"keywords"`)
 
-Behavior: automatically extracts relevant keywords from the content and adds them to metadata.
+Features:
+- Concurrent chunk processing
+- Structured keyword extraction using Pydantic models
+- Customizable prompts and metadata field names
+- Preserves original chunk content and IDs
 
 ## 7. Embedding Generation
 
@@ -309,13 +374,14 @@ formatted_prompt = prompt_template.format(
 
 ## 12. End‑to‑End Example
 
-Here is a complete example integrating all components:
+Here is a complete example integrating all components using `TextParser`:
 
 ```python
 import asyncio
 import os
 from dotenv import load_dotenv
 from datapizzai.clients import OpenAIClient
+from datapizzai.modules.parsers.text_parser import parse_text
 
 load_dotenv()
 
@@ -323,24 +389,32 @@ async def rag_pipeline_example():
     # 1. Setup
     client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"))
     
-    # 2. Parsing
-    parser = AzureParser(
-        api_key=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_API_KEY"),
-        endpoint=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT")
-    )
-    document = parser.invoke("document.pdf")
+    # 2. Parsing (with TextParser)
+    text = """Machine learning is a branch of artificial intelligence.
     
-    # 3. Captioning
-    captioner = LLMCaptioner(client=client)
-    captioned_doc = captioner.invoke(document)
+It enables computers to learn from data without being explicitly programmed.
+It uses statistical algorithms to identify patterns in data."""
+    
+    document = parse_text(text)
+    
+    # 3. Tree building (optional)
+    tree_builder = LLMTreeBuilder(client=client)
+    restructured_doc = tree_builder.build_tree(text)
     
     # 4. Splitting
     splitter = TextSplitter(max_char=1000, overlap=100)
-    text_content = captioned_doc.content or ""
+    # Extract text from the node
+    text_content = _extract_text_from_node(restructured_doc)
     chunks = splitter.invoke(text_content)
     
     # 5. Metatagger
-    metatagger = KeywordMetatagger()
+    metatagger = KeywordMetatagger(
+        client=client,
+        max_workers=3,
+        system_prompt="Extract up to 5 relevant keywords per chunk; avoid duplicates.",
+        user_prompt="Prefer short, specific terms; no full sentences.",
+        keyword_name="keywords"
+    )
     for i, chunk in enumerate(chunks):
         chunks[i] = metatagger.invoke(chunk)
     

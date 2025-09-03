@@ -133,53 +133,11 @@ print(document_node)
 ```
 
 **Parametri:**
-- `client`: client LLM per la ristrutturazione
-- `system_prompt`: prompt per guidare la ristrutturazione
+- `client`: client LLM (OpenAI, Google, ecc)
 
 **Metodi principali:**
-- `build_tree(text)`: ristruttura un testo usando LLM
-- `invoke(file_path)`: legge un file e lo ristruttura (per file su disco)
-
-**⚠️ Problemi comuni e soluzioni:**
-
-Il TreeBuilder può fallire se l'LLM non produce XML valido. Errori tipici:
-```
-XML parsing failed after cleaning: not well-formed (invalid token)
-```
-
-**Soluzioni:**
-
-1. **Usa il sistema di fallback automatico** (già integrato):
-```python
-# Il TreeBuilder ha fallback automatico - controlla i metadata
-if result.metadata.get('llm_fallback'):
-    print("TreeBuilder ha usato fallback - risultato comunque valido")
-```
-
-2. **Approccio più robusto**:
-```python
-def safe_tree_building(client, text):
-    try:
-        tree_builder = LLMTreeBuilder(client=client)
-        result = tree_builder.build_tree(text)
-        
-        # Controlla se ha funzionato davvero
-        if not result.metadata.get('llm_fallback'):
-            return result
-        else:
-            print("TreeBuilder fallback - uso TextParser")
-            return parse_text(text)
-    except Exception as e:
-        print(f"TreeBuilder fallito: {e}")
-        return parse_text(text)  # Fallback sicuro
-```
-
-3. **Salta il TreeBuilder per iniziare**:
-```python
-# Per la maggior parte dei casi, TextParser è sufficiente
-document = parse_text(text)  # Più affidabile
-```
-
+- `build_tree(text)`: refactor di un testo usando il client scelto.
+- `invoke(file_path)`: legge un file e lo sistema (questo per un file accessibile tramite path)
 ## 4. Captioning delle immagini e tabelle
 
 Il captioner genera descrizioni testuali per elementi multimediali.
@@ -193,7 +151,7 @@ captioner = LLMCaptioner(
 )
 
 # Applicazione del captioner
-captioned_node = captioner.invoke(document_node)
+captioned_node = captioner(document_node)
 ```
 
 **Parametri:**
@@ -216,7 +174,7 @@ splitter = TextSplitter(
 
 # Conversione del nodo in testo (esempio semplificato)
 text_content = document_node.content or ""
-chunks = splitter.invoke(text_content)
+chunks = splitter(text_content)
 ```
 
 **Parametri:**
@@ -227,24 +185,42 @@ chunks = splitter.invoke(text_content)
 
 ## 6. Metatagger
 
-Il metatagger aggiunge tag e metadati ai chunk per migliorare il retrieval.
+Il metatagger estrae parole chiave e le aggiunge ai metadati dei chunk per migliorare retrieval e categorizzazione.
 
 ```python
+from datapizzai.modules.metatagger import KeywordMetatagger
+
 metatagger = KeywordMetatagger(
-    num_keywords=5  # numero di keyword da estrarre
+    client=client,                 # Client LLM per l'estrazione
+    max_workers=3,                 # Thread concorrenti
+    system_prompt=(
+        "Estrai fino a 5 keyword rilevanti per ciascun chunk; evita duplicati."
+    ),
+    user_prompt=(
+        "Preferisci termini brevi e specifici; niente frasi complete."
+    ),
+    keyword_name="keywords"        # Nome del campo metadata
 )
 
-# Applicazione del metatagger ai chunk
+# Applicazione del metatagger ai chunk (preserva contenuto e ID)
 tagged_chunks = []
 for chunk in chunks:
-    tagged_chunk = metatagger.invoke(chunk.text)
+    tagged_chunk = metatagger.invoke(chunk)  # passa l'intero Chunk
     tagged_chunks.append(tagged_chunk)
 ```
 
 **Parametri:**
-- `num_keywords`: numero di parole chiave da estrarre per chunk
+- `client (Client)`: client LLM per l'estrazione delle keyword
+- `max_workers (int)`: thread concorrenti (default: 3)
+- `system_prompt (str, opzionale)`: istruzioni per l'estrazione
+- `user_prompt (str, opzionale)`: contesto utente aggiuntivo
+- `keyword_name (str)`: nome del campo metadata per le keyword (default: `"keywords"`)
 
-**Funzionalità:** estrae automaticamente parole chiave rilevanti dal contenuto e le aggiunge ai metadati.
+**Funzionalità:**
+- Elaborazione concorrente dei chunk
+- Estrazione strutturata con modelli Pydantic
+- Prompt e nome campo metadata personalizzabili
+- Preserva contenuto e ID originali dei chunk
 
 ## 7. Embedding generation
 
@@ -417,7 +393,13 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     chunks = splitter.invoke(text_content)
     
     # 5. Metatagger
-    metatagger = KeywordMetatagger()
+    metatagger = KeywordMetatagger(
+        client=client,
+        max_workers=3,
+        system_prompt="Estrai fino a 5 keyword rilevanti per chunk; evita duplicati.",
+        user_prompt="Preferisci termini brevi e specifici; niente frasi complete.",
+        keyword_name="keywords"
+    )
     for i, chunk in enumerate(chunks):
         chunks[i] = metatagger.invoke(chunk)
     
