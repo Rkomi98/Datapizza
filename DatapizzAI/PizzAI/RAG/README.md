@@ -8,6 +8,8 @@ Implementazione rapida di un sistema RAG utilizzando la libreria datapizzai.
 - `test_azure_openai.py` - **TEST FIRST**: Verifica configurazione Azure OpenAI
 - `text_parser_example.py` - **NUOVO**: Esempio con TextParser (più semplice)
 - `improved_treebuilder_example.py` - **NUOVO**: Risolve errori TreeBuilder
+- `fix_api_key_issue.py` - **DIAGNOSTIC**: Risolve problemi API key
+- `env.example` - Template configurazione con tutte le opzioni
 - `simple_rag_example.py` - **START HERE**: Esempio funzionante solo con Azure OpenAI
 - `README_RAG_COMPLETE_GUIDE.md` - Guida completa aggiornata con TextParser
 - `rag_example.py` - Esempio completo con Azure Document Intelligence
@@ -34,7 +36,14 @@ pip install datapizzai
 
 ### 2. Configurazione
 
-Copiare `config.example.json` in `config.json` e inserire le proprie API key.
+```bash
+# Copia il template e inserisci le tue API key
+cp env.example .env
+# Modifica .env con le tue credenziali reali
+
+# O usa il diagnostic tool
+python fix_api_key_issue.py
+```
 
 ### 3. Avvio Qdrant (locale)
 
@@ -119,8 +128,24 @@ restructured_node = tree_builder.invoke(document_node)
 restructured_node = tree_builder.build_tree(text)
 ```
 
-### 2. XML parsing failed (nuovo)
+### 2. XML parsing failed
 Se vedi errori come `XML parsing failed after cleaning`, l'LLM non produce XML valido:
+
+### 3. API key non valida (nuovo)
+Se vedi errori come `Error code: 401 - invalid_api_key`:
+
+```bash
+# Diagnosi automatica
+python fix_api_key_issue.py
+
+# Controlla manualmente il file .env
+cat .env  # Verifica che OPENAI_API_KEY sia corretta
+```
+
+**Problemi comuni:**
+- API key copiata male (spazi, newline)
+- API key scaduta o senza crediti
+- Confusione tra OpenAI e Azure OpenAI keys
 
 ```python
 # ✅ SOLUZIONE ROBUSTA

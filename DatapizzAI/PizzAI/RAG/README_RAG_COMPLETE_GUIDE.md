@@ -84,11 +84,15 @@ Per documenti PDF con layout complessi, tabelle e immagini:
 
 ```python
 from datapizzai.modules.parsers import AzureParser
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Richiede Azure Document Intelligence (servizio separato)
 parser = AzureParser(
-    api_key="your_azure_document_intelligence_key",  # NON Azure OpenAI!
-    endpoint="https://your-doc-intel-endpoint.cognitiveservices.azure.com/",
+    api_key=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_API_KEY"),  # NON Azure OpenAI!
+    endpoint=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT"),
     result_type="markdown"
 )
 
@@ -108,34 +112,24 @@ Il tree builder ristruttura i nodi per ottimizzare la comprensione del documento
 ```python
 from datapizzai.clients import OpenAIClient
 from datapizzai.modules.treebuilder import LLMTreeBuilder
+import os
+from dotenv import load_dotenv
+load_dotenv()
+api_key=os.getenv("OPENAI_API_KEY"),
 
 # Configurazione client LLM
-client = OpenAIClient(api_key="your_openai_key")
+client = OpenAIClient(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model="gpt-4o",
+            )
 
 # Tree builder
 tree_builder = LLMTreeBuilder(
     client=client,
-    system_prompt="Riorganizza la struttura del documento per migliorare la comprensione."
 )
 
-# IMPORTANTE: usa build_tree() con il testo, NON invoke() con il nodo!
-# Estrai il testo dal nodo parsato
-text_content = document_node.content or _extract_text_from_node(document_node)
-
-# Applicazione del tree builder
-restructured_node = tree_builder.build_tree(text_content)
-
-# Funzione helper per estrarre testo da nodi complessi
-def _extract_text_from_node(node):
-    text_parts = []
-    if hasattr(node, 'content') and node.content:
-        text_parts.append(node.content)
-    if hasattr(node, 'children'):
-        for child in node.children:
-            child_text = _extract_text_from_node(child)
-            if child_text:
-                text_parts.append(child_text)
-    return "\n".join(text_parts)
+document_node = tree_builder.build_tree(text)
+print(document_node) 
 ```
 
 **Parametri:**
@@ -335,8 +329,13 @@ rewritten_query = rewriter.invoke(original_query)
 Il reranker riordina i risultati del retrieval per relevanza.
 
 ```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 reranker = CohereReranker(
-    api_key="your_cohere_key",
+    api_key=os.getenv("COHERE_API_KEY"),
     endpoint="https://api.cohere.com/v1",
     top_n=5,        # numero di risultati finali
     threshold=0.7   # soglia di rilevanza
@@ -388,12 +387,16 @@ Ecco un esempio che integra tutti i componenti usando il `TextParser`:
 
 ```python
 import asyncio
+import os
+from dotenv import load_dotenv
 from datapizzai.clients import OpenAIClient
 from datapizzai.modules.parsers.text_parser import parse_text
 
+load_dotenv()
+
 async def rag_pipeline_example():
     # 1. Setup
-    client = OpenAIClient(api_key="your_key")
+    client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"))
     
     # 2. Parsing (con TextParser)
     text = """Il machine learning è una branca dell'intelligenza artificiale.
@@ -443,7 +446,7 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     )
     
     # 10. Reranking
-    reranker = CohereReranker(api_key="cohere_key")
+    reranker = CohereReranker(api_key=os.getenv("COHERE_API_KEY"))
     final_results = reranker.invoke({
         "query": query,
         "documents": results

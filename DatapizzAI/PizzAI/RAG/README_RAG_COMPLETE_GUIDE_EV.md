@@ -55,10 +55,15 @@ The parser converts documents into hierarchical node structures.
 `AzureParser` uses Azure AI Document Intelligence for advanced parsing of PDFs and other documents:
 
 ```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Parser configuration
 parser = AzureParser(
-    api_key="your_azure_api_key",
-    endpoint="https://your-endpoint.cognitiveservices.azure.com/",
+    api_key=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_API_KEY"),
+    endpoint=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT"),
     result_type="markdown"  # or "text"
 )
 
@@ -79,9 +84,13 @@ The tree builder restructures nodes to optimize document understanding.
 
 ```python
 from datapizzai.clients import OpenAIClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # LLM client configuration
-client = OpenAIClient(api_key="your_openai_key")
+client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Tree builder
 tree_builder = LLMTreeBuilder(
@@ -246,8 +255,13 @@ rewritten_query = rewriter.invoke(original_query)
 The reranker reorders retrieved results by relevance.
 
 ```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 reranker = CohereReranker(
-    api_key="your_cohere_key",
+    api_key=os.getenv("COHERE_API_KEY"),
     endpoint="https://api.cohere.com/v1",
     top_n=5,        # number of final results
     threshold=0.7   # relevance threshold
@@ -299,16 +313,20 @@ Here is a complete example integrating all components:
 
 ```python
 import asyncio
+import os
+from dotenv import load_dotenv
 from datapizzai.clients import OpenAIClient
+
+load_dotenv()
 
 async def rag_pipeline_example():
     # 1. Setup
-    client = OpenAIClient(api_key="your_key")
+    client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"))
     
     # 2. Parsing
     parser = AzureParser(
-        api_key="azure_key",
-        endpoint="azure_endpoint"
+        api_key=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_API_KEY"),
+        endpoint=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT")
     )
     document = parser.invoke("document.pdf")
     
@@ -351,7 +369,7 @@ async def rag_pipeline_example():
     )
     
     # 10. Reranking
-    reranker = CohereReranker(api_key="cohere_key")
+    reranker = CohereReranker(api_key=os.getenv("COHERE_API_KEY"))
     final_results = reranker.invoke({
         "query": query,
         "documents": results
@@ -370,4 +388,3 @@ async def rag_pipeline_example():
 response = asyncio.run(rag_pipeline_example())
 print(response.content)
 ```
-
