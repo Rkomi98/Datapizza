@@ -139,9 +139,10 @@ api_key=os.getenv("OPENAI_API_KEY"),
 
 # Configurazione client LLM
 client = OpenAIClient(
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=api_key,
             model="gpt-4o",
             )
+
 
 # Tree builder
 tree_builder = LLMTreeBuilder(
@@ -255,7 +256,7 @@ embedder = NodeEmbedder(
 )
 
 # Generazione degli embedding
-embedded_chunks = embedder.invoke(tagged_chunks)
+embedded_chunks = embedder(tagged_chunks)
 ```
 
 **Parametri:**
@@ -271,6 +272,8 @@ query_embedder = ClientEmbedder(
     client=client,
     model_name="text-embedding-3-small"
 )
+
+embeddings = embedder.embed("Come spieghi il machine learning?")
 ```
 
 ## 8. Vector store

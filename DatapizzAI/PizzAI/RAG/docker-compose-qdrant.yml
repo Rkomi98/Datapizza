@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant-vectordb
+    restart: unless-stopped
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC API (opzionale)
+    volumes:
+      - ./qdrant_storage:/qdrant/storage:z
+    environment:
+      # Configurazioni opzionali
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      # Per autenticazione (opzionale)
+      # - QDRANT__SERVICE__API_KEY=your-secret-api-key
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Servizio opzionale: Qdrant Web UI (se non incluso nell'immagine principale)
+  qdrant-web:
+    image: qdrant/qdrant-web-ui:latest
+    container_name: qdrant-web-ui
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  # Web UI su porta 3000
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    depends_on:
+      - qdrant
+    profiles:
+      - web-ui  # Avvia solo se specificato: docker-compose --profile web-ui up
+
+
