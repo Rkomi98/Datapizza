@@ -5,7 +5,7 @@ Questa guida illustra come implementare un sistema di Retrieval-Augmented Genera
 ## Indice
 
 - [Panoramica del flusso RAG](#panoramica-del-flusso-rag)
-- [1. Setup iniziale](#1-setup-iniziale)
+- [1. Setup iniziale](#1-setup-iniziale) ⚠️ **Richiede Qdrant server attivo**
 - [2. Parsing dei documenti](#2-parsing-dei-documenti)
   - [TextParser (raccomandato per iniziare)](#textparser-raccomandato-per-iniziare)
   - [AzureParser (per PDF complessi)](#azureparser-per-pdf-complessi)
@@ -23,6 +23,11 @@ Questa guida illustra come implementare un sistema di Retrieval-Augmented Genera
 - [12. Esempio completo end-to-end](#12-esempio-completo-end-to-end)
 
 ## Panoramica del flusso RAG
+
+⚠️ **PREREQUISITO**: Assicurati che Qdrant server sia attivo prima di iniziare:
+```bash
+docker run -p 6333:6333 qdrant/qdrant
+```
 
 Il sistema RAG con datapizzai è composto dai seguenti componenti principali:
 
@@ -49,6 +54,18 @@ graph TD
 ```
 
 ## 1. Setup iniziale
+
+### Prerequisiti di sistema
+
+**Qdrant vector database** (obbligatorio per il vector store):
+```bash
+# Avvia Qdrant server con Docker
+docker run -p 6333:6333 qdrant/qdrant
+
+# Dashboard disponibile su: http://localhost:6333/dashboard
+```
+
+### Dipendenze Python
 
 Prima di iniziare, assicurarsi di avere installato datapizzai e le dipendenze necessarie:
 
@@ -135,11 +152,10 @@ from datapizzai.modules.treebuilder import LLMTreeBuilder
 import os
 from dotenv import load_dotenv
 load_dotenv()
-api_key=os.getenv("OPENAI_API_KEY"),
 
 # Configurazione client LLM
 client = OpenAIClient(
-            api_key=api_key,
+            api_key=os.getenv("OPENAI_API_KEY"),
             model="gpt-4o",
             )
 
@@ -280,31 +296,93 @@ embeddings = embedder.embed("Come spieghi il machine learning?")
 
 Il vector store memorizza i chunk con i loro embedding per il retrieval efficiente.
 
+⚠️ **IMPORTANTE**: Qdrant richiede di **creare esplicitamente le collezioni** prima dell'uso, specificando dimensione dei vettori e metrica di distanza.
+
 ```python
-# Configurazione Qdrant
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+
+# 1. PRIMA: assicurati che Qdrant server sia attivo
+# Avvia con: docker run -p 6333:6333 qdrant/qdrant
+
+# 2. Crea collezione (OBBLIGATORIO, fai UNA SOLA VOLTA)
+def create_collection_if_not_exists(collection_name, vector_size=384):
+    """Crea collezione Qdrant se non esiste già."""
+    client = QdrantClient(host="localhost", port=6333)
+    
+    # Verifica collezioni esistenti
+    collections = [c.name for c in client.get_collections().collections]
+    
+    if collection_name not in collections:
+        client.create_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(
+                size=vector_size,      # Dimensione embedding (es. 384 per text-embedding-3-small)
+                distance=Distance.COSINE  # Metrica di similarità
+            )
+        )
+        print(f"✅ Collezione '{collection_name}' creata")
+    else:
+        print(f"✅ Collezione '{collection_name}' già esistente")
+
+# 3. Setup collezione
+collection_name = "my_documents"
+vector_dimension = 384  # Deve corrispondere alla dimensione dei tuoi embeddings
+create_collection_if_not_exists(collection_name, vector_dimension)
+
+# 4. Configurazione vectorstore
 vectorstore = QdrantVectorstore(
     host="localhost",
     port=6333,
-    api_key=None  # se necessario
+    https=False,  # HTTP locale, non HTTPS
+    api_key=None  # Opzionale per istanze locali
 )
 
-# Creazione della collection
-collection_name = "my_documents"
+# 5. Aggiunta dei chunk al vector store
+try:
+    vectorstore.add(embedded_chunks, collection_name=collection_name)
+    print(f"✅ {len(embedded_chunks)} chunk aggiunti al vectorstore")
+except Exception as e:
+    print(f"❌ Errore aggiunta chunk: {e}")
+    print("💡 Verifica che la collezione esista e Qdrant sia attivo")
 
-# Aggiunta dei chunk al vector store
-for chunk in embedded_chunks:
-    vectorstore.add(chunk, collection_name=collection_name)
+# 6. Ricerca (con parametri corretti)
+query_embedding = [0.1, 0.2, ...]  # Il tuo embedding di query
+results = vectorstore.search(
+    query_embedding=query_embedding,  # ← Parametro corretto
+    collection_name=collection_name,
+    top_k=10                          # ← Parametro corretto (non k)
+)
 ```
 
-**Parametri:**
-- `host`: indirizzo del server Qdrant
-- `port`: porta del server Qdrant
-- `api_key`: chiave API se richiesta
+**Prerequisiti:**
+- **Qdrant server attivo**: `docker run -p 6333:6333 qdrant/qdrant`
+- **Collezione creata** con dimensione corretta
+- **Embedding dimension matching**: la collezione deve avere la stessa dimensione dei tuoi embeddings
+
+**Parametri QdrantVectorstore:**
+- `host`: indirizzo del server Qdrant (default: "localhost")  
+- `port`: porta del server Qdrant (default: 6333)
+- `https`: usa HTTPS (default: True, impostare False per locale)
+- `api_key`: chiave API se richiesta (None per installazioni locali)
+
+**Parametri search:**
+- `query_embedding`: vettore di query (lista di float)
+- `collection_name`: nome della collezione
+- `top_k`: numero di risultati da restituire
 
 **Funzionalità:**
-- Storage persistente di embedding
-- Ricerca semantica veloce
+- Storage persistente di embedding con metadati
+- Ricerca semantica ad alte prestazioni
 - Supporto per embedding densi e sparsi
+- Dashboard web su http://localhost:6333/dashboard
+
+**Troubleshooting comune:**
+```python
+# Errore "Collection doesn't exist" → Crea collezione prima
+# Errore "Connection refused" → Avvia Qdrant server  
+# Errore dimensione → Verifica vector_size nella collezione
+```
 
 ## 9. Query rewriting (facoltativo)
 
@@ -339,7 +417,16 @@ reranker = CohereReranker(
 
 # Esempio di utilizzo
 query = "machine learning applications"
-retrieved_chunks = vectorstore.search(query, top_k=20)
+
+# Prima genera embedding per la query
+query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
+query_embedding = query_embedder.embed(query)
+
+retrieved_chunks = vectorstore.search(
+    query_embedding=query_embedding,  # ← Parametro corretto
+    collection_name="documents", 
+    top_k=20
+)
 
 # Reranking
 final_chunks = reranker.invoke({
@@ -427,24 +514,42 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     embedder = NodeEmbedder(client=client)
     embedded_chunks = embedder.invoke(chunks)
     
-    # 7. Vector Store
-    vectorstore = QdrantVectorstore(host="localhost")
-    collection = "documents"
+    # 7. Vector Store - Setup completo e funzionante
+    from qdrant_client import QdrantClient
+    from qdrant_client.models import Distance, VectorParams
     
-    for chunk in embedded_chunks:
-        vectorstore.add(chunk, collection_name=collection)
+    # Setup collezione (OBBLIGATORIO)
+    collection_name = "documents"
+    vector_dimension = 384  # Dimensione embedding del modello
+    
+    client_qdrant = QdrantClient(host="localhost", port=6333)
+    collections = [c.name for c in client_qdrant.get_collections().collections]
+    
+    if collection_name not in collections:
+        client_qdrant.create_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=vector_dimension, distance=Distance.COSINE)
+        )
+        print(f"✅ Collezione '{collection_name}' creata")
+    
+    # Crea vectorstore
+    vectorstore = QdrantVectorstore(host="localhost", port=6333, https=False)
+    
+    # Aggiungi chunk
+    vectorstore.add(embedded_chunks, collection_name=collection_name)
+    print(f"✅ {len(embedded_chunks)} chunk aggiunti")
     
     # 8. Query processing
     query = "Qual è il contenuto principale del documento?"
     
     # 9. Retrieval
-    query_embedder = ClientEmbedder(client=client)
-    query_embedding = query_embedder.invoke(query)
+    query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
+    query_embedding = query_embedder.embed(query)
     
     results = vectorstore.search(
-        query_embedding, 
-        collection_name=collection, 
-        top_k=10
+        query_embedding=query_embedding,  # ← Parametro corretto
+        collection_name=collection_name,
+        top_k=10  # ← Parametro corretto
     )
     
     # 10. Reranking
