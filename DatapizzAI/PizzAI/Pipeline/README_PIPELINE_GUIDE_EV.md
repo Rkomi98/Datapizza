@@ -153,53 +153,154 @@ The DagPipeline allows creating dependency graphs (DAG - Directed Acyclic Graph)
 from datapizzai.pipeline import DagPipeline
 from datapizzai.core.models import PipelineComponent
 
+# 1. Define all graph components
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
-        return {"data": ["text1", "text2", "text3"]}
+        return {"reviews": ["Excellent product!", "I don't like it", "Average"]}
     async def _a_run(self, **kwargs):
         return self._run(**kwargs)
 
 class SentimentAnalyzer(PipelineComponent):
-    def _run(self, data, **kwargs):
-        # Sentiment analysis logic
-        return {"results": [{"text": t, "sentiment": "positive"} for t in data]}
-    async def _a_run(self, data, **kwargs):
-        return self._run(data=data, **kwargs)
+    def _run(self, reviews, **kwargs):
+        analyzed = [
+            {
+                "text": r,
+                "sentiment": "positive" if "excellent" in r.lower() else "negative" if "don't" in r.lower() else "neutral"
+            }
+            for r in reviews
+        ]
+        return {"sentiment_results": analyzed}
+    async def _a_run(self, reviews, **kwargs):
+        return self._run(reviews=reviews, **kwargs)
 
-# Create DAG pipeline
+class StatisticsCalculator(PipelineComponent):
+    def _run(self, sentiment_results, **kwargs):
+        sentiments = [r["sentiment"] for r in sentiment_results]
+        stats = {
+            "positive": sentiments.count("positive"),
+            "negative": sentiments.count("negative"), 
+            "neutral": sentiments.count("neutral")
+        }
+        return {"statistics": stats}
+    async def _a_run(self, sentiment_results, **kwargs):
+        return self._run(sentiment_results=sentiment_results, **kwargs)
+
+class MetadataExtractor(PipelineComponent):
+    def _run(self, reviews, **kwargs):
+        metadata = {
+            "total_reviews": len(reviews),
+            "avg_length": sum(len(r) for r in reviews) / len(reviews),
+            "timestamp": "2025-09-15"
+        }
+        return {"metadata": metadata}
+    async def _a_run(self, reviews, **kwargs):
+        return self._run(reviews=reviews, **kwargs)
+
+class ReportGenerator(PipelineComponent):
+    def _run(self, sentiment_results, statistics, metadata, **kwargs):
+        report = f"""
+ANALYSIS REPORT - {metadata['timestamp']}
+Total reviews: {metadata['total_reviews']}
+Average length: {metadata['avg_length']:.1f}
+
+SENTIMENT:
+- Positive: {statistics['positive']}
+- Negative: {statistics['negative']}
+- Neutral: {statistics['neutral']}
+
+DETAILS:
+{chr(10).join(f"- {r['text']}: {r['sentiment']}" for r in sentiment_results)}
+        """
+        return {"final_report": report.strip()}
+    async def _a_run(self, sentiment_results, statistics, metadata, **kwargs):
+        return self._run(sentiment_results=sentiment_results, statistics=statistics, metadata=metadata, **kwargs)
+
+# 2. Create DAG pipeline
 pipeline = DagPipeline()
-pipeline.add_module("loader", DataLoader())
-pipeline.add_module("analyzer", SentimentAnalyzer())
 
-# Define connections
+# 3. Register nodes
+pipeline.add_module("data_loader", DataLoader())
+pipeline.add_module("sentiment_analyzer", SentimentAnalyzer())
+pipeline.add_module("statistics_calculator", StatisticsCalculator())
+pipeline.add_module("metadata_extractor", MetadataExtractor())
+pipeline.add_module("report_generator", ReportGenerator())
+
+# 4. Define connections (as in the diagram)
+# DataLoader -> SentimentAnalyzer
 pipeline.connect(
-    source_node="loader",
-    target_node="analyzer",
-    source_key="data",
-    target_key="data"
+    source_node="data_loader",
+    target_node="sentiment_analyzer",
+    source_key="reviews",
+    target_key="reviews"
 )
 
-# Execute
+# SentimentAnalyzer -> StatisticsCalculator
+pipeline.connect(
+    source_node="sentiment_analyzer",
+    target_node="statistics_calculator",
+    source_key="sentiment_results",
+    target_key="sentiment_results"
+)
+
+# DataLoader -> MetadataExtractor
+pipeline.connect(
+    source_node="data_loader",
+    target_node="metadata_extractor",
+    source_key="reviews",
+    target_key="reviews"
+)
+
+# Converge into ReportGenerator
+pipeline.connect(
+    source_node="sentiment_analyzer",
+    target_node="report_generator",
+    source_key="sentiment_results",
+    target_key="sentiment_results"
+)
+
+pipeline.connect(
+    source_node="statistics_calculator",
+    target_node="report_generator",
+    source_key="statistics",
+    target_key="statistics"
+)
+
+pipeline.connect(
+    source_node="metadata_extractor",
+    target_node="report_generator",
+    source_key="metadata",
+    target_key="metadata"
+)
+
+# 5. Execute pipeline
 results = pipeline.run({})
+print(results["report_generator"]["final_report"])
 ```
 
 ### Flow diagram
 
 ```mermaid
 graph TD
-    A[DataLoader] --> B[SentimentAnalyzer]
-    B --> C[StatisticsCalculator]
-    A --> D[MetadataExtractor]
-    B --> E[ReportGenerator]
-    C --> E
-    D --> E
+    A[DataLoader] -->|reviews| B[SentimentAnalyzer]
+    B -->|sentiment_results| C[StatisticsCalculator]
+    A -->|reviews| D[MetadataExtractor]
+    B -->|sentiment_results| E[ReportGenerator]
+    C -->|statistics| E
+    D -->|metadata| E
     
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#f3e5f5
-    style D fill:#f3e5f5
-    style E fill:#e8f5e8
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style D fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    style E fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
 ```
+
+### Detailed parameters
+
+- **source_key**: specific key in the dictionary returned by the source node. If `None`, passes the entire result
+- **target_key**: parameter name in the `run()` method of the target node
+- **add_module()**: registers a component in the graph with a unique name
+- **connect()**: creates a directional dependency between two existing nodes
 
 ### Complete script
 
@@ -222,18 +323,117 @@ The FunctionalPipeline offers a functional approach to pipeline construction wit
 
 ```python
 from datapizzai.pipeline import FunctionalPipeline, Dependency
+from datapizzai.core.models import PipelineComponent
 
-# Sub-pipeline for notifications
+# 1. Define all required components
+class DataLoader(PipelineComponent):
+    def _run(self, **kwargs):
+        documents = [
+            {"id": 1, "title": "Bug Critical", "content": "System crash", "priority": "urgent"},
+            {"id": 2, "title": "Feature Request", "content": "New feature", "priority": "normal"},
+            {"id": 3, "title": "Security Issue", "content": "Vulnerability found", "priority": "urgent"}
+        ]
+        return {"documents": documents}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
+
+class Classifier(PipelineComponent):
+    def _run(self, documents, **kwargs):
+        # Accepts either dict {"documents": [...]} or a list of dicts
+        if isinstance(documents, dict) and "documents" in documents:
+            documents = documents["documents"]
+        elif documents is None:
+            documents = []
+        
+        # Classify by urgency
+        urgent_docs = [d for d in documents if isinstance(d, dict) and d.get("priority") == "urgent"]
+        has_urgent = len(urgent_docs) > 0
+        
+        return {
+            "classified_documents": documents,
+            "urgent_documents": urgent_docs,
+            "has_urgent": has_urgent
+        }
+    async def _a_run(self, documents, **kwargs):
+        return self._run(documents=documents, **kwargs)
+
+class NotificationSender(PipelineComponent):
+    def _run(self, **kwargs):
+        return {
+            "notification_sent": True,
+            "message": "⚠️ Urgent documents detected! Notification sent to the team.",
+            "timestamp": "2025-09-15T10:00:00Z"
+        }
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
+
+class DocumentProcessor(PipelineComponent):
+    def _run(self, document, **kwargs):
+        processed = {
+            **document,
+            "processed": True,
+            "word_count": len(document["content"].split()),
+            "processing_time": "2025-09-15T10:00:00Z"
+        }
+        return processed
+    async def _a_run(self, document, **kwargs):
+        return self._run(document=document, **kwargs)
+
+class ReportGenerator(PipelineComponent):
+    def _run(self, classified_documents, **kwargs):
+        total = len(classified_documents)
+        urgent_count = sum(1 for d in classified_documents if d.get("priority") == "urgent")
+        normal_count = total - urgent_count
+        
+        report = f"""
+DOCUMENT ANALYSIS REPORT
+========================
+Total documents: {total}
+Urgent documents: {urgent_count}
+Normal documents: {normal_count}
+
+DETAILS:
+{chr(10).join(f"- {d['title']}: {d['priority']}" for d in classified_documents)}
+        """
+        
+        return {
+            "final_report": report.strip(),
+            "statistics": {
+                "total": total,
+                "urgent": urgent_count,
+                "normal": normal_count
+            }
+        }
+    async def _a_run(self, classified_documents, **kwargs):
+        return self._run(classified_documents=classified_documents, **kwargs)
+
+# 2. Notification sub-pipeline (urgent documents)
 notification_pipeline = FunctionalPipeline().run(
-    name="notify",
+    name="send_notification",
     node=NotificationSender()
 )
 
-# Main pipeline with branching
+# 3. Standard processing sub-pipeline (normal documents)
+standard_processing_pipeline = (
+    FunctionalPipeline()
+    .foreach(
+        name="process_documents",
+        dependencies=[Dependency(node_name="classified_documents", target_key=None)],
+        do=DocumentProcessor()
+    )
+    .then(
+        name="generate_report",
+        node=ReportGenerator(),
+        target_key="classified_documents",
+        dependencies=[Dependency(node_name="classify", target_key="classified_documents")]
+    )
+)
+
+# 4. Main pipeline with conditional branching
 pipeline = (
     FunctionalPipeline()
-    .run(name="load", node=DataLoader())
-    .then(name="classify", node=Classifier(), target_key="data")
+    .run(name="load_data", node=DataLoader())
+    .then(name="classify", node=Classifier(), target_key="documents")
     .branch(
         condition=lambda ctx: ctx.get("classify", {}).get("has_urgent", False),
         dependencies=[Dependency(node_name="classify")],
