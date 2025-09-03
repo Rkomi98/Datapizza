@@ -2,6 +2,26 @@
 
 Questa guida illustra come implementare un sistema di Retrieval-Augmented Generation (RAG) completo utilizzando la libreria datapizzai. Il sistema copre l'intero flusso dalla parsing dei documenti fino alla generazione di risposte contestuali.
 
+## Indice
+
+- [Panoramica del flusso RAG](#panoramica-del-flusso-rag)
+- [1. Setup iniziale](#1-setup-iniziale)
+- [2. Parsing dei documenti](#2-parsing-dei-documenti)
+  - [TextParser (raccomandato per iniziare)](#textparser-raccomandato-per-iniziare)
+  - [AzureParser (per PDF complessi)](#azureparser-per-pdf-complessi)
+- [3. Tree builder (facoltativo)](#3-tree-builder-facoltativo)
+- [4. Captioning delle immagini e tabelle](#4-captioning-delle-immagini-e-tabelle)
+- [5. Splitting del testo](#5-splitting-del-testo)
+- [6. Metatagger](#6-metatagger)
+- [7. Embedding generation](#7-embedding-generation)
+  - [NodeEmbedder](#nodeembedder)
+  - [ClientEmbedder (per le query)](#clientembedder-per-le-query)
+- [8. Vector store](#8-vector-store)
+- [9. Query rewriting (facoltativo)](#9-query-rewriting-facoltativo)
+- [10. Reranking](#10-reranking)
+- [11. Prompt templates (facoltativo)](#11-prompt-templates-facoltativo)
+- [12. Esempio completo end-to-end](#12-esempio-completo-end-to-end)
+
 ## Panoramica del flusso RAG
 
 Il sistema RAG con datapizzai è composto dai seguenti componenti principali:
@@ -203,10 +223,7 @@ metatagger = KeywordMetatagger(
 )
 
 # Applicazione del metatagger ai chunk (preserva contenuto e ID)
-tagged_chunks = []
-for chunk in chunks:
-    tagged_chunk = metatagger.invoke(chunk)  # passa l'intero Chunk
-    tagged_chunks.append(tagged_chunk)
+tagged_chunks = metatagger(chunks)
 ```
 
 **Parametri:**

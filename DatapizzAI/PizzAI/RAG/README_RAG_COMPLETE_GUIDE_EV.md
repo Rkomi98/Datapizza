@@ -2,6 +2,26 @@
 
 This guide shows how to implement a complete Retrieval‑Augmented Generation (RAG) system using the datapizzai library. The system covers the entire flow from document parsing to context‑aware answer generation.
 
+## Table of Contents
+
+- [RAG Flow Overview](#rag-flow-overview)
+- [1. Initial Setup](#1-initial-setup)
+- [2. Document Parsing](#2-document-parsing)
+  - [TextParser (recommended to start)](#textparser-recommended-to-start)
+  - [AzureParser (for complex PDFs)](#azureparser-for-complex-pdfs)
+- [3. Tree Builder (optional)](#3-tree-builder-optional)
+- [4. Captioning Images and Tables](#4-captioning-images-and-tables)
+- [5. Text Splitting](#5-text-splitting)
+- [6. Metatagger](#6-metatagger)
+- [7. Embedding Generation](#7-embedding-generation)
+  - [NodeEmbedder](#nodeembedder)
+  - [ClientEmbedder (for queries)](#clientembedder-for-queries)
+- [8. Vector Store](#8-vector-store)
+- [9. Query Rewriting (optional)](#9-query-rewriting-optional)
+- [10. Reranking](#10-reranking)
+- [11. Prompt Templates (optional)](#11-prompt-templates-optional)
+- [12. End‑to‑End Example](#12-endtoend-example)
+
 ## RAG Flow Overview
 
 A datapizzai‑based RAG system is composed of the following main components:
