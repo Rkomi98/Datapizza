@@ -402,12 +402,10 @@ rewriter = ToolRewriter(
     system_prompt="Scegli e usa i tool solo se migliorano il recupero dei documenti.",
 )
 
-original_query = "Come funziona il machine learning?"
-# Uso asincrono (consigliato)
-rewritten_query = await rewriter.a_run(original_query)
+original_query = "Ciao, come stai? Sai per caso come funziona il machine learning?"
 
-# In alternativa, uso sincrono
-# rewritten_query = rewriter.run(original_query)
+rewritten_query = rewriter.run(original_query, memory=None)
+print(rewritten_query)
 ```
 
 ## 10. Reranking
