@@ -465,9 +465,9 @@ It uses statistical algorithms to identify patterns in data."""
     query_embedding = await query_embedder.a_run(query)
     
     results = vectorstore.search(
-        query_embedding, 
+        query_vector=query_embedding, 
         collection_name=collection, 
-        top_k=10
+        top_k=10  # or `k=10` on older versions
     )
     
     # 10. Reranking

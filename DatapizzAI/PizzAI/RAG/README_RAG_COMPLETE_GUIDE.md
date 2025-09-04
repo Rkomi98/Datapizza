@@ -65,33 +65,6 @@ docker run -p 6333:6333 qdrant/qdrant
 # Dashboard disponibile su: http://localhost:6333/dashboard
 ```
 
-### Quick Start Pattern
-
-Ecco il pattern base per usare DatapizzAI con Qdrant:
-
-```python
-# 1. Setup Qdrant
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
-from datapizzai.vectorstores import QdrantVectorstore
-
-client = QdrantClient(host="localhost", port=6333)
-client.create_collection(
-    collection_name="documents",
-    vectors_config=VectorParams(size=384, distance=Distance.COSINE)
-)
-
-vectorstore = QdrantVectorstore(host="localhost", port=6333, https=False)
-
-# 2. Usa DatapizzAI per RAG
-vectorstore.add(embedded_chunks, collection_name="documents")
-results = vectorstore.search(
-    query_embedding=query_embedding,
-    collection_name="documents",
-    top_k=5
-)
-```
-
 ### Dipendenze Python
 
 Prima di iniziare, assicurarsi di avere installato datapizzai e le dipendenze necessarie:
@@ -316,12 +289,12 @@ query_embedder = ClientEmbedder(
     model_name="text-embedding-3-small"
 )
 # Uso asincrono (consigliato)
-query_vector = await query_embedder.a_run(
-    "Come spieghi il machine learning?"
-)  # -> list[float]
+#query_vector = await query_embedder.a_run(
+#    "Come spieghi il machine learning?"
+#)  # -> list[float]
 
 # In alternativa, uso sincrono
-# query_vector = query_embedder.run("Come spieghi il machine learning?")
+query_vector = query_embedder.run("Come spieghi il machine learning?")
 ```
 
 ## 8. Vector store
@@ -331,40 +304,44 @@ Il vector store memorizza i chunk con i loro embedding per il retrieval efficien
 ⚠️ **IMPORTANTE**: Qdrant richiede di **creare esplicitamente le collezioni** prima dell'uso, specificando dimensione dei vettori e metrica di distanza.
 
 ```python
+import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
+from datapizzai.type import Chunk
 from datapizzai.vectorstores import QdrantVectorstore
 
 # 1. PRIMA: assicurati che Qdrant server sia attivo
 # Avvia con: docker run -p 6333:6333 qdrant/qdrant
 
 # 2. Connetti a Qdrant
-client = QdrantClient(host="localhost", port=6333)
+vectorstore = QdrantVectorstore(host="localhost", port=6333)
+client_Q = QdrantClient(host="localhost", port=6333)
 
 # 3. Crea collezione (una sola volta)
 client.create_collection(
     collection_name="documents",
     vectors_config=VectorParams(
-        size=384,  # Dimensione dei tuoi embeddings
+        size=1536,  # Dimensione dei tuoi embeddings
         distance=Distance.COSINE
     )
 )
+chunks = [
+    Chunk(id=uuid.uuid4(), text="Python programming concepts"),
+    Chunk(id=uuid.uuid4(), text="Machine learning fundamentals")
+]
 
-# 4. Configurazione vectorstore DatapizzAI
-vectorstore = QdrantVectorstore(
-    host="localhost", 
-    port=6333,
-    https=False  # HTTP locale
-)
+embedded_chunks = embedder(chunks)
 
 # 5. Aggiungi dati
 vectorstore.add(embedded_chunks, collection_name="documents")
-
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="text-embedding-3-small")
+query_embedding = client.embed("programming languages")
 # 6. Ricerca
 results = vectorstore.search(
-    query_embedding=query_embedding,   # ← parametro corretto
+    query_vector=query_embedding,
     collection_name="documents",
-    top_k=5                            # ← parametro corretto
 )
 ```
 
@@ -379,10 +356,10 @@ results = vectorstore.search(
 - `https`: usa HTTPS (default: True, impostare False per locale)
 - `api_key`: chiave API se richiesta (None per installazioni locali)
 
-**Parametri search:**
-- `query_embedding`: vettore di query (lista di float)
+**Parametri search (variano per versione):**
+- `query_vector`: vettore di query (lista di float)
 - `collection_name`: nome della collezione
-- `top_k`: numero di risultati da restituire
+- `top_k` oppure `k`: numero di risultati da restituire
 
 **Funzionalità:**
 - Storage persistente di embedding con metadati
@@ -440,7 +417,7 @@ query_embedding = await query_embedder.a_run(query)
 
 # Usa DatapizzAI vectorstore
 retrieved_chunks = vectorstore.search(
-    query_embedding=query_embedding,  # ← Parametro corretto
+    query_vector=query_embedding,  # alcune versioni usano `query_vector`
     collection_name="documents", 
     top_k=20
 )
@@ -557,9 +534,9 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     query_embedding = await query_embedder.a_run(query)
     
     results = vectorstore.search(
-        query_embedding=query_embedding,  # ← Parametro corretto
+        query_vector=query_embedding,  # alcune versioni usano `query_vector`
         collection_name="documents",
-        top_k=10  # ← Parametro corretto
+        top_k=10  # oppure `k=10` in versioni precedenti
     )
     
     # 10. Reranking
