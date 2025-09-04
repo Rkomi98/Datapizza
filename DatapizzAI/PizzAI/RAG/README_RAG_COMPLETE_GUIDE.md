@@ -403,7 +403,10 @@ rewriter = ToolRewriter(
 )
 
 original_query = "Ciao, come stai? Sai per caso come funziona il machine learning?"
+# Uso asincrono (consigliato)
+# rewritten_query = await rewriter.a_run(original_query)
 
+# In alternativa, uso sincrono
 rewritten_query = rewriter.run(original_query, memory=None)
 print(rewritten_query)
 ```
