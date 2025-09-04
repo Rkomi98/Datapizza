@@ -238,10 +238,7 @@ metatagger = KeywordMetatagger(
 )
 
 # Apply metatagger to chunks (preserves content and IDs)
-tagged_chunks = []
-for chunk in chunks:
-    tagged_chunk = metatagger.invoke(chunk)  # pass the whole Chunk
-    tagged_chunks.append(tagged_chunk)
+tagged_chunks = metatagger(chunks)
 ```
 
 Parameters:
@@ -272,8 +269,8 @@ embedder = NodeEmbedder(
     batch_size=100  # batch size for processing
 )
 
-# Generate embeddings
-embedded_chunks = embedder.invoke(tagged_chunks)
+# Generate embeddings (sync)
+embedded_chunks = embedder(tagged_chunks)
 ```
 
 Parameters:
@@ -304,43 +301,96 @@ query_vector = await query_embedder.a_run(
 The vector store persists chunks and their embeddings for efficient retrieval.
 
 ```python
-# Qdrant configuration
-vectorstore = QdrantVectorstore(
-    host="localhost",
-    port=6333,
-    api_key=None  # if required
+import os, uuid
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+from datapizzai.type import Chunk
+from datapizzai.vectorstores import QdrantVectorstore
+from datapizzai.clients import OpenAIClient
+
+# 1) Ensure Qdrant server is running
+# docker run -p 6333:6333 qdrant/qdrant
+
+# 2) Connect to Qdrant and create collection once
+vectorstore = QdrantVectorstore(host="localhost", port=6333)
+client_Q = QdrantClient(host="localhost", port=6333)
+
+client_Q.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(
+        size=1536,              # match your embedding model
+        distance=Distance.COSINE
+    )
 )
 
-# Create a collection
-collection_name = "my_documents"
+# 3) Prepare chunks and embed
+chunks = [
+    Chunk(id=uuid.uuid4(), text="Python programming concepts"),
+    Chunk(id=uuid.uuid4(), text="Machine learning fundamentals"),
+]
 
-# Add chunks to the vector store
-for chunk in embedded_chunks:
-    vectorstore.add(chunk, collection_name=collection_name)
+embedded_chunks = embedder(chunks)
+
+# 4) Add to vector store (batch)
+vectorstore.add(embedded_chunks, collection_name="documents")
+
+# 5) Build a query embedding and search
+client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="text-embedding-3-small")
+query_vector = client.embed("programming languages")
+
+results = vectorstore.search(
+    query_vector=query_vector,
+    collection_name="documents",
+)
 ```
 
-Parameters:
-- `host`: Qdrant server address
-- `port`: Qdrant server port
-- `api_key`: API key if required
+Parameters QdrantVectorstore:
+- `host`: Qdrant server address (default: "localhost")
+- `port`: Qdrant server port (default: 6333)
+- `https`: enable HTTPS (default: True; set False for local HTTP)
+- `api_key`: API key if required (None for local HTTP)
+
+Search parameters (version‑dependent):
+- `query_vector`: query embedding (list of float)
+- `collection_name`: target collection name
+- `top_k` or `k`: number of results to return
 
 Features:
-- Persistent storage of embeddings
+- Persistent storage of embeddings with metadata
 - Fast semantic search
 - Supports dense and sparse embeddings
 
-## 9. Query Rewriting (optional)
+## 9. Rewriters (optional)
 
-The rewriter optimizes user queries to improve retrieval.
+Rewriters are pipeline components that transform and enhance user queries using language models and tools. They help optimize queries for better search results and data retrieval by rephrasing, expanding, or restructuring the input.
+
+When to use them:
+- Reframing questions for broader information coverage
+- Expanding with synonyms/technical terms or related entities
+- Normalizing and disambiguating queries (e.g., acronyms)
+- Preparing tool‑compatible queries for search engines or APIs
+
+Common traits:
+- Input: query string (optionally with memory/context)
+- Output: rewritten string or a structured payload with fields
+- Modes: synchronous (`run`) or asynchronous (`a_run`)
+
+Example: ToolRewriter
 
 ```python
+from datapizzai.modules.rewriters import ToolRewriter
+
 rewriter = ToolRewriter(
-    tools=["web_search", "document_search"],  # available tools
-    max_rewrites=3
+    client=client,
+    system_prompt="Pick and use tools only when they improve document retrieval.",
 )
 
 original_query = "How does machine learning work?"
-rewritten_query = rewriter.invoke(original_query)
+# Async usage (recommended)
+rewritten_query = await rewriter.a_run(original_query)
+
+# Alternatively, sync usage
+# rewritten_query = rewriter.run(original_query)
 ```
 
 ## 10. Reranking
@@ -360,9 +410,22 @@ reranker = CohereReranker(
     threshold=0.7   # relevance threshold
 )
 
-# Example usage
+# Example usage with DatapizzAI
+from datapizzai.embedders import ClientEmbedder
+from datapizzai.vectorstores import QdrantVectorstore
+
 query = "machine learning applications"
-retrieved_chunks = vectorstore.search(query, top_k=20)
+
+# Build query embedding
+query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
+query_embedding = await query_embedder.a_run(query)
+
+# Search
+retrieved_chunks = vectorstore.search(
+    query_vector=query_embedding,
+    collection_name="documents",
+    top_k=20
+)
 
 # Reranking
 final_chunks = reranker.invoke({

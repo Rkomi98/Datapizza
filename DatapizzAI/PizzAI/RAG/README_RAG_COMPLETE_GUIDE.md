@@ -17,7 +17,7 @@ Questa guida illustra come implementare un sistema di Retrieval-Augmented Genera
   - [NodeEmbedder](#nodeembedder)
   - [ClientEmbedder (per le query)](#clientembedder-per-le-query)
 - [8. Vector store](#8-vector-store)
-- [9. Query rewriting (facoltativo)](#9-query-rewriting-facoltativo)
+- [9. Rewriter (facoltativo)](#9-rewriter-facoltativo)
 - [10. Reranking](#10-reranking)
 - [11. Prompt templates (facoltativo)](#11-prompt-templates-facoltativo)
 - [12. Esempio completo end-to-end](#12-esempio-completo-end-to-end)
@@ -133,7 +133,7 @@ parser = AzureParser(
     result_type="markdown"
 )
 
-document_node = parser.invoke("path/to/document.pdf")
+document_node = parser("path/to/document.pdf")
 ```
 
 **Quando usarlo:**
@@ -318,7 +318,7 @@ vectorstore = QdrantVectorstore(host="localhost", port=6333)
 client_Q = QdrantClient(host="localhost", port=6333)
 
 # 3. Crea collezione (una sola volta)
-client.create_collection(
+client_Q.create_collection(
     collection_name="documents",
     vectors_config=VectorParams(
         size=1536,  # Dimensione dei tuoi embeddings
@@ -337,10 +337,10 @@ vectorstore.add(embedded_chunks, collection_name="documents")
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="text-embedding-3-small")
-query_embedding = client.embed("programming languages")
+query_vector = client.embed("programming languages")
 # 6. Ricerca
 results = vectorstore.search(
-    query_vector=query_embedding,
+    query_vector=query_vector,
     collection_name="documents",
 )
 ```
@@ -374,18 +374,40 @@ results = vectorstore.search(
 # Errore dimensione → Verifica vector_size nella collezione
 ```
 
-## 9. Query rewriting (facoltativo)
+## 9. Rewriter (facoltativo)
 
-Il rewriter ottimizza le query utente per migliorare il retrieval.
+I rewriter sono componenti di pipeline che trasformano e migliorano le query dell'utente usando modelli linguistici e tool. Aiutano a ottimizzare le query per ottenere risultati di ricerca e retrieval migliori, riformulando, espandendo o ristrutturando l'input.
+
+Quando usarli:
+- Reframing della domanda per maggior copertura informativa
+- Espansione con sinonimi/termini tecnici o entità correlate
+- Normalizzazione e disambiguazione della query (es. acronimi)
+- Preparazione di query compatibili con tool e motori di ricerca
+
+Caratteristiche comuni:
+- Input: stringa della query (opzionalmente con memoria/contesto)
+- Output: stringa riscritta o struttura con campi specifici
+- Modalità: sincrona (`run`) o asincrona (`a_run`)
+
+Esempio: ToolRewriter
 
 ```python
+from datapizzai.modules.rewriters import ToolRewriter
+from datapizzai.clients import OpenAIClient
+
+client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+
 rewriter = ToolRewriter(
-    tools=["web_search", "document_search"],  # tool disponibili
-    max_rewrites=3
+    client=client,
+    system_prompt="Scegli e usa i tool solo se migliorano il recupero dei documenti.",
 )
 
 original_query = "Come funziona il machine learning?"
-rewritten_query = rewriter.invoke(original_query)
+# Uso asincrono (consigliato)
+rewritten_query = await rewriter.a_run(original_query)
+
+# In alternativa, uso sincrono
+# rewritten_query = rewriter.run(original_query)
 ```
 
 ## 10. Reranking
