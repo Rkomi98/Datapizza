@@ -68,13 +68,13 @@ def basic_tracing_example():
     
     with tracer.trace("chat_conversation") as trace:
         # Add user message to memory
-        memory.add(TextBlock(text="Explain what machine learning is", role=ROLE.USER))
+        memory.add_turn([TextBlock(content="Explain what machine learning is")], ROLE.USER)
         
         # Invoke client - automatically traced
-        response = client.invoke(memory.get_memory())
+        response = client.invoke("", memory=memory)
         
         # Add response to memory
-        memory.add(TextBlock(text=response.text, role=ROLE.ASSISTANT))
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         
         print(f"Response: {response.text}")
         print(f"Tokens used: {response.prompt_tokens_used + response.completion_tokens_used}")
@@ -122,7 +122,7 @@ def manual_spans_example():
             span.set_attribute("input_length", 150)
             
             response = client.invoke([
-                TextBlock(text="Write a poem", role=ROLE.USER)
+                TextBlock(content="Write a poem")
             ])
             
             span.set_attribute("output_length", len(response.text))
@@ -169,7 +169,7 @@ def custom_attributes_example():
             
             # Invoke model for sentiment analysis
             prompt = "Analyze the sentiment of this text: 'Today is a fantastic day!'"
-            response = client.invoke([TextBlock(text=prompt, role=ROLE.USER)])
+            response = client.invoke([TextBlock(content=prompt)])
             
             # Output attributes
             span.set_attribute("sentiment_detected", "positive")
@@ -244,7 +244,7 @@ def zipkin_example():
         client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-3.5-turbo")
         
         response = client.invoke([
-            TextBlock(text="Create a 50-word summary", role=ROLE.USER)
+            TextBlock(content="Create a 50-word summary")
         ])
         
         print(f"Response sent to Zipkin: {response.text[:100]}...")
@@ -389,9 +389,9 @@ def chat_with_monitoring():
     """Chat function with monitoring"""
     client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-3.5-turbo")
     
-    response = client.invoke([
-        TextBlock(text="Explain the concept of monitoring in 100 words", role=ROLE.USER)
-    ])
+                response = client.invoke([
+                TextBlock(content="Explain the concept of monitoring in 100 words")
+            ])
     
     return response
 
@@ -567,7 +567,7 @@ def complete_grafana_example():
     for i in range(10):
         with tracer.trace(f"grafana_example_{i}") as trace:
             response = client.invoke([
-                TextBlock(text=f"Message number {i+1}", role=ROLE.USER)
+                TextBlock(content=f"Message number {i+1}")
             ])
             
             print(f"✅ Request {i+1} traced in Grafana")
@@ -665,7 +665,7 @@ def process_business_rules(data):
     """
     
     # AI client call (automatically traced by ContextTracing)
-    response = client.invoke([TextBlock(text=prompt, role=ROLE.USER)])
+    response = client.invoke([TextBlock(content=prompt)])
     
     # Process result
     result = {
