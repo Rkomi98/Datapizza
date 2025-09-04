@@ -200,7 +200,18 @@ def esempio_attributi_personalizzati():
             
     return response
 ```
-
+```bash
+╭────────────────────────────────── Trace Summary of sentiment_analysis_father ───────────────────────────────────╮
+│ Total Spans: 3                                                                                                  │
+│ Duration: 8.86s                                                                                                 │
+│                          Token Usage                                                                            │
+│ ┏━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓                                                   │
+│ ┃ Model ┃ Prompt Tokens ┃ Completion Tokens ┃ Cached Tokens ┃                                                   │
+│ ┡━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩                                                   │
+│ │ gpt-5 │ 23            │ 400               │ 0             │                                                   │
+│ └───────┴───────────────┴───────────────────┴───────────────┘                                                   │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
 ## 4. Adding external exporters
 
 Per integrare il monitoring con sistemi esterni, è possibile configurare esportatori personalizzati.
