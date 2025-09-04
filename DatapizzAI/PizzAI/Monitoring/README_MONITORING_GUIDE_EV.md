@@ -581,74 +581,109 @@ def complete_grafana_example():
 
 ## Complete example
 
+This practical example combines the `datapizzai` contextual tracer with manual spans created via OpenTelemetry to monitor a complete workflow.
+
 ```python
 #!/usr/bin/env python3
 """
-Complete monitoring example with datapizzai
-Demonstrates all tracing and monitoring features
+Practical monitoring example with manual spans and datapizzai client.
 """
 
 import os
 import time
+import logging
 from dotenv import load_dotenv
+from opentelemetry import trace
 from datapizzai.clients import ClientFactory
 from datapizzai.tracing import ContextTracing
-from datapizzai.tracing.tracing import generation_span, tool_span
-from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+# --- Example Functions ---
+
+def fetch_from_database():
+    """Simulates fetching data from a database."""
+    logger.info("Fetching data from database...")
+    time.sleep(0.5)
+    logger.info("Data fetched successfully.")
+    return {"user_id": 123, "request_text": "Create a summary of a text about finance."}
+
+def validate_data(data: dict):
+    """Simulates data validation logic."""
+    logger.info("Validating data...")
+    time.sleep(0.2)
+    if "user_id" in data and "request_text" in data:
+        logger.info("Data validated successfully.")
+        return True
+    logger.error("Data validation failed.")
+    return False
+
+def process_business_rules(data: dict, client):
+    """
+    Simulates core business logic using the AI client.
+    This function is automatically traced by the datapizzai client.
+    """
+    logger.info("Processing business rules...")
+    prompt = f"User {data['user_id']} requested: {data['request_text']}. Respond concisely."
+    response = client.invoke([TextBlock(text=prompt, role=ROLE.USER)])
+    logger.info("Business rules processed successfully.")
+    return {"summary": response.text, "tokens_used": response.completion_tokens_used}
+
+# --- Main Application ---
+
 def main():
-    """Complete monitoring example"""
+    """Main function to run the monitoring example."""
     
-    # Setup monitoring
-    tracer = ContextTracing()
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4")
-    memory = Memory()
-    
-    print("🚀 Starting complete monitoring example")
-    
-    with tracer.trace("complete_monitoring_example") as trace:
-        
-        # Phase 1: Basic conversation
-        with generation_span("initial_conversation") as span:
-            span.set_attribute("phase", "initialization")
-            
-            memory.add(TextBlock(text="Hello! Can you explain what monitoring is?", role=ROLE.USER))
-            response1 = client.invoke(memory.get_memory())
-            memory.add(TextBlock(text=response1.text, role=ROLE.ASSISTANT))
-            
-            span.set_attribute("response_length", len(response1.text))
-            print(f"✅ Phase 1 completed - {response1.completion_tokens_used} tokens")
-        
-        # Phase 2: Data processing
-        with tool_span("data_processing") as span:
-            span.set_attribute("operation", "data_analysis")
-            
-            # Simulate processing
-            time.sleep(0.5)
-            span.set_attribute("processing_time", 0.5)
-            span.set_attribute("data_processed", True)
-            
-            print("✅ Phase 2 completed - Data processed")
-        
-        # Phase 3: Final response
-        with generation_span("final_response") as span:
-            span.set_attribute("phase", "finalization")
-            
-            memory.add(TextBlock(text="Perfect! Now give me a practical example", role=ROLE.USER))
-            response2 = client.invoke(memory.get_memory())
-            memory.add(TextBlock(text=response2.text, role=ROLE.ASSISTANT))
-            
-            span.set_attribute("final_response_length", len(response2.text))
-            print(f"✅ Phase 3 completed - {response2.completion_tokens_used} tokens")
-    
-    print("\n🎯 Monitoring completed! Check the trace output above.")
-    print("📊 The trace shows:")
-    print("  - Tokens used for each phase")
-    print("  - Total operation duration")
-    print("  - Custom span details")
+    # 1. Initialize datapizzai tracer for the main context
+    datapizzai_tracer = ContextTracing()
+
+    # 2. Configure the AI client
+    try:
+        client = ClientFactory.create(
+            provider="openai",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model="gpt-4",
+            temperature=0.7
+        )
+    except Exception:
+        logger.warning("OPENAI_API_KEY not found. Using a mock client.")
+        class MockResponse:
+            text = "This is a mock response."
+            prompt_tokens_used = 10
+            completion_tokens_used = 20
+            cached_tokens_used = 0
+        class MockClient:
+            def invoke(self, messages): return MockResponse()
+        client = MockClient()
+
+    # 3. Get the standard OpenTelemetry tracer to create manual spans
+    otel_tracer = trace.get_tracer(__name__)
+
+    # 4. Run the workflow inside the main trace
+    with datapizzai_tracer.trace("user_request_processing") as main_trace:
+        logger.info("Starting trace for user request processing...")
+
+        with otel_tracer.start_as_current_span("database_query") as db_span:
+            data = fetch_from_database()
+            db_span.set_attribute("user_id", data.get("user_id"))
+
+        with otel_tracer.start_as_current_span("data_validation") as validation_span:
+            is_valid = validate_data(data)
+            validation_span.set_attribute("is_valid", is_valid)
+            if not is_valid:
+                return
+
+        with otel_tracer.start_as_current_span("business_logic") as business_span:
+            result = process_business_rules(data, client)
+            business_span.set_attribute("tokens_used", result.get("tokens_used"))
+
+        logger.info(f"Final result: {result['summary']}")
+        logger.info("Trace completed.")
 
 if __name__ == "__main__":
     main()
