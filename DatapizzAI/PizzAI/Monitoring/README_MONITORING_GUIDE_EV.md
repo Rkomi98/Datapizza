@@ -581,112 +581,177 @@ def complete_grafana_example():
 
 ## Complete example
 
-This practical example combines the `datapizzai` contextual tracer with manual spans created via OpenTelemetry to monitor a complete workflow.
+This practical example combines the `datapizzai` contextual tracer with manual spans created via OpenTelemetry to monitor a complete workflow. The script is designed to be as clear as possible, with detailed comments explaining each step.
 
 ```python
 #!/usr/bin/env python3
 """
-Practical monitoring example with manual spans and datapizzai client.
+Practical monitoring example with datapizzai.
+
+Objective:
+To illustrate how to combine `datapizzai`'s contextual tracing with
+manual span creation via OpenTelemetry to monitor a realistic workflow.
+
+What this script does:
+1.  **Initializes Tracing**: Sets up both `ContextTracing` from datapizzai for general monitoring and a standard OpenTelemetry tracer for custom spans.
+2.  **Configures an AI Client**: Uses `ClientFactory` to create an OpenAI client. If the API key is unavailable, it falls back to a "mock" client to allow execution.
+3.  **Simulates a Workflow**:
+    - Fetches data from a "database".
+    - Validates the data.
+    - Executes business logic that includes a call to the AI client.
+4.  **Creates Detailed Spans**: Each step of the workflow (DB read, validation, business logic) is wrapped in a manual span for detailed performance and flow analysis.
+5.  **Prints Clear Output**: Displays the executed steps and the final result in the console. At the end, the `ContextTracing` trace summarizes key metrics (tokens, duration).
 """
 
 import os
 import time
 import logging
 from dotenv import load_dotenv
+
+# Import from OpenTelemetry to create manual spans
 from opentelemetry import trace
+
+# Import from datapizzai for the client and contextual tracing
 from datapizzai.clients import ClientFactory
 from datapizzai.tracing import ContextTracing
 from datapizzai.type import TextBlock, ROLE
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# --- Initial Setup ---
+
+# Enable clear logging to follow the script's execution
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(funcName)s] - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Load environment variables from a .env file
 load_dotenv()
 
-# --- Example Functions ---
+
+# --- Helper Functions simulating a real application ---
 
 def fetch_from_database():
-    """Simulates fetching data from a database."""
-    logger.info("Fetching data from database...")
-    time.sleep(0.5)
-    logger.info("Data fetched successfully.")
-    return {"user_id": 123, "request_text": "Create a summary of a text about finance."}
+    """Simulates a call to a database to retrieve data."""
+    logger.info("Attempting to fetch data...")
+    time.sleep(0.3)  # Simulate network/DB latency
+    logger.info("Data fetched.")
+    return {"user_id": "USR-007", "request_text": "Explain the benefits of monitoring in an AI application."}
 
 def validate_data(data: dict):
-    """Simulates data validation logic."""
+    """Simulates validation of the received data."""
     logger.info("Validating data...")
-    time.sleep(0.2)
-    if "user_id" in data and "request_text" in data:
-        logger.info("Data validated successfully.")
+    time.sleep(0.1)  # Simulate processing time
+    if data and "user_id" in data and len(data.get("request_text", "")) > 10:
+        logger.info("Data is valid.")
         return True
-    logger.error("Data validation failed.")
+    logger.error("Invalid or incomplete data.")
     return False
 
-def process_business_rules(data: dict, client):
+def process_with_ai(data: dict, client):
     """
-    Simulates core business logic using the AI client.
-    This function is automatically traced by the datapizzai client.
+    Executes the main business logic, which includes an LLM call.
+    The interaction with `client.invoke` is automatically traced by `ContextTracing`.
     """
-    logger.info("Processing business rules...")
-    prompt = f"User {data['user_id']} requested: {data['request_text']}. Respond concisely."
-    response = client.invoke([TextBlock(text=prompt, role=ROLE.USER)])
-    logger.info("Business rules processed successfully.")
-    return {"summary": response.text, "tokens_used": response.completion_tokens_used}
-
-# --- Main Application ---
-
-def main():
-    """Main function to run the monitoring example."""
+    logger.info("Processing the request with the AI client...")
     
-    # 1. Initialize datapizzai tracer for the main context
-    datapizzai_tracer = ContextTracing()
+    prompt = f"User {data['user_id']} asks: '{data['request_text']}'. Formulate a clear and concise answer."
+    
+    # This call is automatically traced, including token usage
+    response = client.invoke([TextBlock(text=prompt, role=ROLE.USER)])
+    
+    logger.info("AI response generated.")
+    return {"final_summary": response.text, "tokens_used": response.completion_tokens_used}
 
-    # 2. Configure the AI client
+def get_ai_client():
+    """
+    Creates and returns an AI client. If the API key is not configured,
+    it returns a mock client to allow the script to run.
+    """
     try:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY not found in .env file")
+            
         client = ClientFactory.create(
             provider="openai",
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=api_key,
             model="gpt-4",
             temperature=0.7
         )
-    except Exception:
-        logger.warning("OPENAI_API_KEY not found. Using a mock client.")
+        logger.info("OpenAI client configured successfully.")
+        return client
+    except Exception as e:
+        logger.warning(f"{e}. A mock client will be used instead.")
+        
+        # --- Definition of a Mock client for offline execution ---
         class MockResponse:
-            text = "This is a mock response."
-            prompt_tokens_used = 10
-            completion_tokens_used = 20
+            text = "Monitoring is crucial for tracking performance, costs, and reliability. (Mock Response)"
+            prompt_tokens_used = 30
+            completion_tokens_used = 45
             cached_tokens_used = 0
+            
         class MockClient:
-            def invoke(self, messages): return MockResponse()
-        client = MockClient()
+            def invoke(self, messages):
+                time.sleep(0.5) # Simulate LLM latency
+                return MockResponse()
+                
+        return MockClient()
 
-    # 3. Get the standard OpenTelemetry tracer to create manual spans
+
+# --- Main Workflow ---
+
+def run_monitored_workflow():
+    """
+    Runs a complete workflow, monitoring it with `ContextTracing`
+    and enriching it with manual OpenTelemetry spans.
+    """
+    
+    # 1. Initialize the datapizzai contextual tracer.
+    #    This wrapper will automatically capture calls to datapizzai clients
+    #    and provide a final summary.
+    datapizzai_tracer = ContextTracing()
+
+    # 2. Get the standard OpenTelemetry tracer.
+    #    This is used to create manual spans for granular control
+    #    over monitoring specific parts of the code.
     otel_tracer = trace.get_tracer(__name__)
 
-    # 4. Run the workflow inside the main trace
-    with datapizzai_tracer.trace("user_request_processing") as main_trace:
-        logger.info("Starting trace for user request processing...")
+    # 3. Prepare the AI client
+    ai_client = get_ai_client()
 
-        with otel_tracer.start_as_current_span("database_query") as db_span:
-            data = fetch_from_database()
-            db_span.set_attribute("user_id", data.get("user_id"))
+    # 4. Start the main trace.
+    #    Everything that happens within this `with` block will be part of a
+    #    single trace, making it easy to analyze the entire operation.
+    with datapizzai_tracer.trace("complete_request_processing") as main_trace:
+        logger.info(">>> Starting monitored workflow <<<")
 
-        with otel_tracer.start_as_current_span("data_validation") as validation_span:
-            is_valid = validate_data(data)
-            validation_span.set_attribute("is_valid", is_valid)
+        # Span 1: Fetch data from the Database
+        with otel_tracer.start_as_current_span("1. fetch_db_data") as db_span:
+            retrieved_data = fetch_from_database()
+            db_span.set_attribute("user.id", retrieved_data.get("user_id"))
+            db_span.set_attribute("db.system", "postgresql_simulation")
+
+        # Span 2: Validate Data
+        with otel_tracer.start_as_current_span("2. validate_input") as validation_span:
+            is_valid = validate_data(retrieved_data)
+            validation_span.set_attribute("validation.success", is_valid)
             if not is_valid:
+                logger.error("Workflow stopped due to invalid data.")
                 return
 
-        with otel_tracer.start_as_current_span("business_logic") as business_span:
-            result = process_business_rules(data, client)
-            business_span.set_attribute("tokens_used", result.get("tokens_used"))
+        # Span 3: Business Logic with AI
+        # This manual span provides context for the AI call.
+        # The `client.invoke` call within it will, in turn, create its own
+        # automatic child span, thanks to `ContextTracing`.
+        with otel_tracer.start_as_current_span("3. process_business_logic") as business_span:
+            result = process_with_ai(retrieved_data, ai_client)
+            business_span.set_attribute("ai.tokens_used", result.get("tokens_used"))
+            business_span.set_attribute("result.summary_length", len(result.get("final_summary", "")))
 
-        logger.info(f"Final result: {result['summary']}")
-        logger.info("Trace completed.")
+        logger.info(f"\n--- FINAL RESULT ---\n{result['final_summary']}\n--------------------")
+        logger.info(">>> Monitored workflow completed successfully <<<")
+
 
 if __name__ == "__main__":
-    main()
+    run_monitored_workflow()
 ```
 
 **Space for screenshot: Complete trace final output**
