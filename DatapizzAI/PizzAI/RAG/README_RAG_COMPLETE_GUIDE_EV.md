@@ -289,6 +289,14 @@ query_embedder = ClientEmbedder(
     client=client,
     model_name="text-embedding-3-small"
 )
+
+# Async usage (recommended)
+query_vector = await query_embedder.a_run(
+    "How would you explain machine learning?"
+)  # -> list[float]
+
+# Alternatively, sync usage
+# query_vector = query_embedder.run("How would you explain machine learning?")
 ```
 
 ## 8. Vector Store
@@ -440,7 +448,7 @@ It uses statistical algorithms to identify patterns in data."""
     
     # 6. Embedding
     embedder = NodeEmbedder(client=client)
-    embedded_chunks = embedder.invoke(chunks)
+    embedded_chunks = await embedder.a_run(chunks)
     
     # 7. Vector Store
     vectorstore = QdrantVectorstore(host="localhost")
@@ -454,7 +462,7 @@ It uses statistical algorithms to identify patterns in data."""
     
     # 9. Retrieval
     query_embedder = ClientEmbedder(client=client)
-    query_embedding = query_embedder.invoke(query)
+    query_embedding = await query_embedder.a_run(query)
     
     results = vectorstore.search(
         query_embedding, 

@@ -315,8 +315,13 @@ query_embedder = ClientEmbedder(
     client=client,
     model_name="text-embedding-3-small"
 )
+# Uso asincrono (consigliato)
+query_vector = await query_embedder.a_run(
+    "Come spieghi il machine learning?"
+)  # -> list[float]
 
-embeddings = embedder.embed("Come spieghi il machine learning?")
+# In alternativa, uso sincrono
+# query_vector = query_embedder.run("Come spieghi il machine learning?")
 ```
 
 ## 8. Vector store
@@ -431,7 +436,7 @@ query = "machine learning applications"
 
 # Genera embedding per la query
 query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
-query_embedding = query_embedder.embed(query)
+query_embedding = await query_embedder.a_run(query)
 
 # Usa DatapizzAI vectorstore
 retrieved_chunks = vectorstore.search(
@@ -524,7 +529,7 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     
     # 6. Embedding
     embedder = NodeEmbedder(client=client)
-    embedded_chunks = embedder.invoke(chunks)
+    embedded_chunks = await embedder.a_run(chunks)
     
     # 7. Vector Store - DatapizzAI
     from qdrant_client import QdrantClient
@@ -549,7 +554,7 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     
     # 9. Retrieval
     query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
-    query_embedding = query_embedder.embed(query)
+    query_embedding = await query_embedder.a_run(query)
     
     results = vectorstore.search(
         query_embedding=query_embedding,  # ← Parametro corretto
