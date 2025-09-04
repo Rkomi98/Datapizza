@@ -89,6 +89,18 @@ def esempio_tracing_base():
 # Esegui l'esempio
 response = esempio_tracing_base()
 ```
+```bash
+╭────────────────────────────────────── Trace Summary of chat_conversation ───────────────────────────────────────╮
+│ Total Spans: 2                                                                                                  │
+│ Duration: 17.97s                                                                                                │
+│                          Token Usage                                                                            │
+│ ┏━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓                                                   │
+│ ┃ Model ┃ Prompt Tokens ┃ Completion Tokens ┃ Cached Tokens ┃                                                   │
+│ ┡━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩                                                   │
+│ │ gpt-5 │ 13            │ 912               │ 0             │                                                   │
+│ └───────┴───────────────┴───────────────────┴───────────────┘                                                   │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
 
 ### Parametri del trace
 
@@ -150,16 +162,28 @@ def esempio_span_manuali():
 result = esempio_span_manuali()
 ```
 
-**Spazio per screenshot: Dettagli degli span manuali nel trace**
-
+```bash
+╭───────────────────────────────────── Trace Summary of operazione_complessa ─────────────────────────────────────╮
+│ Total Spans: 5                                                                                                  │
+│ Duration: 11.5s                                                                                                 │
+│                          Token Usage                                                                            │
+│ ┏━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓                                                   │
+│ ┃ Model ┃ Prompt Tokens ┃ Completion Tokens ┃ Cached Tokens ┃                                                   │
+│ ┡━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩                                                   │
+│ │ gpt-5 │ 10            │ 748               │ 0             │                                                   │
+│ └───────┴───────────────┴───────────────────┴───────────────┘                                                   │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
 ### Attributi personalizzati
 
 ```python
 def esempio_attributi_personalizzati():
     """Esempio di attributi personalizzati negli span"""
     
-    with tracer.trace("analisi_sentimento") as trace:
-        with generation_span("sentiment_analysis") as span:
+    with tracer.trace("sentiment_analysis_father") as trace:
+        with generation_span("sentiment_analysis_child") as span:
+            span.set_attribute("model_name", client.model_name)  # es. "gpt-4o"
+            
             # Attributi per input
             span.set_attribute("input_type", "text")
             span.set_attribute("language", "italian")
@@ -189,18 +213,23 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
 
 def setup_monitoring_resource():
-    """Configura risorsa OpenTelemetry"""
+    """Configura risorsa OpenTelemetry (compatibile con datapizzai)"""
     
-    resource = Resource.create({
-        SERVICE_NAME: "datapizzai-app",
-        SERVICE_VERSION: "1.0.0",
-        "environment": "production",
-        "team": "ai-team"
-    })
+    # Ottieni il tracer provider esistente o creane uno nuovo
+    tracer_provider = trace.get_tracer_provider()
     
-    # Configura tracer provider
-    tracer_provider = TracerProvider(resource=resource)
-    trace.set_tracer_provider(tracer_provider)
+    # Se è un ProxyTracerProvider, configurane uno nuovo
+    from opentelemetry.trace import ProxyTracerProvider
+    if isinstance(tracer_provider, ProxyTracerProvider):
+        resource = Resource.create({
+            SERVICE_NAME: "datapizzai-app",
+            SERVICE_VERSION: "1.0.0",
+            "environment": "production",
+            "team": "ai-team"
+        })
+        
+        tracer_provider = TracerProvider(resource=resource)
+        trace.set_tracer_provider(tracer_provider)
     
     return tracer_provider
 ```
@@ -212,9 +241,13 @@ from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 def setup_zipkin_exporter():
-    """Configura esportatore Zipkin"""
+    """Configura esportatore Zipkin (compatibile con datapizzai)"""
     
-    tracer_provider = setup_monitoring_resource()
+    # IMPORTANTE: Inizializza ContextTracing PRIMA di configurare esportatori
+    context_tracer = ContextTracing()
+    
+    # Ottieni il tracer provider configurato da datapizzai
+    tracer_provider = trace.get_tracer_provider()
     
     # Configura Zipkin exporter
     zipkin_exporter = ZipkinExporter(
@@ -229,23 +262,29 @@ def setup_zipkin_exporter():
     tracer_provider.add_span_processor(span_processor)
     
     print("✅ Zipkin exporter configurato")
-    return tracer_provider
+    return context_tracer
 
 # Esempio di utilizzo con Zipkin
 def esempio_zipkin():
     """Esempio con esportazione verso Zipkin"""
     
-    setup_zipkin_exporter()
-    tracer = ContextTracing()
+    # PRIMA: Avvia Zipkin con Docker
+    # docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
+    
+    tracer = setup_zipkin_exporter()  # Restituisce il ContextTracing configurato
     
     with tracer.trace("zipkin_example") as trace:
-        client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-3.5-turbo")
+        client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
         
         response = client.invoke([
             TextBlock(content="Crea un riassunto di 50 parole")
         ])
         
         print(f"Response inviata a Zipkin: {response.text[:100]}...")
+        print("🎯 Controlla Zipkin su http://localhost:9411")
+
+# Esegui l'esempio
+esempio_zipkin()
 ```
 
 **Spazio per screenshot: Dashboard Zipkin con trace datapizzai**
@@ -283,7 +322,7 @@ def esempio_otlp_completo():
     setup_otlp_exporter()
     tracer = ContextTracing()
     
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4")
+    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
     memory = Memory()
     
     with tracer.trace("conversazione_otlp") as trace:
@@ -385,7 +424,6 @@ monitor = PerformanceMonitor()
 @monitor.monitor_operation("chat_response")
 def chat_with_monitoring():
     """Funzione di chat con monitoring"""
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-3.5-turbo")
     
     response = client.invoke([
         TextBlock(text="Spiega il concetto di monitoring in 100 parole", role=ROLE.USER)
@@ -559,7 +597,7 @@ def esempio_completo_grafana():
     setup_grafana_dashboard()
     
     tracer = ContextTracing()
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4")
+    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
     
     # Simula traffico per dashboard
     for i in range(10):
@@ -603,7 +641,7 @@ context_tracer = ContextTracing()
 client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4",
+    model="gpt-4o",
     temperature=0.7
 )
 

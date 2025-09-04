@@ -11,8 +11,10 @@ Questa cartella contiene guide ed esempi completi per implementare il monitoring
 
 ### Esempi
 
-- **`monitoring_complete_example.py`** - Esempio pratico funzionante
-- **`.env.example`** - Template di configurazione
+- **`monitoring_complete_example.py`** - Esempio pratico base
+- **`monitoring_fixed_example.py`** - Esempio corretto per TracerProvider (⭐ raccomandato)
+- **`docker-setup.md`** - Guida completa Docker
+- **`env.example`** - Template di configurazione
 
 ## Quick start
 
@@ -21,20 +23,35 @@ Questa cartella contiene guide ed esempi completi per implementare il monitoring
 ```bash
 pip install datapizzai opentelemetry-api opentelemetry-sdk
 pip install opentelemetry-exporter-zipkin opentelemetry-exporter-otlp
-pip install psutil python-dotenv
+pip install psutil python-dotenv requests
 ```
 
 ### 2. Configurazione
 
 ```bash
-cp .env.example .env
+cp env.example .env
 # Modifica .env con le tue API keys
 ```
 
-### 3. Esecuzione esempio
+### 3. Setup Docker (opzionale ma raccomandato)
 
 ```bash
+# Avvia tutti i servizi di monitoring
+docker-compose up -d
+
+# Verifica che siano attivi
+curl http://localhost:9411/health      # Zipkin
+curl http://localhost:3000/health      # Grafana
+```
+
+### 4. Esecuzione esempi
+
+```bash
+# Esempio base (funziona anche senza Docker)
 python monitoring_complete_example.py
+
+# Esempio corretto per TracerProvider (raccomandato)
+python monitoring_fixed_example.py
 ```
 
 ## Funzionalità dimostrate
