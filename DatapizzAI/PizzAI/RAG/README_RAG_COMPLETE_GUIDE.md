@@ -359,7 +359,7 @@ results = vectorstore.search(
 **Parametri search (variano per versione):**
 - `query_vector`: vettore di query (lista di float)
 - `collection_name`: nome della collezione
-- `top_k` oppure `k`: numero di risultati da restituire
+- `top_n`: numero di risultati da restituire
 
 **Funzionalità:**
 - Storage persistente di embedding con metadati
@@ -411,13 +411,15 @@ rewritten_query = rewriter.run(original_query, memory=None)
 print(rewritten_query)
 ```
 
-## 10. Reranking
+## 10. Reranking -- da sistemare quando avrò accesso a Azure
 
 Il reranker riordina i risultati del retrieval per relevanza.
 
 ```python
 import os
 from dotenv import load_dotenv
+from datapizzai.embedders import ClientEmbedder
+from datapizzai.vectorstores import QdrantVectorstore
 
 load_dotenv()
 
@@ -425,12 +427,7 @@ reranker = CohereReranker(
     api_key=os.getenv("COHERE_API_KEY"),
     endpoint="https://api.cohere.com/v1",
     top_n=5,        # numero di risultati finali
-    threshold=0.7   # soglia di rilevanza
 )
-
-# Esempio di utilizzo con DatapizzAI
-from datapizzai.embedders import ClientEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
 
 query = "machine learning applications"
 
@@ -442,7 +439,7 @@ query_embedding = await query_embedder.a_run(query)
 retrieved_chunks = vectorstore.search(
     query_vector=query_embedding,  # alcune versioni usano `query_vector`
     collection_name="documents", 
-    top_k=20
+    top_n=20
 )
 
 # Reranking
@@ -463,22 +460,34 @@ final_chunks = reranker.invoke({
 I template strutturano l'input per il modello di generazione.
 
 ```python
-prompt_template = ChatPromptTemplate(
-    template="""Basandoti sui seguenti documenti, rispondi alla domanda dell'utente.
-
-Documenti:
-{context}
-
-Domanda: {question}
-
-Rispondi in modo preciso e completo:"""
+from datapizzai.modules.prompt import ChatPromptTemplate
+from datapizzai.type import Chunk
+# Create RAG prompt template
+template = ChatPromptTemplate(
+    user_prompt_template="Question: {{ user_prompt }}\nPlease answer based on the provided context.",
+    retrieval_prompt_template="Context:\n{% for chunk in chunks %}- {{ chunk.text }}\n{% endfor %}"
 )
 
-# Utilizzo del template
-formatted_prompt = prompt_template.format(
-    context="\n".join([chunk.text for chunk in final_chunks]),
-    question=query
+# Simulate search results
+chunks = [
+    Chunk(id="1", text="Python is a high-level programming language"),
+    Chunk(id="2", text="Python was created by Guido van Rossum in 1991")
+]
+
+# Create conversation memory
+memory = template.format(
+    user_prompt="Who created Python?",
+    chunks=chunks,
+    retrieval_query="Python creator history"
 )
+
+print("User: ", memory[0])
+print("Assistant: ", memory[1])
+print("Tool: ", memory[2].blocks[0].result)
+
+# 1. User:  Question: Who created Python? Please answer based on the provided context.
+# 2. Assistant: FunctionCall(search_vectorstore, query="Python creator history")
+# 3. Tool:  Context - Python is a high-level programming language - Python was created by Guido van Rossum in 1991
 ```
 
 ## 12. Esempio completo end-to-end
@@ -559,7 +568,7 @@ Utilizza algoritmi statistici per identificare pattern nei dati."""
     results = vectorstore.search(
         query_vector=query_embedding,  # alcune versioni usano `query_vector`
         collection_name="documents",
-        top_k=10  # oppure `k=10` in versioni precedenti
+        top_n=10
     )
     
     # 10. Reranking
