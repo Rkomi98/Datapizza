@@ -38,7 +38,7 @@ graph TD
     H --> I["Embedder<br/>(NodeEmbedder)"]
     I --> J["Vector Store<br/>(QdrantVectorstore)"]
     
-    K["🔍 User query"] --> L["Rewriter<br/>(ToolRewriter)<br/>optional"]
+    K["🔍 User query"] --> L["Rewriter<br/>(e.g., ToolRewriter)<br/>optional"]
     L --> M["Query embedder<br/>(ClientEmbedder)"]
     M --> N["Retrieval<br/>(from Vector Store)"]
     N --> O["Reranker<br/>(CohereReranker)"]
@@ -439,6 +439,9 @@ Parameters:
 - `endpoint`: service endpoint
 - `top_n`: maximum number of documents to return
 - `threshold`: minimum relevance threshold
+
+Tips and troubleshooting:
+- Cohere requires a valid `model` (e.g., `rerank-english-v3.0`). Your current `CohereReranker` may not expose a model parameter; if so, prefer `TogetherReranker` with an explicit `model` or call the Cohere SDK directly.
 
 ## 11. Prompt Templates (optional)
 

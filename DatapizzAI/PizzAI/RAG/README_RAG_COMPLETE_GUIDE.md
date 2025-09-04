@@ -43,7 +43,7 @@ graph TD
     H --> I["Embedder<br/>(NodeEmbedder)"]
     I --> J["Vector Store<br/>(QdrantVectorstore)"]
     
-    K["🔍 Query utente"] --> L["Rewriter<br/>(ToolRewriter)<br/>facoltativo"]
+    K["🔍 Query utente"] --> L["Rewriter<br/>(es. ToolRewriter)<br/>facoltativo"]
     L --> M["Embedder query<br/>(ClientEmbedder)"]
     M --> N["Retrieval<br/>(da Vector Store)"]
     N --> O["Reranker<br/>(CohereReranker)"]
@@ -455,6 +455,9 @@ final_chunks = reranker.invoke({
 - `top_n`: numero massimo di documenti da restituire
 - `threshold`: soglia minima di rilevanza
 
+Suggerimenti e troubleshooting:
+- Cohere richiede un `model` valido (es. `rerank-english-v3.0`). La versione attuale di `CohereReranker` può non esporre il parametro modello: in tal caso usa `TogetherReranker` con `model` esplicito oppure il client Cohere SDK diretto. Il modulo Cohere è pensato per essere usato con account Azure.
+
 ## 11. Prompt templates (facoltativo)
 
 I template strutturano l'input per il modello di generazione.
@@ -489,4 +492,3 @@ print("Tool: ", memory[2].blocks[0].result)
 # 2. Assistant: FunctionCall(search_vectorstore, query="Python creator history")
 # 3. Tool:  Context - Python is a high-level programming language - Python was created by Guido van Rossum in 1991
 ```
-
