@@ -305,26 +305,42 @@ esempio_zipkin()
 
 ```python
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.semconv.resource import ResourceAttributes
 
 def setup_otlp_exporter():
     """Configura esportatore OTLP per Jaeger/Grafana"""
     
     tracer_provider = setup_monitoring_resource()
     
-    # Configura OTLP exporter
     otlp_exporter = OTLPSpanExporter(
-        endpoint="http://localhost:4317",  # Jaeger OTLP endpoint
-        headers={
-            "Authorization": "Bearer your-token-here"
-        }
+        endpoint="http://localhost:4317"
+        # Per Jaeger: endpoint="http://localhost:14250"
+        # Per Zipkin: usare ZipkinExporter invece
+        # headers={"Authorization": "Bearer <token>"}  # Solo se necessario
     )
     
-    # Aggiungi span processor
     span_processor = BatchSpanProcessor(otlp_exporter)
-    tracer_provider.add_span_processor(span_processor)
+    trace.get_tracer_provider().add_span_processor(span_processor)
     
     print("✅ OTLP exporter configurato")
+    return tracer_provider
+
+def setup_zipkin_exporter():
+    """Configura esportatore Zipkin"""
+    
+    tracer_provider = setup_monitoring_resource()
+    
+    zipkin_exporter = ZipkinExporter(
+        endpoint="http://localhost:9411/api/v2/spans"
+    )
+    
+    span_processor = BatchSpanProcessor(zipkin_exporter)
+    trace.get_tracer_provider().add_span_processor(span_processor)
+    
+    print("✅ Zipkin exporter configurato")
     return tracer_provider
 
 # Esempio completo con OTLP
@@ -339,16 +355,42 @@ def esempio_otlp_completo():
     
     with tracer.trace("conversazione_otlp") as trace:
         # Primo messaggio
-        memory.add(TextBlock(text="Ciao, come stai?", role=ROLE.USER))
-        response1 = client.invoke(memory.get_memory())
-        memory.add(TextBlock(text=response1.text, role=ROLE.ASSISTANT))
-        
-        # Secondo messaggio  
-        memory.add(TextBlock(text="Parlami di Python", role=ROLE.USER))
-        response2 = client.invoke(memory.get_memory())
-        memory.add(TextBlock(text=response2.text, role=ROLE.ASSISTANT))
+        memory.add_turn([TextBlock(content="Ciao, come stai?")], ROLE.USER)
+        response1 = client.invoke("", memory=memory)
+        memory.add_turn([TextBlock(content=response1.text)], ROLE.ASSISTANT)
+    
+        memory.add_turn([TextBlock(content="Parlami di Python")], ROLE.USER)
+        response2 = client.invoke("", memory=memory)
+        memory.add_turn([TextBlock(content=response2.text)], ROLE.ASSISTANT)
+
         
         print(f"Conversazione completata. Trace inviato via OTLP.")
+
+# Esempio completo con Zipkin
+def esempio_zipkin_completo():
+    """Esempio completo con esportazione Zipkin"""
+    
+    setup_zipkin_exporter()
+    tracer = ContextTracing()
+    
+    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+    memory = Memory()
+    
+    with tracer.trace("conversazione_zipkin") as trace:
+        # Primo messaggio
+        memory.add_turn([TextBlock(content="Ciao, come stai?")], ROLE.USER)
+        response1 = client.invoke("", memory=memory)
+        memory.add_turn([TextBlock(content=response1.text)], ROLE.ASSISTANT)
+    
+        memory.add_turn([TextBlock(content="Parlami di Python")], ROLE.USER)
+        response2 = client.invoke("", memory=memory)
+        memory.add_turn([TextBlock(content=response2.text)], ROLE.ASSISTANT)
+
+        print(f"Conversazione completata. Trace inviato a Zipkin su http://localhost:9411")
+
+# Scegli quale esempio eseguire:
+# esempio_otlp_completo()  # Per OTLP/Jaeger
+esempio_zipkin_completo()  # Per Zipkin
 ```
 
 **Spazio per screenshot: Jaeger UI con trace OTLP**
