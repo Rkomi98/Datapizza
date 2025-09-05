@@ -12,6 +12,7 @@ from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry import trace
+from opentelemetry.trace import ProxyTracerProvider
 
 try:
     from datapizzai.clients import ClientFactory
@@ -22,6 +23,13 @@ except ImportError as e:
     print(f"⚠️  Errore importazione datapizzai: {e}")
     print("   Verifica che datapizzai sia installato correttamente")
     exit(1)
+
+# Sentinel globali per esecuzioni ripetute (es. notebook)
+_TRACER_PROVIDER_SET = False
+_ZIPKIN_SP_ATTACHED = False
+_METRICS_PROVIDER_SET = False
+_PROM_SERVER_STARTED = False
+
 
 class SimpleChatbotMonitor:
     """Monitor semplice per chatbot con Grafana/Prometheus usando le librerie disponibili"""
@@ -39,12 +47,28 @@ class SimpleChatbotMonitor:
         
         # === TRACING ZIPKIN (opzionale) ===
         try:
-            tracer_provider = TracerProvider()
-            zipkin_exporter = ZipkinExporter(endpoint=zipkin_url)
-            tracer_provider.add_span_processor(BatchSpanProcessor(zipkin_exporter))
-            trace.set_tracer_provider(tracer_provider)
+            global _TRACER_PROVIDER_SET, _ZIPKIN_SP_ATTACHED
+
+            current_tp = trace.get_tracer_provider()
+            if not _TRACER_PROVIDER_SET:
+                # Sostituisci solo se è ancora il proxy di default
+                if isinstance(current_tp, ProxyTracerProvider):
+                    tracer_provider = TracerProvider()
+                    trace.set_tracer_provider(tracer_provider)
+                else:
+                    tracer_provider = current_tp
+                _TRACER_PROVIDER_SET = True
+            else:
+                tracer_provider = current_tp
+
+            # Collega lo Zipkin exporter una sola volta
+            if not _ZIPKIN_SP_ATTACHED:
+                zipkin_exporter = ZipkinExporter(endpoint=zipkin_url)
+                tracer_provider.add_span_processor(BatchSpanProcessor(zipkin_exporter))
+                _ZIPKIN_SP_ATTACHED = True
+                print(f"✅ Zipkin configurato: {zipkin_url}")
+
             self.zipkin_tracer = trace.get_tracer(__name__)
-            print(f"✅ Zipkin configurato: {zipkin_url}")
         except Exception as e:
             print(f"⚠️  Zipkin non disponibile: {e}")
             self.zipkin_tracer = None
@@ -72,9 +96,16 @@ class SimpleChatbotMonitor:
                 ['error_type']
             )
             
-            # Avvia server Prometheus
-            start_http_server(prometheus_port)
-            print(f"✅ Server Prometheus avviato su http://localhost:{prometheus_port}")
+            # Avvia server Prometheus solo se non già avviato
+            global _PROM_SERVER_STARTED
+            if not _PROM_SERVER_STARTED:
+                try:
+                    start_http_server(prometheus_port)
+                    _PROM_SERVER_STARTED = True
+                    print(f"✅ Server Prometheus avviato su http://localhost:{prometheus_port}")
+                except OSError as e:
+                    # Porta occupata: presumiamo che il server sia già attivo
+                    print("⚠️  Prometheus già in esecuzione (porta in uso). Uso server esistente.")
             
         except Exception as e:
             print(f"❌ Errore configurazione Prometheus: {e}")
