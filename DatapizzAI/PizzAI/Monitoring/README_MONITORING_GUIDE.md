@@ -103,6 +103,7 @@ response = esempio_tracciamento_base()
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 Come puoi vedere, la traccia mostra automaticamente:
+    
     - Token utilizzati (prompt, completion, cached)
     - Durata dell'operazione
     - Numero di span generati
@@ -121,7 +122,7 @@ Più in dettaglio, il sistema di tracciamento cattura automaticamente:
 
 Per un controllo più granulare, è possibile creare span manuali per tracciare operazioni specifiche.
 
-### Tipi di span disponibili
+Vediamo ora con un esempio come definire varie tipologie di span e qual è il loro output.
 
 ```python
 from datapizzai.tracing.tracing import generation_span, agent_span, tool_span
