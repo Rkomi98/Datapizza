@@ -265,10 +265,10 @@ def setup_otlp_exporter():
     
     # Configure OTLP exporter
     otlp_exporter = OTLPSpanExporter(
-        endpoint="http://localhost:4317",  # Jaeger OTLP endpoint
-        headers={
-            "Authorization": "Bearer your-token-here"
-        }
+        endpoint="http://localhost:4317"  # Jaeger OTLP endpoint
+        # headers={
+        #     "Authorization": "Bearer your-token-here"  # Only if auth required
+        # }
     )
     
     # Add span processor
