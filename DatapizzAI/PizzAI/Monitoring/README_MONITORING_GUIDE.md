@@ -104,9 +104,9 @@ response = esempio_tracciamento_base()
 ```
 Come puoi vedere, la traccia mostra automaticamente:
     
-    - Token utilizzati (prompt, completion, cached)
-    - Durata dell'operazione
-    - Numero di span generati
+ - Token utilizzati (prompt, completion, cached)
+ - Durata dell'operazione
+ - Numero di span generati
 
 ### Parametri della traccia
 
@@ -142,7 +142,7 @@ def esempio_span_manuali():
             ])
             
             span.set_attribute("lunghezza_output", len(response.text))
-            span.set_attribute("model_name", "gpt-4")
+            span.set_attribute("model_name", "gpt-5")
         
         # Span per operazioni di strumenti
         with tool_span("elaborazione_dati") as span:
@@ -180,49 +180,14 @@ result = esempio_span_manuali()
 │                └─────────┴────────────────┴─────────────────────┴───────────────────┘             │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
-### Attributi personalizzati
 
-```python
-def esempio_attributi_personalizzati():
-    """Esempio di attributi personalizzati negli span"""
-    
-    with tracer.trace("analisi_sentiment_padre") as trace:
-        with generation_span("analisi_sentiment_figlio") as span:
-            span.set_attribute("model_name", client.model_name)  # es. "gpt-4o"
-            
-            # Attributi per l'input
-            span.set_attribute("tipo_input", "testo")
-            span.set_attribute("lingua", "italiano")
-            span.set_attribute("lunghezza_testo", 250)
-            
-            # Invoca il modello per l'analisi del sentiment
-            prompt = "Analizza il sentiment di questo testo: 'Oggi è una giornata fantastica!'"
-            response = client.invoke([TextBlock(content=prompt)])
-            
-            # Attributi per l'output
-            span.set_attribute("sentiment_rilevato", "positivo")
-            span.set_attribute("punteggio_confidenza", 0.95)
-            span.set_attribute("token_risposta", response.completion_tokens_used)
-            
-    return response
-```
-```bash
-╭────────────────────────────────── Riepilogo traccia di analisi_sentiment_padre ───────────────────────────────────╮
-│ Span totali: 3                                                                                                      │
-│ Durata: 8.86s                                                                                                       │
-│                          Utilizzo token                                                                               │
-│ ┏━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓                                                      │
-│ ┃ Modello ┃ Token prompt ┃ Token completamento ┃ Token in cache ┃                                                     │
-│ ┡━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩                                                     │
-│ │ gpt-5 │ 23            │ 400               │ 0             │                                                      │
-│ └───────┴───────────────┴───────────────────┴───────────────┘                                                      │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 ## 4. Aggiungere esportatori esterni
 
-Per integrare il monitoraggio con sistemi esterni, è possibile configurare esportatori personalizzati.
+Per integrare il monitoraggio con sistemi esterni, è possibile configurare delle funzioni personalizzate.
 
 ### 4.1. Creazione della risorsa
+Per fare questo non serve usare la libreria datapizzai, ma basta il modo standard che probabilmente hai già visto in passato.
 
 ```python
 from opentelemetry import trace
