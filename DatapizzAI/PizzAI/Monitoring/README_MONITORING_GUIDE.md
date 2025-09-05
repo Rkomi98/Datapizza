@@ -392,6 +392,7 @@ def esempio_otlp_completo():
         print(f"Conversazione completata. Traccia inviata via OTLP.")
 
 ### Esempio completo con Zipkin
+```python
 def esempio_zipkin_completo():
     """Esempio completo con esportazione Zipkin"""
     
