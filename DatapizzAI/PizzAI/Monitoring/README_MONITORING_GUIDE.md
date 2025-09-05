@@ -426,63 +426,82 @@ esempio_zipkin_completo()  # Per Zipkin
 
 ### Monitoraggio semplice per chatbot con Grafana
 
+> **💡 Nota per notebook Jupyter**: Il codice seguente è progettato per funzionare senza riavviare il kernel. I provider OpenTelemetry vengono impostati solo quando necessario e le risorse (server Prometheus, Zipkin) vengono gestite in modo idempotente.
+
 ```python
+# Usa il file simple_chatbot_monitor.py già ottimizzato
+from simple_chatbot_monitor import SimpleChatbotMonitor
+import os
+from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
+
+# Oppure, se preferisci il codice inline, ecco la versione semplificata:
 import time
 import os
-from opentelemetry import trace, metrics
+from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.exporter.prometheus import PrometheusMetricReader
-from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.semconv.resource import ResourceAttributes
-from prometheus_client import start_http_server
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
+from opentelemetry.trace import ProxyTracerProvider
+from prometheus_client import Counter, Histogram, start_http_server
 from datapizzai.clients import ClientFactory
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 from datapizzai.tracing import ContextTracing
 
+_ZIPKIN_ATTACHED = False  # evita duplicazioni in notebook
+
+
 class SimpleChatbotMonitor:
     """Monitoraggio semplice per chatbot con Grafana/Prometheus"""
     
     def __init__(self, service_name="chatbot"):
-        # Configura OpenTelemetry
-        resource = Resource.create({
-            ResourceAttributes.SERVICE_NAME: service_name,
-            ResourceAttributes.SERVICE_VERSION: "1.0.0"
-        })
+        # Tracciamento (Zipkin) senza sovrascrivere provider già impostati
+        current_tp = trace.get_tracer_provider()
+        if isinstance(current_tp, ProxyTracerProvider):
+            trace.set_tracer_provider(TracerProvider())
+            current_tp = trace.get_tracer_provider()
+
+        # Verifica se Zipkin è disponibile prima di configurarlo
+        zipkin_available = False
+        try:
+            import requests
+            response = requests.get("http://localhost:9411/api/v2/services", timeout=2)
+            zipkin_available = response.status_code == 200
+        except:
+            print("⚠️  Zipkin non raggiungibile. Avvia con: docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin")
+
+        global _ZIPKIN_ATTACHED
+        if zipkin_available and not _ZIPKIN_ATTACHED:
+            zipkin_exporter = ZipkinExporter(endpoint="http://localhost:9411/api/v2/spans")
+            current_tp.add_span_processor(BatchSpanProcessor(zipkin_exporter))
+            _ZIPKIN_ATTACHED = True
+            print("✅ Zipkin configurato")
         
-        # Tracciamento (per Zipkin)
-        tracer_provider = TracerProvider(resource=resource)
-        zipkin_exporter = ZipkinExporter(endpoint="http://localhost:9411/api/v2/spans")
-        tracer_provider.add_span_processor(BatchSpanProcessor(zipkin_exporter))
-        trace.set_tracer_provider(tracer_provider)
         self.tracer = trace.get_tracer(__name__)
-        
-        # Metriche (per Prometheus/Grafana)
-        prometheus_reader = PrometheusMetricReader()
-        meter_provider = MeterProvider(resource=resource, metric_readers=[prometheus_reader])
-        metrics.set_meter_provider(meter_provider)
-        meter = metrics.get_meter(__name__)
-        
-        # Definisci metriche
-        self.request_counter = meter.create_counter(
+
+        # Metriche (Prometheus client diretto: nessun MeterProvider da impostare)
+        self.request_counter = Counter(
             "chatbot_requests_total",
-            description="Numero totale di richieste al chatbot"
+            "Numero totale di richieste al chatbot",
+            ["status"],
         )
-        self.response_time = meter.create_histogram(
+        self.response_time = Histogram(
             "chatbot_response_time_seconds",
-            description="Tempo di risposta del chatbot in secondi"
+            "Tempo di risposta del chatbot in secondi",
         )
-        self.token_usage = meter.create_counter(
-            "chatbot_tokens_total", 
-            description="Numero totale di token utilizzati"
+        self.token_usage = Counter(
+            "chatbot_tokens_total",
+            "Numero totale di token utilizzati",
+            ["type"],
         )
-        
-        # Avvia server Prometheus
-        start_http_server(8000)
-        print("✅ Server Prometheus avviato su http://localhost:8000")
+
+        # Avvia server Prometheus (idempotente)
+        try:
+            start_http_server(8000)
+            print("✅ Server Prometheus avviato su http://localhost:8000")
+        except OSError:
+            print("⚠️  Porta 8000 già in uso: uso il server Prometheus esistente")
     
     def monitor_chat(self, user_message: str, client, memory=None):
         """Monitora una singola interazione di chat"""
@@ -506,13 +525,13 @@ class SimpleChatbotMonitor:
                     memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
                 
                 # Registra le metriche
-                self.request_counter.add(1, {"status": "success"})
-                self.response_time.record(duration)
+                self.request_counter.labels(status="success").inc()
+                self.response_time.observe(duration)
                 
                 # Utilizzo token (se disponibile)
                 if hasattr(response, 'prompt_tokens_used'):
-                    total_tokens = response.prompt_tokens_used + response.completion_tokens_used
-                    self.token_usage.add(total_tokens)
+                    self.token_usage.labels(type="prompt").inc(response.prompt_tokens_used)
+                    self.token_usage.labels(type="completion").inc(response.completion_tokens_used)
                     span.set_attribute("tokens.prompt", response.prompt_tokens_used)
                     span.set_attribute("tokens.completion", response.completion_tokens_used)
                 
@@ -526,7 +545,7 @@ class SimpleChatbotMonitor:
                 
             except Exception as e:
                 # Errore
-                self.request_counter.add(1, {"status": "error"})
+                self.request_counter.labels(status="error").inc()
                 span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
                 span.record_exception(e)
                 raise
@@ -574,6 +593,13 @@ def esempio_chatbot_con_monitoraggio():
 # Esegui l'esempio
 esempio_chatbot_con_monitoraggio()
 ```
+
+**💡 Note per l'uso in notebook Jupyter:**
+1. **Nessun riavvio del kernel necessario**: Il codice gestisce automaticamente provider già impostati
+2. **Zipkin opzionale**: Se non è in esecuzione, il monitoring continua solo con Prometheus 
+3. **Porta Prometheus**: Se la 8000 è occupata, riusa il server esistente
+4. **Per avviare Zipkin**: `docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin`
+5. **Usa il file ottimizzato**: `from simple_chatbot_monitor import SimpleChatbotMonitor` (consigliato)
 
 ### Configurazione rapida per Grafana
 
@@ -668,6 +694,7 @@ python tuo_chatbot.py
 2.  **`prometheus.yml`** - Configurazione Prometheus  
 3.  **`start_monitoring.sh`** - Avvia tutto lo stack
 4.  **`stop_monitoring.sh`** - Ferma tutto lo stack
+5.  **`start_zipkin.sh`** - Avvia solo Zipkin (opzionale)
 
 #### Avvio rapido:
 
@@ -686,6 +713,9 @@ python simple_chatbot_monitor.py
 
 # Oppure in modalità automatica:
 python simple_chatbot_monitor.py --auto
+
+# 5. (Opzionale) Per abilitare Zipkin:
+./start_zipkin.sh
 ```
 
 #### Accesso ai servizi:

@@ -47,28 +47,40 @@ class SimpleChatbotMonitor:
         
         # === TRACING ZIPKIN (opzionale) ===
         try:
-            global _TRACER_PROVIDER_SET, _ZIPKIN_SP_ATTACHED
+            # Prima verifica se Zipkin è raggiungibile
+            import requests
+            try:
+                response = requests.get("http://localhost:9411/api/v2/services", timeout=2)
+                zipkin_available = response.status_code == 200
+            except:
+                zipkin_available = False
 
-            current_tp = trace.get_tracer_provider()
-            if not _TRACER_PROVIDER_SET:
-                # Sostituisci solo se è ancora il proxy di default
-                if isinstance(current_tp, ProxyTracerProvider):
-                    tracer_provider = TracerProvider()
-                    trace.set_tracer_provider(tracer_provider)
+            if zipkin_available:
+                global _TRACER_PROVIDER_SET, _ZIPKIN_SP_ATTACHED
+
+                current_tp = trace.get_tracer_provider()
+                if not _TRACER_PROVIDER_SET:
+                    # Sostituisci solo se è ancora il proxy di default
+                    if isinstance(current_tp, ProxyTracerProvider):
+                        tracer_provider = TracerProvider()
+                        trace.set_tracer_provider(tracer_provider)
+                    else:
+                        tracer_provider = current_tp
+                    _TRACER_PROVIDER_SET = True
                 else:
                     tracer_provider = current_tp
-                _TRACER_PROVIDER_SET = True
+
+                # Collega lo Zipkin exporter una sola volta
+                if not _ZIPKIN_SP_ATTACHED:
+                    zipkin_exporter = ZipkinExporter(endpoint=zipkin_url)
+                    tracer_provider.add_span_processor(BatchSpanProcessor(zipkin_exporter))
+                    _ZIPKIN_SP_ATTACHED = True
+                    print(f"✅ Zipkin configurato: {zipkin_url}")
+
+                self.zipkin_tracer = trace.get_tracer(__name__)
             else:
-                tracer_provider = current_tp
-
-            # Collega lo Zipkin exporter una sola volta
-            if not _ZIPKIN_SP_ATTACHED:
-                zipkin_exporter = ZipkinExporter(endpoint=zipkin_url)
-                tracer_provider.add_span_processor(BatchSpanProcessor(zipkin_exporter))
-                _ZIPKIN_SP_ATTACHED = True
-                print(f"✅ Zipkin configurato: {zipkin_url}")
-
-            self.zipkin_tracer = trace.get_tracer(__name__)
+                print("⚠️  Zipkin non raggiungibile su localhost:9411. Tracciamento Zipkin disabilitato.")
+                self.zipkin_tracer = None
         except Exception as e:
             print(f"⚠️  Zipkin non disponibile: {e}")
             self.zipkin_tracer = None
@@ -180,6 +192,11 @@ def esempio_chatbot_interattivo():
         print("❌ OPENAI_API_KEY non trovata nelle variabili d'ambiente!")
         print("   Esporta la chiave con: export OPENAI_API_KEY='your-key-here'")
         return
+    
+    # Suggerimento per Zipkin se non disponibile
+    print("💡 Per abilitare il tracciamento Zipkin, avvia:")
+    print("   docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin")
+    print("   Altrimenti il monitoring funzionerà solo con Prometheus.\n")
     
     try:
         # Inizializza monitor
