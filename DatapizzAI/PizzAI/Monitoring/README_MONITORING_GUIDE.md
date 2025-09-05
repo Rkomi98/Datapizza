@@ -695,6 +695,7 @@ python tuo_chatbot.py
 3.  **`start_monitoring.sh`** - Avvia tutto lo stack
 4.  **`stop_monitoring.sh`** - Ferma tutto lo stack
 5.  **`start_zipkin.sh`** - Avvia solo Zipkin (opzionale)
+6.  **`test_full_stack.py`** - Test completo dello stack
 
 #### Avvio rapido:
 
@@ -716,6 +717,9 @@ python simple_chatbot_monitor.py --auto
 
 # 5. (Opzionale) Per abilitare Zipkin:
 ./start_zipkin.sh
+
+# 6. Test dello stack completo:
+python test_full_stack.py
 ```
 
 #### Accesso ai servizi:
