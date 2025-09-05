@@ -307,7 +307,7 @@ def setup_esportatore_otlp():
 
 <img width="3443" height="1603" alt="immagine" src="https://github.com/user-attachments/assets/50db17f8-d9bf-4285-bddb-9feaa329064a" />
 
-## 5. Monitoraggio semplice per chatbot con Grafana 
+## 5. Configurazione del monitoraggio con Grafana
 
 > **💡 Nota per notebook Jupyter**: Il codice seguente è progettato per funzionare senza riavviare il kernel. I provider OpenTelemetry vengono impostati solo quando necessario e le risorse (server Prometheus, Zipkin) vengono gestite in modo idempotente.
 
