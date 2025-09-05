@@ -430,10 +430,11 @@ esempio_zipkin_completo()  # Per Zipkin
 
 ```python
 # Usa il file simple_chatbot_monitor.py già ottimizzato
-from simple_chatbot_monitor import SimpleChatbotMonitor
 import os
 from datapizzai.clients import ClientFactory
 from datapizzai.memory import Memory
+from dotenv import load_dotenv
+load_dotenv()
 
 # Oppure, se preferisci il codice inline, ecco la versione semplificata:
 import time
