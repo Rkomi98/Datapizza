@@ -642,7 +642,7 @@ scrape_configs:
 
 Una volta avviato Grafana (http://localhost:3000, user/pass: admin/admin):
 
-1.  **Aggiungi Data Source**: Prometheus → http://prometheus:9090
+1.  **Aggiungi Data Source**: Prometheus → http://172.17.0.1:9090/
 2.  **Crea una Dashboard** con questi pannelli:
 
 ```json
