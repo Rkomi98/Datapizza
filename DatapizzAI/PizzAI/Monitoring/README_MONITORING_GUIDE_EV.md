@@ -8,33 +8,33 @@ This guide demonstrates how to implement a comprehensive monitoring system using
 
 - [1. Basic Setup](#1-basic-setup)
 - [2. Tracing Client I/O and Memory](#2-tracing-client-io-and-memory)
-- [3. Creating Spans Manually](#3-creating-spans-manually)
+- [3. Manual Span Creation](#3-manual-span-creation)
 - [4. Adding External Exporters](#4-adding-external-exporters)
-- [5. Performance Considerations](#5-performance-considerations)
-- [6. Configuring Monitoring with Grafana](#6-configuring-monitoring-with-grafana)
+- [5. Configuring Monitoring with Grafana](#5-configuring-monitoring-with-grafana)
 
 ## 1. Basic Setup
 
-To get started with monitoring in datapizzai, you need to configure the built-in OpenTelemetry tracing system.
+To get started with monitoring in `datapizzai`, you need to configure the built-in OpenTelemetry tracing system.
 
-### Installing Dependencies
+### Dependency Installation
 
 ```bash
 # Required packages
-pip install datapizzai \
-  opentelemetry-api opentelemetry-sdk \
+pip install opentelemetry-api opentelemetry-sdk \
   opentelemetry-exporter-zipkin opentelemetry-exporter-otlp \
   opentelemetry-exporter-prometheus prometheus-client
 
-# If your private registry lacks some packages, install from PyPI:
+# If the private registry is missing some packages, install from PyPI:
 python -m pip install --index-url https://pypi.org/simple/ opentelemetry-exporter-prometheus prometheus-client
 ```
 
 ### Initial Configuration
+It may seem trivial at this point, but as always, we'll start by configuring the client.
 
 ```python
 import os
 from dotenv import load_dotenv
+from opentelemetry import trace
 from datapizzai.clients import ClientFactory
 from datapizzai.tracing import ContextTracing
 
@@ -45,17 +45,16 @@ tracer = ContextTracing()
 
 # Configure the client
 client = ClientFactory.create(
-    "openai", 
-    os.getenv("OPENAI_API_KEY"), 
-    "gpt-4"
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-5",
+    temperature=1
 )
 ```
 
-**Space for screenshot: Initial project configuration**
-
 ## 2. Tracing Client I/O and Memory
 
-With automatic client tracing, you can monitor all interactions with your AI models.
+Automatic client tracing allows you to monitor all interactions with the chosen model.
 
 ### Basic Tracing Example
 
@@ -67,65 +66,74 @@ from datapizzai.type import TextBlock, ROLE
 
 # Initialize components
 tracer = ContextTracing()
-client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4")
+client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
 memory = Memory()
 
 def basic_tracing_example():
-    """An example of automatic input/output tracing."""
+    """Example of automatic input and output tracing"""
     
     with tracer.trace("chat_conversation") as trace:
-        # Add a user message to memory
+        # Add the user's message to memory
         memory.add_turn([TextBlock(content="Explain what machine learning is")], ROLE.USER)
         
-        # Invoke the client—this is automatically traced
+        # Invoke the client: the operation is traced automatically
         response = client.invoke("", memory=memory)
         
-        # Add the assistant's response to memory
+        # Add the response to memory
         memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         
         print(f"Response: {response.text}")
-        print(f"Tokens used: {response.prompt_tokens_used + response.completion_tokens_used}")
-        
-        # The trace automatically shows:
-        # - Tokens used (prompt, completion, cached)
-        # - Operation duration
-        # - Number of spans generated
-        
+        print(f"Tokens used: {response.prompt_tokens_used + response.completion_tokens_used}")        
         return response
 
 # Run the example
 response = basic_tracing_example()
 ```
-
-**Space for screenshot: Tracing output with token usage**
+```bash
+╭───────────────────────────── Trace Summary: chat_conversation ──────────────────────────────╮
+│ Total Spans: 2                                                                              │
+│ Duration: 17.97s                                                                            │
+│ Token Usage:                                                                                │
+│                ┏━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓       │
+│                ┃ Model   ┃ Prompt Tokens  ┃ Completion Tokens   ┃ Cached Tokens     ┃       │
+│                ┡━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩       │
+│                │ gpt-5   │ 13             │ 912                 │ 0                 │       │
+│                └─────────┴────────────────┴─────────────────────┴───────────────────┘       │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+As you can see, the trace automatically shows:
+    
+ - Tokens used (prompt, completion, cached)
+ - Operation duration
+ - Number of spans generated
 
 ### Trace Parameters
 
-The tracing system automatically captures the following attributes:
+In more detail, the tracing system automatically captures:
 
-- **prompt_tokens_used**: Tokens in the sent prompt.
+- **prompt_tokens_used**: Tokens from the submitted prompt.
 - **completion_tokens_used**: Tokens generated by the model.
 - **cached_tokens_used**: Tokens served from the cache.
 - **model_name**: Name of the model used.
 - **duration**: Operation duration in seconds.
 
-## 3. Creating Spans Manually
+## 3. Manual Span Creation
 
-For more granular control over your traces, you can create spans manually to monitor specific operations.
+For more granular control, you can create manual spans to trace specific operations.
 
-### Available Span Types
+Let's see an example of how to define various types of spans and what their output looks like.
 
 ```python
 from datapizzai.tracing.tracing import generation_span, agent_span, tool_span
 
 def manual_spans_example():
-    """An example of manual span creation."""
+    """Example of manual span creation"""
     
     with tracer.trace("complex_operation") as trace:
         
         # Span for content generation
         with generation_span("text_generation") as span:
-            span.set_attribute("custom_param", "value")
+            span.set_attribute("custom_parameter", "value")
             span.set_attribute("input_length", 150)
             
             response = client.invoke([
@@ -133,7 +141,7 @@ def manual_spans_example():
             ])
             
             span.set_attribute("output_length", len(response.text))
-            span.set_attribute("model_name", "gpt-4")
+            span.set_attribute("model_name", "gpt-5")
         
         # Span for tool operations
         with tool_span("data_processing") as span:
@@ -146,7 +154,7 @@ def manual_spans_example():
             processed_data = {"status": "completed", "records": 100}
             span.set_attribute("records_processed", processed_data["records"])
         
-        # Span for agent actions
+        # Span for agents
         with agent_span("decision_agent") as span:
             span.set_attribute("agent_type", "decision_maker")
             
@@ -159,38 +167,25 @@ def manual_spans_example():
 result = manual_spans_example()
 ```
 
-**Space for screenshot: Manual span details in trace**
-
-### Custom Attributes
-
-```python
-def custom_attributes_example():
-    """An example of custom attributes in spans."""
-    
-    with tracer.trace("sentiment_analysis") as trace:
-        with generation_span("sentiment_analysis_operation") as span:
-            # Input attributes
-            span.set_attribute("input_type", "text")
-            span.set_attribute("language", "english")
-            span.set_attribute("text_length", 250)
-            
-            # Invoke the model for sentiment analysis
-            prompt = "Analyze the sentiment of this text: 'Today is a fantastic day!'"
-            response = client.invoke([TextBlock(content=prompt)])
-            
-            # Output attributes
-            span.set_attribute("sentiment_detected", "positive")
-            span.set_attribute("confidence_score", 0.95)
-            span.set_attribute("response_tokens", response.completion_tokens_used)
-            
-    return response
+```bash
+╭──────────────────────────── Trace Summary: complex_operation ─────────────────────────────╮
+│ Total Spans: 5                                                                              │
+│ Duration: 11.5s                                                                             │
+│ Token Usage                                                                                 │
+│                ┏━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓       │
+│                ┃ Model   ┃ Prompt Tokens  ┃ Completion Tokens   ┃ Cached Tokens     ┃       │
+│                ┡━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩       │
+│                │ gpt-5   │ 10             │ 748                 │ 0                 │       │
+│                └─────────┴────────────────┴─────────────────────┴───────────────────┘       │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## 4. Adding External Exporters
 
-To integrate datapizzai's monitoring with external systems like Jaeger or Zipkin, you can configure custom exporters.
+To integrate monitoring with external systems, you can configure custom functions.
 
-### 4.1. Creating the Resource
+### 4.1. Resource Creation
+To do this, you don't need to use the `datapizzai` library; the standard method you've likely seen before is sufficient.
 
 ```python
 from opentelemetry import trace
@@ -198,39 +193,47 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
 
 def setup_monitoring_resource():
-    """Configures an OpenTelemetry resource for monitoring."""
+    """Configures the OpenTelemetry resource (compatible with datapizzai)"""
     
-    resource = Resource.create({
-        SERVICE_NAME: "datapizzai-app",
-        SERVICE_VERSION: "1.0.0",
-        "environment": "production",
-        "team": "ai-team"
-    })
+    # Gets the existing tracer provider or creates a new one
+    tracer_provider = trace.get_tracer_provider()
     
-    # Configure the tracer provider
-    tracer_provider = TracerProvider(resource=resource)
-    trace.set_tracer_provider(tracer_provider)
+    # If it's a ProxyTracerProvider, configure a new one
+    from opentelemetry.trace import ProxyTracerProvider
+    if isinstance(tracer_provider, ProxyTracerProvider):
+        resource = Resource.create({
+            SERVICE_NAME: "datapizzai-app",
+            SERVICE_VERSION: "1.0.0",
+            "environment": "production",
+            "team": "ai-team"
+        })
+        
+        tracer_provider = TracerProvider(resource=resource)
+        trace.set_tracer_provider(tracer_provider)
     
     return tracer_provider
 ```
 
 ### 4.2. Zipkin Integration
 
+The Zipkin setup integrates easily with `ContextTracing`. The exporter is added to the existing trace provider.
+
 ```python
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 def setup_zipkin_exporter():
-    """Configures a Zipkin exporter."""
+    """Configures the Zipkin exporter (compatible with datapizzai)"""
     
-    tracer_provider = setup_monitoring_resource()
+    # IMPORTANT: Initialize ContextTracing BEFORE configuring exporters
+    context_tracer = ContextTracing()
+    
+    # Get the tracer provider configured by datapizzai
+    tracer_provider = trace.get_tracer_provider()
     
     # Configure the Zipkin exporter
     zipkin_exporter = ZipkinExporter(
         endpoint="http://localhost:9411/api/v2/spans",
-        local_node_ipv4="127.0.0.1",
-        local_node_ipv6="::1",
-        local_node_port=5000,
     )
     
     # Add the span processor
@@ -238,521 +241,316 @@ def setup_zipkin_exporter():
     tracer_provider.add_span_processor(span_processor)
     
     print("✅ Zipkin exporter configured")
-    return tracer_provider
+    return context_tracer
 
 # Example of using Zipkin
 def zipkin_example():
-    """An example of exporting traces to Zipkin."""
+    """Example of exporting to Zipkin"""
     
-    setup_zipkin_exporter()
-    tracer = ContextTracing()
+    # FIRST: Start Zipkin with Docker
+    # docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin
+    
+    tracer = setup_zipkin_exporter()  # Returns the configured ContextTracing
     
     with tracer.trace("zipkin_example") as trace:
-        client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-3.5-turbo")
+        client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
         
         response = client.invoke([
             TextBlock(content="Create a 50-word summary")
         ])
         
         print(f"Response sent to Zipkin: {response.text[:100]}...")
+        print("🎯 Check Zipkin at http://localhost:9411")
+
+# Run the example
+# zipkin_example()
 ```
 
-**Space for screenshot: Zipkin dashboard with datapizzai traces**
+<img width="3443" height="1255" alt="image" src="https://github.com/user-attachments/assets/99d01347-1069-40dd-a529-feb741ebbd5b" />
 
-### 4.3. OTLP (OpenTelemetry Protocol)
+## 5. Configuring Monitoring with Grafana
+
+> **💡 Note for Jupyter Notebooks**: If you've been running the code so far in a Jupyter Notebook, you will need to restart the kernel each time you set up Prometheus in this cell. 
 
 ```python
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-
-def setup_otlp_exporter():
-    """Configures an OTLP exporter for Jaeger/Grafana."""
-    
-    tracer_provider = setup_monitoring_resource()
-    
-    # Configure the OTLP exporter
-    otlp_exporter = OTLPSpanExporter(
-        endpoint="http://localhost:4317"  # Jaeger OTLP endpoint
-        # headers={
-        #     "Authorization": "Bearer your-token-here"  # Only if auth is required
-        # }
-    )
-    
-    # Add the span processor
-    span_processor = BatchSpanProcessor(otlp_exporter)
-    tracer_provider.add_span_processor(span_processor)
-    
-    print("✅ OTLP exporter configured")
-    return tracer_provider
-
-# Complete example with OTLP
-def complete_otlp_example():
-    """A complete example with OTLP export."""
-    
-    setup_otlp_exporter()
-    tracer = ContextTracing()
-    
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4")
-    memory = Memory()
-    
-    with tracer.trace("otlp_conversation") as trace:
-        # First message
-        memory.add(TextBlock(text="Hello, how are you?", role=ROLE.USER))
-        response1 = client.invoke(memory.get_memory())
-        memory.add(TextBlock(text=response1.text, role=ROLE.ASSISTANT))
-        
-        # Second message
-        memory.add(TextBlock(text="Tell me about Python", role=ROLE.USER))
-        response2 = client.invoke(memory.get_memory())
-        memory.add(TextBlock(text=response2.text, role=ROLE.ASSISTANT))
-        
-        print(f"Conversation completed. Trace sent via OTLP.")
-```
-
-**Space for screenshot: Jaeger UI with OTLP traces**
-
-## 5. Performance Considerations
-
-### Monitoring Performance
-
-```python
-import time
-from dataclasses import dataclass
-from typing import Dict, List
-
-@dataclass
-class PerformanceMetrics:
-    """A data class for performance metrics."""
-    operation_name: str
-    duration_seconds: float
-    tokens_used: int
-    memory_usage_mb: float
-    cache_hit_rate: float
-
-class PerformanceMonitor:
-    """A performance monitor for datapizzai."""
-    
-    def __init__(self):
-        self.metrics: List[PerformanceMetrics] = []
-        self.tracer = ContextTracing()
-    
-    def monitor_operation(self, operation_name: str):
-        """A decorator to monitor operations."""
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                start_time = time.time()
-                
-                with self.tracer.trace(f"perf_{operation_name}") as trace:
-                    result = func(*args, **kwargs)
-                    
-                    duration = time.time() - start_time
-                    
-                    # Calculate metrics
-                    tokens_used = 0
-                    if hasattr(result, 'prompt_tokens_used'):
-                        tokens_used = result.prompt_tokens_used + result.completion_tokens_used
-                    
-                    # Simulate memory calculation
-                    import psutil
-                    memory_usage = psutil.Process().memory_info().rss / 1024 / 1024
-                    
-                    # Save metrics
-                    metrics = PerformanceMetrics(
-                        operation_name=operation_name,
-                        duration_seconds=duration,
-                        tokens_used=tokens_used,
-                        memory_usage_mb=memory_usage,
-                        cache_hit_rate=0.0  # To be implemented with a cache
-                    )
-                    self.metrics.append(metrics)
-                    
-                    return result
-            return wrapper
-        return decorator
-    
-    def get_performance_report(self) -> Dict:
-        """Generates a performance report."""
-        if not self.metrics:
-            return {"error": "No metrics available"}
-        
-        total_operations = len(self.metrics)
-        avg_duration = sum(m.duration_seconds for m in self.metrics) / total_operations
-        total_tokens = sum(m.tokens_used for m in self.metrics)
-        avg_memory = sum(m.memory_usage_mb for m in self.metrics) / total_operations
-        
-        return {
-            "total_operations": total_operations,
-            "avg_duration_seconds": round(avg_duration, 3),
-            "total_tokens_used": total_tokens,
-            "avg_memory_usage_mb": round(avg_memory, 2),
-            "operations_per_second": round(1 / avg_duration, 2) if avg_duration > 0 else 0
-        }
-
-# Usage example
-monitor = PerformanceMonitor()
-
-@monitor.monitor_operation("chat_response")
-def chat_with_monitoring():
-    """A chat function with monitoring."""
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-3.5-turbo")
-    
-    response = client.invoke([
-        TextBlock(content="Explain the concept of monitoring in 100 words")
-    ])
-    
-    return response
-
-# Run and get the report
-for i in range(3):
-    response = chat_with_monitoring()
-    print(f"Operation {i+1} completed")
-
-print("\n📊 Performance Report:")
-report = monitor.get_performance_report()
-for key, value in report.items():
-    print(f"  {key}: {value}")
-```
-
-**Space for screenshot: Performance report**
-
-### Optimizing Performance
-
-```python
-def optimized_configuration():
-    """An optimized configuration for production environments."""
-    
-    # Use batch processing to reduce overhead
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor
-    
-    tracer_provider = setup_monitoring_resource()
-    
-    # Configure an optimized batch processor
-    batch_processor = BatchSpanProcessor(
-        span_exporter=otlp_exporter,
-        max_queue_size=2048,        # Larger queue
-        export_timeout_millis=30000, # Longer timeout
-        schedule_delay_millis=5000,  # Optimized delay
-        max_export_batch_size=512    # Optimized batch size
-    )
-    
-    tracer_provider.add_span_processor(batch_processor)
-    
-    print("✅ Optimized configuration applied")
-```
-
-## 6. Configuring Monitoring with Grafana
-
-### Setting up Grafana + Tempo
-
-```yaml
-# docker-compose.yml for the Grafana stack
-version: '3.8'
-
-services:
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-
-  tempo:
-    image: grafana/tempo:latest
-    command: [ "-config.file=/etc/tempo.yaml" ]
-    volumes:
-      - ./tempo/tempo.yaml:/etc/tempo.yaml
-      - tempo-data:/var/tempo
-    ports:
-      - "3200:3200"   # Tempo
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
-
-volumes:
-  grafana-data:
-  tempo-data:
-```
-
-### Configuring Tempo
-
-```yaml
-# tempo/tempo.yaml
-server:
-  http_listen_port: 3200
-
-distributor:
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: 0.0.0.0:4317
-        http:
-          endpoint: 0.0.0.0:4318
-
-ingester:
-  trace_idle_period: 10s
-  max_block_bytes: 1_000_000
-  max_block_duration: 5m
-
-compactor:
-  compaction:
-    compaction_window: 1h
-    max_block_bytes: 100_000_000
-    block_retention: 1h
-    compacted_block_retention: 10m
-
-storage:
-  trace:
-    backend: local
-    local:
-      path: /var/tempo/traces
-```
-
-### Creating a Grafana Dashboard for Datapizzai
-
-```python
-def setup_grafana_dashboard():
-    """Configures a Grafana dashboard for datapizzai."""
-    
-    dashboard_config = {
-        "dashboard": {
-            "title": "DatapizzAI Monitoring",
-            "panels": [
-                {
-                    "title": "Token Usage Over Time",
-                    "type": "timeseries",
-                    "targets": [
-                        {
-                            "expr": "rate(datapizzai_tokens_total[5m])",
-                            "legendFormat": "{{model_name}}"
-                        }
-                    ]
-                },
-                {
-                    "title": "Response Time Distribution", 
-                    "type": "histogram",
-                    "targets": [
-                        {
-                            "expr": "histogram_quantile(0.95, datapizzai_duration_seconds)",
-                            "legendFormat": "95th percentile"
-                        }
-                    ]
-                },
-                {
-                    "title": "Cache Hit Rate",
-                    "type": "stat",
-                    "targets": [
-                        {
-                            "expr": "datapizzai_cache_hits / datapizzai_total_requests",
-                            "legendFormat": "Cache Hit Rate"
-                        }
-                    ]
-                }
-            ]
-        }
-    }
-    
-    print("📊 Grafana dashboard configured")
-    return dashboard_config
-
-# Grafana integration example
-def complete_grafana_example():
-    """A complete example with Grafana monitoring."""
-    
-    # Set up OTLP for Tempo
-    setup_otlp_exporter()
-    
-    # Set up the dashboard
-    setup_grafana_dashboard()
-    
-    tracer = ContextTracing()
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4")
-    
-    # Simulate traffic for the dashboard
-    for i in range(10):
-        with tracer.trace(f"grafana_example_{i}") as trace:
-            response = client.invoke([
-                TextBlock(content=f"Message number {i+1}")
-            ])
-            
-            print(f"✅ Request {i+1} traced in Grafana")
-            time.sleep(1)
-    
-    print("🎯 Check Grafana at http://localhost:3000")
-    print("   Username: admin, Password: admin")
-```
-
-**Space for screenshot: Grafana dashboard with datapizzai metrics**
-
-## Complete Example
-
-```python
-#!/usr/bin/env python3
-"""
-A complete monitoring example with datapizzai,
-demonstrating the integration between ContextTracing and manual OpenTelemetry spans.
-"""
-
 import os
-import time
-from dotenv import load_dotenv
-from opentelemetry import trace
 from datapizzai.clients import ClientFactory
-from datapizzai.tracing import ContextTracing
-from datapizzai.type import TextBlock, ROLE
-
+from datapizzai.memory import Memory
+from dotenv import load_dotenv
 load_dotenv()
 
-# Initialize the tracing system
-context_tracer = ContextTracing()
+# Or, if you prefer inline code, here is the simplified version:
+import time
+import os
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
+from opentelemetry.trace import ProxyTracerProvider
+from prometheus_client import Counter, Histogram, start_http_server
+from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock, ROLE
+from datapizzai.tracing import ContextTracing
 
-# Configure the client
-client = ClientFactory.create(
-    provider="openai",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4",
-    temperature=0.7
-)
+_ZIPKIN_ATTACHED = False  # Avoids duplication in notebooks
 
-# OpenTelemetry tracer for manual spans
-tracer = trace.get_tracer(__name__)
 
-def fetch_from_database():
-    """Simulates retrieving data from a database."""
-    print("📊 Fetching data from database...")
-    time.sleep(0.3)  # Simulate database latency
+class SimpleChatbotMonitor:
+    """Simple monitoring for a chatbot with Grafana/Prometheus"""
     
-    # Sample data for an analysis request
-    data = {
-        "user_id": "USR-001",
-        "request_type": "analysis",
-        "content": "Analyze the performance of our monitoring system",
-        "priority": "high",
-        "timestamp": "2024-01-15T10:30:00Z"
-    }
-    
-    print(f"✅ Data retrieved: {data['request_type']} for user {data['user_id']}")
-    return data
+    def __init__(self, service_name="chatbot"):
+        # Tracing (Zipkin) without overwriting already set providers
+        current_tp = trace.get_tracer_provider()
+        if isinstance(current_tp, ProxyTracerProvider):
+            trace.set_tracer_provider(TracerProvider())
+            current_tp = trace.get_tracer_provider()
 
-def validate_data(data):
-    """Validates the retrieved data."""
-    print("🔍 Validating data...")
-    time.sleep(0.1)  # Simulate validation time
-    
-    # Validation checks
-    if not data:
-        raise ValueError("Empty data")
-    
-    required_fields = ["user_id", "request_type", "content"]
-    missing_fields = [field for field in required_fields if field not in data]
-    
-    if missing_fields:
-        raise ValueError(f"Missing fields: {missing_fields}")
-    
-    if len(data.get("content", "")) < 10:
-        raise ValueError("Content too short")
-    
-    print("✅ Validation completed successfully")
-    return True
+        # Check if Zipkin is available before configuring it
+        zipkin_available = False
+        try:
+            import requests
+            response = requests.get("http://localhost:9411/api/v2/services", timeout=2)
+            zipkin_available = response.status_code == 200
+        except:
+            print("⚠️  Zipkin not reachable. Start with: docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin")
 
-def process_business_rules(data):
-    """Processes business logic with an AI call."""
-    print("🤖 Processing business logic...")
-    
-    # Build the prompt based on the data
-    prompt = f"""
-    Analyze the following request from {data['user_id']}:
-    Type: {data['request_type']}
-    Content: {data['content']}
-    Priority: {data['priority']}
-    
-    Provide a detailed analysis and practical recommendations.
-    """
-    
-    # AI client call (automatically traced by ContextTracing)
-    response = client.invoke([TextBlock(content=prompt)])
-    
-    # Process the result
-    result = {
-        "user_id": data["user_id"],
-        "analysis": response.text,
-        "tokens_used": response.completion_tokens_used,
-        "processing_time": time.time(),
-        "status": "completed"
-    }
-    
-    print(f"✅ Processing completed - {result['tokens_used']} tokens used")
-    return result
-
-def main():
-    """A complete example with ContextTracing and manual spans."""
-    print("🚀 Starting complete monitoring example")
-    
-    with context_tracer.trace("business_workflow_complete") as trace:
+        global _ZIPKIN_ATTACHED
+        if zipkin_available and not _ZIPKIN_ATTACHED:
+            zipkin_exporter = ZipkinExporter(endpoint="http://localhost:9411/api/v2/spans")
+            current_tp.add_span_processor(BatchSpanProcessor(zipkin_exporter))
+            _ZIPKIN_ATTACHED = True
+            print("✅ Zipkin configured")
         
-        # Manual span for the database operation
-        with tracer.start_as_current_span("database_query") as db_span:
-            # Attributes for the database span
-            db_span.set_attribute("db.system", "postgresql")
-            db_span.set_attribute("db.operation", "select")
-            
-            # Database operation
-            data = fetch_from_database()
-            
-            db_span.set_attribute("db.records_fetched", 1)
-            db_span.set_attribute("user.id", data["user_id"])
+        self.tracer = trace.get_tracer(__name__)
 
-        # Manual span for validation
-        with tracer.start_as_current_span("data_validation") as validation_span:
-            validation_span.set_attribute("validation.type", "business_rules")
+        # Metrics (direct Prometheus client: no MeterProvider to set up)
+        self.request_counter = Counter(
+            "chatbot_requests_total",
+            "Total number of requests to the chatbot",
+            ["status"],
+        )
+        self.response_time = Histogram(
+            "chatbot_response_time_seconds",
+            "Response time of the chatbot in seconds",
+        )
+        self.token_usage = Counter(
+            "chatbot_tokens_total",
+            "Total number of tokens used",
+            ["type"],
+        )
+
+        # Start Prometheus server (idempotent)
+        try:
+            start_http_server(8000)
+            print("✅ Prometheus server started on http://localhost:8000")
+        except OSError:
+            print("⚠️  Port 8000 already in use: using existing Prometheus server")
+    
+    def monitor_chat(self, user_message: str, client, memory=None):
+        """Monitors a single chat interaction"""
+        
+        with self.tracer.start_as_current_span("chat_interaction") as span:
+            start_time = time.time()
             
-            # Validation logic
             try:
-                validate_data(data)
-                validation_span.set_attribute("validation.success", True)
-            except ValueError as e:
-                validation_span.set_attribute("validation.success", False)
-                validation_span.set_attribute("validation.error", str(e))
+                # Add the user's message to memory
+                if memory:
+                    memory.add_turn([TextBlock(content=user_message)], ROLE.USER)
+                
+                # Call the model
+                response = client.invoke(user_message, memory=memory)
+                
+                # Calculate the duration
+                duration = time.time() - start_time
+                
+                # Add the response to memory
+                if memory:
+                    memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+                
+                # Record the metrics
+                self.request_counter.labels(status="success").inc()
+                self.response_time.observe(duration)
+                
+                # Token usage (if available)
+                if hasattr(response, 'prompt_tokens_used'):
+                    self.token_usage.labels(type="prompt").inc(response.prompt_tokens_used)
+                    self.token_usage.labels(type="completion").inc(response.completion_tokens_used)
+                    span.set_attribute("tokens.prompt", response.prompt_tokens_used)
+                    span.set_attribute("tokens.completion", response.completion_tokens_used)
+                
+                # Span attributes
+                span.set_attribute("chat.user_message", user_message[:100])  # First 100 characters
+                span.set_attribute("chat.response_length", len(response.text))
+                span.set_attribute("chat.duration_seconds", duration)
+                span.set_status(trace.Status(trace.StatusCode.OK))
+                
+                return response
+                
+            except Exception as e:
+                # Error
+                self.request_counter.labels(status="error").inc()
+                span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
+                span.record_exception(e)
                 raise
 
-        # Manual span for business logic
-        with tracer.start_as_current_span("business_logic") as business_span:
-            business_span.set_attribute("business.operation", "ai_analysis")
-            business_span.set_attribute("business.priority", data["priority"])
-            
-            # Core business logic (includes the automatically traced AI call)
-            result = process_business_rules(data)
-            
-            business_span.set_attribute("business.tokens_consumed", result["tokens_used"])
-            business_span.set_attribute("business.status", result["status"])
+# Practical example
+def chatbot_with_monitoring_example():
+    """Complete example of a chatbot with monitoring"""
     
-    print("\n🎯 Workflow completed!")
-    print("📊 The trace shows:")
-    print("  - Manual spans for database, validation, and business logic")
-    print("  - Automatic spans for AI calls")
-    print("  - Custom attributes for each operation")
-    print("  - Token usage and performance metrics")
+    # Initialize the monitor
+    monitor = SimpleChatbotMonitor("my-chatbot")
+    
+    # Initialize client and memory
+    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+    memory = Memory()
+    
+    # Simulate a conversation
+    messages = [
+        "Hello, how are you?",
+        "Tell me about machine learning.",
+        "What are the advantages of AI?",
+        "How does a chatbot work?",
+        "Thank you, goodbye!"
+    ]
+    
+    print("🤖 Starting conversation with monitoring...")
+    
+    for i, message in enumerate(messages, 1):
+        print(f"\n👤 User: {message}")
+        
+        try:
+            response = monitor.monitor_chat(message, client, memory)
+            print(f"🤖 Bot: {response.text[:200]}...")
+            
+        except Exception as e:
+            print(f"❌ Error: {e}")
+        
+        time.sleep(1)  # Pause between messages
+    
+    print("\n✅ Conversation complete!")
+    print("📊 Metrics available at:")
+    print("  - Prometheus: http://localhost:8000")
+    print("  - Zipkin: http://localhost:9411")
+    print("  - Grafana: http://localhost:3000 (if configured)")
 
-if __name__ == "__main__":
-    main()
+# Run the example
+chatbot_with_monitoring_example()
 ```
 
-**Space for screenshot: Complete trace final output**
+**💡 Notes for use in Jupyter Notebooks:**
+1. **Zipkin is optional**: If it's not running, monitoring will continue with only Prometheus.
+2. **To start Zipkin**: `docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin`
+3. **Use the optimized file**: `from simple_chatbot_monitor import SimpleChatbotMonitor` (recommended)
+
+### Quick Setup for Prometheus and Grafana
+
+Let's see how to start the Prometheus and Grafana Docker containers. This is also done in a standard way.
+
+#### 1. Start Prometheus and Grafana with Docker
+
+```bash
+# Create data directories
+mkdir -p grafana-data prometheus-data
+
+# Start Prometheus
+docker run -d -p 9090:9090 \
+  --name prometheus \
+  -v $(pwd)/prometheus-data:/prometheus \
+  prom/prometheus --config.file=/etc/prometheus/prometheus.yml
+
+# Start Grafana
+docker run -d -p 3000:3000 \
+  --name grafana \
+  -v $(pwd)/grafana-data:/var/lib/grafana \
+  grafana/grafana
+```
+
+#### 2. Configure Prometheus to Read Metrics
+
+Create the `prometheus.yml` file:
+
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'chatbot-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8000']  # For Docker Desktop
+        # - targets: ['172.17.0.1:8000']        # For Linux
+```
+
+#### 3. Grafana Dashboard for the Chatbot
+
+Once Grafana is running (http://localhost:3000, user/pass: admin/admin):
+
+1.  **Add Data Source**: Prometheus → http://172.17.0.1:9090/
+2.  **Create a Dashboard** with these panels:
+
+```json
+{
+  "dashboard": {
+    "title": "Chatbot Monitoring",
+    "panels": [
+      {
+        "title": "Total Requests",
+        "type": "stat",
+        "targets": [{"expr": "chatbot_requests_total"}]
+      },
+      {
+        "title": "Response Time",
+        "type": "graph", 
+        "targets": [{"expr": "rate(chatbot_response_time_seconds_sum[5m]) / rate(chatbot_response_time_seconds_count[5m])"}]
+      },
+      {
+        "title": "Tokens Used",
+        "type": "graph",
+        "targets": [{"expr": "rate(chatbot_tokens_total[5m])"}]
+      }
+    ]
+  }
+}
+```
+
+#### 4. Full Execution
+
+```bash
+# 1. Start services
+docker run -d -p 9411:9411 openzipkin/zipkin        # Zipkin
+docker run -d -p 9090:9090 prom/prometheus          # Prometheus  
+docker run -d -p 3000:3000 grafana/grafana          # Grafana
+
+# 2. Run your chatbot with monitoring
+python your_chatbot.py
+
+# 3. View metrics
+# - Prometheus: http://localhost:9090
+# - Grafana: http://localhost:3000
+# - Zipkin: http://localhost:9411
+```
+
+The following metrics are available and can be viewed on Grafana:
+
+- `chatbot_requests_total` - Total requests (success/error)
+- `chatbot_response_time_seconds` - Response time
+- `chatbot_tokens_total` - Tokens used
+- `chatbot_errors_total` - Errors by type
+
+<img width="1862" height="800" alt="image" src="https://github.com/user-attachments/assets/544c5c3f-273b-4379-abda-a66097a07012" />
 
 ## Conclusions
 
-The datapizzai monitoring system offers:
+In this guide, we've seen how to use monitoring with the `datapizzai` library. Specifically, we've covered:
 
-- **Automatic tracing** of all model interactions.
-- **Custom spans** for specific operations.
-- **OpenTelemetry integration** with external systems.
-- **Real-time performance monitoring**.
-- **Grafana dashboards** for advanced visualization.
+- **Automatic tracing** of all model interactions
+- **Custom spans** for specific operations
+- **Integration with OpenTelemetry** and external systems
+- **Real-time performance monitoring**
+- **Grafana dashboards** for advanced visualization
 
 Monitoring is essential for:
-- Optimizing token usage.
-- Identifying performance bottlenecks.
-- Monitoring operational costs.
-- Ensuring stable performance in production.
+- Optimizing token usage
+- Identifying bottlenecks
+- Monitoring operational costs
+- Ensuring stable performance in production

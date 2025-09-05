@@ -180,7 +180,6 @@ result = esempio_span_manuali()
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-```
 ## 4. Aggiungere esportatori esterni
 
 Per integrare il monitoraggio con sistemi esterni, è possibile configurare delle funzioni personalizzate.
@@ -216,7 +215,8 @@ def setup_risorsa_monitoraggio():
 ```
 
 ### 4.2. Integrazione con Zipkin
-Il setup di Zipkin avviene 
+
+Il setup di Zipkin si integra facilmente con `ContextTracing`. L'esportatore viene aggiunto al provider di tracce esistente.
 
 ```python
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
@@ -234,9 +234,6 @@ def setup_esportatore_zipkin():
     # Configura l'esportatore Zipkin
     zipkin_exporter = ZipkinExporter(
         endpoint="http://localhost:9411/api/v2/spans",
-        local_node_ipv4="127.0.0.1",
-        local_node_ipv6="::1",
-        local_node_port=5000,
     )
     
     # Aggiunge il processore di span
@@ -266,46 +263,10 @@ def esempio_zipkin():
         print("🎯 Controlla Zipkin su http://localhost:9411")
 
 # Esegue l'esempio
-esempio_zipkin()
+# esempio_zipkin()
 ```
 
 <img width="3443" height="1255" alt="immagine" src="https://github.com/user-attachments/assets/99d01347-1069-40dd-a529-feb741ebbd5b" />
-
-
-### 4.3. OTLP (OpenTelemetry Protocol)
-Infine vediamo come eseguire il setup di Opentelemetry
-
-```python
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.zipkin.json import ZipkinExporter
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.semconv.resource import ResourceAttributes
-
-def setup_esportatore_otlp():
-    """Configura l'esportatore OTLP (gRPC) per Jaeger/Collector"""
-    
-    tracer_provider = setup_risorsa_monitoraggio()
-    
-    # NOTE importanti per gRPC OTLP:
-    # - NIENTE prefisso http:// nell'endpoint (usa host:porta)
-    # - Usa insecure=True se il backend non ha TLS
-    # - Le chiavi degli header devono essere lowercase (es. "authorization")
-    otlp_exporter = OTLPSpanExporter(
-        endpoint="localhost:4317",
-        insecure=True,
-        # headers=(("authorization", f"Bearer {os.getenv('OTLP_TOKEN','')}"),),  # opzionale
-    )
-    
-    span_processor = BatchSpanProcessor(otlp_exporter)
-    trace.get_tracer_provider().add_span_processor(span_processor)
-    
-    print("✅ Esportatore OTLP configurato (gRPC → localhost:4317)")
-    return tracer_provider
-```
-
-
-<img width="3443" height="1603" alt="immagine" src="https://github.com/user-attachments/assets/50db17f8-d9bf-4285-bddb-9feaa329064a" />
 
 ## 5. Configurazione del monitoraggio con Grafana
 
@@ -580,7 +541,7 @@ Sono disponibili le seguenti metriche, visualizzabili su Grafana
 
 ## Conclusioni
 
-In questa guida abbiamo visto come usare il monitoraggio con la libreria datapizzai, ma anche:
+In questa guida abbiamo visto come usare il monitoraggio con la libreria datapizzai. Più in dettaglio abbiamo visto:
 
 - **Tracciamento automatico** di tutte le interazioni con i modelli
 - **Span personalizzati** per operazioni specifiche  
