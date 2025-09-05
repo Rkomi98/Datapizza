@@ -309,10 +309,9 @@ def setup_esportatore_otlp():
 
 ## 5. Configurazione del monitoraggio con Grafana
 
-> **💡 Nota per notebook Jupyter**: Il codice seguente è progettato per funzionare senza riavviare il kernel. I provider OpenTelemetry vengono impostati solo quando necessario e le risorse (server Prometheus, Zipkin) vengono gestite in modo idempotente.
+> **💡 Nota per notebook Jupyter**: Se hai usato il codice finora in jupyter notebook, dovrai riavviare il kernel. Dovrai riavviare il kernel ogni volta che fai il setup di prometheus in questa cella. 
 
 ```python
-# Usa il file simple_chatbot_monitor.py già ottimizzato
 import os
 from datapizzai.clients import ClientFactory
 from datapizzai.memory import Memory
@@ -479,13 +478,13 @@ esempio_chatbot_con_monitoraggio()
 ```
 
 **💡 Note per l'uso in notebook Jupyter:**
-1. **Nessun riavvio del kernel necessario**: Il codice gestisce automaticamente provider già impostati
-2. **Zipkin opzionale**: Se non è in esecuzione, il monitoring continua solo con Prometheus 
-3. **Porta Prometheus**: Se la 8000 è occupata, riusa il server esistente
-4. **Per avviare Zipkin**: `docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin`
-5. **Usa il file ottimizzato**: `from simple_chatbot_monitor import SimpleChatbotMonitor` (consigliato)
+1. **Zipkin opzionale**: Se non è in esecuzione, il monitoring continua solo con Prometheus 
+2. **Per avviare Zipkin**: `docker run -d -p 9411:9411 --name zipkin openzipkin/zipkin`
+3. **Usa il file ottimizzato**: `from simple_chatbot_monitor import SimpleChatbotMonitor` (consigliato)
 
-### Configurazione rapida per Grafana
+### Configurazione rapida di Prometheus e Grafana
+
+Vediamo come avviare fisicamente prometheus e Grafana. Anche questo è un modo standard.
 
 #### 1. Avvia Prometheus e Grafana con Docker
 
@@ -570,50 +569,7 @@ python tuo_chatbot.py
 # - Zipkin: http://localhost:9411
 ```
 
-### Utilizzo pratico
-
-#### File pronti all'uso:
-
-1.  **`simple_chatbot_monitor.py`** - Monitor completo per chatbot
-2.  **`prometheus.yml`** - Configurazione Prometheus  
-3.  **`start_monitoring.sh`** - Avvia tutto lo stack
-4.  **`stop_monitoring.sh`** - Ferma tutto lo stack
-5.  **`start_zipkin.sh`** - Avvia solo Zipkin (opzionale)
-6.  **`test_full_stack.py`** - Test completo dello stack
-
-#### Avvio rapido:
-
-```bash
-# 1. Vai nella directory Monitoring
-cd Monitoring/
-
-# 2. Avvia lo stack di monitoraggio
-./start_monitoring.sh
-
-# 3. Configura la chiave API
-export OPENAI_API_KEY='your-key-here'
-
-# 4. Avvia il chatbot con monitoraggio
-python simple_chatbot_monitor.py
-
-# Oppure in modalità automatica:
-python simple_chatbot_monitor.py --auto
-
-# 5. (Opzionale) Per abilitare Zipkin:
-./start_zipkin.sh
-
-# 6. Test dello stack completo:
-python test_full_stack.py
-```
-
-#### Accesso ai servizi:
-
-- **Zipkin** (tracce): http://localhost:9411
-- **Prometheus** (metriche): http://localhost:9090  
-- **Grafana** (dashboard): http://localhost:3000 (admin/admin)
-- **Metriche chatbot**: http://localhost:8000
-
-#### Metriche disponibili:
+Sono disponibili le seguenti metriche, visualizzabili su Grafana
 
 - `chatbot_requests_total` - Richieste totali (successo/errore)
 - `chatbot_response_time_seconds` - Tempo di risposta
