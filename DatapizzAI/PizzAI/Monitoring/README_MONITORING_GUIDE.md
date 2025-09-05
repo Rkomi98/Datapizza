@@ -336,9 +336,8 @@ def setup_esportatore_otlp():
     
     print("✅ Esportatore OTLP configurato (gRPC → localhost:4317)")
     return tracer_provider
-
-"""
-Backend OTLP consigliato (Jaeger all-in-one)
+```
+### Backend OTLP consigliato (Jaeger all-in-one)
 
 Avvia Jaeger con supporto OTLP gRPC e interfaccia web:
 
@@ -369,7 +368,7 @@ def setup_esportatore_zipkin():
     print("✅ Esportatore Zipkin configurato")
     return tracer_provider
 
-# Esempio completo con OTLP
+### Esempio completo con OTLP
 def esempio_otlp_completo():
     """Esempio completo con esportazione OTLP"""
     
@@ -392,7 +391,7 @@ def esempio_otlp_completo():
         
         print(f"Conversazione completata. Traccia inviata via OTLP.")
 
-# Esempio completo con Zipkin
+### Esempio completo con Zipkin
 def esempio_zipkin_completo():
     """Esempio completo con esportazione Zipkin"""
     
