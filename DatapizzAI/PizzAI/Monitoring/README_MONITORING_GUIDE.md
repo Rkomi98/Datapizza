@@ -10,8 +10,7 @@ Questa guida illustra come implementare un sistema di monitoraggio completo util
 - [2. Tracciamento del client: input, output e memoria](#2-tracciamento-del-client-input-output-e-memoria)
 - [3. Creazione manuale di span](#3-creazione-manuale-di-span)
 - [4. Aggiungere esportatori esterni](#4-aggiungere-esportatori-esterni)
-- [5. Considerazioni sulle prestazioni](#5-considerazioni-sulle-prestazioni)
-- [6. Configurazione del monitoraggio con Grafana](#6-configurazione-del-monitoraggio-con-grafana)
+- [5. Configurazione del monitoraggio con Grafana](#5-configurazione-del-monitoraggio-con-grafana)
 
 ## 1. Configurazione di base
 
@@ -67,7 +66,7 @@ from datapizzai.type import TextBlock, ROLE
 
 # Inizializza i componenti
 tracer = ContextTracing()
-client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4")
+client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
 memory = Memory()
 
 def esempio_tracciamento_base():
@@ -217,6 +216,7 @@ def setup_risorsa_monitoraggio():
 ```
 
 ### 4.2. Integrazione con Zipkin
+Il setup di Zipkin avviene 
 
 ```python
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
@@ -273,6 +273,7 @@ esempio_zipkin()
 
 
 ### 4.3. OTLP (OpenTelemetry Protocol)
+Infine vediamo come eseguire il setup di Opentelemetry
 
 ```python
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -302,94 +303,11 @@ def setup_esportatore_otlp():
     print("✅ Esportatore OTLP configurato (gRPC → localhost:4317)")
     return tracer_provider
 ```
-### Backend OTLP consigliato (Jaeger all-in-one)
 
-Avvia Jaeger con supporto OTLP gRPC e interfaccia web:
-
-```bash
-docker run -d --name jaeger \
-  -p 4317:4317 -p 16686:16686 \
-  jaegertracing/all-in-one:1.57
-```
-
-- Tracce via OTLP gRPC: `localhost:4317`
-- UI Jaeger: http://localhost:16686
-
-Nota: Zipkin non riceve OTLP gRPC su 4317. Per Zipkin, usa lo `ZipkinExporter` oppure un OpenTelemetry Collector come bridge (OTLP → Zipkin).
-"""
-
-def setup_esportatore_zipkin():
-    """Configura l'esportatore Zipkin"""
-    
-    tracer_provider = setup_risorsa_monitoraggio()
-    
-    zipkin_exporter = ZipkinExporter(
-        endpoint="http://localhost:9411/api/v2/spans"
-    )
-    
-    span_processor = BatchSpanProcessor(zipkin_exporter)
-    trace.get_tracer_provider().add_span_processor(span_processor)
-    
-    print("✅ Esportatore Zipkin configurato")
-    return tracer_provider
-
-### Esempio completo con OTLP
-def esempio_otlp_completo():
-    """Esempio completo con esportazione OTLP"""
-    
-    setup_esportatore_otlp()
-    tracer = ContextTracing()
-    
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
-    memory = Memory()
-    
-    with tracer.trace("conversazione_otlp") as trace:
-        # Primo messaggio
-        memory.add_turn([TextBlock(content="Ciao, come stai?")], ROLE.USER)
-        response1 = client.invoke("", memory=memory)
-        memory.add_turn([TextBlock(content=response1.text)], ROLE.ASSISTANT)
-    
-        memory.add_turn([TextBlock(content="Parlami di Python")], ROLE.USER)
-        response2 = client.invoke("", memory=memory)
-        memory.add_turn([TextBlock(content=response2.text)], ROLE.ASSISTANT)
-
-        
-        print(f"Conversazione completata. Traccia inviata via OTLP.")
-
-### Esempio completo con Zipkin
-```python
-def esempio_zipkin_completo():
-    """Esempio completo con esportazione Zipkin"""
-    
-    setup_esportatore_zipkin()
-    tracer = ContextTracing()
-    
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
-    memory = Memory()
-    
-    with tracer.trace("conversazione_zipkin") as trace:
-        # Primo messaggio
-        memory.add_turn([TextBlock(content="Ciao, come stai?")], ROLE.USER)
-        response1 = client.invoke("", memory=memory)
-        memory.add_turn([TextBlock(content=response1.text)], ROLE.ASSISTANT)
-    
-        memory.add_turn([TextBlock(content="Parlami di Python")], ROLE.USER)
-        response2 = client.invoke("", memory=memory)
-        memory.add_turn([TextBlock(content=response2.text)], ROLE.ASSISTANT)
-
-        print(f"Conversazione completata. Traccia inviata a Zipkin su http://localhost:9411")
-
-# Scegli quale esempio eseguire:
-# esempio_otlp_completo()  # Per OTLP → Jaeger (porta 4317)
-esempio_zipkin_completo()  # Per Zipkin
-```
 
 <img width="3443" height="1603" alt="immagine" src="https://github.com/user-attachments/assets/50db17f8-d9bf-4285-bddb-9feaa329064a" />
 
-
-## 5. Considerazioni sulle prestazioni
-
-### Monitoraggio semplice per chatbot con Grafana
+## 5. Monitoraggio semplice per chatbot con Grafana 
 
 > **💡 Nota per notebook Jupyter**: Il codice seguente è progettato per funzionare senza riavviare il kernel. I provider OpenTelemetry vengono impostati solo quando necessario e le risorse (server Prometheus, Zipkin) vengono gestite in modo idempotente.
 
@@ -726,8 +644,6 @@ def configurazione_ottimizzata():
     
     print("✅ Configurazione ottimizzata applicata")
 ```
-
-## 6. Configurazione del monitoraggio con Grafana
 
 ### 6.1 Datasource Prometheus (fix errore porta 8000)
 
