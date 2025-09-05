@@ -95,3 +95,18 @@ I servizi usano le porte: 3000, 8000, 9090, 9411. Assicurati siano libere.
 export OPENAI_API_KEY='sk-...'
 # Oppure crea file .env con OPENAI_API_KEY=sk-...
 ```
+
+### Importazioni corrette
+Se hai errori di importazione, usa:
+```python
+from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory  
+from datapizzai.type import TextBlock, ROLE
+from datapizzai.tracing import ContextTracing
+```
+
+### Test rapido
+```bash
+cd Monitoring/
+python test_monitor.py  # Test senza API key
+```

@@ -412,7 +412,10 @@ from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv.resource import ResourceAttributes
 from prometheus_client import start_http_server
-from datapizzai import ClientFactory, Memory, TextBlock, ROLE
+from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock, ROLE
+from datapizzai.tracing import ContextTracing
 
 class SimpleChatbotMonitor:
     """Monitor semplice per chatbot con Grafana/Prometheus"""

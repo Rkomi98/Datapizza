@@ -2,74 +2,74 @@
 """
 Monitor semplice per chatbot con Grafana/Prometheus/Zipkin
 Esempio pratico e pronto all'uso per monitorare un chatbot DatapizzAI
+Usa solo le librerie già disponibili in datapizzai
 """
 
 import time
 import os
-from opentelemetry import trace, metrics
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.exporter.prometheus import PrometheusMetricReader
+from prometheus_client import Counter, Histogram, start_http_server
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.semconv.resource import ResourceAttributes
-from prometheus_client import start_http_server
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry import trace
 
 try:
-    from datapizzai import ClientFactory, Memory, TextBlock, ROLE
-except ImportError:
-    print("⚠️  datapizzai non installato. Installa con: pip install datapizzai")
+    from datapizzai.clients import ClientFactory
+    from datapizzai.memory import Memory
+    from datapizzai.type import TextBlock, ROLE
+    from datapizzai.tracing import ContextTracing
+except ImportError as e:
+    print(f"⚠️  Errore importazione datapizzai: {e}")
+    print("   Verifica che datapizzai sia installato correttamente")
     exit(1)
 
 class SimpleChatbotMonitor:
-    """Monitor semplice per chatbot con Grafana/Prometheus"""
+    """Monitor semplice per chatbot con Grafana/Prometheus usando le librerie disponibili"""
     
     def __init__(self, service_name="chatbot", prometheus_port=8000, zipkin_url="http://localhost:9411/api/v2/spans"):
         print(f"🔧 Inizializzazione monitor per {service_name}...")
         
-        # Configura OpenTelemetry Resource
-        resource = Resource.create({
-            ResourceAttributes.SERVICE_NAME: service_name,
-            ResourceAttributes.SERVICE_VERSION: "1.0.0",
-            ResourceAttributes.SERVICE_INSTANCE_ID: f"{service_name}-{int(time.time())}"
-        })
-        
-        # === TRACING (per Zipkin) ===
+        # === TRACING (usando ContextTracing di datapizzai) ===
         try:
-            tracer_provider = TracerProvider(resource=resource)
+            self.context_tracer = ContextTracing()
+            print("✅ ContextTracing di datapizzai configurato")
+        except Exception as e:
+            print(f"⚠️  ContextTracing non disponibile: {e}")
+            self.context_tracer = None
+        
+        # === TRACING ZIPKIN (opzionale) ===
+        try:
+            tracer_provider = TracerProvider()
             zipkin_exporter = ZipkinExporter(endpoint=zipkin_url)
             tracer_provider.add_span_processor(BatchSpanProcessor(zipkin_exporter))
             trace.set_tracer_provider(tracer_provider)
-            self.tracer = trace.get_tracer(__name__)
+            self.zipkin_tracer = trace.get_tracer(__name__)
             print(f"✅ Zipkin configurato: {zipkin_url}")
         except Exception as e:
             print(f"⚠️  Zipkin non disponibile: {e}")
-            self.tracer = None
+            self.zipkin_tracer = None
         
-        # === METRICHE (per Prometheus/Grafana) ===
+        # === METRICHE PROMETHEUS (usando prometheus_client direttamente) ===
         try:
-            prometheus_reader = PrometheusMetricReader()
-            meter_provider = MeterProvider(resource=resource, metric_readers=[prometheus_reader])
-            metrics.set_meter_provider(meter_provider)
-            meter = metrics.get_meter(__name__)
-            
             # Definisci metriche principali
-            self.request_counter = meter.create_counter(
-                "chatbot_requests_total",
-                description="Numero totale di richieste al chatbot"
+            self.request_counter = Counter(
+                'chatbot_requests_total',
+                'Numero totale di richieste al chatbot',
+                ['status']
             )
-            self.response_time = meter.create_histogram(
-                "chatbot_response_time_seconds",
-                description="Tempo di risposta del chatbot in secondi"
+            self.response_time = Histogram(
+                'chatbot_response_time_seconds',
+                'Tempo di risposta del chatbot in secondi'
             )
-            self.token_usage = meter.create_counter(
-                "chatbot_tokens_total", 
-                description="Numero totale di token utilizzati"
+            self.token_counter = Counter(
+                'chatbot_tokens_total', 
+                'Numero totale di token utilizzati',
+                ['type']
             )
-            self.error_counter = meter.create_counter(
-                "chatbot_errors_total",
-                description="Numero totale di errori"
+            self.error_counter = Counter(
+                'chatbot_errors_total',
+                'Numero totale di errori',
+                ['error_type']
             )
             
             # Avvia server Prometheus
@@ -83,71 +83,61 @@ class SimpleChatbotMonitor:
     def monitor_chat(self, user_message: str, client, memory=None):
         """Monitora una singola interazione di chat"""
         
-        # Usa span solo se tracer disponibile
-        span_context = self.tracer.start_as_current_span("chat_interaction") if self.tracer else None
+        start_time = time.time()
+        
+        # Usa ContextTracing di datapizzai se disponibile
+        if self.context_tracer:
+            with self.context_tracer.trace("chat_interaction") as trace_context:
+                return self._execute_chat_with_monitoring(user_message, client, memory, start_time, trace_context)
+        else:
+            return self._execute_chat_with_monitoring(user_message, client, memory, start_time, None)
+    
+    def _execute_chat_with_monitoring(self, user_message: str, client, memory, start_time, trace_context):
+        """Esegue la chat con monitoring completo"""
         
         try:
-            with span_context if span_context else nullcontext():
-                start_time = time.time()
-                
-                # Aggiungi messaggio utente alla memoria
-                if memory:
-                    memory.add_turn([TextBlock(content=user_message)], ROLE.USER)
-                
-                # Chiamata al modello
-                response = client.invoke(user_message, memory=memory)
-                
-                # Calcola durata
-                duration = time.time() - start_time
-                
-                # Aggiungi risposta alla memoria
-                if memory:
-                    memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-                
-                # === REGISTRA METRICHE ===
-                self.request_counter.add(1, {"status": "success"})
-                self.response_time.record(duration)
-                
-                # Token usage (se disponibile)
-                total_tokens = 0
-                if hasattr(response, 'prompt_tokens_used') and hasattr(response, 'completion_tokens_used'):
-                    total_tokens = response.prompt_tokens_used + response.completion_tokens_used
-                    self.token_usage.add(total_tokens)
-                
-                # === ATTRIBUTI SPAN (se disponibile) ===
-                if span_context and self.tracer:
-                    span = trace.get_current_span()
-                    span.set_attribute("chat.user_message", user_message[:100])  # Primi 100 char
+            # Aggiungi messaggio utente alla memoria
+            if memory:
+                memory.add_turn([TextBlock(content=user_message)], ROLE.USER)
+            
+            # Chiamata al modello
+            response = client.invoke(user_message, memory=memory)
+            
+            # Calcola durata
+            duration = time.time() - start_time
+            
+            # Aggiungi risposta alla memoria
+            if memory:
+                memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+            
+            # === REGISTRA METRICHE PROMETHEUS ===
+            self.request_counter.labels(status="success").inc()
+            self.response_time.observe(duration)
+            
+            # Token usage (se disponibile)
+            if hasattr(response, 'prompt_tokens_used') and hasattr(response, 'completion_tokens_used'):
+                self.token_counter.labels(type="prompt").inc(response.prompt_tokens_used)
+                self.token_counter.labels(type="completion").inc(response.completion_tokens_used)
+            
+            # === ZIPKIN SPAN (opzionale) ===
+            if self.zipkin_tracer:
+                with self.zipkin_tracer.start_as_current_span("chat_zipkin") as span:
+                    span.set_attribute("chat.user_message", user_message[:100])
                     span.set_attribute("chat.response_length", len(response.text))
                     span.set_attribute("chat.duration_seconds", duration)
-                    span.set_attribute("chat.tokens_total", total_tokens)
                     if hasattr(response, 'prompt_tokens_used'):
                         span.set_attribute("tokens.prompt", response.prompt_tokens_used)
                         span.set_attribute("tokens.completion", response.completion_tokens_used)
-                    span.set_status(trace.Status(trace.StatusCode.OK))
-                
-                return response
-                
+            
+            return response
+            
         except Exception as e:
             # Registra errore
-            self.request_counter.add(1, {"status": "error"})
-            self.error_counter.add(1, {"error_type": type(e).__name__})
-            
-            # Span error (se disponibile)
-            if span_context and self.tracer:
-                span = trace.get_current_span()
-                span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
-                span.record_exception(e)
+            self.request_counter.labels(status="error").inc()
+            self.error_counter.labels(error_type=type(e).__name__).inc()
             
             print(f"❌ Errore durante chat: {e}")
             raise
-
-# Context manager per quando tracer non è disponibile
-class nullcontext:
-    def __enter__(self):
-        return self
-    def __exit__(self, *args):
-        pass
 
 def esempio_chatbot_interattivo():
     """Esempio interattivo di chatbot con monitoring"""
@@ -170,8 +160,9 @@ def esempio_chatbot_interattivo():
         
         print("\n📊 Monitoring attivo su:")
         print("  - Prometheus metriche: http://localhost:8000")
-        print("  - Zipkin traces: http://localhost:9411")
+        print("  - Zipkin traces: http://localhost:9411 (se configurato)")
         print("  - Grafana dashboard: http://localhost:3000 (se configurato)")
+        print("  - ContextTracing: integrato in datapizzai")
         print("\n💬 Chatbot pronto! Scrivi 'quit' per uscire.\n")
         
         message_count = 0
