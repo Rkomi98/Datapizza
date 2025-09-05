@@ -30,6 +30,7 @@ python -m pip install --index-url https://pypi.org/simple/ opentelemetry-exporte
 ```
 
 ### Configurazione iniziale
+Arrivati a questo punto può sembrare banale, ma come sembre iniziamo dalla configurazione del client.
 
 ```python
 import os
@@ -54,7 +55,7 @@ client = ClientFactory.create(
 
 ## 2. Tracciamento del client: input, output e memoria
 
-Il tracciamento automatico dei client permette di monitorare tutte le interazioni con i modelli di intelligenza artificiale.
+Il tracciamento automatico dei client permette di monitorare tutte le interazioni con il modello scelto.
 
 ### Esempio base con tracciamento
 
@@ -83,13 +84,7 @@ def esempio_tracciamento_base():
         memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         
         print(f"Risposta: {response.text}")
-        print(f"Token utilizzati: {response.prompt_tokens_used + response.completion_tokens_used}")
-        
-        # La traccia mostra automaticamente:
-        # - Token utilizzati (prompt, completion, cached)
-        # - Durata dell'operazione
-        # - Numero di span generati
-        
+        print(f"Token utilizzati: {response.prompt_tokens_used + response.completion_tokens_used}")        
         return response
 
 # Esegue l'esempio
@@ -107,10 +102,14 @@ response = esempio_tracciamento_base()
 │ └───────┴───────────────┴───────────────────┴───────────────┘                                                       │
 ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
+Come puoi vedere, la traccia mostra automaticamente:
+    - Token utilizzati (prompt, completion, cached)
+    - Durata dell'operazione
+    - Numero di span generati
 
 ### Parametri della traccia
 
-Il sistema di tracciamento cattura automaticamente:
+Più in dettaglio, il sistema di tracciamento cattura automaticamente:
 
 - **prompt_tokens_used**: Token del prompt inviato
 - **completion_tokens_used**: Token generati dal modello  
