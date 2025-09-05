@@ -298,7 +298,8 @@ def esempio_zipkin():
 esempio_zipkin()
 ```
 
-**Spazio per screenshot: Dashboard Zipkin con trace datapizzai**
+<img width="3443" height="1255" alt="immagine" src="https://github.com/user-attachments/assets/99d01347-1069-40dd-a529-feb741ebbd5b" />
+
 
 ### 4.3. OTLP (OpenTelemetry Protocol)
 
