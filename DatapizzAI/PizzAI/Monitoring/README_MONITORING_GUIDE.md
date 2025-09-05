@@ -393,7 +393,8 @@ def esempio_zipkin_completo():
 esempio_zipkin_completo()  # Per Zipkin
 ```
 
-**Spazio per screenshot: Jaeger UI con trace OTLP**
+<img width="3443" height="1603" alt="immagine" src="https://github.com/user-attachments/assets/50db17f8-d9bf-4285-bddb-9feaa329064a" />
+
 
 ## 5. Performance considerations
 
