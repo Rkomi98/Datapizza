@@ -398,106 +398,280 @@ esempio_zipkin_completo()  # Per Zipkin
 
 ## 5. Performance considerations
 
-### Monitoring delle performance
+### Monitoring semplice per chatbot con Grafana
 
 ```python
 import time
-from dataclasses import dataclass
-from typing import Dict, List
+import os
+from opentelemetry import trace, metrics
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.semconv.resource import ResourceAttributes
+from prometheus_client import start_http_server
+from datapizzai import ClientFactory, Memory, TextBlock, ROLE
 
-@dataclass
-class PerformanceMetrics:
-    """Metriche di performance"""
-    operation_name: str
-    duration_seconds: float
-    tokens_used: int
-    memory_usage_mb: float
-    cache_hit_rate: float
-
-class PerformanceMonitor:
-    """Monitor delle performance per datapizzai"""
+class SimpleChatbotMonitor:
+    """Monitor semplice per chatbot con Grafana/Prometheus"""
     
-    def __init__(self):
-        self.metrics: List[PerformanceMetrics] = []
-        self.tracer = ContextTracing()
+    def __init__(self, service_name="chatbot"):
+        # Configura OpenTelemetry
+        resource = Resource.create({
+            ResourceAttributes.SERVICE_NAME: service_name,
+            ResourceAttributes.SERVICE_VERSION: "1.0.0"
+        })
+        
+        # Tracing (per Zipkin)
+        tracer_provider = TracerProvider(resource=resource)
+        zipkin_exporter = ZipkinExporter(endpoint="http://localhost:9411/api/v2/spans")
+        tracer_provider.add_span_processor(BatchSpanProcessor(zipkin_exporter))
+        trace.set_tracer_provider(tracer_provider)
+        self.tracer = trace.get_tracer(__name__)
+        
+        # Metriche (per Prometheus/Grafana)
+        prometheus_reader = PrometheusMetricReader()
+        meter_provider = MeterProvider(resource=resource, metric_readers=[prometheus_reader])
+        metrics.set_meter_provider(meter_provider)
+        meter = metrics.get_meter(__name__)
+        
+        # Definisci metriche
+        self.request_counter = meter.create_counter(
+            "chatbot_requests_total",
+            description="Numero totale di richieste al chatbot"
+        )
+        self.response_time = meter.create_histogram(
+            "chatbot_response_time_seconds",
+            description="Tempo di risposta del chatbot in secondi"
+        )
+        self.token_usage = meter.create_counter(
+            "chatbot_tokens_total", 
+            description="Numero totale di token utilizzati"
+        )
+        
+        # Avvia server Prometheus
+        start_http_server(8000)
+        print("✅ Server Prometheus avviato su http://localhost:8000")
     
-    def monitor_operation(self, operation_name: str):
-        """Decorator per monitorare operazioni"""
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                start_time = time.time()
+    def monitor_chat(self, user_message: str, client, memory=None):
+        """Monitora una singola interazione di chat"""
+        
+        with self.tracer.start_as_current_span("chat_interaction") as span:
+            start_time = time.time()
+            
+            try:
+                # Aggiungi messaggio utente alla memoria
+                if memory:
+                    memory.add_turn([TextBlock(content=user_message)], ROLE.USER)
                 
-                with self.tracer.trace(f"perf_{operation_name}") as trace:
-                    result = func(*args, **kwargs)
-                    
-                    duration = time.time() - start_time
-                    
-                    # Calcola metriche
-                    tokens_used = 0
-                    if hasattr(result, 'prompt_tokens_used'):
-                        tokens_used = result.prompt_tokens_used + result.completion_tokens_used
-                    
-                    # Simula calcolo memoria
-                    import psutil
-                    memory_usage = psutil.Process().memory_info().rss / 1024 / 1024
-                    
-                    # Salva metriche
-                    metrics = PerformanceMetrics(
-                        operation_name=operation_name,
-                        duration_seconds=duration,
-                        tokens_used=tokens_used,
-                        memory_usage_mb=memory_usage,
-                        cache_hit_rate=0.0  # Da implementare con cache
-                    )
-                    self.metrics.append(metrics)
-                    
-                    return result
-            return wrapper
-        return decorator
+                # Chiamata al modello
+                response = client.invoke(user_message, memory=memory)
+                
+                # Calcola durata
+                duration = time.time() - start_time
+                
+                # Aggiungi risposta alla memoria
+                if memory:
+                    memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+                
+                # Registra metriche
+                self.request_counter.add(1, {"status": "success"})
+                self.response_time.record(duration)
+                
+                # Token usage (se disponibile)
+                if hasattr(response, 'prompt_tokens_used'):
+                    total_tokens = response.prompt_tokens_used + response.completion_tokens_used
+                    self.token_usage.add(total_tokens)
+                    span.set_attribute("tokens.prompt", response.prompt_tokens_used)
+                    span.set_attribute("tokens.completion", response.completion_tokens_used)
+                
+                # Attributi span
+                span.set_attribute("chat.user_message", user_message[:100])  # Primi 100 char
+                span.set_attribute("chat.response_length", len(response.text))
+                span.set_attribute("chat.duration_seconds", duration)
+                span.set_status(trace.Status(trace.StatusCode.OK))
+                
+                return response
+                
+            except Exception as e:
+                # Errore
+                self.request_counter.add(1, {"status": "error"})
+                span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
+                span.record_exception(e)
+                raise
+
+# Esempio pratico
+def esempio_chatbot_con_monitoring():
+    """Esempio completo di chatbot con monitoring"""
     
-    def get_performance_report(self) -> Dict:
-        """Genera report delle performance"""
-        if not self.metrics:
-            return {"error": "Nessuna metrica disponibile"}
+    # Inizializza monitor
+    monitor = SimpleChatbotMonitor("mio-chatbot")
+    
+    # Inizializza client e memoria
+    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+    memory = Memory()
+    
+    # Simula conversazione
+    messaggi = [
+        "Ciao, come stai?",
+        "Parlami del machine learning",
+        "Quali sono i vantaggi dell'AI?",
+        "Come funziona un chatbot?",
+        "Grazie, arrivederci!"
+    ]
+    
+    print("🤖 Avvio conversazione con monitoring...")
+    
+    for i, messaggio in enumerate(messaggi, 1):
+        print(f"\n👤 Utente: {messaggio}")
         
-        total_operations = len(self.metrics)
-        avg_duration = sum(m.duration_seconds for m in self.metrics) / total_operations
-        total_tokens = sum(m.tokens_used for m in self.metrics)
-        avg_memory = sum(m.memory_usage_mb for m in self.metrics) / total_operations
+        try:
+            response = monitor.monitor_chat(messaggio, client, memory)
+            print(f"🤖 Bot: {response.text[:200]}...")
+            
+        except Exception as e:
+            print(f"❌ Errore: {e}")
         
-        return {
-            "total_operations": total_operations,
-            "avg_duration_seconds": round(avg_duration, 3),
-            "total_tokens_used": total_tokens,
-            "avg_memory_usage_mb": round(avg_memory, 2),
-            "operations_per_second": round(1 / avg_duration, 2) if avg_duration > 0 else 0
-        }
-
-# Esempio di utilizzo
-monitor = PerformanceMonitor()
-
-@monitor.monitor_operation("chat_response")
-def chat_with_monitoring():
-    """Funzione di chat con monitoring"""
+        time.sleep(1)  # Pausa tra messaggi
     
-    response = client.invoke([
-        TextBlock(text="Spiega il concetto di monitoring in 100 parole", role=ROLE.USER)
-    ])
-    
-    return response
+    print("\n✅ Conversazione completata!")
+    print("📊 Metriche disponibili su:")
+    print("  - Prometheus: http://localhost:8000")
+    print("  - Zipkin: http://localhost:9411")
+    print("  - Grafana: http://localhost:3000 (se configurato)")
 
-# Esegui e ottieni report
-for i in range(3):
-    response = chat_with_monitoring()
-    print(f"Operazione {i+1} completata")
-
-print("\n📊 Performance Report:")
-report = monitor.get_performance_report()
-for key, value in report.items():
-    print(f"  {key}: {value}")
+# Esegui esempio
+esempio_chatbot_con_monitoring()
 ```
 
-**Spazio per screenshot: Report delle performance**
+### Setup rapido per Grafana
+
+#### 1. Avvia Prometheus e Grafana con Docker
+
+```bash
+# Crea directory per i dati
+mkdir -p grafana-data prometheus-data
+
+# Avvia Prometheus
+docker run -d -p 9090:9090 \
+  --name prometheus \
+  -v $(pwd)/prometheus-data:/prometheus \
+  prom/prometheus --config.file=/etc/prometheus/prometheus.yml
+
+# Avvia Grafana
+docker run -d -p 3000:3000 \
+  --name grafana \
+  -v $(pwd)/grafana-data:/var/lib/grafana \
+  grafana/grafana
+```
+
+#### 2. Configura Prometheus per leggere le metriche
+
+Crea file `prometheus.yml`:
+
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'chatbot-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8000']  # Per Docker Desktop
+        # - targets: ['172.17.0.1:8000']        # Per Linux
+```
+
+#### 3. Dashboard Grafana per il chatbot
+
+Una volta avviato Grafana (http://localhost:3000, user/pass: admin/admin):
+
+1. **Aggiungi Data Source**: Prometheus → http://prometheus:9090
+2. **Crea Dashboard** con questi pannelli:
+
+```json
+{
+  "dashboard": {
+    "title": "Chatbot Monitoring",
+    "panels": [
+      {
+        "title": "Richieste Totali",
+        "type": "stat",
+        "targets": [{"expr": "chatbot_requests_total"}]
+      },
+      {
+        "title": "Tempo di Risposta",
+        "type": "graph", 
+        "targets": [{"expr": "rate(chatbot_response_time_seconds_sum[5m]) / rate(chatbot_response_time_seconds_count[5m])"}]
+      },
+      {
+        "title": "Token Utilizzati",
+        "type": "graph",
+        "targets": [{"expr": "rate(chatbot_tokens_total[5m])"}]
+      }
+    ]
+  }
+}
+```
+
+#### 4. Esecuzione completa
+
+```bash
+# 1. Avvia i servizi
+docker run -d -p 9411:9411 openzipkin/zipkin        # Zipkin
+docker run -d -p 9090:9090 prom/prometheus          # Prometheus  
+docker run -d -p 3000:3000 grafana/grafana          # Grafana
+
+# 2. Esegui il tuo chatbot con monitoring
+python tuo_chatbot.py
+
+# 3. Visualizza metriche
+# - Prometheus: http://localhost:9090
+# - Grafana: http://localhost:3000
+# - Zipkin: http://localhost:9411
+```
+
+### Utilizzo pratico
+
+#### File pronti all'uso:
+
+1. **`simple_chatbot_monitor.py`** - Monitor completo per chatbot
+2. **`prometheus.yml`** - Configurazione Prometheus  
+3. **`start_monitoring.sh`** - Avvia tutto l'stack
+4. **`stop_monitoring.sh`** - Ferma tutto l'stack
+
+#### Avvio rapido:
+
+```bash
+# 1. Vai nella directory Monitoring
+cd Monitoring/
+
+# 2. Avvia lo stack di monitoring
+./start_monitoring.sh
+
+# 3. Configura API key
+export OPENAI_API_KEY='your-key-here'
+
+# 4. Avvia chatbot con monitoring
+python simple_chatbot_monitor.py
+
+# Oppure modalità automatica:
+python simple_chatbot_monitor.py --auto
+```
+
+#### Accesso ai servizi:
+
+- **Zipkin** (traces): http://localhost:9411
+- **Prometheus** (metriche): http://localhost:9090  
+- **Grafana** (dashboard): http://localhost:3000 (admin/admin)
+- **Metriche chatbot**: http://localhost:8000
+
+#### Metriche disponibili:
+
+- `chatbot_requests_total` - Richieste totali (successo/errore)
+- `chatbot_response_time_seconds` - Tempo di risposta
+- `chatbot_tokens_total` - Token utilizzati
+- `chatbot_errors_total` - Errori per tipo
 
 ### Ottimizzazioni
 

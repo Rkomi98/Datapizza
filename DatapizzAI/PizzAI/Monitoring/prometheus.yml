@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Chatbot metrics dal nostro monitor Python
+  - job_name: 'chatbot-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8000']  # Per Docker Desktop su Mac/Windows
+        # - targets: ['172.17.0.1:8000']        # Per Docker su Linux
+        # - targets: ['localhost:8000']         # Se Prometheus gira nativo
+    scrape_interval: 5s
+    metrics_path: /metrics
+    
+  # Self-monitoring di Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
