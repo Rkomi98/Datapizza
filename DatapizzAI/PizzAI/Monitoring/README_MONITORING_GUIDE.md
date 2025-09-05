@@ -21,8 +21,7 @@ Per iniziare con il monitoraggio in datapizzai, è necessario configurare il sis
 
 ```bash
 # Pacchetti richiesti
-pip install datapizzai \
-  opentelemetry-api opentelemetry-sdk \
+pip install opentelemetry-api opentelemetry-sdk \
   opentelemetry-exporter-zipkin opentelemetry-exporter-otlp \
   opentelemetry-exporter-prometheus prometheus-client
 
@@ -318,22 +317,42 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.semconv.resource import ResourceAttributes
 
 def setup_esportatore_otlp():
-    """Configura l'esportatore OTLP per Jaeger/Grafana"""
+    """Configura l'esportatore OTLP (gRPC) per Jaeger/Collector"""
     
     tracer_provider = setup_risorsa_monitoraggio()
     
+    # NOTE importanti per gRPC OTLP:
+    # - NIENTE prefisso http:// nell'endpoint (usa host:porta)
+    # - Usa insecure=True se il backend non ha TLS
+    # - Le chiavi degli header devono essere lowercase (es. "authorization")
     otlp_exporter = OTLPSpanExporter(
-        endpoint="http://localhost:4317"
-        # Per Jaeger: endpoint="http://localhost:14250"
-        # Per Zipkin: usare ZipkinExporter invece
-        # headers={"Authorization": "Bearer <token>"}  # Solo se necessario
+        endpoint="localhost:4317",
+        insecure=True,
+        # headers=(("authorization", f"Bearer {os.getenv('OTLP_TOKEN','')}"),),  # opzionale
     )
     
     span_processor = BatchSpanProcessor(otlp_exporter)
     trace.get_tracer_provider().add_span_processor(span_processor)
     
-    print("✅ Esportatore OTLP configurato")
+    print("✅ Esportatore OTLP configurato (gRPC → localhost:4317)")
     return tracer_provider
+
+"""
+Backend OTLP consigliato (Jaeger all-in-one)
+
+Avvia Jaeger con supporto OTLP gRPC e interfaccia web:
+
+```bash
+docker run -d --name jaeger \
+  -p 4317:4317 -p 16686:16686 \
+  jaegertracing/all-in-one:1.57
+```
+
+- Tracce via OTLP gRPC: `localhost:4317`
+- UI Jaeger: http://localhost:16686
+
+Nota: Zipkin non riceve OTLP gRPC su 4317. Per Zipkin, usa lo `ZipkinExporter` oppure un OpenTelemetry Collector come bridge (OTLP → Zipkin).
+"""
 
 def setup_esportatore_zipkin():
     """Configura l'esportatore Zipkin"""
@@ -396,7 +415,7 @@ def esempio_zipkin_completo():
         print(f"Conversazione completata. Traccia inviata a Zipkin su http://localhost:9411")
 
 # Scegli quale esempio eseguire:
-# esempio_otlp_completo()  # Per OTLP/Jaeger
+# esempio_otlp_completo()  # Per OTLP → Jaeger (porta 4317)
 esempio_zipkin_completo()  # Per Zipkin
 ```
 
@@ -710,7 +729,70 @@ def configurazione_ottimizzata():
 
 ## 6. Configurazione del monitoraggio con Grafana
 
-### Impostazione di Grafana + Tempo
+### 6.1 Datasource Prometheus (fix errore porta 8000)
+
+Se in Grafana vedi l'errore:
+
+Post "http://localhost:8000/api/v1/query": connect: connection refused
+
+significa che la datasource punta all'endpoint di metriche dell'applicazione (porta 8000) invece che all'API di Prometheus (porta 9090). Correggi così:
+
+- URL corretta della datasource Prometheus:
+  - Host locale: `http://localhost:9090`
+  - Stesso network Docker: `http://prometheus:9090`
+  - Grafana in container, Prometheus su host:
+    - Mac/Windows: `http://host.docker.internal:9090`
+    - Linux: `http://172.17.0.1:9090`
+
+Esempio provisioning Grafana per Prometheus (`grafana/provisioning/datasources/prometheus.yml`):
+
+```yaml
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+```
+
+Esegui Prometheus con una config minima che scrapi la tua app su `:8000`:
+
+```yaml
+# Monitoring/prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'datapizzai-app'
+    static_configs:
+      # Scegli UN solo target a seconda dello scenario:
+      # - Se Prometheus gira sullo stesso host dell'app:
+      # - targets: ['localhost:8000']
+      # - Se Prometheus è in Docker e l'app è sull'host (Linux):
+      # - targets: ['172.17.0.1:8000']
+      # - Se Prometheus è in Docker e l'app è sull'host (Mac/Win):
+      # - targets: ['host.docker.internal:8000']
+      # - Se sia Prometheus che l'app sono nello stesso network Docker (nome servizio "app"):
+      # - targets: ['app:8000']
+      targets: ['localhost:8000']
+```
+
+Esegui Prometheus (host o Docker):
+
+```bash
+docker run -d --name prometheus \
+  -p 9090:9090 \
+  -v $(pwd)/Monitoring/prometheus.yml:/etc/prometheus/prometheus.yml \
+  prom/prometheus:latest
+
+# Verifica
+curl -s http://localhost:9090/-/ready  # atteso: OK
+```
+
+Poi in Grafana imposta/aggiorna la datasource Prometheus con la URL corretta (vedi sopra).
+
+### 6.2 Impostazione di Grafana + Tempo
 
 ```yaml
 # docker-compose.yml per lo stack Grafana
