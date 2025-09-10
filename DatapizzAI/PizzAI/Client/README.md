@@ -73,8 +73,6 @@ openai_client = ClientFactory.create(
     system_prompt="Sei un assistente AI utile.",
     temperature=0.7
 )
-
-# Modelli disponibili: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
 ```
 
 ### Anthropic client (Claude)
@@ -87,8 +85,6 @@ anthropic_client = ClientFactory.create(
     system_prompt="Sei Claude, un assistente AI di Anthropic.",
     temperature=0.5
 )
-
-# Modelli disponibili: claude-3-5-sonnet-latest, claude-3-5-haiku-latest, claude-3-opus-latest
 ```
 
 ### Google client (Gemini)
@@ -101,8 +97,6 @@ google_client = ClientFactory.create(
     system_prompt="Sei Gemini, l'assistente AI di Google.",
     temperature=0.6
 )
-
-# Modelli disponibili: gemini-2.0-flash, gemini-1.5-pro, gemini-1.5-flash
 ```
 
 ### Mistral client
@@ -115,8 +109,6 @@ mistral_client = ClientFactory.create(
     system_prompt="Sei un assistente AI basato su Mistral.",
     temperature=0.7
 )
-
-# Modelli disponibili: mistral-large-latest, mistral-medium-latest, mistral-small-latest
 ```
 
 ### Azure OpenAI client
