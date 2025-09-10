@@ -11,7 +11,7 @@ This guide walks you step-by-step through building a text-only chatbot with Data
 - [Prerequisites](#prerequisites)
 - [1. Client setup](#1-client-setup)
 - [2. Core Concepts: Memory, TextBlock, ROLE](#2-core-concepts-memory-textblock-role)
-- [3. Performance: Caching and Metrics](#3-performance-caching-and-metrics)
+- [3. Caching](#3-caching)
 - [4. Putting It All Together: Complete Chatbot](#4-putting-it-all-together-complete-chatbot)
 - [Useful References](#useful-references)
 
@@ -76,10 +76,12 @@ response = client.invoke("", memory=memory)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
 
-## 3. Performance: Caching and Metrics
-Caching reduces costs for repeated requests. Metrics help you understand the impact of your prompting and memory strategies.
+## 3. Caching
+Caching reduces cost and latency for repeated requests.
 
-Important note on caching: caching is implemented by the `datapizzai` library (not by the provider). You can use in‑process `MemoryCache` or a shared `RedisCache` in distributed environments. The cache key is computed from the request content.
+How it works: if you send two identical requests to the same client with caching enabled, the second one is served from the cache (cache hit). In this case, the provider is not called and the response is returned immediately.
+
+Implementation details: caching is handled by the `datapizzai` library (not by the provider). The cache key is computed as a hash of the request content (prompt, parameters, and memory if present). You can use an in‑process `MemoryCache` or a shared `RedisCache` for distributed setups.
 
 ```python
 from datapizzai.cache import MemoryCache
@@ -117,13 +119,9 @@ client_redis = ClientFactory.create(
     cache=redis_cache,
 )
 
-# Inspect metrics
-print("prompt tokens:", r2.prompt_tokens_used)
-print("completion tokens:", r2.completion_tokens_used)
-print("stop reason:", r2.stop_reason)
 ```
 
-Measurement enables data-driven optimizations for latency, cost, and quality.
+
 
 ## 4. Putting It All Together: Complete Chatbot
 Here is a summary example that combines configuration, a simple class, REPL, and basic metrics, using memory for multi-turn context.

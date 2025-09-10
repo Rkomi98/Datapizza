@@ -167,8 +167,6 @@ resp = client.invoke("", memory=memory)
 memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT) #Aggiungo risposta alla memori
 
 # Secondo turno: follow-up che si basa sull'immagine precedente
-memory.add_turn([TextBlock("Quali miglioramenti consiglieresti?")], ROLE.USER)
-resp = client.invoke("", memory=memory)
-
+resp = client.invoke("Quali miglioramenti consiglieresti", memory=memory)
 print(resp.text)
 ```

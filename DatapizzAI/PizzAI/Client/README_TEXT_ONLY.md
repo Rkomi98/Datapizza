@@ -11,7 +11,7 @@ Questa guida ti accompagna passo‑passo alla creazione di un chatbot testuale c
 - [Prerequisiti](#prerequisiti)
 - [1. Configurazione del client](#1-configurazione-del-client)
 - [2. Concetti chiave: Memory, TextBlock, ROLE](#2-concetti-chiave-memory-textblock-role)
-- [3. Prestazioni: cache e metriche](#3-prestazioni-cache-e-metriche)
+- [3. Cache](#3-cache)
 - [4. Mettere tutto insieme: chatbot completo](#4-mettere-tutto-insieme-chatbot-completo)
 - [Riferimenti utili](#riferimenti-utili)
 
@@ -77,10 +77,12 @@ memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
 Nota: la risposta è un oggetto. Per salvarla in memoria devi usare `response.text` (stringa). Non passare l'oggetto risposta direttamente nei `TextBlock`, altrimenti otterrai errori di serializzazione JSON.
 
-## 3. Prestazioni: cache e metriche
-La cache riduce costi per richieste ripetute. Le metriche aiutano a capire l’impatto delle scelte di prompting/memoria.
+## 3. Cache
+La cache riduce costi e latenza per richieste ripetute.
 
-Nota importante sulla cache: la cache è implementata dalla libreria `datapizzai` (non dal provider). Puoi usare `MemoryCache` (in‑process) oppure `RedisCache` per ambienti distribuiti. La logica di cache si basa su un hash del contenuto della richiesta.
+Come funziona: se invii due richieste identiche allo stesso client con la cache attiva, la seconda è servita dalla cache (cache hit). In questo caso il provider non viene chiamato e la risposta è restituita immediatamente.
+
+Dettagli di implementazione: la cache è gestita dalla libreria `datapizzai` (non dal provider). La chiave di cache è calcolata da un hash del contenuto della richiesta (prompt, parametri e memoria se presente). Puoi usare `MemoryCache` (in‑process) oppure `RedisCache` per ambienti distribuiti.
 
 ```python
 from datapizzai.cache import MemoryCache

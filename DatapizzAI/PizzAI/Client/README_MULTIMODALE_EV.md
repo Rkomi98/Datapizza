@@ -170,8 +170,8 @@ resp = client.invoke("", memory=memory)
 memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)  # Add assistant response to memory
 
 # Second turn: follow-up that builds on the previous image
-memory.add_turn([TextBlock("What improvements would you recommend?")], ROLE.USER)
-resp = client.invoke("", memory=memory)
+resp = client.invoke("What improvements would you recommend?", memory=memory)
+print(resp.text)
 
 print(resp.text)
 ```
