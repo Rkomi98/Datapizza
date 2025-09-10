@@ -196,14 +196,13 @@ captioned_node = captioner(document_node)
 
 **Funzionalità:** il captioner identifica automaticamente nodi di tipo `FIGURE` e `TABLE` e genera descrizioni testuali.
 
-## 5. Splitting del testo
+## 5. Splitting dei nodi
 
 Dato che stiamo lavorando con nodi, usa il NodeSplitter: divide i nodi in sotto‑nodi/chunk adatti all'embedding.
 
 ```python
 splitter = NodeSplitter(
     max_char=1000,  # lunghezza massima del chunk
-    overlap=100     # sovrapposizione tra chunk
 )
 
 # Suddivisione diretta del nodo in sotto‑nodi/chunk
@@ -282,21 +281,33 @@ embedded_chunks = embedder(tagged_chunks)
 
 Il vector store memorizza i chunks con i loro vettori per un retrieval efficiente. In questa guida manteniamo la sezione essenziale per non duplicare la documentazione dei moduli.
 
-Esempio minimo con Qdrant (presuppone Qdrant avviato):
-
+Esempio minimo con Qdrant, se non l'hai ancora attivato fai così:
 ```python
+# 1. Setup Qdrant
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
 from datapizzai.vectorstores import QdrantVectorstore
 
+client = QdrantClient(host="localhost", port=6333)
+client.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
+)
+```
+E poi per gestire i chunks su Qdrant fai:
+
+```python
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
 vectorstore.add(embedded_chunks, collection_name="documents")
-
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="text-embedding-3-small")
 # Crea un embedding per la query con lo stesso client
-query_vector = client.embed("programming languages")
+query_vector = client.embed("Data visualization")
 
 results = vectorstore.search(
     query_vector=query_vector,
     collection_name="documents",
-    top_n=10,
 )
 ```
 
@@ -355,7 +366,7 @@ reranker = CohereReranker(
     top_n=5,        # numero di risultati finali
 )
 
-query = "machine learning applications"
+query = "data visualization applications"
 
 # Genera embedding per la query
 query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
@@ -365,11 +376,10 @@ query_embedding = await query_embedder.a_run(query)
 retrieved_chunks = vectorstore.search(
     query_vector=query_embedding,  # alcune versioni usano `query_vector`
     collection_name="documents", 
-    top_n=20
 )
 
 # Reranking
-final_chunks = reranker.invoke({
+final_chunks = reranker.a_run({
     "query": query,
     "documents": retrieved_chunks
 })
