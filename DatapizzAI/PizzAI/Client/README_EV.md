@@ -360,7 +360,7 @@ class IBMWatsonXClient:
             estimated_completion_tokens = len(text.split()) * 1.3
             
             return ClientResponse(
-                text=text,
+                content=[TextBlock(content=text)],
                 prompt_tokens_used=int(estimated_prompt_tokens),
                 completion_tokens_used=int(estimated_completion_tokens),
                 stop_reason="stop"
@@ -368,7 +368,7 @@ class IBMWatsonXClient:
             
         except Exception as e:
             return ClientResponse(
-                text=f"IBM Watson error: {str(e)}",
+                content=[TextBlock(content=f"IBM Watson error: {str(e)}")],
                 prompt_tokens_used=0,
                 completion_tokens_used=0,
                 stop_reason="error"
@@ -485,7 +485,7 @@ class OllamaClient:
             completion_tokens = self._estimate_tokens(text)
             
             return ClientResponse(
-                text=text,
+                content=[TextBlock(content=text)],
                 prompt_tokens_used=prompt_tokens,
                 completion_tokens_used=completion_tokens,
                 stop_reason="stop"
@@ -493,14 +493,14 @@ class OllamaClient:
             
         except requests.RequestException as e:
             return ClientResponse(
-                text=f"Ollama connection error: {str(e)}",
+                content=[TextBlock(content=f"Ollama connection error: {str(e)}")],
                 prompt_tokens_used=0,
                 completion_tokens_used=0,
                 stop_reason="error"
             )
         except Exception as e:
             return ClientResponse(
-                text=f"Ollama error: {str(e)}",
+                content=[TextBlock(content=f"Ollama error: {str(e)}")],
                 prompt_tokens_used=0,
                 completion_tokens_used=0,
                 stop_reason="error"
