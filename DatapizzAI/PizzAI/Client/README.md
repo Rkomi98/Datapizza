@@ -257,19 +257,7 @@ from ibm_watsonx_ai import APIClient
 
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
-
-# Usa la stessa struttura di risposta dei client DatapizzAI
-# (assumendo che ClientResponse sia disponibile dalla libreria)
-try:
-    from datapizzai.clients.base import ClientResponse
-except ImportError:
-    # Fallback se non disponibile
-    from pydantic import BaseModel
-    class ClientResponse(BaseModel):
-        text: str
-        prompt_tokens_used: int = 0
-        completion_tokens_used: int = 0
-        stop_reason: str = "stop"
+from datapizzai.clients import ClientResponse
 
 
 class IBMWatsonXClient:
