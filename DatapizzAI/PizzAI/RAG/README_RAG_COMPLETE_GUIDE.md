@@ -1,6 +1,6 @@
-# Guida completa RAG con datapizzai
+# Guida completa RAG con datapizza-ai
 
-Questa guida illustra come implementare un sistema di Retrieval-Augmented Generation (RAG) completo utilizzando la libreria datapizzai. Il sistema copre l'intero flusso dalla parsing dei documenti fino alla generazione di risposte contestuali.
+Questa guida illustra come implementare un sistema di Retrieval-Augmented Generation (RAG) completo utilizzando il framework datapizza-ai. Il sistema copre l'intero flusso dalla parsing dei documenti fino alla generazione di risposte contestuali.
 
 ## Indice
 
@@ -71,7 +71,7 @@ Prima di iniziare, assicurarsi di avere installato datapizzai e le dipendenze ne
 
 ```python
 from datapizzai.modules.parsers import AzureParser
-from datapizzai.modules.splitters import TextSplitter
+from datapizzai.modules.splitters import NodeSplitter
 from datapizzai.modules.captioners import LLMCaptioner
 from datapizzai.modules.metatagger import KeywordMetatagger
 from datapizzai.modules.treebuilder import LLMTreeBuilder
@@ -144,7 +144,7 @@ document_node = parser("path/to/document.pdf")
 
 ## 3. Tree builder (facoltativo)
 
-Il tree builder ristruttura i nodi per ottimizzare la comprensione del documento usando un LLM.
+Il tree builder serve quando parti da testo libero e NON hai usato un parser (sezione 2): crea o ristruttura una gerarchia di nodi a partire dal testo, così da sfruttare al meglio i componenti successivi della pipeline (captioner, splitter, metatagger, embedder). È facoltativo perché, se hai già usato un parser (es. `TextParser` o `AzureParser`), disponi già di una struttura a nodi.
 
 ```python
 from datapizzai.clients import OpenAIClient
@@ -160,13 +160,10 @@ client = OpenAIClient(
             )
 
 
-# Tree builder
-tree_builder = LLMTreeBuilder(
-    client=client,
-)
-
+# Tree Builder: crea struttura a nodi dal testo se non hai usato un parser
+tree_builder = LLMTreeBuilder(client=client)
 document_node = tree_builder.build_tree(text)
-print(document_node) 
+print(document_node)
 ```
 
 **Parametri:**
@@ -201,17 +198,16 @@ captioned_node = captioner(document_node)
 
 ## 5. Splitting del testo
 
-Lo splitter divide il contenuto in chunk gestibili per l'embedding.
+Dato che stiamo lavorando con nodi, usa il NodeSplitter: divide i nodi in sotto‑nodi/chunk adatti all'embedding.
 
 ```python
-splitter = TextSplitter(
+splitter = NodeSplitter(
     max_char=1000,  # lunghezza massima del chunk
     overlap=100     # sovrapposizione tra chunk
 )
 
-# Conversione del nodo in testo (esempio semplificato)
-text_content = document_node.content or ""
-chunks = splitter(text_content)
+# Suddivisione diretta del nodo in sotto‑nodi/chunk
+chunks = splitter(document_node)
 ```
 
 **Parametri:**
@@ -258,7 +254,7 @@ tagged_chunks = metatagger(chunks)
 
 ## 7. Embedding generation
 
-Gli embedder convertono i chunk in rappresentazioni vettoriali.
+Gli embedder aggiungono i vettori ai chunks.
 
 ### NodeEmbedder
 
@@ -281,97 +277,27 @@ embedded_chunks = embedder(tagged_chunks)
 - `embedding_name`: nome identificativo per l'embedding
 - `batch_size`: numero di chunk da processare per batch
 
-### ClientEmbedder (per le query)
-
-```python
-query_embedder = ClientEmbedder(
-    client=client,
-    model_name="text-embedding-3-small"
-)
-# Uso asincrono (consigliato)
-#query_vector = await query_embedder.a_run(
-#    "Come spieghi il machine learning?"
-#)  # -> list[float]
-
-# In alternativa, uso sincrono
-query_vector = query_embedder.run("Come spieghi il machine learning?")
-```
 
 ## 8. Vector store
 
-Il vector store memorizza i chunk con i loro embedding per il retrieval efficiente.
+Il vector store memorizza i chunks con i loro vettori per un retrieval efficiente. In questa guida manteniamo la sezione essenziale per non duplicare la documentazione dei moduli.
 
-⚠️ **IMPORTANTE**: Qdrant richiede di **creare esplicitamente le collezioni** prima dell'uso, specificando dimensione dei vettori e metrica di distanza.
+Esempio minimo con Qdrant (presuppone Qdrant avviato):
 
 ```python
-import uuid
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
-from datapizzai.type import Chunk
 from datapizzai.vectorstores import QdrantVectorstore
 
-# 1. PRIMA: assicurati che Qdrant server sia attivo
-# Avvia con: docker run -p 6333:6333 qdrant/qdrant
-
-# 2. Connetti a Qdrant
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
-client_Q = QdrantClient(host="localhost", port=6333)
-
-# 3. Crea collezione (una sola volta)
-client_Q.create_collection(
-    collection_name="documents",
-    vectors_config=VectorParams(
-        size=1536,  # Dimensione dei tuoi embeddings
-        distance=Distance.COSINE
-    )
-)
-chunks = [
-    Chunk(id=uuid.uuid4(), text="Python programming concepts"),
-    Chunk(id=uuid.uuid4(), text="Machine learning fundamentals")
-]
-
-embedded_chunks = embedder(chunks)
-
-# 5. Aggiungi dati
 vectorstore.add(embedded_chunks, collection_name="documents")
-client = OpenAIClient(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="text-embedding-3-small")
+
+# Crea un embedding per la query con lo stesso client
 query_vector = client.embed("programming languages")
-# 6. Ricerca
+
 results = vectorstore.search(
     query_vector=query_vector,
     collection_name="documents",
+    top_n=10,
 )
-```
-
-**Prerequisiti:**
-- **Qdrant server attivo**: `docker run -p 6333:6333 qdrant/qdrant`
-- **Collezione creata** con dimensione corretta
-- **Embedding dimension matching**: la collezione deve avere la stessa dimensione dei tuoi embeddings
-
-**Parametri QdrantVectorstore:**
-- `host`: indirizzo del server Qdrant (default: "localhost")  
-- `port`: porta del server Qdrant (default: 6333)
-- `https`: usa HTTPS (default: True, impostare False per locale)
-- `api_key`: chiave API se richiesta (None per installazioni locali)
-
-**Parametri search (variano per versione):**
-- `query_vector`: vettore di query (lista di float)
-- `collection_name`: nome della collezione
-- `top_n`: numero di risultati da restituire
-
-**Funzionalità:**
-- Storage persistente di embedding con metadati
-- Ricerca semantica ad alte prestazioni
-- Supporto per embedding densi e sparsi
-- Dashboard web su http://localhost:6333/dashboard
-
-**Troubleshooting comune:**
-```python
-# Errore "Collection doesn't exist" → Crea collezione prima
-# Errore "Connection refused" → Avvia Qdrant server  
-# Errore dimensione → Verifica vector_size nella collezione
 ```
 
 ## 9. Rewriter (facoltativo)

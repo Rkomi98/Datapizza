@@ -1,6 +1,6 @@
-# Complete RAG Guide with datapizzai
+# Complete RAG Guide with datapizza-ai
 
-This guide shows how to implement a complete Retrieval‑Augmented Generation (RAG) system using the datapizzai library. The system covers the entire flow from document parsing to context‑aware answer generation.
+This guide shows how to implement a complete Retrieval‑Augmented Generation (RAG) system using the datapizza-ai framework. The system covers the entire flow from document parsing to context‑aware answer generation.
 
 ## Table of Contents
 
@@ -54,7 +54,7 @@ Before starting, ensure datapizzai and required dependencies are installed:
 
 ```python
 from datapizzai.modules.parsers import AzureParser
-from datapizzai.modules.splitters import TextSplitter
+from datapizzai.modules.splitters import NodeSplitter
 from datapizzai.modules.captioners import LLMCaptioner
 from datapizzai.modules.metatagger import KeywordMetatagger
 from datapizzai.modules.treebuilder import LLMTreeBuilder
@@ -128,7 +128,7 @@ Output: returns a `Node` with a hierarchical structure (document → pages → p
 
 ## 3. Tree Builder (optional)
 
-The tree builder restructures content to optimize document understanding using an LLM.
+Use the Tree Builder when you start from raw text and did NOT use a parser (section 2). It creates or restructures a node hierarchy from the text, so downstream pipeline components (captioner, splitter, metatagger, embedder) can work at their best. It is optional because, if you already used a parser (e.g., `TextParser` or `AzureParser`), you already have a node structure.
 
 ```python
 from datapizzai.clients import OpenAIClient
@@ -141,29 +141,9 @@ load_dotenv()
 # LLM client configuration
 client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Tree builder
-tree_builder = LLMTreeBuilder(
-    client=client,
-)
-
-# IMPORTANT: use build_tree() with TEXT, NOT invoke() with the node!
-# Extract text from the parsed node
-text_content = document_node.content or _extract_text_from_node(document_node)
-
-# Apply the tree builder
-restructured_node = tree_builder.build_tree(text_content)
-
-# Helper function to extract text from complex nodes
-def _extract_text_from_node(node):
-    text_parts = []
-    if hasattr(node, 'content') and node.content:
-        text_parts.append(node.content)
-    if hasattr(node, 'children'):
-        for child in node.children:
-            child_text = _extract_text_from_node(child)
-            if child_text:
-                text_parts.append(child_text)
-    return "\n".join(text_parts)
+# Tree Builder: create node structure from text if you don't have a parser output
+tree_builder = LLMTreeBuilder(client=client)
+restructured_node = tree_builder.build_tree(text)
 ```
 
 Parameters:
@@ -199,17 +179,16 @@ Behavior: automatically detects `FIGURE` and `TABLE` nodes and generates textual
 
 ## 5. Text Splitting
 
-The splitter divides content into manageable chunks for embedding.
+Since we work with nodes, prefer NodeSplitter: it splits nodes into sub‑nodes/chunks ready for embedding.
 
 ```python
-splitter = TextSplitter(
+splitter = NodeSplitter(
     max_char=1000,  # maximum chunk length
     overlap=100     # overlap between chunks
 )
 
-# Convert node to text (simplified example)
-text_content = document_node.content or ""
-chunks = splitter.invoke(text_content)
+# Split the node directly into chunks
+chunks = splitter(document_node)
 ```
 
 Parameters:
@@ -256,7 +235,7 @@ Features:
 
 ## 7. Embedding Generation
 
-Embedders convert chunks into vector representations.
+Embedders add vectors to chunks.
 
 ### NodeEmbedder
 
@@ -279,68 +258,27 @@ Parameters:
 - `embedding_name`: identifier for the embedding
 - `batch_size`: number of chunks per batch
 
-### ClientEmbedder (for queries)
+<!-- Removed: ClientEmbedder is not needed inside the RAG pipeline section. -->
+
+## 8. Vector Store (kept minimal here)
+
+The vector store persists chunks and vectors for efficient retrieval. We keep this section minimal to avoid duplicating module docs.
+
+Minimal example with Qdrant (assuming it is running):
 
 ```python
-query_embedder = ClientEmbedder(
-    client=client,
-    model_name="text-embedding-3-small"
-)
-
-# Async usage (recommended)
-query_vector = await query_embedder.a_run(
-    "How would you explain machine learning?"
-)  # -> list[float]
-
-# Alternatively, sync usage
-# query_vector = query_embedder.run("How would you explain machine learning?")
-```
-
-## 8. Vector Store
-
-The vector store persists chunks and their embeddings for efficient retrieval.
-
-```python
-import os, uuid
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
-from datapizzai.type import Chunk
 from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.clients import OpenAIClient
 
-# 1) Ensure Qdrant server is running
-# docker run -p 6333:6333 qdrant/qdrant
-
-# 2) Connect to Qdrant and create collection once
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
-client_Q = QdrantClient(host="localhost", port=6333)
-
-client_Q.create_collection(
-    collection_name="documents",
-    vectors_config=VectorParams(
-        size=1536,              # match your embedding model
-        distance=Distance.COSINE
-    )
-)
-
-# 3) Prepare chunks and embed
-chunks = [
-    Chunk(id=uuid.uuid4(), text="Python programming concepts"),
-    Chunk(id=uuid.uuid4(), text="Machine learning fundamentals"),
-]
-
-embedded_chunks = embedder(chunks)
-
-# 4) Add to vector store (batch)
 vectorstore.add(embedded_chunks, collection_name="documents")
 
-# 5) Build a query embedding and search
-client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="text-embedding-3-small")
+# Create a query embedding with the same client
 query_vector = client.embed("programming languages")
 
 results = vectorstore.search(
     query_vector=query_vector,
     collection_name="documents",
+    top_k=10,
 )
 ```
 
