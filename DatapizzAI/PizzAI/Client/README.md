@@ -261,7 +261,7 @@ from datapizzai.clients import ClientResponse
 
 
 class IBMWatsonXClient:
-    def __init__(self, model_id: str = "ibm/granite-13b-chat-v2", temperature: float = 0.7):
+    def __init__(self, model_id: str = "ibm/granite-3-2-8b-instruct", temperature: float = 0.7):
         self.model_id = model_id
         self.temperature = temperature
         
@@ -362,7 +362,7 @@ if __name__ == "__main__":
     
     # Crea il client IBM WatsonX
     watsonx_client = IBMWatsonXClient(
-        model_id="ibm/granite-13b-chat-v2",
+        model_id="ibm/granite-3-2-8b-instruct",
         temperature=0.7
     )
     
