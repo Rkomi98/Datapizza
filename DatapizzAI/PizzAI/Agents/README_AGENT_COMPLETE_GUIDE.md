@@ -9,8 +9,7 @@ Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libr
 - [1. Creare un agente](#1-creare-un-agente)
 - [2. Eseguire un agente](#2-eseguire-un-agente)
 - [3. Sistema multi‑agente](#3-sistema-multi-agente)
-- [4. Esempio minimale](#4-esempio-minimale)
-- [5. Planning interval](#5-planning-interval)
+- [4. Planning interval](#4-planning-interval)
 
 ## 1. Creare un agente
 
@@ -73,7 +72,7 @@ agent = Agent(
     tools=[get_weather],
     terminate_on_text=True,
 )
-response = agent.run("What's the weather tomorrow in Milan?")
+response = agent.run("Che tempo ci sarà lunedì prossimo a Milano?")
 print(response)
 ```
 
@@ -131,23 +130,9 @@ response = coordinator.run("Analizza il testo 'AI is powerful' e calcola 1024 / 
 
 - `can_call` (`List[Agent]`): Rende gli agenti nella lista disponibili come "strumenti" per il coordinatore, che può quindi invocarli passandogli un compito specifico.
 
-## 4. Esempio minimale
-
-Questo script completo e funzionante mostra come creare e usare un agente base. Assicurati di avere un file `.env` con la tua `OPENAI_API_KEY`.
-
-```python
-from datapizzai.tools import tool
-from datapizzai.agents import Agent
-
-@tool
-def get_weather(location: str, when: str) -> str:
-    return "25 °C"
-
-agent = Agent(tools=[get_weather], terminate_on_text=True)
-print(agent.run("What's the weather tomorrow in Milan?"))
 ```
 
-## 5. Planning interval
+## 4. Planning interval
 
 Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.
 

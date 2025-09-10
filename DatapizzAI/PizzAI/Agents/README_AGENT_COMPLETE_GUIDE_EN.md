@@ -1,38 +1,15 @@
-# Complete guide: creating AI agents with datapizzai
+# Complete Guide: Building AI Agents with datapizzai
 
 ## Overview
 
-This guide explains how to build and orchestrate AI agents using the `datapizzai` library (>= 3.0.8). The goal is to provide a clear understanding of how agents work, focusing on their configuration and interaction in complex systems.
-
-For a comprehensive exploration of all features, the `Agents/agent_complete.py` file remains the complete reference.
+This guide shows how to build and orchestrate AI agents using the `datapizzai` library (>= 3.0.8). The goal is a clear, hands‑on understanding of how agents work and interact in complex systems, with minimal, practical examples.
 
 ## Table of contents
 
-- [Environment setup](#environment-setup)
 - [1. Create an agent](#1-create-an-agent)
-  - [Input parameters](#input-parameters)
 - [2. Run an agent](#2-run-an-agent)
-- [3. Create a multi-agent system](#3-create-a-multi-agent-system)
-- [4. Minimal working example](#4-minimal-working-example)
-- [Additional information](#additional-information)
-
-## Environment setup
-
-Before you begin, you need to install the libraries and configure your credentials.
-
-1.  **Installation**:
-    ```bash
-    pip install datapizzai python-dotenv
-    ```
-
-2.  **Credentials**:
-    Create a `.env` file in the project root and enter your API keys.
-    ```env
-    # .env
-    OPENAI_API_KEY="sk-..."
-    GOOGLE_API_KEY="AIza..."
-    # ...other keys...
-    ```
+- [3. Multi‑agent system](#3-multi-agent-system)
+- [4. Planning interval](#4-planning-interval)
 
 ## 1. Create an agent
 
@@ -55,19 +32,48 @@ graph TD;
 Its creation requires configuring several parameters that define its behavior.
 
 ```python
-from datapizzai.agents import Agent
+import os
+from dotenv import load_dotenv
+from datapizzai.clients import OpenAIClient
+from datapizzai.cache import MemoryCache
+from datapizzai.tools import tool
+from datapizzai.agents import Agent  # alternatively: from datapizzai.agents import Agent, ClientManager
 
-agent = Agent(
-    name="Calculation_Assistant",
-    client=openai_client,
-    system_prompt="You are an assistant specialized in mathematical calculations.",
-    tools=[calculator_tool],
-    max_steps=5,
-    memory=conversational_memory,
-    stateless=False,
-    terminate_on_text=True,
-    planning_interval=0,
+load_dotenv()
+
+# In‑process cache
+cache = MemoryCache()
+
+# OpenAI client with cache
+openai_client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    temperature=0.3,
+    cache=cache,
 )
+
+# Quick client test (second call is a cache hit)
+r1 = openai_client.invoke("Hello!")
+print("Response 1:", r1.text)
+r2 = openai_client.invoke("Hello!")
+print("Response 2 (cache hit):", r2.text)
+
+# Tool
+@tool
+def get_weather(location: str, when: str) -> str:
+    """Retrieves weather information for a specified location and time."""
+    return "25 °C"
+
+# Agent wired to the client
+agent = Agent(
+    name="WeatherAgent",
+    client=openai_client,
+    system_prompt="You are a weather assistant. Use tools when needed and reply in English.",
+    tools=[get_weather],
+    terminate_on_text=True,
+)
+response = agent.run("What will the weather be next Monday in Milan?")
+print(response)
 ```
 
 ### Input parameters
@@ -105,107 +111,70 @@ Once configured, the agent can be run in different modes:
           print("Intermediate step:", type(chunk).__name__)
   ```
 
-## 3. Create a multi-agent system
+## 3. Multi‑agent system
 
 For complex problems, it is effective to combine multiple specialized agents. A "coordinator" agent receives the request, breaks it down, and delegates the sub-tasks to the most suitable agents.
 
 This is achieved through the `can_call` parameter.
 
 ```mermaid
-graph TD;
-    subgraph Multi-Agent System;
-        A["Complex User Query"] --> B{"Coordinator Agent"};
-        B -- Deploys Task 1 --> C["Specialist Agent 1<br>(e.g., Analyst)"];
-        B -- Deploys Task 2 --> D["Specialist Agent 2<br>(e.g., Calculator)"];
-        C -- Returns Result --> B;
-        D -- Returns Result --> B;
-        B -- Synthesizes Results --> E["Final Response"];
-    end;
+graph TD
+    subgraph Multi-Agent System
+        A["Complex User Query"] --> B{"Coordinator Agent"}
+        B -- Plan --> P((Plan))
+        B -- Task 1 --> C["text_analysis_tool"]:::tool
+        B -- Task 2 --> D["calculator_tool"]:::tool
+        C -- Result --> B
+        D -- Result --> B
+        B -- Synthesize --> E["Final Response"]
+    end
+
+classDef tool fill:#E6F7FF,stroke:#1890FF,color:#003A8C
+classDef agent fill:#FFF7E6,stroke:#FA8C16,color:#613400
+class B agent
 ```
 
 ```python
-# Agent 1: specialized in text analysis
-analyst_agent = Agent(name="Analyst_Agent", tools=[text_analysis_tool], ...)
+analyst_agent = Agent(name="Analyst_Agent", tools=[text_analysis_tool])
+calculator_agent = Agent(name="Calculator_Agent", tools=[calculator_tool])
 
-# Agent 2: specialized in calculations
-calculator_agent = Agent(name="Calculator_Agent", tools=[calculator_tool], ...)
-
-# Agent 3: coordinator
-coordinator = Agent(
-    name="Coordinator_Agent",
-    system_prompt="Analyze the request and delegate to your specialized agents.",
-    can_call=[analyst_agent, calculator_agent] # Can "call" the other two
-)
-
-# The coordinator decides who to assign tasks to
+coordinator = Agent(name="Coordinator_Agent", can_call=[analyst_agent, calculator_agent])
 response = coordinator.run("Analyze the text 'AI is powerful' and calculate 1024 / 256")
 ```
 
 - `can_call` (`List[Agent]`): Makes the agents in the list available as "tools" for the coordinator, who can then invoke them by passing a specific task.
 
-## 4. Minimal working example
+## 4. Planning interval
 
-This complete and functional script shows how to create and use a basic agent. Make sure you have a `.env` file with your `OPENAI_API_KEY`.
+With `planning_interval=N` the agent reviews its plan every N steps. Useful for long/branched tasks.
 
 ```python
-import os
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.clients.factory import Provider
-from datapizzai.tools import tool
 from datapizzai.agents import Agent
-from datapizzai.memory import Memory
 
-# 1. Load environment variables (from .env file)
-load_dotenv()
-
-# 2. Define a simple tool
-@tool(name="calculator", description="Performs mathematical calculations")
-def calculator(expression: str) -> str:
-    """Safely evaluates a mathematical expression."""
-    try:
-        allowed_chars = set('0123456789+-*/.() ')
-        if not all(c in allowed_chars for c in expression):
-            return "Error: invalid characters."
-        return f"Result: {eval(expression)}"
-    except Exception as e:
-        return f"Calculation error: {str(e)}"
-
-# 3. Configure the client for the LLM
-try:
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY not found. Check your .env file")
-
-    client = ClientFactory.create(
-        provider=Provider.OPENAI,
-        api_key=api_key,
-        model="gpt-4o",
-    )
-except ValueError as e:
-    print(e)
-    exit()
-
-# 4. Create the agent
-assistant_agent = Agent(
-    name="AI_Assistant",
+agent = Agent(
     client=client,
-    system_prompt="You are an AI assistant. Use the calculator when necessary.",
-    tools=[calculator],
-    memory=Memory(),
-    max_steps=3
+    planning_interval=3,  # plan every 3 steps
 )
 
-# 5. Run the agent
-query = "What is (100 + 50) / 2?"
-print(f"Query: {query}")
+response = agent.run("Write a plan to migrate a monolith to microservices and estimate the effort")
+print(response)
+```
 
-response = assistant_agent.run(query)
-print(f"Response: {response}")
+Conceptual execution (planning every 3 steps):
 
+```mermaid
+flowchart LR
+    A[Start] --> S1[Step 1]
+    S1 --> S2[Step 2]
+    S2 --> S3[Step 3]
+    S3 --> P[Plan Review]
+    P --> S4[Step 4]
+    S4 --> S5[Step 5]
+    S5 --> S6[Step 6]
+    S6 --> P2[Plan Review]
+    P2 --> E[End]
 ```
 
 ## Additional information
 
-- **Client and Tool**: For simplicity, this guide omits the detailed definition of `ClientFactory` and `@tool`. These components are essential, but their operation is similar to that seen in other guides. The `agent_complete.py` file contains complete implementations.
-- **Troubleshooting**: If `MockClient` is activated, it means the API key was not found. Check that the `.env` file is present, readable, and that the variable name is correct.
+- The `agent_complete.py` file contains complete implementations and advanced scenarios.
