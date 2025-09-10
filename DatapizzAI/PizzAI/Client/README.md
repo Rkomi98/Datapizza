@@ -235,15 +235,157 @@ print(f"Risposta: {response.text}")
 
 ---
 
-## Metodo 3: Provider personalizzato via API (es. DeepSeek)
+## Metodo 3: Provider personalizzato via API (es. IBM Watson)
 
-#TODO (con AI eng):
-- Definire design dell'adapter REST per provider custom (schema richieste/risposte, headers, retry, timeouts).
-- Standardizzare il payload e la risposta per allinearsi a `invoke(input, memory)` del framework.
-- Gestire errori/transitori (HTTP, rate limit, parsing) e metriche (`usage`).
-- Scrivere esempi minimi e test end‑to‑end con provider reale.
+Per integrare provider personalizzati come IBM Watson, puoi creare un adapter che rispetti l'interfaccia standard `invoke(input, memory)`.
 
-Nota: per ora, si consiglia l’uso di `ClientFactory` o client nativi già inclusi. L’implementazione dell’adapter custom sarà aggiunta insieme al team AI Engineering.
+### Configurazione IBM Watson
+
+Prerequisiti:
+```bash
+pip install ibm-watson-machine-learning
+```
+
+Variabili d'ambiente:
+```bash
+# File .env
+IBM_WATSON_API_KEY=your-ibm-watson-api-key
+IBM_WATSON_PROJECT_ID=your-project-id
+IBM_WATSON_URL=https://us-south.ml.cloud.ibm.com
+```
+
+Implementazione dell'adapter:
+
+```python
+import os
+from typing import Optional, List, Dict, Any
+from ibm_watson_machine_learning import APIClient
+from ibm_watson_machine_learning.foundation_models import ModelInference
+
+from datapizzai.type import TextBlock
+from datapizzai.memory import Memory
+
+# Usa la stessa struttura di risposta dei client DatapizzAI
+# (assumendo che ClientResponse sia disponibile dalla libreria)
+try:
+    from datapizzai.clients.base import ClientResponse
+except ImportError:
+    # Fallback se non disponibile
+    from pydantic import BaseModel
+    class ClientResponse(BaseModel):
+        text: str
+        prompt_tokens_used: int = 0
+        completion_tokens_used: int = 0
+        stop_reason: str = "stop"
+
+
+class IBMWatsonClient:
+    def __init__(self, model_id: str = "ibm/granite-13b-chat-v2", temperature: float = 0.7):
+        self.model_id = model_id
+        self.temperature = temperature
+        
+        # Configurazione credenziali IBM Watson
+        credentials = {
+            "url": os.getenv("IBM_WATSON_URL", "https://us-south.ml.cloud.ibm.com"),
+            "apikey": os.getenv("IBM_WATSON_API_KEY")
+        }
+        
+        self.client = APIClient(credentials)
+        self.project_id = os.getenv("IBM_WATSON_PROJECT_ID")
+        
+        # Inizializza il modello
+        self.model = self._initialize_model()
+    
+    def _initialize_model(self):
+        """Inizializza il modello IBM Watson una sola volta per ottimizzare le performance."""
+        model_params = {
+            "max_tokens": 1000,
+            "temperature": self.temperature,
+            "stop_sequences": ["Human:", "Assistant:"]
+        }
+        
+        return ModelInference(
+            model_id=self.model_id,
+            credentials=self.client.credentials,
+            project_id=self.project_id,
+            params=model_params
+        )
+    
+    def _build_prompt(self, input_text: str = None, memory: Optional[Memory] = None) -> str:
+        """Costruisce il prompt includendo la memoria della conversazione."""
+        prompt_parts = []
+        
+        # Aggiungi contesto dalla memoria
+        if memory is not None:
+            for turn in memory.memory:
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(getattr(block, "content", "") for block in turn.blocks)
+                if content:
+                    if role.lower() == "user":
+                        prompt_parts.append(f"Human: {content}")
+                    elif role.lower() == "assistant":
+                        prompt_parts.append(f"Assistant: {content}")
+        
+        # Aggiungi input corrente
+        if input_text:
+            prompt_parts.append(f"Human: {input_text}")
+        
+        prompt_parts.append("Assistant:")
+        return "\n\n".join(prompt_parts)
+    
+    def invoke(self, input_text: str = None, memory: Optional[Memory] = None) -> ClientResponse:
+        """Invoca il modello IBM Watson e restituisce una risposta compatibile."""
+        try:
+            prompt = self._build_prompt(input_text, memory)
+            
+            # Chiamata al modello IBM Watson
+            response = self.model.generate_text(prompt=prompt)
+            
+            # Estrai il testo della risposta
+            if isinstance(response, dict):
+                text = response.get("generated_text", "").strip()
+                # Rimuovi il prefisso "Assistant:" se presente
+                if text.startswith("Assistant:"):
+                    text = text[10:].strip()
+            else:
+                text = str(response).strip()
+            
+            # Stima approssimativa dei token (IBM Watson non sempre fornisce metriche dettagliate)
+            estimated_prompt_tokens = len(prompt.split()) * 1.3  # Stima approssimativa
+            estimated_completion_tokens = len(text.split()) * 1.3
+            
+            return ClientResponse(
+                text=text,
+                prompt_tokens_used=int(estimated_prompt_tokens),
+                completion_tokens_used=int(estimated_completion_tokens),
+                stop_reason="stop"
+            )
+            
+        except Exception as e:
+            return ClientResponse(
+                text=f"Errore IBM Watson: {str(e)}",
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
+
+
+# Esempio di utilizzo
+if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    # Crea il client IBM Watson
+    watson_client = IBMWatsonClient(
+        model_id="ibm/granite-13b-chat-v2",
+        temperature=0.7
+    )
+    
+    # Test del client
+    response = watson_client.invoke("Ciao! Presentati brevemente.")
+    print(f"Risposta: {response.text}")
+    print(f"Token usati: {response.prompt_tokens_used + response.completion_tokens_used}")
+```
 
 ## Metodo 4: Modello locale (Ollama/Gemma)
 
@@ -268,7 +410,7 @@ Test rapido da CLI:
 ollama run gemma3n:e2b "Ciao! Presentati brevemente."
 ```
 
-Adapter Python minimale (stesso schema del provider personalizzato):
+Ora vediamo l'adapter Python con DatapizzAI:
 
 ```python
 import requests
@@ -278,12 +420,17 @@ from pydantic import BaseModel
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
 
-
-class SimpleResponse(BaseModel):
-    text: str
-    prompt_tokens_used: int = 0
-    completion_tokens_used: int = 0
-    stop_reason: str = "stop"
+# Usiamo qua la stessa struttura di risposta dei client DatapizzAI
+try:
+    from datapizzai.clients.base import ClientResponse
+except ImportError:
+    # Fallback se non disponibile - mantiene la stessa interfaccia
+    from pydantic import BaseModel
+    class ClientResponse(BaseModel):
+        text: str
+        prompt_tokens_used: int = 0
+        completion_tokens_used: int = 0
+        stop_reason: str = "stop"
 
 
 class OllamaClient:
@@ -292,6 +439,7 @@ class OllamaClient:
         self.base_url = base_url.rstrip("/")
 
     def _build_messages(self, input=None, memory: Optional[Memory] = None):
+        """Costruisce i messaggi per la chat API di Ollama includendo la memoria."""
         msgs = []
         if memory is not None:
             for turn in memory.memory:
@@ -303,21 +451,66 @@ class OllamaClient:
             msgs.append({"role": "user", "content": input})
         return msgs
 
-    def invoke(self, input=None, memory: Optional[Memory] = None) -> SimpleResponse:
-        payload = {"model": self.model, "messages": self._build_messages(input, memory), "stream": False}
+    def _estimate_tokens(self, text: str) -> int:
+        """Stima approssimativa del numero di token basata sul conteggio delle parole."""
+        return int(len(text.split()) * 1.3)  # Fattore di conversione approssimativo
+
+    def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
+        """Invoca il modello Ollama e restituisce una risposta compatibile con DatapizzAI."""
+        messages = self._build_messages(input, memory)
+        payload = {
+            "model": self.model, 
+            "messages": messages, 
+            "stream": False
+        }
+        
         try:
-            r = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
-            r.raise_for_status()
-            data = r.json()
-            text = data.get("message", {}).get("content") or str(data)
+            response = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Estrai il testo della risposta
+            text = data.get("message", {}).get("content", "").strip()
+            if not text:
+                text = str(data)
+            
+            # Calcola stime dei token utilizzati
+            prompt_text = " ".join([msg["content"] for msg in messages])
+            prompt_tokens = self._estimate_tokens(prompt_text)
+            completion_tokens = self._estimate_tokens(text)
+            
+            return ClientResponse(
+                text=text,
+                prompt_tokens_used=prompt_tokens,
+                completion_tokens_used=completion_tokens,
+                stop_reason="stop"
+            )
+            
+        except requests.RequestException as e:
+            return ClientResponse(
+                text=f"Errore connessione Ollama: {str(e)}",
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
         except Exception as e:
-            text = f"Errore Ollama: {e}"
-        return SimpleResponse(text=text)
+            return ClientResponse(
+                text=f"Errore Ollama: {str(e)}",
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
 
 
 if __name__ == "__main__":
+    # Test del client locale
     client = OllamaClient()
-    print(client.invoke("Ciao! Riassumi in una frase il teorema di Pitagora.").text)
+    response = client.invoke("Ciao! Riassumi in una frase il teorema di Pitagora.")
+    
+    print(f"Risposta: {response.text}")
+    print(f"Token prompt: {response.prompt_tokens_used}")
+    print(f"Token completion: {response.completion_tokens_used}")
+    print(f"Stop reason: {response.stop_reason}")
 ```
 
 
