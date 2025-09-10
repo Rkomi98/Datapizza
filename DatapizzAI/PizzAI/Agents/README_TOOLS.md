@@ -116,7 +116,7 @@ while hasattr(response, "function_calls") and response.function_calls:
 
         tool_result_block = FunctionCallResultBlock(
             id=f_call.id,
-            tool=tool_name,
+            tool=f_call.tool,
             result=result,
         )
         
@@ -192,7 +192,7 @@ def chat_turn(user_input, memory, client, tools):
             # Crea il blocco risultato
             tool_result_block = FunctionCallResultBlock(
                 id=f_call.id, 
-                tool=f_call.name, 
+                tool=f_call.tool, 
                 result=result
             )
             memory.add_turn([tool_result_block], ROLE.TOOL)
