@@ -243,15 +243,15 @@ To integrate custom providers like IBM Watson, you can create an adapter that re
 
 Prerequisites:
 ```bash
-pip install ibm-watson-machine-learning
+pip install ibm-watsonx-ai
 ```
 
 Environment variables:
 ```bash
 # .env file
-IBM_WATSON_API_KEY=your-ibm-watson-api-key
-IBM_WATSON_PROJECT_ID=your-project-id
-IBM_WATSON_URL=https://us-south.ml.cloud.ibm.com
+IBM_WATSONX_API_KEY=your-ibm-watsonx-api-key
+IBM_WATSONX_PROJECT_ID=your-project-id
+IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com
 ```
 
 Adapter implementation:
@@ -259,8 +259,9 @@ Adapter implementation:
 ```python
 import os
 from typing import Optional, List, Dict, Any
-from ibm_watson_machine_learning import APIClient
-from ibm_watson_machine_learning.foundation_models import ModelInference
+from ibm_watsonx_ai import Credentials
+from ibm_watsonx_ai.foundation_models import ModelInference
+from ibm_watsonx_ai import APIClient
 
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
@@ -279,35 +280,39 @@ except ImportError:
         stop_reason: str = "stop"
 
 
-class IBMWatsonClient:
+class IBMWatsonXClient:
     def __init__(self, model_id: str = "ibm/granite-13b-chat-v2", temperature: float = 0.7):
         self.model_id = model_id
         self.temperature = temperature
         
-        # IBM Watson credentials configuration
-        credentials = {
-            "url": os.getenv("IBM_WATSON_URL", "https://us-south.ml.cloud.ibm.com"),
-            "apikey": os.getenv("IBM_WATSON_API_KEY")
-        }
+        # IBM WatsonX credentials configuration
+        self.credentials = Credentials(
+            url=os.getenv("IBM_WATSONX_URL", "https://us-south.ml.cloud.ibm.com"),
+            api_key=os.getenv("IBM_WATSONX_API_KEY")
+        )
         
-        self.client = APIClient(credentials)
-        self.project_id = os.getenv("IBM_WATSON_PROJECT_ID")
+        # Initialize API client
+        self.client = APIClient(self.credentials)
+        self.project_id = os.getenv("IBM_WATSONX_PROJECT_ID")
+        
+        # Set default project
+        if self.project_id:
+            self.client.set.default_project(self.project_id)
         
         # Initialize the model
         self.model = self._initialize_model()
     
     def _initialize_model(self):
-        """Initialize IBM Watson model once to optimize performance."""
+        """Initialize IBM WatsonX model once to optimize performance."""
         model_params = {
-            "max_tokens": 1000,
+            "max_new_tokens": 1000,
             "temperature": self.temperature,
             "stop_sequences": ["Human:", "Assistant:"]
         }
         
         return ModelInference(
             model_id=self.model_id,
-            credentials=self.client.credentials,
-            project_id=self.project_id,
+            api_client=self.client,
             params=model_params
         )
     
@@ -375,14 +380,14 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv()
     
-    # Create IBM Watson client
-    watson_client = IBMWatsonClient(
+    # Create IBM WatsonX client
+    watsonx_client = IBMWatsonXClient(
         model_id="ibm/granite-13b-chat-v2",
         temperature=0.7
     )
     
     # Test the client
-    response = watson_client.invoke("Hello! Introduce yourself briefly.")
+    response = watsonx_client.invoke("Hello! Introduce yourself briefly.")
     print(f"Response: {response.text}")
     print(f"Tokens used: {response.prompt_tokens_used + response.completion_tokens_used}")
 ```

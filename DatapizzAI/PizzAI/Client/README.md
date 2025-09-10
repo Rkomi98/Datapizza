@@ -8,7 +8,7 @@ Questa guida ti aiuterà a configurare tutti i tipi di client disponibili nella 
 - [Setup base del codice](#setup-base-del-codice)
 - [Metodo 1: Utilizzo del ClientFactory (raccomandato)](#metodo-1-utilizzo-del-clientfactory-raccomandato)
 - [Metodo 2: Configurazione diretta dei client](#metodo-2-configurazione-diretta-dei-client)
-- [Metodo 3: Provider personalizzato via API (es. DeepSeek)](#metodo-3-provider-personalizzato-via-api-es-deepseek)
+- [Metodo 3: Provider personalizzato via API (es. IBM WatsonX)](#metodo-3-provider-personalizzato-via-api-es-ibm-watsonX)
 - [Metodo 4: Modello locale (Ollama/Gemma)](#metodo-4-modello-locale-ollamagemma)
 - [Esempio completo di utilizzo](#esempio-completo-di-utilizzo)
 - [Prossimi passi](#prossimi-passi)
@@ -81,7 +81,7 @@ openai_client = ClientFactory.create(
 anthropic_client = ClientFactory.create(
     provider=Provider.ANTHROPIC,  # o "anthropic"
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-4-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     system_prompt="Sei Claude, un assistente AI di Anthropic.",
     temperature=0.5
 )
@@ -105,7 +105,7 @@ google_client = ClientFactory.create(
 mistral_client = ClientFactory.create(
     provider=Provider.MISTRAL,  # o "mistral"
     api_key=os.getenv("MISTRAL_API_KEY"),
-    model="mistral-large-latest",
+    model="mistral-small-latest",
     system_prompt="Sei un assistente AI basato su Mistral.",
     temperature=0.7
 )
@@ -157,7 +157,7 @@ print(f"Risposta: {response.text}")
 ```python
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-3-5-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     system_prompt="Sei un assistente per la scrittura creativa.",
     temperature=0.8  # Più creativo per la scrittura
 )
@@ -227,7 +227,7 @@ print(f"Risposta: {response.text}")
 
 ---
 
-## Metodo 3: Provider personalizzato via API (es. IBM Watson)
+## Metodo 3: Provider personalizzato via API (es. IBM WatsonX)
 
 Per integrare provider personalizzati come IBM Watson, puoi creare un adapter che rispetti l'interfaccia standard `invoke(input, memory)`.
 
@@ -235,15 +235,15 @@ Per integrare provider personalizzati come IBM Watson, puoi creare un adapter ch
 
 Prerequisiti:
 ```bash
-pip install ibm-watson-machine-learning
+pip install ibm-watsonx-ai
 ```
 
 Variabili d'ambiente:
 ```bash
 # File .env
-IBM_WATSON_API_KEY=your-ibm-watson-api-key
-IBM_WATSON_PROJECT_ID=your-project-id
-IBM_WATSON_URL=https://us-south.ml.cloud.ibm.com
+IBM_WATSONX_API_KEY=your-ibm-watsonx-api-key
+IBM_WATSONX_PROJECT_ID=your-project-id
+IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com
 ```
 
 Implementazione dell'adapter:
@@ -251,8 +251,9 @@ Implementazione dell'adapter:
 ```python
 import os
 from typing import Optional, List, Dict, Any
-from ibm_watson_machine_learning import APIClient
-from ibm_watson_machine_learning.foundation_models import ModelInference
+from ibm_watsonx_ai import Credentials
+from ibm_watsonx_ai.foundation_models import ModelInference
+from ibm_watsonx_ai import APIClient
 
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
@@ -271,35 +272,39 @@ except ImportError:
         stop_reason: str = "stop"
 
 
-class IBMWatsonClient:
+class IBMWatsonXClient:
     def __init__(self, model_id: str = "ibm/granite-13b-chat-v2", temperature: float = 0.7):
         self.model_id = model_id
         self.temperature = temperature
         
-        # Configurazione credenziali IBM Watson
-        credentials = {
-            "url": os.getenv("IBM_WATSON_URL", "https://us-south.ml.cloud.ibm.com"),
-            "apikey": os.getenv("IBM_WATSON_API_KEY")
-        }
+        # Configurazione credenziali IBM WatsonX
+        self.credentials = Credentials(
+            url=os.getenv("IBM_WATSONX_URL", "https://us-south.ml.cloud.ibm.com"),
+            api_key=os.getenv("IBM_WATSONX_API_KEY")
+        )
         
-        self.client = APIClient(credentials)
-        self.project_id = os.getenv("IBM_WATSON_PROJECT_ID")
+        # Inizializza il client API
+        self.client = APIClient(self.credentials)
+        self.project_id = os.getenv("IBM_WATSONX_PROJECT_ID")
+        
+        # Imposta il progetto di default
+        if self.project_id:
+            self.client.set.default_project(self.project_id)
         
         # Inizializza il modello
         self.model = self._initialize_model()
     
     def _initialize_model(self):
-        """Inizializza il modello IBM Watson una sola volta per ottimizzare le performance."""
+        """Inizializza il modello IBM WatsonX una sola volta per ottimizzare le performance."""
         model_params = {
-            "max_tokens": 1000,
+            "max_new_tokens": 1000,
             "temperature": self.temperature,
             "stop_sequences": ["Human:", "Assistant:"]
         }
         
         return ModelInference(
             model_id=self.model_id,
-            credentials=self.client.credentials,
-            project_id=self.project_id,
+            api_client=self.client,
             params=model_params
         )
     
@@ -367,14 +372,14 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv()
     
-    # Crea il client IBM Watson
-    watson_client = IBMWatsonClient(
+    # Crea il client IBM WatsonX
+    watsonx_client = IBMWatsonXClient(
         model_id="ibm/granite-13b-chat-v2",
         temperature=0.7
     )
     
     # Test del client
-    response = watson_client.invoke("Ciao! Presentati brevemente.")
+    response = watsonx_client.invoke("Ciao! Presentati brevemente.")
     print(f"Risposta: {response.text}")
     print(f"Token usati: {response.prompt_tokens_used + response.completion_tokens_used}")
 ```
