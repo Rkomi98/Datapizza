@@ -33,15 +33,39 @@ graph TD;
 La sua creazione richiede la configurazione di diversi parametri che ne definiscono il comportamento.
 
 ```python
+import os
+from dotenv import load_dotenv
+from datapizzai.clients import OpenAIClient
 from datapizzai.tools import tool
-from datapizzai.agents import Agent
+from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents import Agent, ClientManager
 
+load_dotenv()
+
+openai_client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="Sei un esperto di meteorologia.",
+    temperature=0.3,
+)
+
+# Test veloce del client (la seconda chiamata è un cache hit)
+r1 = openai_client.invoke("Ciao! Come stai?")
+print("Risposta 1:", r1.text)
+
+# Tool
 @tool
 def get_weather(location: str, when: str) -> str:
     """Retrieves weather information for a specified location and time."""
     return "25 °C"
 
-agent = Agent(tools=[get_weather], terminate_on_text=True)
+# Agent collegato al client
+agent = Agent(
+    name="WeatherAgent",
+    client=openai_client,
+    system_prompt="Sei un assistente meteo. Usa i tool quando servono e rispondi in italiano.",
+    tools=[get_weather],
+    terminate_on_text=True,
+)
 response = agent.run("What's the weather tomorrow in Milan?")
 print(response)
 ```
