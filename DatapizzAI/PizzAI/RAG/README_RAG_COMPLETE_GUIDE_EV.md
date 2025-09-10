@@ -24,6 +24,11 @@ This guide shows how to implement a complete Retrieval‑Augmented Generation (R
 
 ## RAG Flow Overview
 
+A prerequisite for local development is a running Qdrant server:
+```bash
+docker run -p 6333:6333 qdrant/qdrant
+```
+
 A datapizzai‑based RAG system is composed of the following main components:
 
 ```mermaid
@@ -50,7 +55,15 @@ graph TD
 
 ## 1. Initial Setup
 
-Before starting, ensure datapizzai and required dependencies are installed:
+System prerequisite — Qdrant vector database (required for the vector store):
+```bash
+# Start Qdrant server with Docker
+docker run -p 6333:6333 qdrant/qdrant
+
+# Dashboard available at: http://localhost:6333/dashboard
+```
+
+Python dependencies (imports used in this guide):
 
 ```python
 from datapizzai.modules.parsers import AzureParser
@@ -139,11 +152,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # LLM client configuration
-client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+)
 
 # Tree Builder: create node structure from text if you don't have a parser output
 tree_builder = LLMTreeBuilder(client=client)
-restructured_node = tree_builder.build_tree(text)
+document_node = tree_builder.build_tree(text)
 ```
 
 Parameters:
@@ -183,8 +199,7 @@ Since we work with nodes, prefer NodeSplitter: it splits nodes into sub‑nodes/
 
 ```python
 splitter = NodeSplitter(
-    max_char=1000,  # maximum chunk length
-    overlap=100     # overlap between chunks
+    max_char=1000  # maximum chunk length
 )
 
 # Split the node directly into chunks
@@ -260,43 +275,37 @@ Parameters:
 
 <!-- Removed: ClientEmbedder is not needed inside the RAG pipeline section. -->
 
-## 8. Vector Store (kept minimal here)
+## 8. Vector Store
 
-The vector store persists chunks and vectors for efficient retrieval. We keep this section minimal to avoid duplicating module docs.
+The vector store persists chunks and their vectors for efficient retrieval. We keep this section essential to avoid duplicating module docs.
 
-Minimal example with Qdrant (assuming it is running):
-
+Minimal Qdrant setup, if you haven’t already started it:
 ```python
+# 1. Setup Qdrant
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
 from datapizzai.vectorstores import QdrantVectorstore
 
+client = QdrantClient(host="localhost", port=6333)
+client.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
+)
+```
+
+Then manage chunks with Qdrant:
+```python
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
 vectorstore.add(embedded_chunks, collection_name="documents")
 
 # Create a query embedding with the same client
-query_vector = client.embed("programming languages")
+query_vector = client.embed("Data visualization")
 
 results = vectorstore.search(
     query_vector=query_vector,
     collection_name="documents",
-    top_k=10,
 )
 ```
-
-Parameters QdrantVectorstore:
-- `host`: Qdrant server address (default: "localhost")
-- `port`: Qdrant server port (default: 6333)
-- `https`: enable HTTPS (default: True; set False for local HTTP)
-- `api_key`: API key if required (None for local HTTP)
-
-Search parameters (version‑dependent):
-- `query_vector`: query embedding (list of float)
-- `collection_name`: target collection name
-- `top_k` or `k`: number of results to return
-
-Features:
-- Persistent storage of embeddings with metadata
-- Fast semantic search
-- Supports dense and sparse embeddings
 
 ## 9. Rewriters (optional)
 
@@ -338,70 +347,72 @@ The reranker reorders retrieved results by relevance.
 ```python
 import os
 from dotenv import load_dotenv
+from datapizzai.embedders import ClientEmbedder
 
 load_dotenv()
 
 reranker = CohereReranker(
     api_key=os.getenv("COHERE_API_KEY"),
     endpoint="https://api.cohere.com/v1",
-    top_n=5,        # number of final results
-    threshold=0.7   # relevance threshold
+    top_n=5,  # number of final results
 )
 
-# Example usage with DatapizzAI
-from datapizzai.embedders import ClientEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
+query = "data visualization applications"
 
-query = "machine learning applications"
-
-# Build query embedding
+# Generate embedding for the query
 query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
 query_embedding = await query_embedder.a_run(query)
 
-# Search
+# Use DatapizzAI vector store
 retrieved_chunks = vectorstore.search(
     query_vector=query_embedding,
     collection_name="documents",
-    top_k=20
 )
 
-# Reranking
-final_chunks = reranker.invoke({
+# Reranking (async)
+final_chunks = await reranker.a_run({
     "query": query,
     "documents": retrieved_chunks
 })
 ```
 
-Parameters:
-- `api_key`: Cohere API key
-- `endpoint`: service endpoint
-- `top_n`: maximum number of documents to return
-- `threshold`: minimum relevance threshold
-
-Tips and troubleshooting:
-- Cohere requires a valid `model` (e.g., `rerank-english-v3.0`). Your current `CohereReranker` may not expose a model parameter; if so, prefer `TogetherReranker` with an explicit `model` or call the Cohere SDK directly.
+Notes and troubleshooting:
+- Cohere requires a valid `model` (e.g., `rerank-english-v3.0`). If your `CohereReranker` version does not expose a `model` parameter, prefer `TogetherReranker` with an explicit `model`, or use the Cohere SDK directly.
 
 ## 11. Prompt Templates (optional)
 
 Templates structure the input for the generative model.
 
 ```python
-prompt_template = ChatPromptTemplate(
-    template="""Based on the following documents, answer the user's question.
+from datapizzai.modules.prompt import ChatPromptTemplate
+from datapizzai.type import Chunk
 
-Documents:
-{context}
-
-Question: {question}
-
-Answer precisely and comprehensively:"""
+# Create RAG prompt template
+template = ChatPromptTemplate(
+    user_prompt_template="Question: {{ user_prompt }}\nPlease answer based on the provided context.",
+    retrieval_prompt_template="Context:\n{% for chunk in chunks %}- {{ chunk.text }}\n{% endfor %}"
 )
 
-# Use the template
-formatted_prompt = prompt_template.format(
-    context="\n".join([chunk.text for chunk in final_chunks]),
-    question=query
+# Simulate search results
+chunks = [
+    Chunk(id="1", text="Python is a high-level programming language"),
+    Chunk(id="2", text="Python was created by Guido van Rossum in 1991")
+]
+
+# Create conversation memory
+memory = template.format(
+    user_prompt="Who created Python?",
+    chunks=chunks,
+    retrieval_query="Python creator history"
 )
+
+print("User: ", memory[0])
+print("Assistant: ", memory[1])
+print("Tool: ", memory[2].blocks[0].result)
+
+# 1. User:  Question: Who created Python? Please answer based on the provided context.
+# 2. Assistant: FunctionCall(search_vectorstore, query="Python creator history")
+# 3. Tool:  Context - Python is a high-level programming language - Python was created by Guido van Rossum in 1991
 ```
 
 ## 12. End‑to‑End Example
