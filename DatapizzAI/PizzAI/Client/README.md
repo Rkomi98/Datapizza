@@ -179,13 +179,13 @@ google_client = GoogleClient(
 
 # Configurazione per Vertex AI (deployment enterprise)
 google_vertex_client = GoogleClient(
-    model="gemini-1.5-pro",
+    model="gemini-2.5-pro",
     system_prompt="Sei un assistente aziendale.",
     temperature=0.5,
     # Parametri per Vertex AI
-    project_id="your-gcp-project-id",
+    project_id=os.getenv("VERTEX_PROJECT_ID"),
     location="us-central1",
-    credentials_path="/path/to/service-account.json",
+    credentials_path="service-account.json",
     use_vertexai=True
 )
 
