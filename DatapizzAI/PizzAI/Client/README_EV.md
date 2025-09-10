@@ -8,7 +8,7 @@ This guide will help you set up all kind of clients available in the DatapizzAI 
 - [Basic code setup](#basic-code-setup)
 - [Method 1: Using ClientFactory (recommended)](#method-1-using-clientfactory-recommended)
 - [Method 2: Direct client configuration](#method-2-direct-client-configuration)
-- [Method 3: Custom provider via API (e.g., DeepSeek)](#method-3-custom-provider-via-api-eg-deepseek)
+- [Method 3: Custom provider via API (e.g., IBM WatsonX)](#method-3-custom-provider-via-api-eg-ibm-watsonx)
 - [Method 4: Local model (Ollama/Gemma)](#method-4-local-model-ollamagemma)
 - [Complete usage example](#complete-usage-example)
 - [Next steps](#next-steps)
@@ -74,7 +74,7 @@ openai_client = ClientFactory.create(
     temperature=0.7
 )
 
-# Available models: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
+ 
 ```
 
 ### Anthropic client (Claude)
@@ -83,12 +83,12 @@ openai_client = ClientFactory.create(
 anthropic_client = ClientFactory.create(
     provider=Provider.ANTHROPIC,  # or "anthropic"
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-4-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     system_prompt="You are Claude, an Anthropic AI assistant.",
     temperature=0.5
 )
 
-# Available models: claude-3-5-sonnet-latest, claude-3-5-haiku-latest, claude-3-opus-latest
+ 
 ```
 
 ### Google client (Gemini)
@@ -97,12 +97,12 @@ anthropic_client = ClientFactory.create(
 google_client = ClientFactory.create(
     provider=Provider.GOOGLE,  # or "google"
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     system_prompt="You are Gemini, Google's AI assistant.",
     temperature=0.6
 )
 
-# Available models: gemini-2.0-flash, gemini-1.5-pro, gemini-1.5-flash
+ 
 ```
 
 ### Mistral client
@@ -111,12 +111,12 @@ google_client = ClientFactory.create(
 mistral_client = ClientFactory.create(
     provider=Provider.MISTRAL,  # or "mistral"
     api_key=os.getenv("MISTRAL_API_KEY"),
-    model="mistral-large-latest",
+    model="mistral-small-latest",
     system_prompt="You are an AI assistant based on Mistral.",
     temperature=0.7
 )
 
-# Available models: mistral-large-latest, mistral-medium-latest, mistral-small-latest
+ 
 ```
 
 ### Azure OpenAI client
@@ -165,7 +165,7 @@ print(f"Response: {response.text}")
 ```python
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-4-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     system_prompt="You are an assistant for creative writing.",
     temperature=0.8  # More creative for writing
 )
@@ -180,14 +180,14 @@ print(f"Response: {response.text}")
 # Standard configuration (GenAI API)
 google_client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     system_prompt="You are a patient math tutor.",
     temperature=0.4
 )
 
 # Vertex AI configuration (enterprise deployment)
 google_vertex_client = GoogleClient(
-    model="gemini-2.5-flash",
+    model="gemini-1.5-pro",
     system_prompt="You are a business assistant.",
     temperature=0.5,
     # Vertex AI parameters
@@ -235,11 +235,11 @@ print(f"Response: {response.text}")
 
 ---
 
-## Method 3: Custom provider via API (e.g., IBM Watson)
+## Method 3: Custom provider via API (e.g., IBM WatsonX)
 
 To integrate custom providers like IBM Watson, you can create an adapter that respects the standard `invoke(input, memory)` interface.
 
-### IBM Watson configuration
+### IBM WatsonX configuration
 
 Prerequisites:
 ```bash
@@ -281,7 +281,7 @@ except ImportError:
 
 
 class IBMWatsonXClient:
-    def __init__(self, model_id: str = "ibm/granite-13b-chat-v2", temperature: float = 0.7):
+    def __init__(self, model_id: str = "ibm/granite-3-2-8b-instruct", temperature: float = 0.7):
         self.model_id = model_id
         self.temperature = temperature
         
@@ -382,7 +382,7 @@ if __name__ == "__main__":
     
     # Create IBM WatsonX client
     watsonx_client = IBMWatsonXClient(
-        model_id="ibm/granite-13b-chat-v2",
+        model_id="ibm/granite-3-2-8b-instruct",
         temperature=0.7
     )
     
