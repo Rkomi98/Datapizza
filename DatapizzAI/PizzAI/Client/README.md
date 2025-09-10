@@ -93,7 +93,7 @@ anthropic_client = ClientFactory.create(
 google_client = ClientFactory.create(
     provider=Provider.GOOGLE,  # o "google"
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     system_prompt="Sei Gemini, l'assistente AI di Google.",
     temperature=0.6
 )
@@ -172,7 +172,7 @@ print(f"Risposta: {response.text}")
 # Configurazione standard (GenAI API)
 google_client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     system_prompt="Sei un tutor di matematica paziente.",
     temperature=0.4
 )
