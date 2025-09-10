@@ -404,18 +404,7 @@ from pydantic import BaseModel
 
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
-
-# Usiamo qua la stessa struttura di risposta dei client DatapizzAI
-try:
-    from datapizzai.clients.base import ClientResponse
-except ImportError:
-    # Fallback se non disponibile - mantiene la stessa interfaccia
-    from pydantic import BaseModel
-    class ClientResponse(BaseModel):
-        text: str
-        prompt_tokens_used: int = 0
-        completion_tokens_used: int = 0
-        stop_reason: str = "stop"
+from datapizzai.clients import ClientResponse
 
 
 class OllamaClient:

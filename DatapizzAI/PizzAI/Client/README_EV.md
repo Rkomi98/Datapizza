@@ -424,19 +424,7 @@ from pydantic import BaseModel
 
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
-
-# Use the same response structure as DatapizzAI clients for compatibility
-try:
-    from datapizzai.clients.base import ClientResponse
-except ImportError:
-    # Fallback if not available - maintains the same interface
-    from pydantic import BaseModel
-    class ClientResponse(BaseModel):
-        text: str
-        prompt_tokens_used: int = 0
-        completion_tokens_used: int = 0
-        stop_reason: str = "stop"
-
+from datapizzai.clients import ClientResponse
 
 class OllamaClient:
     def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434"):
