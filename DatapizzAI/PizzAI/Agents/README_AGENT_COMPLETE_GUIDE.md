@@ -36,21 +36,28 @@ La sua creazione richiede la configurazione di diversi parametri che ne definisc
 import os
 from dotenv import load_dotenv
 from datapizzai.clients import OpenAIClient
+from datapizzai.cache import MemoryCache
 from datapizzai.tools import tool
 from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents import Agent, ClientManager
 
 load_dotenv()
 
+# Cache in-process
+cache = MemoryCache()
+
+# Client OpenAI con cache
 openai_client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
-    system_prompt="Sei un esperto di meteorologia.",
     temperature=0.3,
+    cache=cache,
 )
 
 # Test veloce del client (la seconda chiamata è un cache hit)
-r1 = openai_client.invoke("Ciao! Come stai?")
+r1 = openai_client.invoke("Ciao!")
 print("Risposta 1:", r1.text)
+r2 = openai_client.invoke("Ciao!")
+print("Risposta 2 (cache hit):", r2.text)
 
 # Tool
 @tool
