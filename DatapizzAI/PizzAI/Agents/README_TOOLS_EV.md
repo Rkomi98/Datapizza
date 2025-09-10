@@ -71,25 +71,32 @@ def search_info(query: str) -> str:
 
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
+from datapizzai.type import FunctionCallResultBlock, ROLE
 import os
 
 load_dotenv()
 client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 tools = [calculator, search_info]
-
-from datapizzai.type import FunctionCallResultBlock
+memory = Memory()
 
 response = client.invoke(
     input="Calculate (25 * 4) + 10 and search info on Python type hints",
     tools=tools,
-    tool_choice="auto"
+    tool_choice="auto",
+    memory=memory
 )
 
-while getattr(response, "function_calls", []):
+# Iteratively execute function calls and feed results via Memory
+while hasattr(response, "function_calls") and response.function_calls:
+    # Add assistant output to memory
+    memory.add_turn(response.content, ROLE.ASSISTANT)
+
     for f_call in response.function_calls:
         tool_name = f_call.name
         args = f_call.arguments or {}
+        
         if tool_name == "calculator":
             result = calculator(**args)
         elif tool_name == "search_info":
@@ -97,12 +104,21 @@ while getattr(response, "function_calls", []):
         else:
             result = f"Unknown tool: {tool_name}"
 
-        response = client.invoke(
-            input="",
-            tools=tools,
-            tool_choice="auto",
-            tool_results=[FunctionCallResultBlock(id=f_call.id, tool=tool_name, result=result)]
+        # Add each tool result as a TOOL turn
+        tool_result_block = FunctionCallResultBlock(
+            id=f_call.id,
+            tool=f_call.tool,
+            result=result,
         )
+        memory.add_turn([tool_result_block], ROLE.TOOL)
+
+    # Re‑invoke with updated memory
+    response = client.invoke(
+        input="",
+        tools=tools,
+        tool_choice="auto",
+        memory=memory
+    )
 
 print(response.text)
 ```
@@ -126,6 +142,7 @@ def create_conversational_client():
     )
     return client, memory
 
+# 3. Configure multi‑turn conversation
 client, memory = create_conversational_client()
 tools = [calculator, search_info]
 
@@ -140,41 +157,47 @@ def chat_turn(user_input: str, memory: Memory, client, tools):
         tool_choice="auto"
     )
 
-    # Iterate function calls until completion
-    while getattr(response, "function_calls", []):
+    # Handle function calls iteratively using Memory
+    while hasattr(response, "function_calls") and response.function_calls:
+        # Add assistant output to memory
+        memory.add_turn(response.content, ROLE.ASSISTANT)
+
         for f_call in response.function_calls:
-            fn = {
+            # Execute chosen tool
+            result = {
                 "calculator": calculator,
                 "search_info": search_info,
-            }.get(f_call.name, lambda **_: f"Unknown tool: {f_call.name}")
-            res = fn(**(f_call.arguments or {}))
-            response = client.invoke(
-                input="",
-                memory=memory,
-                tools=tools,
-                tool_choice="auto",
-                tool_results=[FunctionCallResultBlock(id=f_call.id, tool=f_call.name, result=res)]
-            )
+            }.get(f_call.name, lambda **_: f"Unknown tool: {f_call.name}")(**(f_call.arguments or {}))
 
-    memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-    print(f"🤖 Assistant: {response.text}")
+            # Add tool result as TOOL turn
+            memory.add_turn([
+                FunctionCallResultBlock(id=f_call.id, tool=f_call.tool, result=result)
+            ], ROLE.TOOL)
+
+        # Re‑invoke with updated memory
+        response = client.invoke(
+            input="",
+            memory=memory,
+            tools=tools,
+            tool_choice="auto"
+        )
+
+    if response.text:
+        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+        print(f"🤖 Assistant: {response.text}")
 ```
 
 ## Best practices
 
 ### Tool design
-- Clear name and description
-- Validate inputs and handle errors
-- Keep output concise and consistent
-
-### Memory management
-- Use memory for multi‑turn conversations
-- Manage memory size for long chats
-- Keep user vs assistant roles clear
+- Clear, descriptive name
+- Detailed description of purpose
+- Clear input schema (types and constraints)
+- Robust error handling with informative messages
 
 ## Step‑by‑step: custom tool
 
-This shows how to create, expose, and use a custom tool.
+This shows how to create, expose, and use a custom tool using the Memory‑based pattern.
 
 1) Define the tool
 ```python
@@ -195,6 +218,7 @@ def extract_emails(text: str, domain: str | None = None) -> list[str]:
 ```python
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
 import os
 
 load_dotenv()
@@ -204,26 +228,25 @@ client = ClientFactory.create(
     model="gpt-4o",
 )
 tools = [extract_emails]
+memory = Memory()
 ```
 
 3) Invoke and handle function calls iteratively
 ```python
-response = client.invoke(
-    input="Find the emails in this text: Contacts: a@example.com, b@test.org",
-    tools=tools,
-    tool_choice="auto"
-)
+from datapizzai.type import FunctionCallResultBlock, ROLE, TextBlock
 
-from datapizzai.type import FunctionCallResultBlock
-while getattr(response, "function_calls", []):
+prompt = "Find the emails in this text: Contacts: a@example.com, b@test.org"
+memory.add_turn([TextBlock(content=prompt)], ROLE.USER)
+
+response = client.invoke(input="", tools=tools, tool_choice="auto", memory=memory)
+
+while hasattr(response, "function_calls") and response.function_calls:
+    memory.add_turn(response.content, ROLE.ASSISTANT)
     for f_call in response.function_calls:
         res = extract_emails(**(f_call.arguments or {}))
-        response = client.invoke(
-            input="",
-            tools=tools,
-            tool_choice="auto",
-            tool_results=[FunctionCallResultBlock(id=f_call.id, tool=f_call.name, result=res)]
-        )
+        memory.add_turn([FunctionCallResultBlock(id=f_call.id, tool=f_call.tool, result=res)], ROLE.TOOL)
+    response = client.invoke(input="", tools=tools, tool_choice="auto", memory=memory)
+
 print(response.text)
 ```
 
@@ -234,31 +257,18 @@ import os
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 from datapizzai.tools.google import google_search_tool
-from datapizzai.type import FunctionCallResultBlock
 
 load_dotenv()
 
+# Make sure you have GOOGLE_API_KEY in your .env
 client = ClientFactory.create(
-    provider="openai",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
+    provider="google",
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-2.0-flash",
 )
 
-response = client.invoke(
-    "Who won Wimbledon 2024?",
-    tools=[google_search_tool],
-    tool_choice="auto"
-)
+response = client.invoke("When do the Winter Olympics start?", tools=[google_search_tool])
 
-while getattr(response, "function_calls", []):
-    for f_call in response.function_calls:
-        res = google_search_tool(**(f_call.arguments or {}))
-        response = client.invoke(
-            input="",
-            tools=[google_search_tool],
-            tool_choice="auto",
-            tool_results=[FunctionCallResultBlock(id=f_call.id, tool=f_call.name, result=res)]
-        )
 print(response.text)
 ```
 
@@ -266,4 +276,3 @@ Tips:
 - Always define clear docstrings and validate input.
 - Avoid `eval` in real systems; use safe libraries or explicit parsing.
 - Iterate function calls until they finish, passing results as `FunctionCallResultBlock`.
-
