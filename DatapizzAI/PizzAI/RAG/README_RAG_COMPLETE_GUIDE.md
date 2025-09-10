@@ -1,4 +1,4 @@
-# Guida completa RAG con datapizza-ai
+# Guida completa RAG
 
 Questa guida illustra come implementare un sistema di Retrieval-Augmented Generation (RAG) completo utilizzando il framework datapizza-ai. Il sistema copre l'intero flusso dalla parsing dei documenti fino alla generazione di risposte contestuali.
 
@@ -133,7 +133,7 @@ parser = AzureParser(
     result_type="markdown"
 )
 
-document_node = parser("path/to/document.pdf")
+document_node = parser("document.pdf")
 ```
 
 **Quando usarlo:**

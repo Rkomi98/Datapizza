@@ -74,3 +74,6 @@ PizzaAI/
 .netrc
 _netrc
 pip.conf
+
+# Mettiamo anche i PDF
+*.pdf
