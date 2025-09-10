@@ -108,15 +108,6 @@ chunks = pipeline.run(
 print(f"Generated {len(chunks)} chunks from document")
 ```
 
-### Detailed parameters
-
-- **max_char**: maximum number of characters per chunk. Smaller chunks = higher precision, more chunks
-- **overlap**: shared characters between consecutive chunks to maintain context
-- **metadata**: optional dictionary attached to all chunks by the `run()` method. Useful for tracking source, date, category, etc.
-- **model_name**: name of the embedding model to use (must be supported by the client)
-- **vector_store**: if `None` returns processed chunks, otherwise saves them automatically to the database
-- **collection_name**: required only if a vector_store is specified
-
 ### Important notes
 
 - **NodeEmbedder vs ClientEmbedder**: use `NodeEmbedder` in pipelines because it works with lists of `Chunk` objects. `ClientEmbedder` is for single strings.
@@ -298,13 +289,6 @@ graph TD
     style E fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
 ```
 
-### Detailed parameters
-
-- **source_key**: specific key in the dictionary returned by the source node. If `None`, passes the entire result
-- **target_key**: parameter name in the `run()` method of the target node
-- **add_module()**: registers a component in the graph with a unique name
-- **connect()**: creates a directional dependency between two existing nodes
-
 ### Complete script
 
 See `examples/dag_example.py` for a sentiment analysis example with dependency graph.
@@ -471,15 +455,6 @@ graph TD
     style G fill:#f1f8e9
     style H fill:#e8f5e8
 ```
-
-### Detailed parameters
-
-- **target_key**: name of the parameter in the next node where to pass the entire result of the previous node
-- **dependencies**: list of `Dependency` specifying which nodes to depend on and how to map data
-- **Dependency(node_name, target_key)**: maps the entire result of `node_name` to the parameter `target_key` of the current node
-- **condition**: lambda function that receives the complete context and returns True/False for branching
-- **foreach**: executes the `do` component for each element in the collection specified by dependencies
-- **execute()**: starts execution and returns dictionary with results from all executed nodes
 
 ### Data flow notes
 

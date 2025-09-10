@@ -108,15 +108,6 @@ chunks = pipeline.run(
 print(f"Generati {len(chunks)} chunks dal documento")
 ```
 
-### Parametri dettagliati
-
-- **max_char**: numero massimo di caratteri per chunk. Chunks più piccoli = maggiore precisione, più chunks
-- **overlap**: caratteri condivisi tra chunks consecutivi per mantenere contesto
-- **metadata**: dizionario opzionale allegato a tutti i chunks dal metodo `run()`. Utile per tracciare fonte, data, categoria, etc.
-- **model_name**: nome del modello embedding da usare (deve essere supportato dal client)
-- **vector_store**: se `None` restituisce i chunks processati, altrimenti li salva automaticamente nel database
-- **collection_name**: obbligatorio solo se si specifica un vector_store
-
 ### Note importanti
 
 Ci sono alcune precisazioni che pensiamo siano importanti prima di procedere alla prossima tipologia di Pipeline:
@@ -275,13 +266,6 @@ pipeline.connect(
 results = pipeline.run({})
 print(results["report_generator"]["final_report"])
 ```
-
-### Parametri dettagliati
-
-- **source_key**: chiave specifica nel dizionario restituito dal nodo sorgente. Se `None`, passa tutto il risultato
-- **target_key**: nome del parametro nel metodo `run()` del nodo destinazione
-- **add_module()**: registra un componente nel grafo con un nome univoco
-- **connect()**: crea una dipendenza direzionale tra due nodi esistenti
 
 ### Diagramma di flusso
 
@@ -464,15 +448,6 @@ else:
     print("BRANCH STANDARD ESEGUITO:")
     print(results["generate_report"]["final_report"])
 ```
-
-### Parametri dettagliati
-
-- **target_key**: nome del parametro nel nodo successivo dove passare l'intero risultato del nodo precedente
-- **dependencies**: lista di `Dependency` che specifica da quali nodi dipendere e come mappare i dati
-- **Dependency(node_name, target_key)**: mappa l'intero risultato di `node_name` al parametro `target_key` del nodo corrente
-- **condition**: funzione lambda che riceve il contesto completo e restituisce True/False per il branching
-- **foreach**: esegue il componente `do` per ogni elemento della collezione specificata dalle dipendenze
-- **execute()**: avvia l'esecuzione e restituisce dizionario con risultati di tutti i nodi eseguiti
 
 ### Note sul flusso dati
 
