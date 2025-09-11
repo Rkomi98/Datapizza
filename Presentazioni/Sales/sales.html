@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Branding Tech Italia 2025 - Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+            animation: gradientShift 20s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-20px, -20px) rotate(120deg); }
+            66% { transform: translate(20px, -10px) rotate(240deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        /* Key Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .metric-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            animation: fadeInUp 0.8s ease 0.4s both;
+            position: relative;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Ensure canvases fill their wrapper (avoids 0px height issues) */
+        .chart-wrapper > canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* Top Companies Section */
+        .top-companies {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .top-companies h2 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .company-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .company-item {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .company-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(10px);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .rank {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+        }
+
+        .rank.gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        }
+
+        .rank.silver {
+            background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+            box-shadow: 0 0 20px rgba(156, 163, 175, 0.5);
+        }
+
+        .rank.bronze {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            box-shadow: 0 0 20px rgba(251, 146, 60, 0.4);
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+
+        .company-details {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .company-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .company-links {
+            margin-top: 0.35rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .company-links a {
+            color: #a78bfa; /* violet-400 */
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            border-radius: 999px;
+        }
+        .company-links a:hover {
+            background: rgba(139, 92, 246, 0.25);
+        }
+
+        /* Sector Analysis */
+        .sector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease 0.8s both;
+        }
+
+        .sector-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sector-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .sector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .sector-name {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .sector-score {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sector-stats {
+            display: flex;
+            justify-content: space-between;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Animated Elements */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s ease infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                height: 300px;
+            }
+            
+            .company-item {
+                grid-template-columns: 40px 1fr;
+            }
+            
+            .company-score {
+                display: none;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* Modal for Sources */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal {
+            width: min(900px, 92vw);
+            max-height: 80vh;
+            overflow: auto;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+        .modal-close {
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06);
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 0.4rem 0.65rem;
+            cursor: pointer;
+        }
+        .modal-content {
+            color: #94a3b8;
+        }
+        .sources-list {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .sources-list a { color: #a78bfa; text-decoration: none; }
+        .sources-list a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Employer Branding Tech Italia 2025</h1>
+            <div class="subtitle">Dashboard Interattiva - Analisi Completa dell'Ecosistema Tech Italiano</div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    🏢
+                </div>
+                <div class="metric-value">62</div>
+                <div class="metric-label">Aziende Identificate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    💰
+                </div>
+                <div class="metric-value">€8.2B+</div>
+                <div class="metric-label">Funding Totale</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #f59e0b, #dc2626);">
+                    🦄
+                </div>
+                <div class="metric-value">4</div>
+                <div class="metric-label">Unicorni Italiani</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+                    👨‍💻
+                </div>
+                <div class="metric-value">147K+</div>
+                <div class="metric-label">Tech Headcount</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);">
+                    📊
+                </div>
+                <div class="metric-value">77.8</div>
+                <div class="metric-label">Score Medio EB</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">
+                    🎯
+                </div>
+                <div class="metric-value">1,200+</div>
+                <div class="metric-label">Posizioni Tech Aperte</div>
+            </div>
+        </div>
+
+        <!-- Top 10 Companies -->
+        <div class="top-companies">
+            <h2>🏆 Top 10 Aziende per Employer Branding Score</h2>
+            <div class="company-list">
+                <div class="company-item">
+                    <div class="rank gold">1</div>
+                    <div class="company-info">
+                        <div class="company-name">Bending Spoons</div>
+                        <div class="company-details">Milano • Professional Services • Unicorn</div>
+                    </div>
+                    <div class="company-score">100/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank gold">2</div>
+                    <div class="company-info">
+                        <div class="company-name">McKinsey Italia</div>
+                        <div class="company-details">Milano • Professional Services • Global</div>
+                    </div>
+                    <div class="company-score">100/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank silver">3</div>
+                    <div class="company-info">
+                        <div class="company-name">Accenture Italia</div>
+                        <div class="company-details">Milano • Professional Services • 15K dipendenti</div>
+                    </div>
+                    <div class="company-score">94/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank bronze">4</div>
+                    <div class="company-info">
+                        <div class="company-name">ENI</div>
+                        <div class="company-details">Roma/Milano • Energy • LinkedIn Awards Winner</div>
+                    </div>
+                    <div class="company-score">92/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">5</div>
+                    <div class="company-info">
+                        <div class="company-name">EssilorLuxottica</div>
+                        <div class="company-details">Milano • Physical Goods • Smart Eyewear Lab</div>
+                    </div>
+                    <div class="company-score">91/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">6</div>
+                    <div class="company-info">
+                        <div class="company-name">Cubbit</div>
+                        <div class="company-details">Bologna • Technology • €12.5M funding 2024</div>
+                    </div>
+                    <div class="company-score">90/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">7</div>
+                    <div class="company-info">
+                        <div class="company-name">Satispay</div>
+                        <div class="company-details">Milano • Finance • Unicorn payments</div>
+                    </div>
+                    <div class="company-score">88/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">8</div>
+                    <div class="company-info">
+                        <div class="company-name">Ferrari</div>
+                        <div class="company-details">Maranello • Physical Goods • F1 Engineering</div>
+                    </div>
+                    <div class="company-score">87/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">9</div>
+                    <div class="company-info">
+                        <div class="company-name">Technogym</div>
+                        <div class="company-details">Cesena • Health • 232K LinkedIn followers</div>
+                    </div>
+                    <div class="company-score">87/100</div>
+                </div>
+                <div class="company-item">
+                    <div class="rank">10</div>
+                    <div class="company-info">
+                        <div class="company-name">Cleafy</div>
+                        <div class="company-details">Milano • Technology • Cybersecurity leader</div>
+                    </div>
+                    <div class="company-score">86/100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>📊 Distribuzione per Settore</h3>
+                <div class="chart-wrapper">
+                    <canvas id="sectorChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>📈 Score Medio per Settore</h3>
+                <div class="chart-wrapper">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Distribution -->
+        <div class="chart-container">
+            <h3>🗺️ Distribuzione Geografica degli Hub Tech</h3>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="geoChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Sector Analysis Cards -->
+        <div class="sector-grid">
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">💰 Finance</span>
+                    <span class="sector-score">71.3</span>
+                </div>
+                <div class="sector-stats">
+                    <span>9 aziende</span>
+                    <span>Satispay, Scalapay leader</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">💻 Technology</span>
+                    <span class="sector-score">76.3</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>Cubbit, Cleafy top</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">🏭 Physical Goods</span>
+                    <span class="sector-score">83.3</span>
+                </div>
+                <div class="sector-stats">
+                    <span>6 aziende</span>
+                    <span>Ferrari, Luxottica</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">💼 Professional Services</span>
+                    <span class="sector-score">85.5</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>Bending Spoons #1</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">🏥 Health & Life</span>
+                    <span class="sector-score">79.1</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>Technogym, Chiesi</span>
+                </div>
+            </div>
+            <div class="sector-card">
+                <div class="sector-header">
+                    <span class="sector-name">⚡ Energy & Real Estate</span>
+                    <span class="sector-score">79.4</span>
+                </div>
+                <div class="sector-stats">
+                    <span>8 aziende</span>
+                    <span>ENI, Casavo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Catalog by Category -->
+        <div class="top-companies" id="companyCatalog">
+            <h2>📚 Aziende per Categoria</h2>
+            <div class="tabs" id="companyCatalogTabs">
+                <div class="tab active" onclick="switchCategoryTab(event, 'finance')">💰 Finance</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'technology')">💻 Technology & Digital</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'physical')">🏭 Physical Goods</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'professional')">💼 Professional Services</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'health')">🏥 Health & Life</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'energy')">⚡ Energy & Real Estate</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'education')">🎓 Education & Public</div>
+                <div class="tab" onclick="switchCategoryTab(event, 'emerging')">🚀 Emerging High-Growth</div>
+            </div>
+            <div id="companyCatalogList" class="company-list"></div>
+        </div>
+
+        <!-- Tabs for Additional Info -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(event, 'insights')">🎯 Key Insights</div>
+            <div class="tab" onclick="switchTab(event, 'indici')">📏 Indici</div>
+            <div class="tab" onclick="switchTab(event, 'trends')">📈 Market Trends</div>
+            <div class="tab" onclick="switchTab(event, 'salary')">💰 Salary Benchmark</div>
+            <div class="tab" onclick="switchTab(event, 'unicorns')">🦄 Unicorni</div>
+            <div class="tab" onclick="switchTab(event, 'fonti')">🔗 Fonti</div>
+        </div>
+
+        <div id="insights" class="tab-content active">
+            <div class="chart-container">
+                <h3>🎯 Insights Principali</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 10px; border-left: 4px solid #6366f1;">
+                        <strong>Milano domina l'ecosistema:</strong> 56% delle aziende tech con HQ nel capoluogo lombardo
+                    </div>
+                    <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border-left: 4px solid #10b981;">
+                        <strong>Professional Services al top:</strong> Score medio EB di 85.5/100, il più alto tra tutti i settori
+                    </div>
+                    <div style="padding: 1rem; background: rgba(236, 72, 153, 0.1); border-radius: 10px; border-left: 4px solid #ec4899;">
+                        <strong>Remote work adoption:</strong> 78% delle aziende offre modalità remote/hybrid post-COVID
+                    </div>
+                    <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 10px; border-left: 4px solid #f59e0b;">
+                        <strong>Talent shortage critico:</strong> 45% delle aziende riporta difficoltà nell'hiring di profili tech
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="trends" class="tab-content">
+            <div class="chart-container">
+                <h3>📈 Market Trends 2025</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 10px;">
+                        <strong>Series A+ rounds:</strong> 23+ round sopra €5M nel 2024
+                    </div>
+                    <div style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 10px;">
+                        <strong>International VC:</strong> 65% dei round include investitori esteri
+                    </div>
+                    <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 10px;">
+                        <strong>CDP Venture Capital:</strong> Presente nel 40% delle scale-up
+                    </div>
+                    <div style="padding: 1rem; background: rgba(236, 72, 153, 0.1); border-radius: 10px;">
+                        <strong>Crescita headcount:</strong> +18% anno su anno in media
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="indici" class="tab-content">
+            <div class="chart-container">
+                <h3>📏 Indici di Valutazione</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div style="padding:1rem; background: rgba(99,102,241,0.08); border-radius: 10px; border-left: 4px solid #6366f1;">
+                        <strong>1. EB_Maturity (40%) – Maturità Employer Branding</strong>
+                        <p style="color:#94a3b8; margin-top:0.5rem;">Misura quanto l’azienda ha un piano strutturato e coerente di Employer Branding specifico per profili tech.</p>
+                        <ul style="margin:0.5rem 0 0 1rem; color:#94a3b8;">
+                            <li>EVP chiara e pubblica</li>
+                            <li>Content strategy (rubriche, format, calendario)</li>
+                            <li>Canali: LinkedIn, engineering blog, YouTube, podcast, eventi</li>
+                            <li>Coerenza e regolarità dei messaggi</li>
+                            <li>Community building (hackathon, open day, università)</li>
+                            <li>Evoluzione 12–18 mesi (campagne tech dedicate)</li>
+                        </ul>
+                        <p style="color:#94a3b8; margin-top:0.5rem;"><em>Esempi punteggio:</em> 0–1 nessuna strategia; 2–3 iniziative non sistematiche; 4–5 piano chiaro, canali multipli, EVP pubblica, contenuti costanti e mirati.</p>
+                    </div>
+                    <div style="padding:1rem; background: rgba(16,185,129,0.08); border-radius: 10px; border-left: 4px solid #10b981;">
+                        <strong>2. PeopleVisibility (35%) – Visibilità persone e team Tech</strong>
+                        <p style="color:#94a3b8; margin-top:0.5rem;">Misura quanto le persone reali sono protagoniste nei contenuti pubblici.</p>
+                        <ul style="margin:0.5rem 0 0 1rem; color:#94a3b8;">
+                            <li>Ingegneri/tech lead autori (blog, talk, video)</li>
+                            <li>Format people-first (interviste, case study firmati)</li>
+                            <li>Open source, talk pubblici, articoli Medium/Dev.to</li>
+                            <li>Eventi con i team tech (webinar, tech talk)</li>
+                            <li>Engagement contenuti delle persone vs corporate</li>
+                        </ul>
+                        <p style="color:#94a3b8; margin-top:0.5rem;"><em>Esempi punteggio:</em> 0–1 solo brand; 2–3 alcune interviste; 4–5 persone costantemente al centro, community attiva.</p>
+                    </div>
+                    <div style="padding:1rem; background: rgba(245,158,11,0.08); border-radius: 10px; border-left: 4px solid #f59e0b;">
+                        <strong>3. HR_Standards (25%) – Standard HR & processi</strong>
+                        <p style="color:#94a3b8; margin-top:0.5rem;">Misura la professionalità e trasparenza delle pratiche HR lato tech hiring.</p>
+                        <ul style="margin:0.5rem 0 0 1rem; color:#94a3b8;">
+                            <li>JD chiare (livelli, stack, responsabilità)</li>
+                            <li>Trasparenza compensation, carriera, remote/hybrid</li>
+                            <li>Onboarding e candidate experience pubblici</li>
+                            <li>Processi di selezione descritti (fasi, tempi, ruoli)</li>
+                            <li>DEI e linguaggio inclusivo</li>
+                        </ul>
+                        <p style="color:#94a3b8; margin-top:0.5rem;"><em>Esempi punteggio:</em> 0–1 processi opachi; 2–3 descrizioni senza dettagli; 4–5 alta trasparenza, DEI integrato, ottima candidate experience.</p>
+                    </div>
+                    <div style="padding:1rem; background: rgba(139,92,246,0.08); border-radius: 10px; border-left: 4px solid #8b5cf6;">
+                        <strong>Formula punteggio</strong>
+                        <pre style="margin-top:0.5rem; color:#e2e8f0; background: rgba(255,255,255,0.05); padding:0.75rem; border-radius:8px; overflow:auto;">Score_100 = (EB_Maturity * 0.4 + PeopleVisibility * 0.35 + HR_Standards * 0.25) * 20</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="salary" class="tab-content">
+            <div class="chart-container">
+                <h3>💰 Salary Benchmarking 2025</h3>
+                <canvas id="salaryChart"></canvas>
+            </div>
+        </div>
+
+        <div id="unicorns" class="tab-content">
+            <div class="chart-container">
+                <h3>🦄 Unicorni Italiani</h3>
+                <div style="display: grid; gap: 1.5rem;">
+                    <div style="padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 15px; border: 1px solid rgba(99, 102, 241, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">Bending Spoons</h4>
+                            <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: #1e293b; font-weight: 600;">UNICORN</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Valuation:</strong> $2.55B (2024)</p>
+                            <p><strong>Score EB:</strong> 100/100</p>
+                            <p><strong>Focus:</strong> Mobile app empire, acquisition strategy</p>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 15px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">Satispay</h4>
+                            <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: #1e293b; font-weight: 600;">UNICORN</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Funding:</strong> €320M (2022)</p>
+                            <p><strong>Score EB:</strong> 88/100</p>
+                            <p><strong>Focus:</strong> European payment network leader, 5M+ utenti</p>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(236, 72, 153, 0.1); border-radius: 15px; border: 1px solid rgba(236, 72, 153, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">Scalapay</h4>
+                            <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: #1e293b; font-weight: 600;">UNICORN</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Funding:</strong> $497M (2023)</p>
+                            <p><strong>Score EB:</strong> 74/100</p>
+                            <p><strong>Focus:</strong> BNPL global expansion</p>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 15px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="font-size: 1.3rem; color: #e2e8f0;">D-Orbit</h4>
+                            <span style="background: linear-gradient(135deg, #10b981, #059669); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; color: white; font-weight: 600;">EMERGING</span>
+                        </div>
+                        <div style="color: #94a3b8;">
+                            <p><strong>Funding:</strong> €100M (2024)</p>
+                            <p><strong>Score EB:</strong> 85/100</p>
+                            <p><strong>Focus:</strong> Space logistics pioneer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Fonti per Azienda -->
+        <div id="sourcesModal" class="modal-overlay" onclick="if(event.target===this) hideSources()">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title" id="sourcesTitle">Fonti</div>
+                    <button class="modal-close" onclick="hideSources()">Chiudi ✕</button>
+                </div>
+                <div class="modal-content">
+                    <div id="sourcesBody" class="sources-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fonti" class="tab-content">
+            <div class="chart-container">
+                <h3>🔗 Fonti per Azienda</h3>
+                <div style="display:grid; gap:1.25rem;">
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Finance</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>Satispay</strong>: 
+                                <a href="https://www.fintechfutures.com/2022/09/satispay-becomes-a-unicorn-with-e320m-in-series-d-funding/" target="_blank">FintechFutures</a>,
+                                <a href="https://thepaypers.com/payments/news/satispay-raises-eur-320-million-and-becomes-a-fintech-unicorn" target="_blank">ThePaypers</a>,
+                                <a href="https://www.pymnts.com/news/investment-tracker/2022/payments-startup-is-italys-newest-unicorn-following-e320m-series-d/" target="_blank">PYMNTS</a>,
+                                <a href="https://www.eu-startups.com/2022/09/milan-based-payment-network-satispay-exceed-e1-billion-valuation-and-becomes-an-italian-unicorn/" target="_blank">EU-Startups</a>,
+                                <a href="https://www.eu-startups.com/2024/11/milan-based-satispay-secures-e60-million-to-expand-its-mobile-payments-and-employee-benefits-platform/" target="_blank">EU-Startups 2024</a>,
+                                <a href="https://tech.eu/2022/09/28/italy-s-second-unicorn-satispay-rings-up-320-million-at-1-billion-valuation" target="_blank">Tech.eu</a>,
+                                <a href="https://techcrunch.com/2022/09/28/italys-satispay-raises-e320m-at-a-e1b-valuation-with-backing-from-block-tencent-and-more-for-its-indy-payment-network/" target="_blank">TechCrunch</a>,
+                                <a href="https://www.linkedin.com/company/satispay/" target="_blank">LinkedIn</a>,
+                                <a href="https://www.linkedin.com/company/satispay/jobs/" target="_blank">LinkedIn Jobs</a>
+                            </li>
+                            <li><strong>Scalapay</strong>: 
+                                <a href="https://www.prnewswire.com/news-releases/scalapay-now-a-unicorn-raises-497m-series-b-and-enters-the-checkout-market-301487923.html" target="_blank">PR Newswire</a>,
+                                <a href="https://ibsintelligence.com/ibsi-news/scalapay-now-a-unicorn-announced-raising-497m-in-a-series-b-funding-round/" target="_blank">IBS Intelligence</a>
+                            </li>
+                            <li><strong>Nexi Group</strong>: 
+                                <a href="https://tracxn.com/d/geographies/italy/__KHa0o50NZX-ONw7JrgYYD6rLUmfZbg6TCWGX8eCemN0" target="_blank">Tracxn Italy</a>,
+                                <a href="https://www.startupblink.com/top-startups/italy" target="_blank">StartupBlink</a>
+                            </li>
+                            <li><strong>illimity Bank</strong>: 
+                                <a href="https://www.illimity.com/en/who-we-are" target="_blank">illimity - Who we are</a>
+                            </li>
+                            <li><strong>Young Platform</strong>: 
+                                <a href="https://www.i3p.it/en/news/fintech-startup-young-platform-closes-a-16-euro-million-funding-round" target="_blank">I3P</a>,
+                                <a href="https://www.examinecrypto.com/post/young-platform-an-italian-crypto-exchange-raise-2-65m-from-azimut-bringing-its-total-raise-to-1" target="_blank">ExamineCrypto</a>
+                            </li>
+                            <li><strong>Credimi</strong>: 
+                                <a href="https://www.unibocconi.it/en/news/credimi-lending-platform-attracting-talent-back-italy" target="_blank">Bocconi News</a>
+                            </li>
+                            <li><strong>Fabrick</strong>: 
+                                <a href="https://www.fabrick.com/en-gb/corporate/platform-open-finance/" target="_blank">Fabrick</a>,
+                                <a href="https://tracxn.com/d/companies/fabrick/__YO2qGNkEMk0yb3_OcaTUAu7N3OoG--IEo4JZk2R2Ho4" target="_blank">Tracxn</a>,
+                                <a href="https://sifted.eu/articles/fabrick-raises-40m-mastercard-news" target="_blank">Sifted</a>
+                            </li>
+                            <li><strong>YOLO Group</strong>: 
+                                <a href="https://www.euronext.com/en/about/media/euronext-press-releases/yolo-group-spa-lists-euronext-growth-milan" target="_blank">Euronext</a>,
+                                <a href="https://news.europawire.eu/the-first-italian-digital-insurance-services-and-brokerage-yolo-gets-investment-from-intesa-sanpaolo-group-9029237432/eu-press-release/2019/01/29/18/47/02/70851/" target="_blank">Europawire</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Technology & Digital</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>Cubbit</strong>: <a href="https://www.finsmes.com/2024/07/cubbit-raises-12-5m-in-funding.html" target="_blank">FinSMEs</a></li>
+                            <li><strong>Cleafy</strong>: <a href="https://www.linkedin.com/company/cleafy" target="_blank">LinkedIn</a>, <a href="https://startupsavant.com/startups-to-watch/italy" target="_blank">StartupSavant</a></li>
+                            <li><strong>TeamSystem</strong>: <a href="https://www.teamsystem.com/il-gruppo/" target="_blank">TeamSystem</a></li>
+                            <li><strong>Engineering</strong>: <a href="https://it.linkedin.com/jobs/engineering-ingegneria-informatica-spa-offerte-di-lavoro" target="_blank">LinkedIn Jobs</a>, <a href="https://www.eng.it/en/careers/life-at-eng" target="_blank">Life at ENG</a></li>
+                            <li><strong>Bending Spoons</strong>: 
+                                <a href="https://bendingspoons.com/careers" target="_blank">Careers</a>,
+                                <a href="https://tech.eu/2024/05/23/10-italian-startups-to-watch-in-2024/" target="_blank">Tech.eu</a>,
+                                <a href="https://www.francescatabor.com/articles/2025/7/28/bending-spoons-a-different-kind-of-tech-company" target="_blank">Francesca Tabor</a>,
+                                <a href="https://www.linkedin.com/company/bendingspoons" target="_blank">LinkedIn</a>,
+                                <a href="https://sifted.eu/articles/bending-spoons-italy-startup-ipo" target="_blank">Sifted</a>,
+                                <a href="https://www.eu-startups.com/2025/08/italys-bending-spoons-raises-over-e500-million-to-turbocharge-tech-acquisitions/" target="_blank">EU-Startups 2025</a>,
+                                <a href="https://money.usnews.com/investing/news/articles/2024-10-21/italian-tech-company-bending-spoons-has-eye-on-us-for-potential-ipo" target="_blank">U.S. News</a>,
+                                <a href="https://finance.yahoo.com/news/italian-tech-company-bending-spoons-095257001.html" target="_blank">Yahoo Finance</a>,
+                                <a href="https://www.siliconrepublic.com/business/bending-spoons-italy-milan-debt-raise-500m-acquisitions" target="_blank">Silicon Republic</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Physical Goods</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>Ferrari</strong>: <a href="https://www.ferrari.com/en-EN/corporate/career" target="_blank">Career</a>, <a href="https://www.ferrari.com/en-EN/ferrari-f1-engineering-academy" target="_blank">F1 Engineering Academy</a>, <a href="https://www.ferrari.com/en-EN/ferrari-engineering-academy-2024" target="_blank">Engineering Academy</a>, <a href="https://www.linkedin.com/company/ferrari/jobs" target="_blank">LinkedIn Jobs</a></li>
+                            <li><strong>EssilorLuxottica</strong>: <a href="https://www.essilorluxottica.com/en/careers/smart-eyewear-lab/" target="_blank">Smart Eyewear Lab</a>, <a href="https://careers.essilorluxottica.com/job/Agordo-Operations-Talent-Program-Italy/1231002601/" target="_blank">Operations Talent</a>, <a href="https://www.essilorluxottica.com/en/careers/operations-talent-program/" target="_blank">Talent Program</a></li>
+                            <li><strong>Bracco</strong>: <a href="https://careers.braccomedtech.com/" target="_blank">Careers</a>, <a href="https://www.bracco.com/careers" target="_blank">Corporate Careers</a>, <a href="https://www.bracco.com/en-us/fulvio-renoldi-bracco" target="_blank">Leadership</a>, <a href="https://www.bracco.com/" target="_blank">Company</a>, <a href="https://en.wikipedia.org/wiki/Bracco_(Company)" target="_blank">Wikipedia</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Professional Services</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>Bending Spoons</strong>: vedi sopra</li>
+                            <li><strong>McKinsey</strong>: <a href="https://www.mckinsey.com/careers/tech" target="_blank">Tech Careers</a>, <a href="https://www.mckinsey.com/careers/students" target="_blank">Students</a>, <a href="https://www.mckinsey.com/industries/technology-media-and-telecommunications/our-insights/cracking-the-code-on-digital-talent" target="_blank">Insight</a></li>
+                            <li><strong>Accenture</strong>: <a href="https://www.linkedin.com/jobs/accenture-jobs-milan?trk=guest_job_search_related_jserp_link" target="_blank">LinkedIn Jobs</a></li>
+                            <li><strong>Engineering</strong>: <a href="https://it.linkedin.com/jobs/engineering-ingegneria-informatica-spa-offerte-di-lavoro" target="_blank">LinkedIn Jobs</a>, <a href="https://www.eng.it/en/careers/life-at-eng" target="_blank">Life at ENG</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Health & Life Sciences</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>Chiesi</strong>: <a href="https://it.linkedin.com/company/chiesi-group/jobs" target="_blank">LinkedIn Jobs</a>, <a href="https://www.linkedin.com/company/chiesi-group" target="_blank">LinkedIn</a>, <a href="https://www.linkedin.com/company/chiesi-usa" target="_blank">LinkedIn USA</a></li>
+                            <li><strong>Dompé</strong>: <a href="https://www.linkedin.com/company/dompe" target="_blank">LinkedIn</a>, <a href="https://www.dompe.com/" target="_blank">Company</a>, <a href="https://www.dompe.com/who-we-are/about-us/leadershipversioneb/" target="_blank">Leadership</a>, <a href="https://www.dompe.com/media/stories/unleashing-innovation-dompe-s-journey-into-the-digital-age-of-pharma/" target="_blank">Digital Innovation</a>, <a href="https://www.dompe.com/who-we-are/about-us/" target="_blank">About</a></li>
+                            <li><strong>Menarini</strong>: <a href="https://www.menarini.com/en-us/careers/available-positions.html" target="_blank">Careers</a>, <a href="https://en.wikipedia.org/wiki/Menarini" target="_blank">Wikipedia</a>, <a href="https://www.drugdiscoverytrends.com/2025-pharma50/menarini/" target="_blank">Pharma50</a></li>
+                            <li><strong>Resalis Therapeutics</strong>: <a href="https://it.linkedin.com/company/resalistherapeutics" target="_blank">LinkedIn</a>, <a href="https://www.resalistherapeutics.com/about-us/our-team/" target="_blank">Team</a>, <a href="https://www.businesswire.com/news/home/20230222005054/en/Resalis-Therapeutics-Announces-Seed-Financing-of-%E2%82%AC10-Million-to-Fund-Non-coding-RNA-based-Therapeutics-for-Metabolic-Diseases" target="_blank">BusinessWire Seed</a>, <a href="https://www.crunchbase.com/organization/resalis-therapeutics" target="_blank">Crunchbase</a>, <a href="https://www.businesswire.com/news/home/20241028943917/en/Resalis-Therapeutics-Gains-Strategic-Equity-Investment-from-Sanofi" target="_blank">BusinessWire Sanofi</a></li>
+                            <li><strong>Recordati</strong>: <a href="https://www.recordati.com/en/join_us/" target="_blank">Join Us</a>, <a href="https://recordati.com/" target="_blank">Company</a>, <a href="https://www.linkedin.com/company/recordati/" target="_blank">LinkedIn</a></li>
+                            <li><strong>Technogym</strong>: <a href="https://www.linkedin.com/company/technogym/" target="_blank">LinkedIn</a>, <a href="https://careers.technogym.com/job/Bracknell-Marketing-Specialist-BRC/1168001301/" target="_blank">Careers</a></li>
+                            <li><strong>Bracco</strong>: vedi sopra</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Energy & Real Estate</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>Casavo</strong>: <a href="https://siliconcanals.com/italian-proptech-scale-up-casavo-lands-e20m/" target="_blank">Silicon Canals</a></li>
+                            <li><strong>ENI</strong>: <a href="https://business.linkedin.com/talent-solutions/case-studies/manufacturing/eni" target="_blank">LinkedIn TS Case</a></li>
+                            <li><strong>Energy Dome</strong>: <a href="https://energydome.com/energy-dome-announces-funding-commitments-from-breakthrough-energy-catalyst-and-the-european-investment-bank-to-support-construction-of-its-first-standard-commercial-scale-co2-battery/" target="_blank">Funding Commitments</a>, <a href="https://www.energy-storage.news/eu-breakthrough-energy-partnership-invests-e60-million-in-long-duration-co2-battery-project-in-italy/" target="_blank">Energy-Storage.news</a>, <a href="https://energydome.com/news-energy-dome-series-a-funding/" target="_blank">Series A</a>, <a href="https://tech.eu/2024/05/23/10-italian-startups-to-watch-in-2024/" target="_blank">Tech.eu</a>, <a href="https://technologywealth.com/startups/energy-dome/" target="_blank">TechnologyWealth</a>, <a href="https://energydome.com/energy-dome-and-engie-sign-pioneering-storage-offtake-agreement/" target="_blank">ENGIE Offtake</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Education & Public</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>Futura</strong>: <a href="https://www.eu-startups.com/2024/05/milan-based-edtech-futura-raises-e14-million-series-a-to-make-the-world-learn-faster-and-better/" target="_blank">EU-Startups</a></li>
+                            <li><strong>WeSchool</strong>: <a href="https://www.linkedin.com/company/weschool" target="_blank">LinkedIn</a>, <a href="https://app.welcometothejungle.com/companies/WeSchool" target="_blank">WTTJ</a>, <a href="https://www.works-hub.com/companies/weschool" target="_blank">WorksHub</a></li>
+                            <li><strong>Wibo</strong>: <a href="https://www.eu-startups.com/2025/06/italian-edtech-startup-wibo-raises-e500k-for-its-upskilling-and-leadership-programmes" target="_blank">EU-Startups</a></li>
+                            <li><strong>Faba</strong>: <a href="https://www.eu-startups.com/2025/08/italys-edtech-startup-faba-gets-serious-with-e4-5-million-to-expand-its-screen-free-storytelling-magic-in-spain/" target="_blank">EU-Startups</a></li>
+                            <li><strong>Algor Education</strong>: <a href="https://www.i3p.it/en/news/international-investment-1-4-million-euro-italian-edtech-startup-algor-education-ai-learning-tools" target="_blank">I3P</a></li>
+                            <li><strong>Olivetti</strong>: <a href="https://www.linkedin.com/company/olivetti" target="_blank">LinkedIn</a>, <a href="https://www.olivetti.com/en/corporate/about-us" target="_blank">About</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Emerging High-Growth</h4>
+                        <ul style="margin-left:1rem; color:#94a3b8;">
+                            <li><strong>D-Orbit</strong>: <a href="https://www.electronicsweekly.com/news/business/space-tech-d-orbit-raises-e100m-series-c-funding-2024-01/" target="_blank">Electronics Weekly</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr style="border-color: rgba(255,255,255,0.1); margin:1.5rem 0;"/>
+                <h3>📚 Fonti Generali & Settoriali</h3>
+                <div style="display:grid; gap:0.75rem; color:#94a3b8;">
+                    <div>
+                        <strong>Ecosystem Reports & Analysis:</strong>
+                        <div><a href="https://tracxn.com/d/geographies/italy/__KHa0o50NZX-ONw7JrgYYD6rLUmfZbg6TCWGX8eCemN0" target="_blank">Tracxn Italy Startups 2025</a>, <a href="https://www.startupblink.com/top-startups/italy" target="_blank">StartupBlink</a>, <a href="https://tech.eu/2024/05/23/10-italian-startups-to-watch-in-2024/" target="_blank">Tech.eu</a>, <a href="https://tracxn.com/d/unicorns/unicorns-in-italy/__KHa0o50NZX-ONw7JrgYYD6rLUmfZbg6TCWGX8eCemN0" target="_blank">Tracxn Unicorns</a>, <a href="https://startupstash.com/italian-startups/" target="_blank">StartupStash</a>, <a href="https://www.startupreporter.eu/milan-ecosystem-report-2024-a-rising-tech-powerhouse-in-europe/" target="_blank">StartupReporter Milan</a>, <a href="https://ildigestivo.substack.com/p/italys-startups-to-watch-and-a-surge" target="_blank">Il Digestivo</a></div>
+                    </div>
+                    <div>
+                        <strong>Tech Job Market:</strong>
+                        <div><a href="https://www.nucamp.co/blog/coding-bootcamp-italy-ita-most-in-demand-tech-job-in-italy-in-2024" target="_blank">Nucamp Jobs 2024</a>, <a href="https://www.nucamp.co/blog/coding-bootcamp-italy-ita-getting-a-job-in-tech-in-italy-in-2025-the-complete-guide" target="_blank">Nucamp Guide 2025</a>, <a href="https://www.nucamp.co/blog/coding-bootcamp-italy-ita-top-10-tech-companies-to-work-for-in-italy-in-2025" target="_blank">Nucamp Top Companies</a>, <a href="https://www.nucamp.co/blog/coding-bootcamp-italy-ita-ranking-the-top-10-highpaying-tech-jobs-in-italy-in-2025" target="_blank">Nucamp High-Paying</a>, <a href="https://www.nucamp.co/blog/coding-bootcamp-italy-ita-italys-top-10-startups-that-tech-professionals-should-watch-out-for-in-2024" target="_blank">Nucamp Startups 2024</a></div>
+                    </div>
+                    <div>
+                        <strong>Startup Lists & Trends:</strong>
+                        <div><a href="https://www.eu-startups.com/2025/02/ciao-innovation-10-promising-italian-startups-you-should-keep-and-eye-on-in-2025/" target="_blank">EU-Startups 2025</a>, <a href="https://www.eu-startups.com/2024/02/viva-linnovazione-10-innovative-italian-startups-to-keep-an-eye-on-in-2024-and-beyond/" target="_blank">EU-Startups 2024</a>, <a href="https://www.seedtable.com/startups-italy" target="_blank">Seedtable</a>, <a href="https://startupsavant.com/startups-to-watch/italy" target="_blank">StartupSavant</a>, <a href="https://startupsmagazine.co.uk/article-italy-startup-ecosystem-report-2023" target="_blank">Startups Magazine</a></div>
+                    </div>
+                    <div>
+                        <strong>Tech Ecosystem & Innovation:</strong>
+                        <div><a href="https://tech.eu/2025/06/19/italys-tech-ecosystem-innovation-growth-and-emerging-opportunities/" target="_blank">Tech.eu 2025</a>, <a href="https://sifoundry.com/the-rise-of-the-italian-tech-ecosystem/" target="_blank">SI Foundry</a>, <a href="https://talent.ai/the-most-dynamic-tech-startups-in-italy/" target="_blank">Talent.ai</a></div>
+                    </div>
+                    <div>
+                        <strong>Venture Capital & Funding:</strong>
+                        <div><a href="https://scaleupitaly.com/new-venture-capital-operators-italy-2023/" target="_blank">ScaleupItaly</a>, <a href="https://www.cdp.it/sitointernet/en/venture_capital.page" target="_blank">CDP Venture Capital</a>, <a href="https://pitchbook.com/profiles/investor/123355-81" target="_blank">PitchBook CDP</a>, <a href="https://shizune.co/investors/proptech-vc-funds-italy" target="_blank">Shizune Proptech</a></div>
+                    </div>
+                    <div>
+                        <strong>Fashion & Manufacturing Tech:</strong>
+                        <div><a href="https://www.ftaccelerator.it/blog/milan-fashion-technology-ecosystem/" target="_blank">FT Accelerator</a>, <a href="https://www.f6s.com/companies/fashion-tech/italy/milan/co" target="_blank">F6S</a>, <a href="https://en.wikipedia.org/wiki/Italian_fashion" target="_blank">Wikipedia</a></div>
+                    </div>
+                    <div>
+                        <strong>Fintech Sector Analysis:</strong>
+                        <div><a href="https://github.com/topics/fintech" target="_blank">GitHub Fintech</a>, <a href="https://github.blog/news-insights/the-library/github-partners-with-finos/" target="_blank">GitHub x FINOS</a>, <a href="https://www.milanfintechsummit.com/News/DettaglioNews/1036" target="_blank">Milan Fintech Investment</a>, <a href="https://www.milanfintechsummit.com/News/DettaglioNews/1033" target="_blank">Italy Digital Payments</a>, <a href="https://www.siliconrepublic.com/start-ups/talent-garden-funding-expansion" target="_blank">Silicon Republic</a>, <a href="https://www.digitalmagics.com/en/blog/startup/talent-garden/" target="_blank">Digital Magics</a></div>
+                    </div>
+                    <div>
+                        <strong>Technology Funding Reports:</strong>
+                        <div><a href="https://www.rdworldonline.com/25-landmark-rd-heavy-tech-funding-rounds-of-2024/" target="_blank">R&D World 2024</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script>
+            // --- Tabs & Chart orchestration ---
+            const createdCharts = {};
+
+            function switchTab(event, id) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                const el = document.getElementById(id);
+                if (el) el.classList.add('active');
+
+                // Lazy init charts inside hidden tabs
+                if (id === 'salary' && !createdCharts.salary) {
+                    createSalaryChart();
+                }
+                // Ensure any visible chart resizes correctly after tab switch
+                setTimeout(() => {
+                    Object.values(createdCharts).forEach(ch => ch && ch.resize && ch.resize());
+                }, 50);
+            }
+
+            // Chart.js global defaults for dark theme
+            if (window.Chart) {
+                Chart.defaults.color = '#cbd5e1';
+                Chart.defaults.borderColor = 'rgba(255,255,255,0.1)';
+                // Grid color (applied when present)
+                Chart.defaults.scales = Chart.defaults.scales || {};
+                // Legend labels color
+                if (Chart.defaults.plugins && Chart.defaults.plugins.legend && Chart.defaults.plugins.legend.labels) {
+                    Chart.defaults.plugins.legend.labels.color = '#e2e8f0';
+                }
+            }
+
+            // Helpers
+            function getCanvas(id) { return document.getElementById(id); }
+            function getCtx(id) { const c = getCanvas(id); return c ? c.getContext('2d') : null; }
+            function drawPlaceholder(id, text) {
+                const c = getCanvas(id);
+                if (!c) return;
+                // Ensure a reasonable height if none (especially when hidden)
+                if (!c.height) c.height = 300;
+                const ctx = c.getContext('2d');
+                const { width, height } = c;
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(148,163,184,0.6)';
+                ctx.font = '16px system-ui, -apple-system, Segoe UI, Roboto';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, width / 2, height / 2);
+            }
+
+            // Chart creators
+            function createSectorChart() {
+                const id = 'sectorChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Finance', 'Technology', 'Physical Goods', 'Professional Services', 'Health & Life', 'Energy & Real Estate'],
+                        datasets: [{
+                            data: [9, 8, 6, 8, 8, 8],
+                            backgroundColor: ['#10b981','#8b5cf6','#f59e0b','#6366f1','#ec4899','#06b6d4'],
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                });
+                createdCharts.sector = ch; return ch;
+            }
+
+            function createScoreChart() {
+                const id = 'scoreChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Finance', 'Technology', 'Physical Goods', 'Professional Services', 'Health & Life', 'Energy & Real Estate'],
+                        datasets: [{
+                            label: 'Score medio',
+                            data: [71.3, 76.3, 83.3, 85.5, 79.1, 79.4],
+                            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                            borderColor: '#6366f1',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+                });
+                createdCharts.score = ch; return ch;
+            }
+
+            function createGeoChart() {
+                const id = 'geoChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Milano', 'Roma', 'Torino', 'Bologna', 'Padova'],
+                        datasets: [{
+                            label: 'Quota aziende (%)',
+                            data: [56, 18, 10, 8, 8],
+                            backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: { indexAxis: 'y', responsive: true, scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+                });
+                createdCharts.geo = ch; return ch;
+            }
+
+            function createSalaryChart() {
+                const id = 'salaryChart';
+                const ctx = getCtx(id);
+                if (!ctx) return null;
+                if (!window.Chart) { drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'); return null; }
+                const ch = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Backend', 'Frontend', 'Data', 'DevOps', 'Mobile', 'Security'],
+                        datasets: [{
+                            label: 'RAL mediana (k€)',
+                            data: [48, 42, 50, 55, 45, 58],
+                            backgroundColor: 'rgba(236, 72, 153, 0.6)',
+                            borderColor: '#ec4899',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+                });
+                createdCharts.salary = ch; return ch;
+            }
+
+            // Init charts that are visible on load
+            (function init() {
+                if (!window.Chart) {
+                    // CDN non raggiungibile: disegno placeholder
+                    ['sectorChart','scoreChart','geoChart'].forEach(id => drawPlaceholder(id, 'Impossibile caricare i grafici (Chart.js)'));
+                    return;
+                }
+                createSectorChart();
+                createScoreChart();
+                createGeoChart();
+            })();
+
+            // --- Company catalog (from Markdown dataset) ---
+            const companiesByCategory = {
+                finance: [
+                    { name: 'Satispay', hq: 'Milano', stage: 'Scale-up', funding: '€320M (Sep 2022)', techHC: '200-250', techPct: '45%', roles: '20+', score: 88, links: 'jobs.ashbyhq.com/satispay; linkedin.com/company/satispay' },
+                    { name: 'Scalapay', hq: 'Milano', stage: 'Scale-up', funding: '$497M (Dec 2023)', techHC: '150-200', techPct: '65%', roles: '15+', score: 74, links: 'scalapay.com/careers' },
+                    { name: 'Nexi Group', hq: 'Milano', stage: 'Corporate', funding: '€220M EIB (2024)', techHC: '1500-2000', techPct: '35%', roles: '56+', score: 74, links: 'nexigroup.com/careers' },
+                    { name: 'illimity Bank', hq: 'Milano', stage: 'Corporate', funding: '€200M EIB (2023)', techHC: '250-300', techPct: '32%', roles: 'Active', score: 74, links: 'careers.illimity.com' },
+                    { name: 'Banca Sella', hq: 'Biella', stage: 'Corporate', funding: 'N/A', techHC: '400-500', techPct: '22%', roles: 'Active', score: 74, links: 'join.sellagroup.eu' },
+                    { name: 'Young Platform', hq: 'Torino', stage: 'Scale-up', funding: '€16M (2022)', techHC: '60-70', techPct: '60%', roles: 'Active', score: 60, links: 'linkedin.com/company/young-platform' },
+                    { name: 'YOLO Group', hq: 'Milano', stage: 'Scale-up', funding: '€10M IPO (2022)', techHC: '30-50', techPct: '45%', roles: '4+', score: 60, links: 'careers.yolo.com' },
+                    { name: 'Credimi', hq: 'Milano', stage: 'Scale-up', funding: '€8.4M', techHC: '25-35', techPct: '55%', roles: 'Active', score: 52, links: 'linkedin.com/company/credimi' },
+                    { name: 'Fabrick', hq: 'Milano', stage: 'Scale-up', funding: 'N/A', techHC: '60-90', techPct: '70%', roles: 'Active', score: 52, links: 'fabrick.com/join-us' },
+                ],
+                technology: [
+                    { name: 'Cubbit', hq: 'Bologna', stage: 'Scale-up', funding: '$12.5M (Jul 2024)', techHC: '40', techPct: '80%', roles: '3-8', score: 90, links: 'cubbit.io/careers' },
+                    { name: 'Cleafy', hq: 'Milano', stage: 'Scale-up', funding: 'Recent growth', techHC: '80-120', techPct: '80%', roles: '5-10', score: 86, links: 'cleafy.com/careers' },
+                    { name: 'Prima', hq: 'Milano', stage: 'Scale-up', funding: '$117M', techHC: '400-500', techPct: '45%', roles: '15-20', score: 78, links: 'helloprima.com/carriere' },
+                    { name: 'Vedrai', hq: 'Milano', stage: 'Scale-up', funding: '€40M (Apr 2022)', techHC: '70-80', techPct: '75%', roles: '5-10', score: 78, links: 'company.vedrai.com' },
+                    { name: 'Talent Garden', hq: 'Milano', stage: 'Scale-up', funding: 'N/A', techHC: '200-300', techPct: '50%', roles: '15-25', score: 78, links: 'talentgarden.com' },
+                    { name: 'Reply', hq: 'Torino', stage: 'Corporate', funding: 'Listed', techHC: '10000+', techPct: '70%', roles: '100+', score: 68, links: 'reply.com/careers' },
+                    { name: 'TeamSystem', hq: 'Pesaro', stage: 'Corporate', funding: '€1B (2023)', techHC: '2000+', techPct: '40%', roles: '50+', score: 66, links: 'teamsystem.com' },
+                    { name: 'Datrix', hq: 'Milano', stage: 'Scale-up', funding: 'Listed', techHC: '80-120', techPct: '75%', roles: '5-15', score: 66, links: 'datrixgroup.com' },
+                ],
+                physical: [
+                    { name: 'EssilorLuxottica', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '5000-7000', techPct: '3-4%', roles: '25+', score: 91, links: 'careers.essilorluxottica.com' },
+                    { name: 'Ferrari', hq: 'Maranello', stage: 'Corporate', funding: 'Listed', techHC: '800-1000', techPct: '18%', roles: '15+', score: 87, links: 'ferrari.com/career; jobs.ferrari.com' },
+                    { name: 'Lamborghini', hq: "Sant'Agata", stage: 'Corporate', funding: 'VW Group', techHC: '300-400', techPct: '18%', roles: '10+', score: 85, links: 'lamborghini.com/careers' },
+                    { name: 'Barilla', hq: 'Parma', stage: 'Corporate', funding: '€4.9B revenue', techHC: '400-600', techPct: '6%', roles: '12+', score: 79, links: 'jobs.barillagroup.com' },
+                    { name: 'Moncler', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '200-250', techPct: '7%', roles: '6+', score: 79, links: 'jobs.moncler.com' },
+                    { name: 'Campari', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '200-300', techPct: '5%', roles: '8+', score: 74, links: 'people.camparigroup.com' },
+                ],
+                professional: [
+                    { name: 'Bending Spoons', hq: 'Milano', stage: 'Corporate', funding: '$665M (2024)', techHC: '480+', techPct: '80%', roles: 'YES', score: 100, links: 'bendingspoons.com/careers' },
+                    { name: 'McKinsey', hq: 'Milano', stage: 'Corporate', funding: 'N/A', techHC: '120+', techPct: '40%', roles: '15+', score: 100, links: 'mckinsey.com/careers' },
+                    { name: 'Accenture', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '10500+', techPct: '70%', roles: '215+', score: 94, links: 'accenture.com/careers' },
+                    { name: 'illimity Bank', hq: 'Milano', stage: 'Corporate', funding: '$50M (2023)', techHC: '180+', techPct: '30%', roles: '15+', score: 86, links: 'careers.illimity.com' },
+                    { name: 'Reply', hq: 'Torino', stage: 'Corporate', funding: 'Listed', techHC: '7000+', techPct: '70%', roles: '50+', score: 80, links: 'reply.com/careers' },
+                    { name: 'Engineering', hq: 'Roma', stage: 'Corporate', funding: 'N/A', techHC: '8400+', techPct: '70%', roles: '109+', score: 80, links: 'eng.it/careers' },
+                    { name: 'Talent Garden', hq: 'Milano', stage: 'Scale-up', funding: '$46M (2023)', techHC: '140+', techPct: '70%', roles: '20+', score: 74, links: 'talentgarden.com' },
+                    { name: 'Fabrick', hq: 'Milano', stage: 'Scale-up', funding: '$43M (2023)', techHC: '210+', techPct: '60%', roles: '10+', score: 60, links: 'fabrick.com/platform' },
+                ],
+                health: [
+                    { name: 'Technogym', hq: 'Cesena', stage: 'Corporate', funding: 'Listed', techHC: '500', techPct: '20%', roles: '20+', score: 87, links: 'careers.technogym.com' },
+                    { name: 'AAVantgarde', hq: 'Milano', stage: 'Scale-up', funding: '€61M (Jun 2023)', techHC: '28', techPct: '70%', roles: '15+', score: 85, links: 'aavantgarde.com/careers' },
+                    { name: 'Chiesi', hq: 'Parma', stage: 'Corporate', funding: 'N/A', techHC: '950', techPct: '15%', roles: '25+', score: 85, links: 'careers.chiesi.com' },
+                    { name: 'Resalis', hq: 'Torino', stage: 'Scale-up', funding: 'Sanofi (Oct 2024)', techHC: '15', techPct: '60%', roles: '8+', score: 82, links: 'resalistherapeutics.com' },
+                    { name: 'Recordati', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '458', techPct: '10%', roles: '15+', score: 76, links: 'recordati.com/careers' },
+                    { name: 'Bracco', hq: 'Milano', stage: 'Corporate', funding: '€1.5B revenue', techHC: '555', techPct: '15%', roles: '18+', score: 76, links: 'bracco.com/careers' },
+                    { name: 'Dompé', hq: 'Milano', stage: 'Corporate', funding: 'N/A', techHC: '80', techPct: '10%', roles: '12+', score: 76, links: 'dompe.com/careers' },
+                    { name: 'Menarini', hq: 'Firenze', stage: 'Corporate', funding: '$4.98B revenue', techHC: '1700', techPct: '10%', roles: '20+', score: 67, links: 'menarini.com/careers' },
+                ],
+                energy: [
+                    { name: 'ENI', hq: 'Roma/Milano', stage: 'Corporate', funding: 'Listed', techHC: '3200-3800', techPct: '12%', roles: '45+', score: 92, links: 'eni.com/careers' },
+                    { name: 'Casavo', hq: 'Milano', stage: 'Scale-up', funding: '$20M (Mar 2024)', techHC: '150-160', techPct: '38%', roles: '30+', score: 85, links: 'casavo.com/careers' },
+                    { name: 'Enel', hq: 'Roma', stage: 'Corporate', funding: 'Listed', techHC: '4500-5200', techPct: '8%', roles: '25+', score: 82, links: 'jobs.enel.com' },
+                    { name: 'Plenitude', hq: 'Milano', stage: 'Corporate', funding: '€500M (2023)', techHC: '200-250', techPct: '15%', roles: '20+', score: 82, links: 'eniplenitude.com' },
+                    { name: 'A2A', hq: 'Milano', stage: 'Corporate', funding: 'Listed', techHC: '1200-1400', techPct: '11%', roles: '134 total', score: 79, links: 'gruppoa2a.it/careers' },
+                    { name: 'Energy Dome', hq: 'Milano', stage: 'Scale-up', funding: '$72.5M (2023-24)', techHC: '55-65', techPct: '65%', roles: '15+', score: 78, links: 'energydome.com/careers' },
+                    { name: 'Edison', hq: 'Milano', stage: 'Corporate', funding: 'EDF Group', techHC: '350-450', techPct: '9%', roles: '15+', score: 70, links: 'edison.it/work-with-us' },
+                    { name: 'MetaCasa', hq: 'Bologna', stage: 'Scale-up', funding: '€740K', techHC: '12-15', techPct: '75%', roles: '5+', score: 60, links: 'Italian PropTech Network' },
+                ],
+                education: [
+                    { name: 'WeSchool', hq: 'Milano', stage: 'Scale-up', funding: '€6.4M', techHC: '40-60', techPct: '40%', roles: '4+', score: 81, links: 'weschool.com' },
+                    { name: 'Olivetti', hq: 'Ivrea/Milano', stage: 'Corporate', funding: 'TIM Group', techHC: '400-600', techPct: '40-60%', roles: 'Active', score: 71, links: 'olivetti.com/careers' },
+                    { name: 'Futura', hq: 'Milano', stage: 'Scale-up', funding: '€14M (May 2024)', techHC: '15-20', techPct: '40-50%', roles: '8+', score: 70, links: 'futura.study' },
+                    { name: 'Wibo', hq: 'Torino', stage: 'Scale-up', funding: '€500K (Jun 2025)', techHC: '5-8', techPct: '35-40%', roles: '5 planned', score: 68, links: 'EU-Startups article' },
+                    { name: 'Algor', hq: 'Torino', stage: 'Scale-up', funding: '€1.4M (2024)', techHC: '6-10', techPct: '60-70%', roles: 'Expansion', score: 60, links: 'i3p.it' },
+                    { name: 'Faba', hq: 'Treviso', stage: 'Scale-up', funding: '€4.5M (Aug 2025)', techHC: '15-20', techPct: '35-40%', roles: '20 planned', score: 60, links: 'EU-Startups article' },
+                ],
+                emerging: [
+                    { name: 'D-Orbit', hq: 'Milano', stage: 'Scale-up', funding: '€100M (Jan 2024)', techHC: '275+', techPct: '70%', roles: 'YES', score: 85, links: 'dorbit.space/careers' },
+                    { name: 'Jet HR', hq: 'Milano', stage: 'Scale-up', funding: '€16.5M (Jun 2023)', techHC: '72+', techPct: '60%', roles: 'YES', score: 76, links: 'jethr.com/careers' },
+                    { name: 'ALKemist Bio', hq: 'Torino', stage: 'Scale-up', funding: '€6.9M (2023)', techHC: '28+', techPct: '80%', roles: 'YES', score: 74, links: 'alkemistbio.com' },
+                    { name: 'Qomodo', hq: 'Milano', stage: 'Scale-up', funding: '€48M (2023)', techHC: '43+', techPct: '50%', roles: 'YES', score: 72, links: 'qomodo.me' },
+                    { name: 'IdentifAI', hq: 'Cesena', stage: 'Scale-up', funding: '€2.2M (2024)', techHC: '20+', techPct: '80%', roles: 'YES', score: 70, links: 'identifai.net' },
+                    { name: 'Limenet', hq: 'Lecco', stage: 'Scale-up', funding: '€7.4M (2023)', techHC: '22+', techPct: '75%', roles: 'YES', score: 69, links: 'limenet.tech' },
+                    { name: 'Volta', hq: 'Milano', stage: 'Scale-up', funding: '€6.5M (2024)', techHC: '32+', techPct: '70%', roles: 'YES', score: 68, links: 'voltasoftware.com' },
+                ],
+            };
+
+            function switchCategoryTab(event, key) {
+                const container = document.getElementById('companyCatalog');
+                if (!container) return;
+                container.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                renderCategory(key);
+            }
+
+            function renderCategory(key) {
+                const list = document.getElementById('companyCatalogList');
+                if (!list) return;
+                const items = companiesByCategory[key] || [];
+                if (!items.length) { list.innerHTML = '<div style="color:#94a3b8">Nessuna azienda disponibile.</div>'; return; }
+                list.innerHTML = items.map((c, i) => companyItemHTML(c, i)).join('');
+            }
+
+            function companyItemHTML(c, i) {
+                const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                const details = [c.hq, c.stage].filter(Boolean).join(' • ');
+                const links = linksHTML(c.links);
+                return `
+                    <div class="company-item" role="button" tabindex="0" data-company="${escapeHtml(c.name)}" onclick="showSources(this)" onkeypress="if(event.key==='Enter') showSources(this)">
+                        <div class="rank ${rankClass}">${i + 1}</div>
+                        <div class="company-info">
+                            <div class="company-name">${escapeHtml(c.name)}</div>
+                            <div class="company-details">${escapeHtml(details)}${c.funding ? ' • ' + escapeHtml(c.funding) : ''}</div>
+                            ${links}
+                        </div>
+                        <div class="company-score">${c.score}/100</div>
+                    </div>
+                `;
+            }
+
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>\"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s]));
+            }
+
+            function linksHTML(raw) {
+                const urls = normalizeLinks(raw);
+                if (!urls.length) return '';
+                const items = urls.map(u => `<a href="${u}" target="_blank" rel="noopener">🔗 ${escapeHtml(linkLabel(u))}</a>`);
+                return `<div class="company-links">${items.join('')}</div>`;
+            }
+
+            function normalizeLinks(raw) {
+                if (!raw) return [];
+                const parts = String(raw)
+                    .split(/[,;\s]+/)
+                    .map(s => s.trim())
+                    .filter(Boolean);
+                const urlLike = /^(https?:\/\/)?([\w\-]+\.)+[a-z]{2,}(\/[^\s]*)?$/i;
+                const normalized = [];
+                for (const p of parts) {
+                    if (!urlLike.test(p)) continue; // skip non-url tokens
+                    const u = p.startsWith('http') ? p : `https://${p}`;
+                    if (!normalized.includes(u)) normalized.push(u);
+                }
+                return normalized.slice(0, 4); // avoid overflow
+            }
+
+            function linkLabel(u) {
+                try {
+                    const url = new URL(u);
+                    const path = url.pathname.replace(/\/$/, '');
+                    const label = url.hostname.replace(/^www\./, '') + (path && path !== '' ? path : '');
+                    return label.length > 32 ? label.slice(0, 29) + '…' : label;
+                } catch {
+                    return u.length > 32 ? u.slice(0, 29) + '…' : u;
+                }
+            }
+
+            // Mapping: Fonti per Azienda
+            const sourcesByCompany = {
+                'Satispay': [
+                    'https://www.fintechfutures.com/2022/09/satispay-becomes-a-unicorn-with-e320m-in-series-d-funding/',
+                    'https://thepaypers.com/payments/news/satispay-raises-eur-320-million-and-becomes-a-fintech-unicorn',
+                    'https://www.pymnts.com/news/investment-tracker/2022/payments-startup-is-italys-newest-unicorn-following-e320m-series-d/',
+                    'https://www.eu-startups.com/2022/09/milan-based-payment-network-satispay-exceed-e1-billion-valuation-and-becomes-an-italian-unicorn/',
+                    'https://www.eu-startups.com/2024/11/milan-based-satispay-secures-e60-million-to-expand-its-mobile-payments-and-employee-benefits-platform/',
+                    'https://tech.eu/2022/09/28/italy-s-second-unicorn-satispay-rings-up-320-million-at-1-billion-valuation',
+                    'https://techcrunch.com/2022/09/28/italys-satispay-raises-e320m-at-a-e1b-valuation-with-backing-from-block-tencent-and-more-for-its-indy-payment-network/',
+                    'https://www.linkedin.com/company/satispay/',
+                    'https://www.linkedin.com/company/satispay/jobs/'
+                ],
+                'Scalapay': [
+                    'https://www.prnewswire.com/news-releases/scalapay-now-a-unicorn-raises-497m-series-b-and-enters-the-checkout-market-301487923.html',
+                    'https://ibsintelligence.com/ibsi-news/scalapay-now-a-unicorn-announced-raising-497m-in-a-series-b-funding-round/'
+                ],
+                'Nexi Group': [
+                    'https://tracxn.com/d/geographies/italy/__KHa0o50NZX-ONw7JrgYYD6rLUmfZbg6TCWGX8eCemN0',
+                    'https://www.startupblink.com/top-startups/italy'
+                ],
+                'illimity Bank': [
+                    'https://www.illimity.com/en/who-we-are'
+                ],
+                'Young Platform': [
+                    'https://www.i3p.it/en/news/fintech-startup-young-platform-closes-a-16-euro-million-funding-round',
+                    'https://www.examinecrypto.com/post/young-platform-an-italian-crypto-exchange-raise-2-65m-from-azimut-bringing-its-total-raise-to-1'
+                ],
+                'Credimi': [
+                    'https://www.unibocconi.it/en/news/credimi-lending-platform-attracting-talent-back-italy'
+                ],
+                'Fabrick': [
+                    'https://www.fabrick.com/en-gb/corporate/platform-open-finance/',
+                    'https://tracxn.com/d/companies/fabrick/__YO2qGNkEMk0yb3_OcaTUAu7N3OoG--IEo4JZk2R2Ho4',
+                    'https://sifted.eu/articles/fabrick-raises-40m-mastercard-news'
+                ],
+                'YOLO Group': [
+                    'https://www.euronext.com/en/about/media/euronext-press-releases/yolo-group-spa-lists-euronext-growth-milan',
+                    'https://news.europawire.eu/the-first-italian-digital-insurance-services-and-brokerage-yolo-gets-investment-from-intesa-sanpaolo-group-9029237432/eu-press-release/2019/01/29/18/47/02/70851/'
+                ],
+                'Cubbit': [
+                    'https://www.finsmes.com/2024/07/cubbit-raises-12-5m-in-funding.html'
+                ],
+                'Cleafy': [
+                    'https://www.linkedin.com/company/cleafy',
+                    'https://startupsavant.com/startups-to-watch/italy'
+                ],
+                'TeamSystem': [
+                    'https://www.teamsystem.com/il-gruppo/'
+                ],
+                'Engineering': [
+                    'https://it.linkedin.com/jobs/engineering-ingegneria-informatica-spa-offerte-di-lavoro',
+                    'https://www.eng.it/en/careers/life-at-eng'
+                ],
+                'Bending Spoons': [
+                    'https://bendingspoons.com/careers',
+                    'https://tech.eu/2024/05/23/10-italian-startups-to-watch-in-2024/',
+                    'https://www.francescatabor.com/articles/2025/7/28/bending-spoons-a-different-kind-of-tech-company',
+                    'https://www.linkedin.com/company/bendingspoons',
+                    'https://sifted.eu/articles/bending-spoons-italy-startup-ipo',
+                    'https://www.eu-startups.com/2025/08/italys-bending-spoons-raises-over-e500-million-to-turbocharge-tech-acquisitions/',
+                    'https://money.usnews.com/investing/news/articles/2024-10-21/italian-tech-company-bending-spoons-has-eye-on-us-for-potential-ipo',
+                    'https://finance.yahoo.com/news/italian-tech-company-bending-spoons-095257001.html',
+                    'https://www.siliconrepublic.com/business/bending-spoons-italy-milan-debt-raise-500m-acquisitions'
+                ],
+                'McKinsey': [
+                    'https://www.mckinsey.com/careers/tech',
+                    'https://www.mckinsey.com/careers/students',
+                    'https://www.mckinsey.com/industries/technology-media-and-telecommunications/our-insights/cracking-the-code-on-digital-talent'
+                ],
+                'Accenture': [
+                    'https://www.linkedin.com/jobs/accenture-jobs-milan?trk=guest_job_search_related_jserp_link'
+                ],
+                'Ferrari': [
+                    'https://www.ferrari.com/en-EN/corporate/career',
+                    'https://www.ferrari.com/en-EN/ferrari-f1-engineering-academy',
+                    'https://www.ferrari.com/en-EN/ferrari-engineering-academy-2024',
+                    'https://www.linkedin.com/company/ferrari/jobs'
+                ],
+                'EssilorLuxottica': [
+                    'https://www.essilorluxottica.com/en/careers/smart-eyewear-lab/',
+                    'https://careers.essilorluxottica.com/job/Agordo-Operations-Talent-Program-Italy/1231002601/',
+                    'https://www.essilorluxottica.com/en/careers/operations-talent-program/'
+                ],
+                'Bracco': [
+                    'https://careers.braccomedtech.com/',
+                    'https://www.bracco.com/careers',
+                    'https://www.bracco.com/en-us/fulvio-renoldi-bracco',
+                    'https://www.bracco.com/',
+                    'https://en.wikipedia.org/wiki/Bracco_(Company)'
+                ],
+                'Chiesi': [
+                    'https://it.linkedin.com/company/chiesi-group/jobs',
+                    'https://www.linkedin.com/company/chiesi-group',
+                    'https://www.linkedin.com/company/chiesi-usa'
+                ],
+                'Dompé': [
+                    'https://www.linkedin.com/company/dompe',
+                    'https://www.dompe.com/',
+                    'https://www.dompe.com/who-we-are/about-us/leadershipversioneb/',
+                    'https://www.dompe.com/media/stories/unleashing-innovation-dompe-s-journey-into-the-digital-age-of-pharma/',
+                    'https://www.dompe.com/who-we-are/about-us/'
+                ],
+                'Menarini': [
+                    'https://www.menarini.com/en-us/careers/available-positions.html',
+                    'https://en.wikipedia.org/wiki/Menarini',
+                    'https://www.drugdiscoverytrends.com/2025-pharma50/menarini/'
+                ],
+                'Resalis': [
+                    'https://it.linkedin.com/company/resalistherapeutics',
+                    'https://www.resalistherapeutics.com/about-us/our-team/',
+                    'https://www.businesswire.com/news/home/20230222005054/en/Resalis-Therapeutics-Announces-Seed-Financing-of-%E2%82%AC10-Million-to-Fund-Non-coding-RNA-based-Therapeutics-for-Metabolic-Diseases',
+                    'https://www.crunchbase.com/organization/resalis-therapeutics',
+                    'https://www.businesswire.com/news/home/20241028943917/en/Resalis-Therapeutics-Gains-Strategic-Equity-Investment-from-Sanofi'
+                ],
+                'Recordati': [
+                    'https://www.recordati.com/en/join_us/',
+                    'https://recordati.com/',
+                    'https://www.linkedin.com/company/recordati/'
+                ],
+                'Technogym': [
+                    'https://www.linkedin.com/company/technogym/',
+                    'https://careers.technogym.com/job/Bracknell-Marketing-Specialist-BRC/1168001301/'
+                ],
+                'Casavo': [
+                    'https://siliconcanals.com/italian-proptech-scale-up-casavo-lands-e20m/'
+                ],
+                'ENI': [
+                    'https://business.linkedin.com/talent-solutions/case-studies/manufacturing/eni'
+                ],
+                'Energy Dome': [
+                    'https://energydome.com/energy-dome-announces-funding-commitments-from-breakthrough-energy-catalyst-and-the-european-investment-bank-to-support-construction-of-its-first-standard-commercial-scale-co2-battery/',
+                    'https://www.energy-storage.news/eu-breakthrough-energy-partnership-invests-e60-million-in-long-duration-co2-battery-project-in-italy/',
+                    'https://energydome.com/news-energy-dome-series-a-funding/',
+                    'https://tech.eu/2024/05/23/10-italian-startups-to-watch-in-2024/',
+                    'https://technologywealth.com/startups/energy-dome/',
+                    'https://energydome.com/energy-dome-and-engie-sign-pioneering-storage-offtake-agreement/'
+                ],
+                'Futura': [
+                    'https://www.eu-startups.com/2024/05/milan-based-edtech-futura-raises-e14-million-series-a-to-make-the-world-learn-faster-and-better/'
+                ],
+                'WeSchool': [
+                    'https://www.linkedin.com/company/weschool',
+                    'https://app.welcometothejungle.com/companies/WeSchool',
+                    'https://www.works-hub.com/companies/weschool'
+                ],
+                'Wibo': [
+                    'https://www.eu-startups.com/2025/06/italian-edtech-startup-wibo-raises-e500k-for-its-upskilling-and-leadership-programmes'
+                ],
+                'Faba': [
+                    'https://www.eu-startups.com/2025/08/italys-edtech-startup-faba-gets-serious-with-e4-5-million-to-expand-its-screen-free-storytelling-magic-in-spain/'
+                ],
+                'Algor': [
+                    'https://www.i3p.it/en/news/international-investment-1-4-million-euro-italian-edtech-startup-algor-education-ai-learning-tools'
+                ],
+                'Olivetti': [
+                    'https://www.linkedin.com/company/olivetti',
+                    'https://www.olivetti.com/en/corporate/about-us'
+                ],
+                'D-Orbit': [
+                    'https://www.electronicsweekly.com/news/business/space-tech-d-orbit-raises-e100m-series-c-funding-2024-01/'
+                ],
+            };
+
+            function showSources(elOrName) {
+                const name = typeof elOrName === 'string' ? elOrName : (elOrName?.dataset?.company || '').trim();
+                const modal = document.getElementById('sourcesModal');
+                const title = document.getElementById('sourcesTitle');
+                const body = document.getElementById('sourcesBody');
+                if (!modal || !title || !body) return;
+                title.textContent = `Fonti – ${name}`;
+                const urls = sourcesByCompany[name] || [];
+                if (!urls.length) {
+                    body.innerHTML = `<div>Nessuna fonte disponibile per ${escapeHtml(name)}.</div>`;
+                } else {
+                    body.innerHTML = urls.map(u => `<div>• <a href="${u}" target="_blank" rel="noopener">${escapeHtml(u)}</a></div>`).join('');
+                }
+                modal.style.display = 'flex';
+            }
+
+            function hideSources() {
+                const modal = document.getElementById('sourcesModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            // Initial render
+            renderCategory('finance');
+        </script>
+    </div>
+</body>
+</html>

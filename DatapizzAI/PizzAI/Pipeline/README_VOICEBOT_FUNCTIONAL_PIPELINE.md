@@ -10,6 +10,9 @@ Questo README presenta una versione snella ma completa del voicebot basato su `F
 
 ## Diagramma della pipeline
 
+
+Se il rendering Mermaid non funziona nel tuo IDE, usa il diagramma ASCII sotto. Manteniamo anche il blocco Mermaid (per GitHub e viewer compatibili).
+
 ASCII (fallback)
 
 ```
@@ -48,7 +51,6 @@ flowchart LR
   - Crea `.env` nella root con: `GOOGLE_API_KEY=la_tua_api_key`
 
 Esegui la versione semplice e funzionante:
-
 ```bash
 python Pipeline/voicebot_with_datapizzai.py \
   --config Pipeline/voicebot_functional_pipeline.yaml
