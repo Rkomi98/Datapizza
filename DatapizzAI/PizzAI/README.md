@@ -1,8 +1,5 @@
 <h1 align="center">
-  <img src="https://via.placeholder.com/800x200/FF0000/FFFFFF?text=DatapizzAI" alt="DatapizzAI Banner">
-  <br>
-  🍕 DatapizzAI Framework
-  <br>
+  <img width="1309" height="504" alt="DatapizzAI Banner" src="https://github.com/user-attachments/assets/b0ca3b74-9476-41a8-bd3b-07ff18a62ce7" />
 </h1>
 
 <p align="center">
@@ -14,11 +11,6 @@
 <p align="center">
   <b>Il framework AI più semplice e potente per costruire sistemi intelligenti in pochi minuti</b>
 </p>
-
-<p align="center">
-  <img src="https://via.placeholder.com/600x400/000000/00FF00?text=Framework+Demo" alt="Demo GIF">
-</p>
-
 ---
 
 ## 🚀 Indice
