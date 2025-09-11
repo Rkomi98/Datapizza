@@ -114,31 +114,8 @@ danzano sullo schermo blu—
 nasce un nuovo mondo
 ```
 
-### Conversazione con Memoria
-
-```python
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-
-memory = Memory()
-client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
-
-# Prima domanda
-memory.add_turn([TextBlock(content="Mi chiamo Marco")], ROLE.USER)
-response = client.invoke("", memory=memory)
-memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-
-# Seconda domanda - ricorda il contesto!
-memory.add_turn([TextBlock(content="Qual è il mio nome?")], ROLE.USER)
-response = client.invoke("", memory=memory)
-print(response.text)  # "Il tuo nome è Marco!"
-```
-
-**Spiegazione del codice:** Il sistema di memoria permette di mantenere il contesto tra le conversazioni. Ogni turno viene salvato con il ruolo appropriato (USER o ASSISTANT), permettendo al modello di ricordare informazioni precedenti senza dover ripetere tutto il contesto.
-
-## Chatbot semplice
-
-Crea un chatbot conversazionale in poche righe:
+### Conversazione con Memoria e creazione di un chatbot
+Il sistema di memoria permette di mantenere il contesto tra le conversazioni. Ogni turno viene salvato con il ruolo appropriato (USER o ASSISTANT), permettendo al modello di ricordare informazioni precedenti senza dover ripetere tutto il contesto.
 
 ```python
 from datapizzai.clients import ClientFactory
