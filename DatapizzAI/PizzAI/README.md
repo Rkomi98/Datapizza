@@ -95,14 +95,23 @@ for provider, model in providers.items():
 **Risultato atteso:**
 ```
 OPENAI:
-Codice che scorre
-Bug nascosti tra le righe
-Debug all'alba
+Codice che scorre,  
+bit danzano in armonia,  
+crea vita nuova.
 
 GOOGLE:
-Logica pura
-Algoritmi che danzano
-Compile riuscito
+Ecco un haiku sulla programmazione:
+
+Logica si svela,
+Codice preciso si crea,
+Mondo prende forma.
+
+ANTHROPIC:
+Ecco un haiku sulla programmazione:
+
+Righe di codice
+danzano sullo schermo blu—
+nasce un nuovo mondo
 ```
 
 ### Conversazione con Memoria
@@ -127,7 +136,37 @@ print(response.text)  # "Il tuo nome è Marco!"
 
 **Spiegazione del codice:** Il sistema di memoria permette di mantenere il contesto tra le conversazioni. Ogni turno viene salvato con il ruolo appropriato (USER o ASSISTANT), permettendo al modello di ricordare informazioni precedenti senza dover ripetere tutto il contesto.
 
-![Memory Demo](https://via.placeholder.com/800x400/000000/00FF00?text=Conversazione+con+Memoria)
+## Chatbot semplice
+
+Crea un chatbot conversazionale in poche righe:
+
+```python
+from datapizzai.clients import ClientFactory
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock, ROLE
+
+class SimpleChatbot:
+    def __init__(self):
+        self.client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+        self.memory = Memory()
+    
+    def send_message(self, user_input: str) -> str:
+        self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        response = self.client.invoke("", memory=self.memory)
+        self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+        return response.text
+
+# Utilizzo
+bot = SimpleChatbot()
+
+while True:
+    user_input = input("Tu: ").strip()
+    if user_input.lower() in ["esci", "quit"]:
+        break
+    print("Bot:", bot.send_message(user_input))
+```
+
+**Risultato:** Un chatbot che ricorda la conversazione e risponde in modo coerente al contesto.
 
 ---
 
