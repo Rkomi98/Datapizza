@@ -3,15 +3,18 @@
 </h1>
 
 <p align="center">
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-red?style=for-the-badge&logo=python&logoColor=white"/>
-  <img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/>
-  <img alt="Version" src="https://img.shields.io/badge/Version-3.0.8+-black?style=for-the-badge"/>
+  <a href="https://www.python.org/downloads/release/python-3120/"><img alt="Python" src="https://img.shields.io/badge/Python-3.12+-blue?style=for-the-badge&logo=python&logoColor=white"/></a>
+  <a href="https://github.com/Datapizza/DatapizzAI/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/></a>
+  <a href="https://pypi.org/project/datapizzai/"><img alt="Version" src="https://img.shields.io/badge/Version-3.0.8+-black?style=for-the-badge"/></a>
+  <a href="https://discord.gg/your-invite-link"><img alt="Discord" src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/></a>
+  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge&logo=python&logoColor=white"></a>
+  <a href="https://github.com/Datapizza/DatapizzAI/pulls"><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge"/></a>
+  <a href="https://github.com/DataPizza-Team"><img alt="Built with Love" src="https://img.shields.io/badge/Built%20with-%E2%9D%A4%EF%B8%8F-ff69b4.svg?style=for-the-badge"/></a>
 </p>
 
 <p align="center">
   <b>Il framework AI più semplice e potente per costruire sistemi intelligenti in pochi minuti</b>
 </p>
----
 
 ## 🚀 Indice
 
@@ -25,17 +28,14 @@
 
 ---
 
-## 📦 Installazione & Setup
-
-**Descrizione breve:** Configura DatapizzAI in 30 secondi e inizia subito a costruire.
-
-### Installazione
+## 📦 Installazione & setup
+Il setup richiede solo tre passaggi: installazione di `datapizzai`, configurazione della chiave API nel file `.env`, e creazione del client con una singola chiamata a `ClientFactory.create()`. Per questo basta seguire i seguenti passaggi:
 
 ```bash
 pip install datapizzai
 ```
 
-### Setup Iniziale
+Poi prima di passare al codice crea un file env in cui inserisci tutte le chiavi necessarie per realizzare il tuo progetto
 
 ```python
 # .env file
@@ -61,8 +61,6 @@ client = ClientFactory.create(
 response = client.invoke("Ciao! Dimmi un fatto interessante sulla pizza 🍕")
 print(response.text)
 ```
-
-**Spiegazione del codice:** Il setup richiede solo tre passaggi: installazione del pacchetto, configurazione della chiave API nel file `.env`, e creazione del client con una singola chiamata a `ClientFactory.create()`. Il framework gestisce automaticamente tutte le configurazioni complesse.
 
 **Risultato atteso:**
 ```
