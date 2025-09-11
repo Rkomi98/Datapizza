@@ -130,8 +130,12 @@ class MessageBus:
 ### Passo 3: Creazione agente specializzato
 
 ```python
+import os
+from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 from datapizzai.memory import Memory
+
+load_dotenv()
 
 class SpecializedAgent:
     def __init__(self, name: str, specialization: str, tools: List, 

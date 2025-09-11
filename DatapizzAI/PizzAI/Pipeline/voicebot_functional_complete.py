@@ -63,7 +63,7 @@ def load_yaml_config(path: Optional[str]) -> Dict[str, Any]:
 # -----------------------------
 
 def build_pipeline_programmatic(seconds: int, sample_rate: int, audio_path: str, 
-                               out_path: str, model: str = "gemini-2.5-flash", skip_recording: bool = False) -> FunctionalPipeline:
+                               out_path: str, model: str = "gemini-2.5-flash", skip_recording: bool = False, **kwargs) -> FunctionalPipeline:
     """
     Costruisce la pipeline programmaticamente seguendo gli esempi forniti dall'utente.
     
@@ -85,35 +85,7 @@ def build_pipeline_programmatic(seconds: int, sample_rate: int, audio_path: str,
     report_builder = BuildReport()
     notification_sender = SendNotification()
 
-    # === Sottopipeline per notifica (se arrabbiato) ===
-    notification_pipeline = (
-        FunctionalPipeline()
-        .run(
-            name="send_notification",
-            node=notification_sender,
-            dependencies=[Dependency(node_name="analyze_audio")],
-            kwargs={"sentiment": "angry"}
-        )
-    )
-
-    # === Sottopipeline per report normale (foreach + report) ===
-    normal_flow_pipeline = (
-        FunctionalPipeline()
-        .foreach(
-            name="normalize_bullets",
-            dependencies=[Dependency(node_name="extract_bullets")],
-            do=bullet_normalizer,
-        )
-        .then(
-            name="generate_report",
-            node=report_builder,
-            target_key="normalized_bullets",
-            dependencies=[
-                Dependency(node_name="analyze_audio", target_key="analysis")
-            ],
-            kwargs={"out_path": out_path}
-        )
-    )
+    # === Componenti semplici (no sottopipeline) ===
 
     # === Pipeline principale ===
     if skip_recording or os.path.exists(audio_path):
@@ -155,12 +127,28 @@ def build_pipeline_programmatic(seconds: int, sample_rate: int, audio_path: str,
             node=bullet_extractor,
             target_key="analyze_audio",
         )
-        # Step 4: Branch basato su sentiment
-        .branch(
-            condition=lambda ctx: (ctx.get("analyze_audio") or {}).get("sentiment", "").lower() in ["angry", "very_angry", "furious"],
-            dependencies=[Dependency(node_name="analyze_audio")],
-            if_true=notification_pipeline,
-            if_false=normal_flow_pipeline,
+        # Step 4: Normalizza bullets con foreach
+        .foreach(
+            name="normalize_bullets",
+            dependencies=[Dependency(node_name="extract_bullets")],
+            do=bullet_normalizer,
+        )
+        # Step 5: Genera report (sempre)
+        .run(
+            name="generate_report",
+            node=report_builder,
+            dependencies=[
+                Dependency(node_name="analyze_audio", target_key="analyze_audio"),
+                Dependency(node_name="normalize_bullets", target_key="normalize_bullets")
+            ],
+            kwargs={"out_path": out_path}
+        )
+        # Step 6: Controllo sentiment e notifica opzionale
+        .run(
+            name="notification_check",
+            node=notification_sender,
+            dependencies=[Dependency(node_name="analyze_audio", target_key="analysis")],
+            kwargs={"sentiment": "conditional"}
         )
         # Step 5: Ottieni il risultato dell'analisi
         .get("analyze_audio")
@@ -297,12 +285,35 @@ def main():
         if args.mode == "basic":
             print("🚀 Modalità: Pipeline programmatica di base")
             config = load_yaml_config(args.config)
-            params = {**config.get("params", {}), **overrides}
+            
+            # Valori di default se il config è vuoto o mancante
+            default_params = {
+                "seconds": 20,
+                "sample_rate": 16000,
+                "audio_path": "session.wav",
+                "out_path": "Pipeline/voicebot_report.md",
+                "model": "gemini-2.5-flash",
+                "skip_recording": False
+            }
+            
+            params = {**default_params, **config.get("params", {}), **overrides}
             params["skip_recording"] = args.skip_recording
             pipeline = build_pipeline_programmatic(**params)
             
         elif args.mode == "yaml":
             print("🚀 Modalità: Pipeline da YAML")
+            
+            # Valori di default per modalità YAML
+            default_params = {
+                "seconds": 20,
+                "sample_rate": 16000,
+                "audio_path": "session.wav",
+                "out_path": "Pipeline/voicebot_report.md",
+                "model": "gemini-2.5-flash",
+                "skip_recording": False
+            }
+            
+            overrides = {**default_params, **overrides}
             overrides["skip_recording"] = args.skip_recording
             pipeline = build_pipeline_from_yaml(args.config, **overrides)
             
@@ -311,7 +322,18 @@ def main():
             if not GOOGLE_API_KEY:
                 raise RuntimeError("GOOGLE_API_KEY richiesta per modalità avanzata")
             config = load_yaml_config(args.config)
-            params = {**config.get("params", {}), **overrides}
+            
+            # Valori di default per modalità avanzata
+            default_params = {
+                "seconds": 20,
+                "sample_rate": 16000,
+                "audio_path": "session.wav",
+                "out_path": "Pipeline/voicebot_report.md",
+                "model": "gemini-2.5-flash",
+                "skip_recording": False
+            }
+            
+            params = {**default_params, **config.get("params", {}), **overrides}
             params["skip_recording"] = args.skip_recording
             advanced_builder = AdvancedVoicebotPipeline(GOOGLE_API_KEY)
             pipeline = advanced_builder.build_advanced_pipeline(**params)

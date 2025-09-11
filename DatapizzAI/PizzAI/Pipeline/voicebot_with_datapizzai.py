@@ -121,7 +121,7 @@ def main():
     seconds = args.sec or cfg.get("params", {}).get("seconds", 20)
     sample_rate = args.sr or cfg.get("params", {}).get("sample_rate", 16000)
     audio_path = args.audio or cfg.get("params", {}).get("audio_path", "session.wav")
-    out_path = args.out or cfg.get("params", {}).get("out_path", "Pipeline/voicebot_report.md")
+    out_path = args.out or cfg.get("params", {}).get("out_path", "voicebot_report.md")
     model = args.model or cfg.get("params", {}).get("model", "gemini-2.5-flash")
 
     pipeline = build_pipeline(seconds, sample_rate, audio_path, out_path, model=model)

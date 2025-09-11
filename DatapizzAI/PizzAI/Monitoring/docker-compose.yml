@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Zipkin per tracing semplice
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: datapizzai-zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+    restart: unless-stopped
+
+  # Grafana per visualizzazione avanzata
+  grafana:
+    image: grafana/grafana:latest
+    container_name: datapizzai-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - tempo
+    restart: unless-stopped
+
+  # Tempo per backend tracing
+  tempo:
+    image: grafana/tempo:latest
+    container_name: datapizzai-tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    ports:
+      - "3200:3200"   # Tempo API
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    restart: unless-stopped
+
+volumes:
+  grafana-data:
+    driver: local
+  tempo-data:
+    driver: local
+
+networks:
+  default:
+    name: datapizzai-monitoring

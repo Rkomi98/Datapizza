@@ -70,6 +70,28 @@ class GeminiAudioAnalyzer(PipelineComponent):
             
         return self._analyze_audio(path)
 
+    def _extract_json_from_markdown(self, text: str) -> str:
+        """Estrae JSON da code blocks markdown (```json ... ```)."""
+        if not text:
+            return text
+            
+        # Cerca code block con ```json o ```
+        if "```" in text:
+            start = text.find("```")
+            if start != -1:
+                # Trova la fine del code block
+                end = text.find("```", start + 3)
+                if end != -1:
+                    # Estrai il contenuto
+                    inner = text[start + 3 : end].strip()
+                    # Rimuovi eventuale etichetta 'json'
+                    if inner.lower().startswith("json"):
+                        inner = inner[4:].lstrip("\n\r ")
+                    return inner
+        
+        # Se non trova code blocks, ritorna il testo originale
+        return text
+
     def _analyze_audio(self, audio_path: str) -> Dict[str, Any]:
         client = ClientFactory.create(
             provider="google",
@@ -95,9 +117,12 @@ class GeminiAudioAnalyzer(PipelineComponent):
         resp = client.invoke([TextBlock(content=prompt), MediaBlock(media=media)])
         text = (resp.text or "").strip()
 
+        # Estrai JSON da code blocks markdown
+        json_text = self._extract_json_from_markdown(text)
+        
         # Prova a parsare JSON; fallback minimale se fallisce
         try:
-            data = json.loads(text)
+            data = json.loads(json_text)
             assert isinstance(data, dict)
         except Exception:
             data = {
@@ -197,7 +222,17 @@ class BuildReport(PipelineComponent):
     def _run(self, analysis=None, out_path: str = "Pipeline/voicebot_report.md", normalized_bullets: Optional[List[str]] = None, **kwargs) -> str:
         # Gestisci diversi modi di passaggio parametri
         if analysis is None:
-            analysis = kwargs.get("analysis") or kwargs
+            # Prova a ottenere i dati dal contesto kwargs
+            if "analyze_audio" in kwargs:
+                analysis = kwargs["analyze_audio"]
+            elif len(kwargs) == 1 and isinstance(list(kwargs.values())[0], dict):
+                analysis = list(kwargs.values())[0]
+            else:
+                analysis = kwargs
+        
+        # Ottieni normalized_bullets se non forniti
+        if normalized_bullets is None and "normalize_bullets" in kwargs:
+            normalized_bullets = kwargs["normalize_bullets"]
         
         return self._build_report(analysis, out_path, normalized_bullets)
 
@@ -210,7 +245,34 @@ class BuildReport(PipelineComponent):
 
     def _build_report(self, analysis: Dict[str, Any], out_path: str, normalized_bullets: Optional[List[str]] = None) -> str:
         md = analysis.get("report_markdown") or ""
-        
+
+        # Sempre costruisci il markdown dai dati più freschi
+        # Questo risolve il problema delle sezioni vuote
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        transcript = analysis.get("transcript") or ""
+        bullets = analysis.get("bullets") or []
+        rewrite = analysis.get("rewrite") or ""
+        sentiment = analysis.get("sentiment", "neutral")
+        audio_path = "audio"  # fallback se non presente
+
+        lines: List[str] = []
+        lines.append("## Trascrizione")
+        lines.append(transcript)
+        lines.append("")
+        lines.append("## Riassunto (bullet)")
+        # Usa normalized_bullets se disponibili, altrimenti quelli originali
+        if normalized_bullets:
+            lines += list(normalized_bullets)
+        elif bullets:
+            lines += [f"- {b}" for b in bullets]
+        lines.append("")
+        lines.append("## Riscrittura")
+        lines.append(rewrite)
+        lines.append("")
+        lines.append(f"_Sentiment_: {sentiment} | _File_: `{audio_path}` | _Ts_: {ts}")
+
+        md = "\n".join(lines) + "\n"
+
         # Se abbiamo bullet normalizzati, sostituiamoli nel markdown
         if normalized_bullets:
             # Ricostruisce la sezione bullet

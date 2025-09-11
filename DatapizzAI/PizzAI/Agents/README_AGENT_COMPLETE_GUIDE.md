@@ -2,41 +2,18 @@
 
 ## Panoramica
 
-Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libreria `datapizzai` (>= 3.0.8). L'obiettivo è fornire una comprensione chiara del funzionamento degli agenti, con un focus sulla loro configurazione e interazione in sistemi complessi.
-
-Per un'esplorazione esaustiva di tutte le funzionalità, il file `Agents/agent_complete.py` resta il riferimento completo.
+Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libreria `datapizzai` (>= 3.0.8). L'obiettivo è una comprensione chiara del funzionamento degli agenti e della loro interazione in sistemi complessi, con esempi minimali e pratici.
 
 ## Indice
 
-- [Setup ambiente](#setup-ambiente)
 - [1. Creare un agente](#1-creare-un-agente)
-  - [Parametri di input](#parametri-di-input)
 - [2. Eseguire un agente](#2-eseguire-un-agente)
-- [3. Creare un sistema multi-agente](#3-creare-un-sistema-multi-agente)
-- [4. Esempio minimale funzionante](#4-esempio-minimale-funzionante)
-- [Informazioni aggiuntive](#informazioni-aggiuntive)
-
-## Setup ambiente
-
-Prima di iniziare, è necessario installare le librerie e configurare le credenziali.
-
-1.  **Installazione**:
-    ```bash
-    pip install datapizzai python-dotenv
-    ```
-
-2.  **Credenziali**:
-    Crea un file `.env` nella root del progetto e inserisci le tue chiavi API.
-    ```env
-    # .env
-    OPENAI_API_KEY="sk-..."
-    GOOGLE_API_KEY="AIza..."
-    # ...altre chiavi...
-    ```
+- [3. Sistema multi‑agente](#3-sistema-multi-agente)
+- [4. Planning interval](#4-planning-interval)
 
 ## 1. Creare un agente
 
-Un agente è un'entità autonoma che utilizza un modello linguistico (LLM) per ragionare, usare strumenti (`tools`) e mantenere una memoria conversazionale per risolvere problemi.
+Un agente è un'entità autonoma che utilizza un modello linguistico (LLM) per ragionare e usare strumenti (`tools`) per risolvere problemi.
 
 ```mermaid
 graph TD;
@@ -55,34 +32,49 @@ graph TD;
 La sua creazione richiede la configurazione di diversi parametri che ne definiscono il comportamento.
 
 ```python
-from datapizzai.agents import Agent
+import os
+from dotenv import load_dotenv
+from datapizzai.clients import OpenAIClient
+from datapizzai.cache import MemoryCache
+from datapizzai.tools import tool
+from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents import Agent, ClientManager
 
-agent = Agent(
-    name="Assistente_Calcoli",
-    client=openai_client,
-    system_prompt="Sei un assistente specializzato in calcoli matematici.",
-    tools=[calculator_tool],
-    max_steps=5,
-    memory=memoria_conversazionale,
-    stateless=False,
-    terminate_on_text=True,
-    planning_interval=0,
+load_dotenv()
+
+# Cache in-process
+cache = MemoryCache()
+
+# Client OpenAI con cache
+openai_client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    temperature=0.3,
+    cache=cache,
 )
+
+# Test veloce del client (la seconda chiamata è un cache hit)
+r1 = openai_client.invoke("Ciao!")
+print("Risposta 1:", r1.text)
+r2 = openai_client.invoke("Ciao!")
+print("Risposta 2 (cache hit):", r2.text)
+
+# Tool
+@tool
+def get_weather(location: str, when: str) -> str:
+    """Retrieves weather information for a specified location and time."""
+    return "25 °C"
+
+# Agent collegato al client
+agent = Agent(
+    name="WeatherAgent",
+    client=openai_client,
+    system_prompt="Sei un assistente meteo. Usa i tool quando servono e rispondi in italiano.",
+    tools=[get_weather],
+    terminate_on_text=True,
+)
+response = agent.run("Che tempo ci sarà lunedì prossimo a Milano?")
+print(response)
 ```
-
-### Parametri di input
-
-Ogni parametro dell'agente ha un ruolo specifico:
-
-- `name` (`str`): Un nome identificativo, utile per il logging e nei sistemi multi-agente.
-- `client` (`Client`): L'istanza del client LLM (es. `OpenAIClient`, `GoogleClient`) che l'agente userà per "pensare". Viene creato tramite `ClientFactory`.
-- `system_prompt` (`str`): Le istruzioni di base che definiscono la personalità, il ruolo e le direttive dell'agente. È l'elemento più importante per guidarne il comportamento.
-- `tools` (`List[Tool]`): Una lista di strumenti (funzioni Python decorate con `@tool`) che l'agente può decidere di usare per compiere azioni (es. calcoli, ricerche su file, API esterne).
-- `max_steps` (`int`): Il numero massimo di passaggi di ragionamento (pensiero -> azione) che l'agente può compiere prima di fermarsi. Utile per evitare loop infiniti.
-- `memory` (`Memory`): Un'istanza di `Memory` per mantenere il contesto delle conversazioni passate. Se non fornita, l'agente opera senza memoria di interazioni precedenti.
-- `stateless` (`bool`): Se `True`, la memoria non viene aggiornata automaticamente tra una chiamata `.run()` e l'altra. Di default è `False` quando si fornisce una memoria.
-- `terminate_on_text` (`bool`): Se `True`, l'agente si ferma non appena produce una risposta testuale finale, senza tentare di usare altri strumenti.
-- `planning_interval` (`int`): Se impostato a un valore `> 0`, l'agente si ferma ogni `N` passi per rivedere il suo piano d'azione, migliorando l'efficacia su task complessi. `0` disattiva il planning esplicito.
 
 ## 2. Eseguire un agente
 
@@ -105,109 +97,72 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
           print("Step intermedio:", type(chunk).__name__)
   ```
 
-## 3. Creare un sistema multi-agente
+## 3. Sistema multi‑agente
 
 Per problemi complessi, è efficace combinare più agenti specializzati. Un agente "coordinatore" riceve la richiesta, la scompone e delega i sotto-compiti agli agenti più adatti.
 
 Questo si ottiene tramite il parametro `can_call`.
 
 ```mermaid
-graph TD;
-    subgraph Multi-Agent System;
-        A["Complex User Query"] --> B{"Coordinator Agent"};
-        B -- Deploys Task 1 --> C["Specialist Agent 1<br>(e.g., Analyst)"];
-        B -- Deploys Task 2 --> D["Specialist Agent 2<br>(e.g., Calculator)"];
-        C -- Returns Result --> B;
-        D -- Returns Result --> B;
-        B -- Synthesizes Results --> E["Final Response"];
-    end;
+graph TD
+    subgraph Multi-Agent System
+        A["Complex User Query"] --> B{"Coordinator Agent"}
+        B -- Plan --> P((Plan))
+        B -- Task 1 --> C["text_analysis_tool"]:::tool
+        B -- Task 2 --> D["calculator_tool"]:::tool
+        C -- Result --> B
+        D -- Result --> B
+        B -- Synthesize --> E["Final Response"]
+    end
+
+classDef tool fill:#E6F7FF,stroke:#1890FF,color:#003A8C
+classDef agent fill:#FFF7E6,stroke:#FA8C16,color:#613400
+class B agent
 ```
 
 ```python
-# Agente 1: specializzato in analisi testuale
-analyst_agent = Agent(name="Analyst_Agent", tools=[text_analysis_tool], ...)
+analyst_agent = Agent(name="Analyst_Agent", tools=[text_analysis_tool])
+calculator_agent = Agent(name="Calculator_Agent", tools=[calculator_tool])
 
-# Agente 2: specializzato in calcoli
-calculator_agent = Agent(name="Calculator_Agent", tools=[calculator_tool], ...)
-
-# Agente 3: coordinatore
-coordinator = Agent(
-    name="Coordinator_Agent",
-    system_prompt="Analizza la richiesta e delega ai tuoi agenti specializzati.",
-    can_call=[analyst_agent, calculator_agent] # Può "chiamare" gli altri due
-)
-
-# Il coordinatore decide a chi affidare i task
+coordinator = Agent(name="Coordinator_Agent", can_call=[analyst_agent, calculator_agent])
 response = coordinator.run("Analizza il testo 'AI is powerful' e calcola 1024 / 256")
 ```
 
 - `can_call` (`List[Agent]`): Rende gli agenti nella lista disponibili come "strumenti" per il coordinatore, che può quindi invocarli passandogli un compito specifico.
 
-## 4. Esempio minimale funzionante
+```
 
-Questo script completo e funzionante mostra come creare e usare un agente base. Assicurati di avere un file `.env` con la tua `OPENAI_API_KEY`.
+## 4. Planning interval
+
+Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.
 
 ```python
-import os
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.clients.factory import Provider
-from datapizzai.tools import tool
 from datapizzai.agents import Agent
-from datapizzai.memory import Memory
 
-# 1. Carica le variabili d'ambiente (da file .env)
-load_dotenv()
-
-# 2. Definisci un tool semplice
-@tool(name="calculator", description="Esegue calcoli matematici")
-def calculator(expression: str) -> str:
-    """Calcola un'espressione matematica in modo sicuro."""
-    try:
-        allowed_chars = set('0123456789+-*/.() ')
-        if not all(c in allowed_chars for c in expression):
-            return "Errore: caratteri non validi."
-        return f"Risultato: {eval(expression)}"
-    except Exception as e:
-        return f"Errore nel calcolo: {str(e)}"
-
-# 3. Configura il client per l'LLM
-try:
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY non trovata. Controlla il file .env")
-
-    client = ClientFactory.create(
-        provider=Provider.OPENAI,
-        api_key=api_key,
-        model="gpt-4o",
-    )
-except ValueError as e:
-    print(e)
-    exit()
-
-# 4. Crea l'agente
-assistente_agente = Agent(
-    name="Assistente_AI",
+agent = Agent(
     client=client,
-    system_prompt="Sei un assistente AI. Rispondi in italiano e usa il calcolatore quando necessario.",
-    tools=[calculator],
-    memory=Memory(),
-    max_steps=3
+    planning_interval=3,  # pianifica ogni 3 step
 )
 
-# 5. Esegui l'agente
-query = "Quanto fa (100 + 50) / 2?"
-print(f"Query: {query}")
+response = agent.run("Scrivi un piano per migrare un monolite a microservizi e stimane l'effort")
+print(response)
+```
 
-response = assistente_agente.run(query)
-print(f"Risposta: {response}")
+Esecuzione concettuale (planning ogni 3 step):
 
+```mermaid
+flowchart LR
+    A[Start] --> S1[Step 1]
+    S1 --> S2[Step 2]
+    S2 --> S3[Step 3]
+    S3 --> P[Revisione Piano]
+    P --> S4[Step 4]
+    S4 --> S5[Step 5]
+    S5 --> S6[Step 6]
+    S6 --> P2[Revisione Piano]
+    P2 --> E[End]
 ```
 
 ## Informazioni aggiuntive
 
-- **Client e Tool**: Per semplicità, questa guida omette la definizione dettagliata di `ClientFactory` e `@tool`. Questi componenti sono essenziali ma il loro funzionamento è analogo a quello visto in altre guide. Il file `agent_complete.py` contiene implementazioni complete.
-- **Troubleshooting**: Se `MockClient` viene attivato, significa che la chiave API non è stata trovata. Controlla che il file `.env` sia presente, leggibile e che il nome della variabile sia corretto.
-
-
+- Il file `agent_complete.py` contiene implementazioni complete e scenari avanzati.

@@ -1,0 +1,171 @@
+{
+  "memory": [
+    {
+      "role": "user",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Ciao, conosci Clessidra Group?"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Ciao! Sì, Clessidra Group è una società di gestione di investimenti con sede in Italia, specializzata principalmente nel settore del private equity. Fondata nel 2003, Clessidra si concentra su investimenti in aziende italiane di medie dimensioni, cercando di creare valore attraverso il miglioramento operativo e la crescita strategica delle aziende in cui investe. La società è nota per il suo approccio attivo nella gestione delle partecipazioni e per la sua profonda conoscenza del mercato italiano. Se hai domande specifiche o hai bisogno di ulteriori informazioni su Clessidra Group, fammi sapere!"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Conosci Mondadori?"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Sì, Mondadori è uno dei principali gruppi editoriali in Italia e ha una lunga storia nel settore dell'editoria. Fondata nel 1907 da Arnoldo Mondadori, la società è nota per la pubblicazione di libri, riviste e contenuti digitali. Mondadori è responsabile della pubblicazione di opere di molti autori italiani e internazionali e ha una vasta gamma di generi letterari nel suo catalogo, che spazia dalla narrativa alla saggistica, dai libri per bambini ai testi educativi.\n\nOltre alla pubblicazione di libri, Mondadori è anche attiva nel settore delle riviste e dei periodici, con titoli che coprono vari argomenti, tra cui moda, lifestyle, cucina e cultura. Negli ultimi anni, Mondadori ha anche investito nel digitale, espandendo la sua presenza online e nei nuovi media.\n\nSe hai domande specifiche su Mondadori o sui suoi prodotti, sentiti libero di chiedere!"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Molto bene e conosci anche Alexander Cublesan?"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Mi dispiace, ma non ho informazioni su una persona di nome Alexander Cublesan. È possibile che non sia una figura pubblica ampiamente riconosciuta o che sia emersa dopo il mio ultimo aggiornamento. Se hai ulteriori dettagli o contesto su chi potrebbe essere, fammi sapere e vedrò come posso aiutarti!"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Conosci Clessidra?"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "blocks": [
+        {
+          "type": "text",
+          "content": "Ciao cos'è clessidra group?"
+        }
+      ]
+    }
+  ],
+  "turn_timestamps": [
+    1756802138.651715,
+    1756802149.5308404,
+    1756802239.6264768,
+    1756802266.4678965,
+    1756802450.646878
+  ],
+  "summary_history": [
+    {
+      "timestamp": "2025-09-02T10:37:20.923973",
+      "strategy": "keep_recent",
+      "summary": "Clessidra Group è una società di gestione di investimenti specializzata nel settore del private equity, fondata nel 2003 e con sede in Italia. Si concentra su investimenti in aziende italiane di medie dimensioni, puntando a creare valore attraverso miglioramenti operativi e crescita strategica. La società è riconosciuta per il suo approccio attivo nella gestione delle partecipazioni e per la profonda conoscenza del mercato italiano.",
+      "metrics_before": {
+        "total_turns": 5,
+        "total_characters": 1556,
+        "estimated_tokens": 389,
+        "oldest_turn_age": 100.97617268562317,
+        "memory_hash": "0x152804bee751047c",
+        "last_summary_turns_ago": 4
+      },
+      "metrics_after": {
+        "total_turns": 5,
+        "total_characters": 1556,
+        "estimated_tokens": 389,
+        "oldest_turn_age": 102.27129173278809,
+        "memory_hash": "0x152804bee751047c",
+        "last_summary_turns_ago": 0
+      },
+      "elapsed_time": 1.2951774597167969
+    },
+    {
+      "timestamp": "2025-09-02T10:37:49.703595",
+      "strategy": "keep_recent",
+      "summary": "L'utente ha chiesto informazioni su Clessidra Group e Mondadori. Clessidra Group è una società di gestione di investimenti italiana fondata nel 2003, specializzata in private equity e focalizzata su aziende italiane di medie dimensioni, con l'obiettivo di migliorare operativamente e crescere strategicamente. Mondadori, invece, è un importante gruppo editoriale italiano fondato nel 1907, noto per la pubblicazione di libri, riviste e contenuti digitali, con un ampio catalogo che include numerosi generi letterari. Non sono stati identificati problemi né sono state prese decisioni o assegnati compiti specifici durante la conversazione.",
+      "metrics_before": {
+        "total_turns": 7,
+        "total_characters": 1874,
+        "estimated_tokens": 468,
+        "oldest_turn_age": 127.81718683242798,
+        "memory_hash": "0x1bf3a1ee9d4587a4",
+        "last_summary_turns_ago": 2
+      },
+      "metrics_after": {
+        "total_turns": 7,
+        "total_characters": 1874,
+        "estimated_tokens": 468,
+        "oldest_turn_age": 131.05141353607178,
+        "memory_hash": "0x1bf3a1ee9d4587a4",
+        "last_summary_turns_ago": 0
+      },
+      "elapsed_time": 3.234231948852539
+    },
+    {
+      "timestamp": "2025-09-02T10:40:54.639272",
+      "strategy": "keep_recent",
+      "summary": "L'utente ha chiesto informazioni su Clessidra Group e Mondadori. L'assistente ha spiegato che Clessidra Group è una società di gestione di investimenti italiana, specializzata nel private equity e focalizzata su aziende italiane di medie dimensioni. Ha anche descritto Mondadori come un importante gruppo editoriale italiano, con una lunga storia nella pubblicazione di libri, riviste e contenuti digitali. Non sono state menzionate decisioni prese o TODO specifici, né sono stati identificati problemi. Alla fine della conversazione, l'utente ha chiesto informazioni su Alexander Cublesan, ma non è stata fornita una risposta.",
+      "metrics_before": {
+        "total_turns": 8,
+        "total_characters": 1901,
+        "estimated_tokens": 475,
+        "oldest_turn_age": 311.9961025714874,
+        "memory_hash": "0xcc5adbe989c2145",
+        "last_summary_turns_ago": 0
+      },
+      "metrics_after": {
+        "total_turns": 8,
+        "total_characters": 1901,
+        "estimated_tokens": 475,
+        "oldest_turn_age": 315.98617362976074,
+        "memory_hash": "0xcc5adbe989c2145",
+        "last_summary_turns_ago": 0
+      },
+      "elapsed_time": 3.9900832176208496
+    }
+  ],
+  "turns_since_last_summary": 0,
+  "config": {
+    "strategy": "keep_recent",
+    "trigger_turns": 5,
+    "trigger_tokens": 5000,
+    "keep_recent_turns": 3,
+    "summary_max_tokens": 200,
+    "importance_keywords": [
+      "importante",
+      "decisione",
+      "todo",
+      "problema",
+      "errore",
+      "importante",
+      "critico",
+      "urgent",
+      "deadline",
+      "requisito"
+    ]
+  }
+}

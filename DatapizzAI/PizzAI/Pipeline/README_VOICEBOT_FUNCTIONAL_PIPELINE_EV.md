@@ -1,323 +1,128 @@
 # Voicebot with FunctionalPipeline
 
-## 1. Overview
+This README presents a lean but complete voicebot based on `FunctionalPipeline` (datapizzai). It focuses on a ready‑to‑use flow and highlights, with concrete examples, the framework’s features.
 
-This system implements a voicebot for voice analysis using datapizzai's `FunctionalPipeline`. The pipeline records audio, analyzes it through Gemini 2.5 Flash, and generates automatic reports with intelligent sentiment management.
+## Why it’s useful
 
-### Key features
+- Record audio locally and get transcription, summary, rewrite, and sentiment with Gemini 2.5 Flash.
+- Declarative, composable pipeline with `run`, `then`, `foreach`, `branch`, and sub‑pipelines.
+- Markdown output ready for reporting, with robust formatting fallbacks.
 
-- Real-time audio recording
-- Automatic analysis with transcription, summary and sentiment
-- Modular pipeline with conditional branches
-- Automatic notifications for angry users
-- Structured markdown reports
-- YAML configuration support
+## Pipeline diagram
 
-## 2. Pipeline architecture
+ASCII (fallback)
 
-### Components used
+```
+┌──────────────┐     ┌───────────────────────┐     ┌──────────────┐     ┌──────────────────────┐
+│ RecordAudio  │ ─→  │ GeminiAudioAnalyzer   │ ─→  │ ExtractKey   │ ─→  │ Foreach: Normalize   │
+│ (mic → .wav) │     │ (ASR+bullets+sentim.) │     │ (bullets[])  │     │ BulletPointNormalizer│
+└──────────────┘     └───────────────────────┘     └──────────────┘     └─────────┬────────────┘
+                                                                                  |
+                                                                        ┌─────────▼─────────────┐
+                                                                        │ Branch sentiment      │
+                                                                        │ angry ?               │
+                                                                        └───┬───────────────┬───┘
+                                                                            │               │
+                                                                            │               │
+                                                                ┌───────────▼─────┐    ┌────▼───────────┐
+                                                                │ SendNotification│    │ BuildReport MD │
+                                                                └─────────────────┘    └────────────────┘
+```
 
-The pipeline uses the following `PipelineComponent` elements:
+Mermaid (optional)
 
-- `RecordAudio`: mono PCM16 audio recording
-- `GeminiAudioAnalyzer`: comprehensive analysis with Gemini 2.5 Flash
-- `ExtractKey`: extraction of specific data from results
-- `BulletPointNormalizer`: bullet points normalization
-- `BuildReport`: markdown report generation
-- `SendNotification`: notification sending for negative sentiment
+```mermaid
+flowchart LR
+  A[RecordAudio] --> B[GeminiAudioAnalyzer<br/>ASR + bullets + sentiment]
+  B --> C[ExtractKey<br/>(bullets)]
+  C --> D{{foreach<br/>BulletPointNormalizer}}
+  B -->|sentiment: angry| E[SendNotification]
+  D --> F[BuildReport (Markdown)]
+```
 
-### Pipeline flow
+## Quickstart
 
-1. **Recording**: capture audio for specified duration
-2. **Analysis**: transcription, summary and sentiment analysis
-3. **Extraction**: bullet points isolation from results
-4. **Normalization**: bullet points format standardization (foreach)
-5. **Conditional branch**: sentiment-based handling
-   - If angry: send notification
-   - If normal: generate report
-6. **Output**: structured final result
+- Python requirements
+  - `pip install datapizzai sounddevice soundfile python-dotenv pyyaml`
+  - Linux: `sudo apt-get install -y portaudio19-dev` (for `sounddevice`)
+- Credentials
+  - Create `.env` at project root with: `GOOGLE_API_KEY=your_api_key`
 
-## 3. Installation and configuration
-
-### System requirements
+Run the simple working version:
 
 ```bash
-pip install sounddevice soundfile python-dotenv pyyaml
+python Pipeline/voicebot_with_datapizzai.py \
+  --config Pipeline/voicebot_functional_pipeline.yaml
 ```
 
-### Environment setup
+Reference files:
+- Main code: `Pipeline/voicebot_with_datapizzai.py:56`
+- Components: `Pipeline/components.py:16` `Pipeline/components.py:35` `Pipeline/components.py:129` `Pipeline/components.py:166` `Pipeline/components.py:194` `Pipeline/components.py:249`
+- Config: `Pipeline/voicebot_functional_pipeline.yaml:1`
 
-Create `.env` file in project root:
+## How it works (in 5 steps)
 
-```env
-GOOGLE_API_KEY=your_google_api_key_here
-```
+1. Record: capture mono 16 kHz audio and save path.
+2. Analyze: send `.wav` to Gemini 2.5 Flash → transcription, bullets, rewrite, sentiment.
+3. Extract: isolate `bullets` from the result.
+4. Foreach: normalize each bullet into a consistent form.
+5. Branch: if sentiment is `angry` send a notification, otherwise generate a Markdown report.
 
-### YAML configuration
+Output: path of the MD report (e.g., `Pipeline/voicebot_report.md`) and the full result dictionary.
 
-The `voicebot_functional_pipeline.yaml` file contains configuration parameters:
+## Framework features (with real examples)
 
-```yaml
-params:
-  seconds: 20
-  sample_rate: 16000
-  audio_path: "session.wav"
-  out_path: "Pipeline/voicebot_report.md"
-  model: "gemini-2.5-flash"
-  temperature: 0.4
+- run: execute a node and save its result in the context
+  - Example: `run(name="record", node=RecordAudio(), kwargs={...})` in `Pipeline/voicebot_with_datapizzai.py:81`
+- then: chain a node, with `dependencies` and `target_key` to specify which output to use
+  - Example: `then(name="analyze", ...)` with `target_key="audio_path"` in `Pipeline/voicebot_with_datapizzai.py:86`
+- foreach: iterate over a list produced by a previous node and apply a component
+  - Example: bullet normalization in `Pipeline/voicebot_with_datapizzai.py:64`
+- branch: split execution on a condition (lambda on the context) to sub‑pipelines
+  - Example: sentiment check in `Pipeline/voicebot_with_datapizzai.py:97`
+- Sub‑pipeline: compose reusable blocks (notification / normalize+report)
+  - Example: definition of `notify` and `normalize_and_report` in `Pipeline/voicebot_with_datapizzai.py:61` and `Pipeline/voicebot_with_datapizzai.py:64`
+- Reusable components: each step is a `PipelineComponent` (sync/async)
+  - `RecordAudio` saves `{ "audio_path": path }` `Pipeline/components.py:16`
+  - `GeminiAudioAnalyzer` constructs a robust `report_markdown` `Pipeline/components.py:35`
+  - `ExtractKey("bullets")` extracts lists tolerantly `Pipeline/components.py:129`
+  - `BulletPointNormalizer` normalizes and capitalizes `Pipeline/components.py:166`
+  - `BuildReport` writes to disk, replacing bullets if normalized `Pipeline/components.py:194`
+  - `SendNotification` shows how to integrate external channels `Pipeline/components.py:249`
 
-modules:
-  - name: data_recorder
-    module: Pipeline.components
-    type: RecordAudio
-    params: {}
+## Execution and parameters
 
-  - name: audio_analyzer
-    module: Pipeline.components
-    type: GeminiAudioAnalyzer
-    params:
-      model: "gemini-2.5-flash"
-      temperature: 0.4
-```
+- Typical command
+  - `python Pipeline/voicebot_with_datapizzai.py --config Pipeline/voicebot_functional_pipeline.yaml`
+- Quick overrides (CLI → YAML → defaults)
+  - `--sec 30` recording duration
+  - `--sr 16000` sample rate
+  - `--audio session.wav` audio path
+  - `--out Pipeline/voicebot_report.md` MD report
+  - `--model gemini-2.5-flash` model
 
-## 4. Usage
+## Expected output
 
-### Basic execution
+- Markdown report with sections
+  - Transcription
+  - Summary (normalized bullets)
+  - Rewrite
+  - Footer with sentiment, file and timestamp
+- Example file: `Pipeline/voicebot_report.md`
 
-```bash
-python Pipeline/voicebot_functional_complete.py --mode basic
-```
+## FAQ / Troubleshooting
 
-### Execution with custom configuration
+- Missing GOOGLE_API_KEY
+  - Add `.env` with `GOOGLE_API_KEY=...` and reopen the terminal.
+- sounddevice not found / PortAudio
+  - `pip install sounddevice soundfile` and on Linux install `portaudio19-dev`.
+- No audio recorded
+  - Check microphone permissions and correct input device.
+- Mermaid not rendering
+  - Use the ASCII diagram or enable a compatible viewer.
 
-```bash
-python Pipeline/voicebot_functional_complete.py \
-    --config Pipeline/voicebot_functional_pipeline.yaml \
-    --mode yaml \
-    --sec 30 \
-    --out custom_report.md
-```
+## Quick extensions (ideas)
 
-### Available modes
-
-- `basic`: standard programmatic pipeline
-- `yaml`: loading from YAML configuration
-- `advanced`: pipeline with complex patterns and multiple branches
-
-### CLI parameters
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `--config` | YAML configuration file | `voicebot_functional_pipeline.yaml` |
-| `--mode` | Pipeline mode | `basic` |
-| `--sec` | Recording duration (seconds) | `20` |
-| `--sr` | Sample rate | `16000` |
-| `--audio` | Audio file path | `session.wav` |
-| `--out` | Output report path | `Pipeline/voicebot_report.md` |
-| `--model` | Gemini model | `gemini-2.5-flash` |
-
-## 5. Code examples
-
-### Basic programmatic pipeline
-
-```python
-from datapizzai.pipeline import Dependency, FunctionalPipeline
-from Pipeline.components import *
-
-# Component initialization
-recorder = RecordAudio()
-analyzer = GeminiAudioAnalyzer(api_key=GOOGLE_API_KEY)
-normalizer = BulletPointNormalizer()
-
-# Sub-pipeline for notifications
-notification_pipeline = (
-    FunctionalPipeline()
-    .run(name="send_notification", node=SendNotification())
-)
-
-# Main pipeline with branch
-pipeline = (
-    FunctionalPipeline()
-    .run(name="record", node=recorder, kwargs={"seconds": 20})
-    .then(name="analyze", node=analyzer, target_key="audio_path")
-    .then(name="extract", node=ExtractKey(key="bullets"), target_key="analyze")
-    .foreach(name="normalize", dependencies=[Dependency(node_name="extract")], do=normalizer)
-    .branch(
-        condition=lambda ctx: ctx.get("analyze", {}).get("sentiment") == "angry",
-        dependencies=[Dependency(node_name="analyze")],
-        if_true=notification_pipeline,
-        if_false=report_pipeline
-    )
-)
-
-# Execution
-results = pipeline.execute()
-```
-
-### Using foreach for normalization
-
-```python
-# Foreach to process bullet points list
-normalize_pipeline = (
-    FunctionalPipeline()
-    .foreach(
-        name="normalize_bullets",
-        dependencies=[Dependency(node_name="extract_bullets")],
-        do=BulletPointNormalizer(),
-    )
-)
-```
-
-### Conditional branch for sentiment
-
-```python
-# Branch based on sentiment analysis
-sentiment_branch = pipeline.branch(
-    condition=lambda ctx: (
-        ctx.get("analyze_audio", {})
-        .get("sentiment", "").lower() in ["angry", "furious"]
-    ),
-    dependencies=[Dependency(node_name="analyze_audio")],
-    if_true=notification_pipeline,
-    if_false=report_pipeline,
-)
-```
-
-## 6. Output structure
-
-### Generated markdown report
-
-```markdown
-## Trascrizione
-[Text transcribed from audio]
-
-## Riassunto (bullet)
-- Main point 1
-- Main point 2
-- Main point 3
-
-## Riscrittura
-[Reworked version of content]
-
-_Sentiment_: neutral | _File_: session.wav | _Ts_: 2024-01-15 14:30:00
-```
-
-### Pipeline results
-
-The `pipeline.execute()` call returns a dictionary with:
-
-```python
-{
-    "record_audio": {"audio_path": "session.wav"},
-    "analyze_audio": {
-        "transcript": "...",
-        "bullets": ["...", "..."],
-        "rewrite": "...",
-        "sentiment": "neutral",
-        "report_markdown": "..."
-    },
-    "extract_bullets": ["...", "..."],
-    "normalize_bullets": ["- Point 1", "- Point 2"],
-    "generate_report": "Pipeline/voicebot_report.md"
-}
-```
-
-## 7. Customization and extension
-
-### Creating custom components
-
-```python
-from datapizzai.core.models import PipelineComponent
-
-class CustomAnalyzer(PipelineComponent):
-    def _run(self, data):
-        # Custom analysis logic
-        return processed_data
-    
-    async def _a_run(self, data):
-        # Asynchronous version
-        return processed_data
-```
-
-### Adding new branch conditions
-
-```python
-# Custom conditions for branching
-custom_condition = lambda ctx: (
-    len(ctx.get("transcript", "")) > 500 and
-    "urgent" in ctx.get("transcript", "").lower()
-)
-
-pipeline.branch(
-    condition=custom_condition,
-    if_true=urgent_pipeline,
-    if_false=normal_pipeline
-)
-```
-
-### Advanced foreach patterns
-
-```python
-# Foreach with multiple dependencies
-advanced_foreach = (
-    FunctionalPipeline()
-    .foreach(
-        name="process_items",
-        dependencies=[
-            Dependency(node_name="source_data"),
-            Dependency(node_name="config_data", target_key="config")
-        ],
-        do=CustomProcessor(),
-    )
-)
-```
-
-## 8. Troubleshooting
-
-### Common errors
-
-**Error: GOOGLE_API_KEY missing**
-- Check for `.env` file presence
-- Verify key is valid and active
-
-**Error: sounddevice module not found**
-- Install dependencies: `pip install sounddevice soundfile`
-- On Linux: `sudo apt-get install portaudio19-dev`
-
-**Error: Pipeline execution failed**
-- Verify all components are properly initialized
-- Check logs for component-specific errors
-
-### Pipeline debugging
-
-```python
-# Enable detailed logging
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-# Print pipeline status
-results = pipeline.execute()
-print("Available keys:", list(results.keys()))
-for key, value in results.items():
-    print(f"{key}: {type(value)}")
-```
-
-## 9. Best practices
-
-### Error handling
-
-- Implement validation in custom components
-- Use try/catch in `_run()` methods
-- Verify dependencies before execution
-
-### Performance
-
-- Use asynchronous components when possible
-- Configure appropriate timeouts for audio recording
-- Optimize Gemini prompts to reduce latency
-
-### Maintainability
-
-- Separate business logic from pipeline components
-- Use YAML configuration for variable parameters
-- Document complex branch conditions and dependencies
+- Add `SentimentChecker` for richer conditions (`Pipeline/components.py:272`).
+- Branch on multiple sentiments (positive/neutral/angry) using different sub‑pipelines.
+- Move variable parameters (duration, model, output) into your YAML and version them.

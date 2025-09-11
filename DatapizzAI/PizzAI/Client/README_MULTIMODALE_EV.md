@@ -33,7 +33,8 @@ media = Media(
     extension="jpg",        # Extension without dot for correct MIME type
     media_type="image",     # Media type (image, audio, video)
     source_type="url",      # Source: url, base64, or file
-    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint"
+    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint",
+    detail="high"           # Detail level (low|high|auto, if supported)
 )
 
 # Combine text and image for multimodal input
@@ -97,11 +98,13 @@ print(response.text)
 ```python
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 from datapizzai.type import Media, MediaBlock, TextBlock
 
 # It is recommended to create a dedicated client for audio analysis
 # Make sure GOOGLE_API_KEY is in your .env file
+load_dotenv()
 analysis_client_google = ClientFactory.create(
     provider="google",
     model="gemini-1.5-flash",
@@ -167,8 +170,8 @@ resp = client.invoke("", memory=memory)
 memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)  # Add assistant response to memory
 
 # Second turn: follow-up that builds on the previous image
-memory.add_turn([TextBlock("What improvements would you recommend?")], ROLE.USER)
-resp = client.invoke("", memory=memory)
+resp = client.invoke("What improvements would you recommend?", memory=memory)
+print(resp.text)
 
 print(resp.text)
 ```

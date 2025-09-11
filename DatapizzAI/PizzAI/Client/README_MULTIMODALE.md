@@ -33,7 +33,8 @@ media = Media(
     extension="jpg",        # Estensione senza punto per MIME type corretto
     media_type="image",     # Tipo di media (image, audio, video)
     source_type="url",      # Fonte: url, base64, o file
-    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint"
+    source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint",
+    detail="high"           # Livello di dettaglio (low|high|auto, se supportato)
 )
 
 # Combina testo e immagine per input multimodale
@@ -166,8 +167,6 @@ resp = client.invoke("", memory=memory)
 memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT) #Aggiungo risposta alla memori
 
 # Secondo turno: follow-up che si basa sull'immagine precedente
-memory.add_turn([TextBlock("Quali miglioramenti consiglieresti?")], ROLE.USER)
-resp = client.invoke("", memory=memory)
-
+resp = client.invoke("Quali miglioramenti consiglieresti", memory=memory)
 print(resp.text)
 ```

@@ -10,6 +10,7 @@ Questo README presenta una versione snella ma completa del voicebot basato su `F
 
 ## Diagramma della pipeline
 
+
 Se il rendering Mermaid non funziona nel tuo IDE, usa il diagramma ASCII sotto. Manteniamo anche il blocco Mermaid (per GitHub e viewer compatibili).
 
 ASCII (fallback)
@@ -19,30 +20,28 @@ ASCII (fallback)
 │ RecordAudio  │ ─→  │ GeminiAudioAnalyzer   │ ─→  │ ExtractKey   │ ─→  │ Foreach: Normalize   │
 │ (mic → .wav) │     │ (ASR+bullets+sentim.) │     │ (bullets[])  │     │ BulletPointNormalizer│
 └──────────────┘     └───────────────────────┘     └──────────────┘     └─────────┬────────────┘
-                                                                              ┌───▼───────────────┐
-                                                                              │ Branch sentiment  │
-                                                                              │ angry ?           │
-                                                                              └───┬───────────┬───┘
-                                                                                  │           │
-                                                                                  │           │
-                                                                      ┌───────────▼──┐   ┌────▼───────────┐
-                                                                      │ SendNotification│ │ BuildReport MD │
-                                                                      └────────────────┘ └────────────────┘
+                                                                                  |
+                                                                        ┌─────────▼─────────────┐
+                                                                        │ Branch sentiment      │
+                                                                        │ angry ?               │
+                                                                        └───┬───────────────┬───┘
+                                                                            │               │
+                                                                            │               │
+                                                                ┌───────────▼─────┐    ┌────▼───────────┐
+                                                                │ SendNotification│    │ BuildReport MD │
+                                                                └─────────────────┘    └────────────────┘
 ```
 
 Mermaid (opzionale)
 
 ```mermaid
 flowchart LR
-  A[🎙️ RecordAudio] --> B[🧠 GeminiAudioAnalyzer\nASR + bullets + sentiment]
-  B --> C[🧩 ExtractKey\n(bullets)]
-  C --> D{{foreach\nBulletPointNormalizer}}
-  B -->|sentiment: angry| E[⚠️ SendNotification]
-  D --> F[📝 BuildReport (Markdown)]
+  A[RecordAudio] --> B[GeminiAudioAnalyzer<br/>ASR + bullets + sentiment]
+  B --> C[ExtractKey<br/>(bullets)]
+  C --> D{{foreach<br/>BulletPointNormalizer}}
+  B -->|sentiment: angry| E[SendNotification]
+  D --> F[BuildReport (Markdown)]
 ```
-
-Suggerimenti se Mermaid non rende: in VS Code installa "Markdown Preview Mermaid Support" oppure apri il file su GitHub.
-
 ## Quickstart
 
 - Requisiti Python
@@ -52,7 +51,6 @@ Suggerimenti se Mermaid non rende: in VS Code installa "Markdown Preview Mermaid
   - Crea `.env` nella root con: `GOOGLE_API_KEY=la_tua_api_key`
 
 Esegui la versione semplice e funzionante:
-
 ```bash
 python Pipeline/voicebot_with_datapizzai.py \
   --config Pipeline/voicebot_functional_pipeline.yaml

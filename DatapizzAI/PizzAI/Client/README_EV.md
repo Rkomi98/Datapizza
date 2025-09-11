@@ -8,7 +8,8 @@ This guide will help you set up all kind of clients available in the DatapizzAI 
 - [Basic code setup](#basic-code-setup)
 - [Method 1: Using ClientFactory (recommended)](#method-1-using-clientfactory-recommended)
 - [Method 2: Direct client configuration](#method-2-direct-client-configuration)
-- [Method 3: Local model (Gemma with Ollama)](#method-3-local-model-gemma-with-ollama)
+- [Method 3: Custom provider via API (e.g., IBM WatsonX)](#method-3-custom-provider-via-api-eg-ibm-watsonx)
+- [Method 4: Local model (Ollama/Gemma)](#method-4-local-model-ollamagemma)
 - [Complete usage example](#complete-usage-example)
 - [Next steps](#next-steps)
 
@@ -73,7 +74,7 @@ openai_client = ClientFactory.create(
     temperature=0.7
 )
 
-# Available models: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
+ 
 ```
 
 ### Anthropic client (Claude)
@@ -82,12 +83,12 @@ openai_client = ClientFactory.create(
 anthropic_client = ClientFactory.create(
     provider=Provider.ANTHROPIC,  # or "anthropic"
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-4-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     system_prompt="You are Claude, an Anthropic AI assistant.",
     temperature=0.5
 )
 
-# Available models: claude-3-5-sonnet-latest, claude-3-5-haiku-latest, claude-3-opus-latest
+ 
 ```
 
 ### Google client (Gemini)
@@ -96,12 +97,12 @@ anthropic_client = ClientFactory.create(
 google_client = ClientFactory.create(
     provider=Provider.GOOGLE,  # or "google"
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     system_prompt="You are Gemini, Google's AI assistant.",
     temperature=0.6
 )
 
-# Available models: gemini-2.0-flash, gemini-1.5-pro, gemini-1.5-flash
+ 
 ```
 
 ### Mistral client
@@ -110,12 +111,12 @@ google_client = ClientFactory.create(
 mistral_client = ClientFactory.create(
     provider=Provider.MISTRAL,  # or "mistral"
     api_key=os.getenv("MISTRAL_API_KEY"),
-    model="mistral-large-latest",
+    model="mistral-small-latest",
     system_prompt="You are an AI assistant based on Mistral.",
     temperature=0.7
 )
 
-# Available models: mistral-large-latest, mistral-medium-latest, mistral-small-latest
+ 
 ```
 
 ### Azure OpenAI client
@@ -164,7 +165,7 @@ print(f"Response: {response.text}")
 ```python
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-4-sonnet-latest",
+    model="claude-sonnet-4-20250514",
     system_prompt="You are an assistant for creative writing.",
     temperature=0.8  # More creative for writing
 )
@@ -179,14 +180,14 @@ print(f"Response: {response.text}")
 # Standard configuration (GenAI API)
 google_client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     system_prompt="You are a patient math tutor.",
     temperature=0.4
 )
 
 # Vertex AI configuration (enterprise deployment)
 google_vertex_client = GoogleClient(
-    model="gemini-2.5-flash",
+    model="gemini-1.5-pro",
     system_prompt="You are a business assistant.",
     temperature=0.5,
     # Vertex AI parameters
@@ -234,9 +235,166 @@ print(f"Response: {response.text}")
 
 ---
 
-## Method 3: Local model (Gemma with Ollama)
+## Method 3: Custom provider via API (e.g., IBM WatsonX)
 
-Running models locally ensures privacy, predictable costs, and low latency without relying on external services. With [Ollama](https://ollama.com), you can run Gemma on your own machine and integrate it using the same `invoke` interface as other DatapizzAI clients.
+To integrate custom providers like IBM Watson, you can create an adapter that respects the standard `invoke(input, memory)` interface.
+
+### IBM WatsonX configuration
+
+Prerequisites:
+```bash
+pip install ibm-watsonx-ai
+```
+
+Environment variables:
+```bash
+# .env file
+IBM_WATSONX_API_KEY=your-ibm-watsonx-api-key
+IBM_WATSONX_PROJECT_ID=your-project-id
+IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com
+```
+
+Adapter implementation:
+
+```python
+import os
+from typing import Optional, List, Dict, Any
+from ibm_watsonx_ai import Credentials
+from ibm_watsonx_ai.foundation_models import ModelInference
+from ibm_watsonx_ai import APIClient
+
+from datapizzai.type import TextBlock
+from datapizzai.memory import Memory
+
+# Use the same response structure as DatapizzAI clients
+# (assuming ClientResponse is available from the library)
+try:
+    from datapizzai.clients.base import ClientResponse
+except ImportError:
+    # Fallback if not available
+    from pydantic import BaseModel
+    class ClientResponse(BaseModel):
+        text: str
+        prompt_tokens_used: int = 0
+        completion_tokens_used: int = 0
+        stop_reason: str = "stop"
+
+
+class IBMWatsonXClient:
+    def __init__(self, model_id: str = "ibm/granite-3-2-8b-instruct", temperature: float = 0.7):
+        self.model_id = model_id
+        self.temperature = temperature
+        
+        # IBM WatsonX credentials configuration
+        self.credentials = Credentials(
+            url=os.getenv("IBM_WATSONX_URL", "https://us-south.ml.cloud.ibm.com"),
+            api_key=os.getenv("IBM_WATSONX_API_KEY")
+        )
+        
+        # Initialize API client
+        self.client = APIClient(self.credentials)
+        self.project_id = os.getenv("IBM_WATSONX_PROJECT_ID")
+        
+        # Set default project
+        if self.project_id:
+            self.client.set.default_project(self.project_id)
+        
+        # Initialize the model
+        self.model = self._initialize_model()
+    
+    def _initialize_model(self):
+        """Initialize IBM WatsonX model once to optimize performance."""
+        model_params = {
+            "max_new_tokens": 1000,
+            "temperature": self.temperature,
+            "stop_sequences": ["Human:", "Assistant:"]
+        }
+        
+        return ModelInference(
+            model_id=self.model_id,
+            api_client=self.client,
+            params=model_params
+        )
+    
+    def _build_prompt(self, input_text: str = None, memory: Optional[Memory] = None) -> str:
+        """Build prompt including conversation memory."""
+        prompt_parts = []
+        
+        # Add context from memory
+        if memory is not None:
+            for turn in memory.memory:
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(getattr(block, "content", "") for block in turn.blocks)
+                if content:
+                    if role.lower() == "user":
+                        prompt_parts.append(f"Human: {content}")
+                    elif role.lower() == "assistant":
+                        prompt_parts.append(f"Assistant: {content}")
+        
+        # Add current input
+        if input_text:
+            prompt_parts.append(f"Human: {input_text}")
+        
+        prompt_parts.append("Assistant:")
+        return "\n\n".join(prompt_parts)
+    
+    def invoke(self, input_text: str = None, memory: Optional[Memory] = None) -> ClientResponse:
+        """Invoke IBM Watson model and return compatible response."""
+        try:
+            prompt = self._build_prompt(input_text, memory)
+            
+            # Call IBM Watson model
+            response = self.model.generate_text(prompt=prompt)
+            
+            # Extract response text
+            if isinstance(response, dict):
+                text = response.get("generated_text", "").strip()
+                # Remove "Assistant:" prefix if present
+                if text.startswith("Assistant:"):
+                    text = text[10:].strip()
+            else:
+                text = str(response).strip()
+            
+            # Approximate token estimation (IBM Watson doesn't always provide detailed metrics)
+            estimated_prompt_tokens = len(prompt.split()) * 1.3  # Rough estimate
+            estimated_completion_tokens = len(text.split()) * 1.3
+            
+            return ClientResponse(
+                content=[TextBlock(content=text)],
+                prompt_tokens_used=int(estimated_prompt_tokens),
+                completion_tokens_used=int(estimated_completion_tokens),
+                stop_reason="stop"
+            )
+            
+        except Exception as e:
+            return ClientResponse(
+                content=[TextBlock(content=f"IBM Watson error: {str(e)}")],
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
+
+
+# Usage example
+if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    # Create IBM WatsonX client
+    watsonx_client = IBMWatsonXClient(
+        model_id="ibm/granite-3-2-8b-instruct",
+        temperature=0.7
+    )
+    
+    # Test the client
+    response = watsonx_client.invoke("Hello! Introduce yourself briefly.")
+    print(f"Response: {response.text}")
+    print(f"Tokens used: {response.prompt_tokens_used + response.completion_tokens_used}")
+```
+
+## Method 4: Local model (Ollama/Gemma)
+
+Running locally ensures privacy, predictable costs, and low latency. With [Ollama](https://ollama.com), you can run Gemma (or others) locally and integrate it with the same `invoke` interface.
 
 Prerequisites (Linux/macOS):
 
@@ -257,7 +415,7 @@ Quick CLI test:
 ollama run gemma3n:e2b "Hello! Introduce yourself briefly."
 ```
 
-Minimal Python adapter and quick test:
+Python adapter for full DatapizzAI compatibility:
 
 ```python
 import requests
@@ -266,87 +424,87 @@ from pydantic import BaseModel
 
 from datapizzai.type import TextBlock
 from datapizzai.memory import Memory
+from datapizzai.clients import ClientResponse
 
-
-class SimpleResponse(BaseModel):
-    text: str
-    prompt_tokens_used: int = 0
-    completion_tokens_used: int = 0
-    stop_reason: str = "stop"
-
-
-class OllamaGemmaClient:
-    """Minimal adapter for Ollama Chat API with Gemma model."""
-
-    def __init__(
-        self,
-        model: str = "gemma3n:e2b",
-        system_prompt: Optional[str] = None,
-        temperature: float = 0.7,
-        base_url: str = "http://localhost:11434",
-    ):
+class OllamaClient:
+    def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434"):
         self.model = model
-        self.system_prompt = system_prompt or ""
-        self.temperature = temperature
         self.base_url = base_url.rstrip("/")
 
-    def _build_messages(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> List[dict]:
-        messages: List[dict] = []
-        if self.system_prompt:
-            messages.append({"role": "system", "content": self.system_prompt})
+    def _build_messages(self, input=None, memory: Optional[Memory] = None):
+        """Build messages for Ollama chat API including memory."""
+        msgs = []
         if memory is not None:
             for turn in memory.memory:
                 role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
                 content = " ".join(getattr(b, "content", "") for b in turn.blocks)
                 if content:
-                    messages.append({"role": role, "content": content})
+                    msgs.append({"role": role, "content": content})
         if isinstance(input, str) and input:
-            messages.append({"role": "user", "content": input})
-        elif isinstance(input, list) and input:
-            user_text = " ".join(b.content for b in input if isinstance(b, TextBlock))
-            if user_text:
-                messages.append({"role": "user", "content": user_text})
-        return messages
+            msgs.append({"role": "user", "content": input})
+        return msgs
 
-    def invoke(
-        self,
-        input: Optional[Union[str, List[TextBlock]]] = None,
-        memory: Optional[Memory] = None,
-    ) -> SimpleResponse:
-        messages = self._build_messages(input=input, memory=memory)
+    def _estimate_tokens(self, text: str) -> int:
+        """Approximate token count estimation based on word count."""
+        return int(len(text.split()) * 1.3)  # Rough conversion factor
+
+    def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
+        """Invoke Ollama model and return DatapizzAI-compatible response."""
+        messages = self._build_messages(input, memory)
         payload = {
-            "model": self.model,
-            "messages": messages,
-            "stream": False,
-            "options": {"temperature": self.temperature},
+            "model": self.model, 
+            "messages": messages, 
+            "stream": False
         }
+        
         try:
-            r = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
-            r.raise_for_status()
-            data = r.json()
-            text = data.get("message", {}).get("content") or str(data)
+            response = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Extract response text
+            text = data.get("message", {}).get("content", "").strip()
+            if not text:
+                text = str(data)
+            
+            # Calculate token usage estimates
+            prompt_text = " ".join([msg["content"] for msg in messages])
+            prompt_tokens = self._estimate_tokens(prompt_text)
+            completion_tokens = self._estimate_tokens(text)
+            
+            return ClientResponse(
+                content=[TextBlock(content=text)],
+                prompt_tokens_used=prompt_tokens,
+                completion_tokens_used=completion_tokens,
+                stop_reason="stop"
+            )
+            
+        except requests.RequestException as e:
+            return ClientResponse(
+                content=[TextBlock(content=f"Ollama connection error: {str(e)}")],
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
         except Exception as e:
-            text = f"Ollama error: {e}"
-        return SimpleResponse(text=text)
+            return ClientResponse(
+                content=[TextBlock(content=f"Ollama error: {str(e)}")],
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
 
 
 if __name__ == "__main__":
-    client = OllamaGemmaClient(
-        model="gemma3n:e2b",
-        system_prompt="You are a helpful and concise assistant.",
-        temperature=0.7,
-    )
-    resp = client.invoke("Hello! Introduce yourself in two sentences.")
-    print(f"Response: {resp.text}")
+    # Test local client
+    client = OllamaClient()
+    response = client.invoke("Summarize the Pythagorean theorem in one sentence.")
+    
+    print(f"Response: {response.text}")
+    print(f"Prompt tokens: {response.prompt_tokens_used}")
+    print(f"Completion tokens: {response.completion_tokens_used}")
+    print(f"Stop reason: {response.stop_reason}")
 ```
-
-Notes:
-
-- If you expose an OpenAI‑compatible endpoint (vLLM/TGI), you can evaluate using `OpenAIClient` pointing to your endpoint if your `datapizzai` version supports `base_url`.
 
 ---
 
@@ -397,8 +555,8 @@ if __name__ == "__main__":
 
 Once you have validated the basic configuration, you can explore the library's advanced features.
 
-1. **Memory management** for multi-turn conversations
-2. **Caching system** to optimize performance
+1. **Memory management** for multi‑turn conversations (e.g., periodic summaries)
+2. **Library‑side cache** (`MemoryCache`, `RedisCache`) to optimize cost/latency
 3. **Tools and function calling** for advanced features
 4. **Structured responses** with Pydantic models
 5. **Streaming** for real-time responses

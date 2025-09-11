@@ -1,0 +1,13 @@
+{
+  "openai_key": "sk-your-openai-api-key-here",
+  "azure_key": "your-azure-document-intelligence-key",
+  "azure_endpoint": "https://your-resource-name.cognitiveservices.azure.com/",
+  "cohere_key": "your-cohere-api-key-optional",
+  "qdrant_host": "localhost",
+  "qdrant_port": 6333,
+  "embedding_model": "text-embedding-3-small",
+  "max_chunk_size": 1000,
+  "chunk_overlap": 100,
+  "top_k_retrieval": 10,
+  "reranker_top_n": 5
+}
