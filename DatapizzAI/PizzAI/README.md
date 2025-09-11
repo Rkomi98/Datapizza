@@ -28,7 +28,7 @@
 
 ---
 
-## 📦 Installazione & setup
+## Installazione & setup
 Il setup richiede solo tre passaggi: installazione di `datapizzai`, configurazione della chiave API nel file `.env`, e creazione del client con una singola chiamata a `ClientFactory.create()`. Per questo basta seguire i seguenti passaggi:
 
 ```bash
@@ -68,15 +68,11 @@ print(response.text)
 con pomodoro, mozzarella e basilico che rappresentano i colori della bandiera italiana!"
 ```
 
-![Setup Animation](https://via.placeholder.com/800x400/FF0000/FFFFFF?text=Setup+in+30+secondi)
-
 ---
 
-## 🤖 Client Base
+## Setup client
 
-**Descrizione breve:** Interagisci con qualsiasi LLM usando la stessa interfaccia unificata.
-
-### Esempio Multi-Provider
+DatapizzAI astrae le differenze tra i vari provider AI. Con lo stesso identico codice puoi switchare tra OpenAI, Google Gemini, Anthropic Claude e altri, cambiando solo il nome del provider. Non serve imparare API diverse!
 
 ```python
 from datapizzai.clients import ClientFactory
@@ -84,8 +80,8 @@ from datapizzai.clients import ClientFactory
 # Stesso codice per TUTTI i provider!
 providers = {
     "openai": "gpt-4o",
-    "google": "gemini-2.0-flash", 
-    "anthropic": "claude-3-sonnet"
+    "google": "gemini-2.5-flash", 
+    "anthropic": "claude-sonnet-4-20250514"
 }
 
 for provider, model in providers.items():
@@ -98,8 +94,6 @@ for provider, model in providers.items():
     response = client.invoke("Scrivi un haiku sulla programmazione")
     print(f"\n{provider.upper()}:\n{response.text}")
 ```
-
-**Spiegazione del codice:** DatapizzAI astrae le differenze tra i vari provider AI. Con lo stesso identico codice puoi switchare tra OpenAI, Google Gemini, Anthropic Claude e altri, cambiando solo il nome del provider. Non serve imparare API diverse!
 
 **Risultato atteso:**
 ```
