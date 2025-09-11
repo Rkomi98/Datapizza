@@ -1,5 +1,3 @@
-# README_Cool.MD
-
 <h1 align="center">
   <img src="https://via.placeholder.com/800x200/FF0000/FFFFFF?text=DatapizzAI" alt="DatapizzAI Banner">
   <br>
