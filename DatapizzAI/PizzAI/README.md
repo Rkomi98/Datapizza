@@ -2,14 +2,11 @@
   <img width="1549" height="539" alt="DatapizzAI Banner" src="https://github.com/user-attachments/assets/f4b9c2e5-2a56-47e9-8db4-6ec41a7c6e3a" />
 </h1>
 
-<p align="center">
+<p>
   <a href="https://www.python.org/downloads/release/python-3120/"><img alt="Python" src="https://img.shields.io/badge/Python-3.12+-blue?style=for-the-badge&logo=python&logoColor=white"/></a>
   <a href="https://github.com/Datapizza/DatapizzAI/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/></a>
   <a href="https://pypi.org/project/datapizzai/"><img alt="Version" src="https://img.shields.io/badge/Version-3.0.8+-black?style=for-the-badge"/></a>
   <a href="https://discord.gg/your-invite-link"><img alt="Discord" src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/></a>
-  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge&logo=python&logoColor=white"></a>
-  <a href="https://github.com/Datapizza/DatapizzAI/pulls"><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge"/></a>
-  <a href="https://github.com/DataPizza-Team"><img alt="Built with Love" src="https://img.shields.io/badge/Built%20with-%E2%9D%A4%EF%B8%8F-ff69b4.svg?style=for-the-badge"/></a>
 </p>
 
 <p align="center">
