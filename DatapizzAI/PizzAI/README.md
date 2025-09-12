@@ -143,37 +143,7 @@ print(result)
 
 ### Multi-agent system
 
-```python
-from datapizzai.agents import Agent
-
-# Data analyst agent
-analyst = Agent(
-    name="DataAnalyst", 
-    client=client,
-    system_prompt="Analyze data and find patterns. Be thorough and precise."
-)
-
-# Writer agent
-writer = Agent(
-    name="Writer",
-    client=client, 
-    system_prompt="Write clear and engaging reports. Use data to support conclusions."
-)
-
-# Coordinator that orchestrates other agents
-coordinator = Agent(
-    name="Coordinator",
-    client=client,
-    system_prompt="Coordinate the team to complete complex tasks efficiently.",
-    can_call=[analyst, writer]  # Can delegate to these agents
-)
-
-# Coordinator manages everything autonomously
-result = coordinator.run(
-    "Analyze sales data trends and write an executive summary report"
-)
-print(result)
-```
+DatapizzAI supports multi‑agent orchestration: a coordinator/router delegates tasks to specialized agents (e.g., retrieval, analysis, writing, tools). Agents collaborate via shared memory and hand‑offs while the runtime manages turn‑taking, routing, and tracing to complete complex tasks autonomously.
 
 ![Multi-Agent System Demo](https://github.com/user-attachments/assets/multi-agent-demo-gif)
 
