@@ -161,7 +161,7 @@ while True:
 
 ## Client personalizzato
 
-**Descrizione breve:** Integra qualsiasi API o modello locale con la stessa interfaccia DatapizzAI.
+Creando una classe che implementa il metodo `invoke()` e restituisce un `ClientResponse`, puoi integrare qualsiasi servizio AI (locale o remoto) nel framework. Questo esempio mostra l'integrazione con Ollama per eseguire modelli completamente offline.
 
 ### Esempio: Ollama locale
 
@@ -171,7 +171,7 @@ from datapizzai.type import TextBlock
 from datapizzai.clients import ClientResponse
 
 class OllamaClient:
-    def __init__(self, model="gemma:2b"):
+    def __init__(self, model="gemma3n:e2b"):
         self.model = model
         self.base_url = "http://localhost:11434"
     
@@ -195,8 +195,6 @@ client = OllamaClient("llama3.2")
 response = client.invoke("Spiega la ricorsione in una frase")
 print(response.text)
 ```
-
-**Spiegazione del codice:** Creando una classe che implementa il metodo `invoke()` e restituisce un `ClientResponse`, puoi integrare qualsiasi servizio AI (locale o remoto) nel framework. Questo esempio mostra l'integrazione con Ollama per eseguire modelli completamente offline.
 
 **Risultato atteso:**
 ```
