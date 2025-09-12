@@ -21,7 +21,6 @@
   - [Advanced retrieval](#advanced-retrieval)
 - [Pipeline](#pipeline)
   - [Sentiment analysis pipeline](#sentiment-analysis-pipeline)
-  - [Branching pipeline](#branching-pipeline)
 - [Next steps](#next-steps)
 
 ---
@@ -298,26 +297,6 @@ pipeline.connect("analyzer", "reporter", "results", "results")
 # Execute
 result = pipeline.run({})
 print(result["reporter"]["report"])
-```
-
-### Branching pipeline
-
-```python
-from datapizzai.pipeline import FunctionalPipeline
-
-# Pipeline with conditional branching
-pipeline = (
-    FunctionalPipeline()
-    .run(name="load", node=LoadReviews())
-    .then(name="analyze", node=AnalyzeSentiment(), target_key="reviews")
-    .branch(
-        condition=lambda ctx: len(ctx.get("analyze", {}).get("results", [])) > 10,
-        if_true=DetailedAnalysisPipeline(),
-        if_false=QuickSummaryPipeline()
-    )
-)
-
-result = pipeline.execute()
 ```
 
 ---
