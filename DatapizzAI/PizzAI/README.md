@@ -143,7 +143,8 @@ while True:
     print("Bot:", bot.send_message(user_input))
 ```
 
-**Risultato:** Un chatbot che ricorda la conversazione e risponde in modo coerente al contesto.
+![2025-09-12_10-23-16 mp4](https://github.com/user-attachments/assets/8c759d2f-20a7-4231-ab41-382ff816c894)
+
 
 ---
 
