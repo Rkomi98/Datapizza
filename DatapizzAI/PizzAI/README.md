@@ -160,6 +160,17 @@ from datapizzai.modules.parsers.text_parser import parse_text
 from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import NodeEmbedder
 from datapizzai.vectorstores import QdrantVectorstore
+# 1. Setup Qdrant
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+
+clientQ = QdrantClient(host="localhost", port=6333)
+clientQ.create_collection(
+    collection_name="docs",
+    vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
+)
+
+vectorstore = QdrantVectorstore(host="localhost", port=6333, https=False)
 
 # 1. Prepare documents
 text = """
@@ -172,14 +183,14 @@ Its simplicity makes it accessible to all developers.
 document = parse_text(text)
 
 splitter = TextSplitter(max_char=100, overlap=20)
-chunks = splitter.invoke(text)  # Use text directly
+chunks = splitter(text)  # Use text directly
 
 # 3. Generate embeddings
 embedder = NodeEmbedder(
     client=client,
     model_name="text-embedding-3-small"
 )
-embedded_chunks = embedder.invoke(chunks)
+embedded_chunks = embedder(chunks)
 
 # 4. Store in vector database
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
@@ -190,18 +201,19 @@ for chunk in embedded_chunks:
 ### Advanced retrieval
 
 ```python
-from datapizzai.modules.rerankers import CohereReranker
+ffrom datapizzai.modules.rerankers import CohereReranker
 from datapizzai.modules.metatagger import KeywordMetatagger
 from datapizzai.embedders import ClientEmbedder
 
 # Add metadata to chunks for better retrieval
 metatagger = KeywordMetatagger(client=client)
-tagged_chunks = metatagger.invoke(chunks)
+tagged_chunks = metatagger(chunks)
 
 # Initialize reranker for improved relevance
 reranker = CohereReranker(
     api_key=os.getenv("COHERE_API_KEY"),
-    top_n=3
+    endpoint="https://api.cohere.com/v1",
+    top_n=3,
 )
 
 # Query embedder
@@ -209,23 +221,16 @@ query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-smal
 
 def advanced_rag_query(question: str) -> str:
     # 1. Embed query
-    query_vec = query_embedder.invoke(question)
+    query_vec = query_embedder(question)
     
     # 2. Initial retrieval (cast wide net)
     candidates = vectorstore.search(
         query_vector=query_vec,
         collection_name="docs",
-        limit=10
     )
     
-    # 3. Rerank for precision
-    reranked = reranker.invoke({
-        "query": question,
-        "documents": candidates
-    })
-    
     # 4. Generate final answer with best context
-    context = "\n".join([d.text for d in reranked])
+    context = "\n".join([d.text for d in candidates])
     response = client.invoke(f"Context: {context}\n\nQuestion: {question}")
     return response.text
 
@@ -253,10 +258,13 @@ class LoadReviews(PipelineComponent):
             "Terrible experience, avoid at all costs",
             "Average quality, nothing special"
         ]}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 
 class AnalyzeSentiment(PipelineComponent):
     def _run(self, reviews, **kwargs):
         sentiments = []
+        print(reviews)
         for review in reviews:
             if "amazing" in review.lower() or "recommend" in review.lower():
                 sentiments.append({"text": review, "sentiment": "positive"})
@@ -265,6 +273,8 @@ class AnalyzeSentiment(PipelineComponent):
             else:
                 sentiments.append({"text": review, "sentiment": "neutral"})
         return {"results": sentiments}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 
 class GenerateReport(PipelineComponent):
     def _run(self, results, **kwargs):
@@ -272,6 +282,8 @@ class GenerateReport(PipelineComponent):
         neg = sum(1 for r in results if r["sentiment"] == "negative")
         neu = len(results) - pos - neg
         return {"report": f"📊 Positive: {pos}, Negative: {neg}, Neutral: {neu}"}
+    async def _a_run(self, **kwargs):
+        return self._run(**kwargs)
 
 # Build pipeline
 pipeline = DagPipeline()

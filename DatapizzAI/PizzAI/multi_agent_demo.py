@@ -8,17 +8,26 @@ from datapizzai.tools import tool
 load_dotenv()
 
 @tool
-def get_stock_data(symbol: str) -> str:
-    """Get stock market data"""
-    return f"{symbol}: $245.67 (+3.2%), volume 2.1M"
+def get_info(topic: str) -> str:
+    """Get information about a topic"""
+    return f"Info about {topic}: Revenue 2.5M, Costs 1.8M, Users 15000"
 
 @tool
-def write_report(analysis: str) -> str:
-    """Write investment report"""
-    return f"INVESTMENT REPORT: {analysis}. Recommendation: BUY"
+def extract_numbers(text: str) -> str:
+    """Extract numbers from text"""
+    return "Revenue: 2.5M, Costs: 1.8M, Users: 15000"
+
+@tool
+def calculate(expression: str) -> str:
+    """Calculate mathematical expressions"""
+    try:
+        result = eval(expression.replace("M", "*1000000"))
+        return str(result)
+    except:
+        return "Error in calculation"
 
 def main():
-    print("Multi-agent system demo...")
+    print("Multi-agent workflow demo...")
     
     client = ClientFactory.create(
         provider="openai",
@@ -26,31 +35,39 @@ def main():
         model="gpt-4o"
     )
     
-    # Agent 1: Data collector
-    data_agent = Agent(
-        name="DataCollector",
+    # Agent 1: Research agent with info and extraction tools
+    researcher = Agent(
+        name="Researcher",
         client=client,
-        system_prompt="You collect financial data.",
-        tools=[get_stock_data]
+        system_prompt="Get info and extract numbers. Be brief.",
+        tools=[get_info, extract_numbers]
     )
     
-    # Agent 2: Report writer  
-    writer_agent = Agent(
-        name="ReportWriter",
+    # Agent 2: Calculator agent
+    calculator = Agent(
+        name="Calculator",
         client=client,
-        system_prompt="You write professional reports.",
-        tools=[write_report]
+        system_prompt="Do calculations. Be brief.",
+        tools=[calculate]
     )
     
-    print("Agent 1: Getting Tesla data...")
-    data_result = data_agent.run("Get Tesla stock data")
-    print(f"Data: {data_result}")
+    # Agent 3: Formatter agent
+    formatter = Agent(
+        name="Formatter",
+        client=client,
+        system_prompt="Format output nicely. Be brief."
+    )
     
-    print("\nAgent 2: Writing report...")
-    report_result = writer_agent.run(f"Write a report based on: {data_result}")
-    print(f"Report: {report_result}")
+    print("1. Researcher gathering data...")
+    research_result = researcher.run("Get company performance data and extract key numbers")
     
-    print("\nMulti-agent task complete!")
+    print("2. Calculator computing profit...")
+    calc_result = calculator.run(f"Calculate profit: 2.5M - 1.8M using this data: {research_result}")
+    
+    print("3. Formatter creating final report...")
+    final_result = formatter.run(f"Format this into a nice summary: {research_result} Profit: {calc_result}")
+    
+    print(f"\nFinal Report:\n{final_result}")
 
 if __name__ == "__main__":
     main()
