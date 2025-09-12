@@ -156,7 +156,7 @@ Build complete Retrieval-Augmented Generation systems in minutes.
 ### Document ingestion
 
 ```python
-from datapizzai.modules.parsers import TextParser
+from datapizzai.modules.parsers.text_parser import parse_text
 from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import NodeEmbedder
 from datapizzai.vectorstores import QdrantVectorstore
@@ -169,22 +169,22 @@ Its simplicity makes it accessible to all developers.
 """
 
 # 2. Parse and split documents
-parser = TextParser()
-document = parser.parse(text)
+document = parse_text(text)
 
 splitter = TextSplitter(max_char=100, overlap=20)
-chunks = splitter(document)
+chunks = splitter.invoke(text)  # Use text directly
 
 # 3. Generate embeddings
 embedder = NodeEmbedder(
     client=client,
     model_name="text-embedding-3-small"
 )
-embedded_chunks = embedder(chunks)
+embedded_chunks = embedder.invoke(chunks)
 
 # 4. Store in vector database
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
-vectorstore.add(embedded_chunks, collection_name="docs")
+for chunk in embedded_chunks:
+    vectorstore.add(chunk, collection_name="docs")
 ```
 
 ### Advanced retrieval
@@ -192,10 +192,11 @@ vectorstore.add(embedded_chunks, collection_name="docs")
 ```python
 from datapizzai.modules.rerankers import CohereReranker
 from datapizzai.modules.metatagger import KeywordMetatagger
+from datapizzai.embedders import ClientEmbedder
 
 # Add metadata to chunks for better retrieval
 metatagger = KeywordMetatagger(client=client)
-tagged_chunks = metatagger(chunks)
+tagged_chunks = metatagger.invoke(chunks)
 
 # Initialize reranker for improved relevance
 reranker = CohereReranker(
@@ -203,26 +204,34 @@ reranker = CohereReranker(
     top_n=3
 )
 
+# Query embedder
+query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
+
 def advanced_rag_query(question: str) -> str:
     # 1. Embed query
-    query_vec = client.embed(question)
+    query_vec = query_embedder.invoke(question)
     
     # 2. Initial retrieval (cast wide net)
-    candidates = vectorstore.search(query_vec, limit=10)
+    candidates = vectorstore.search(
+        query_vector=query_vec,
+        collection_name="docs",
+        limit=10
+    )
     
     # 3. Rerank for precision
-    reranked = reranker.run({
+    reranked = reranker.invoke({
         "query": question,
         "documents": candidates
     })
     
     # 4. Generate final answer with best context
     context = "\n".join([d.text for d in reranked])
-    return client.invoke(f"Context: {context}\n\nQuestion: {question}")
+    response = client.invoke(f"Context: {context}\n\nQuestion: {question}")
+    return response.text
 
 # Query the system
 response = advanced_rag_query("What is DatapizzAI?")
-print(response.text)
+print(response)
 ```
 
 ---
