@@ -17,22 +17,22 @@
 
 - [Installazione & setup](#installazione--setup)
 - [Setup client](#setup-client)
-  - [Conversazione con Memoria e creazione di un chatbot](#conversazione-con-memoria-e-creazione-di-un-chatbot)
-- [Client Personalizzato](#client-personalizzato)
-  - [Esempio: Ollama Locale](#esempio-ollama-locale)
-- [Tool Semplice](#tool-semplice)
-  - [Calcolatrice e Meteo](#calcolatrice-e-meteo)
-  - [Tool con Side Effects](#tool-con-side-effects)
-- [Agente AI](#agente-ai)
-  - [Agente Singolo](#agente-singolo)
-  - [Sistema Multi-Agente](#sistema-multi-agente)
+  - [Creazione di un chatbot e conservazione della memoria](#creazione-di-un-chatbot-e-conservazione-della-memoria)
+- [Client personalizzato](#client-personalizzato)
+  - [Esempio: Ollama locale](#esempio-ollama-locale)
+- [Tool semplice](#tool-semplice)
+  - [Calcolatrice e meteo](#calcolatrice-e-meteo)
+  - [Tool con effetti collaterali](#tool-con-effetti-collaterali)
+- [Agente](#agente)
+  - [Agente singolo](#agente-singolo)
+  - [Sistema multi-agente](#sistema-multi-agente)
 - [Pipeline](#pipeline)
-  - [Pipeline di Analisi Sentiment](#pipeline-di-analisi-sentiment)
-  - [Pipeline con Branching](#pipeline-con-branching)
-- [Sistema RAG](#sistema-rag)
-  - [Setup Veloce RAG](#setup-veloce-rag)
-  - [RAG Avanzato con Reranking](#rag-avanzato-con-reranking)
-- [Prossimi Passi](#prossimi-passi)
+  - [Pipeline di analisi sentiment](#pipeline-di-analisi-sentiment)
+  - [Pipeline con branching](#pipeline-con-branching)
+- [Sistema rag](#sistema-rag)
+  - [Setup veloce rag](#setup-veloce-rag)
+  - [Rag avanzato con reranking](#rag-avanzato-con-reranking)
+- [Prossimi passi](#prossimi-passi)
 
 ---
 
@@ -163,7 +163,7 @@ while True:
 
 **Descrizione breve:** Integra qualsiasi API o modello locale con la stessa interfaccia DatapizzAI.
 
-### Esempio: Ollama Locale
+### Esempio: Ollama locale
 
 ```python
 import requests
@@ -208,11 +208,11 @@ un problema dividendolo in sottoproblemi più piccoli."
 
 ---
 
-## 🛠️ Tool Semplice
+## Tool semplice
 
 **Descrizione breve:** Dai superpoteri al tuo AI con tool che può chiamare autonomamente.
 
-### Calcolatrice e Meteo
+### Calcolatrice e meteo
 
 ```python
 from datapizzai.tools import tool
@@ -249,7 +249,7 @@ print(response.text)
 Per quanto riguarda il meteo, a Milano ci sono 22°C con cielo soleggiato ☀️"
 ```
 
-### Tool con Side Effects
+### Tool con effetti collaterali
 
 ```python
 @tool
@@ -275,11 +275,11 @@ response = client.invoke(
 
 ---
 
-## 🤖 Agente AI
+## Agente
 
 **Descrizione breve:** Crea agenti autonomi che ragionano, pianificano e agiscono.
 
-### Agente Singolo
+### Agente singolo
 
 ```python
 from datapizzai.agents import Agent
@@ -318,7 +318,7 @@ per la sua semplicità d'uso (sentimento positivo al 95%).
 È considerato il framework AI più intuitivo disponibile."
 ```
 
-### Sistema Multi-Agente
+### Sistema multi-agente
 
 ```python
 from datapizzai.agents import Agent
@@ -357,11 +357,11 @@ result = coordinator.run(
 
 ---
 
-## 📊 Pipeline
+## Pipeline
 
 **Descrizione breve:** Costruisci flussi di elaborazione complessi con componenti modulari.
 
-### Pipeline di Analisi Sentiment
+### Pipeline di analisi sentiment
 
 ```python
 from datapizzai.pipeline import DagPipeline
@@ -415,7 +415,7 @@ print(result["reporter"]["report"])
 "📊 Positivi: 1, Negativi: 1, Neutri: 1"
 ```
 
-### Pipeline con Branching
+### Pipeline con branching
 
 ```python
 from datapizzai.pipeline import FunctionalPipeline
@@ -438,11 +438,11 @@ result = pipeline.execute()
 
 ---
 
-## 📚 Sistema RAG
+## Sistema rag
 
 **Descrizione breve:** Costruisci un sistema completo di Retrieval-Augmented Generation in pochi minuti.
 
-### Setup Veloce RAG
+### Setup veloce rag
 
 ```python
 from datapizzai.modules.parsers import TextParser
@@ -501,7 +501,7 @@ che permette agli sviluppatori di costruire sistemi intelligenti in modo
 rapido e semplice, rendendolo accessibile a tutti."
 ```
 
-### RAG Avanzato con Reranking
+### Rag avanzato con reranking
 
 ```python
 from datapizzai.modules.rerankers import CohereReranker
@@ -542,7 +542,7 @@ response = advanced_rag_query("Come posso iniziare con DatapizzAI?")
 
 ---
 
-## 🎯 Prossimi Passi
+## Prossimi passi
 
 Ora che hai visto la potenza e semplicità di DatapizzAI, ecco come continuare:
 
