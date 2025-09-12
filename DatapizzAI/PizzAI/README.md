@@ -143,7 +143,7 @@ print(result)
 
 ### Multi-agent system
 
-DatapizzAI supports multi‑agent orchestration: a coordinator/router delegates tasks to specialized agents (e.g., retrieval, analysis, writing, tools). Agents collaborate via shared memory and hand‑offs while the runtime manages turn‑taking, routing, and tracing to complete complex tasks autonomously.
+DatapizzAI enables building teams of specialized agents that work together. A coordinator agent can delegate specific tasks to expert agents - for example, one agent fetches data, another analyzes it, and a third writes the final report. Each agent has its own expertise and tools, while the coordinator orchestrates the workflow and combines their outputs into comprehensive results.
 
 ![Multi-Agent System Demo](https://github.com/user-attachments/assets/multi-agent-demo-gif)
 

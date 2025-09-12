@@ -10,15 +10,15 @@ load_dotenv()
 @tool
 def get_stock_data(symbol: str) -> str:
     """Get stock market data"""
-    return f"{symbol} stock: $245.67 (+3.2%), volume 2.1M shares, P/E ratio 18.5"
+    return f"{symbol}: $245.67 (+3.2%), volume 2.1M"
 
 @tool
-def analyze_trends(data: str) -> str:
-    """Analyze market trends"""  
-    return f"Analysis: Strong upward trend, good fundamentals, 15% growth projected"
+def write_report(analysis: str) -> str:
+    """Write investment report"""
+    return f"INVESTMENT REPORT: {analysis}. Recommendation: BUY"
 
 def main():
-    print("Multi-agent demo starting...")
+    print("Multi-agent system demo...")
     
     client = ClientFactory.create(
         provider="openai",
@@ -26,19 +26,31 @@ def main():
         model="gpt-4o"
     )
     
-    # Create analyst agent
-    analyst = Agent(
-        name="Analyst",
+    # Agent 1: Data collector
+    data_agent = Agent(
+        name="DataCollector",
         client=client,
-        system_prompt="You analyze stock data and market trends.",
-        tools=[get_stock_data, analyze_trends]
+        system_prompt="You collect financial data.",
+        tools=[get_stock_data]
     )
     
-    print("Running Tesla analysis...")
-    result = analyst.run("Analyze Tesla stock performance and provide investment insights")
+    # Agent 2: Report writer  
+    writer_agent = Agent(
+        name="ReportWriter",
+        client=client,
+        system_prompt="You write professional reports.",
+        tools=[write_report]
+    )
     
-    print("\nResult:")
-    print(result)
+    print("Agent 1: Getting Tesla data...")
+    data_result = data_agent.run("Get Tesla stock data")
+    print(f"Data: {data_result}")
+    
+    print("\nAgent 2: Writing report...")
+    report_result = writer_agent.run(f"Write a report based on: {data_result}")
+    print(f"Report: {report_result}")
+    
+    print("\nMulti-agent task complete!")
 
 if __name__ == "__main__":
     main()
