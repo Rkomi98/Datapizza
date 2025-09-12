@@ -13,15 +13,26 @@
   <b>Il framework AI più semplice e potente per costruire sistemi intelligenti in pochi minuti</b>
 </p>
 
-## 🚀 Indice
+## Indice
 
-1. [Installazione & Setup](#-installazione--setup)
-2. [Client Base](#-client-base)
-3. [Client Personalizzato](#-client-personalizzato)
-4. [Tool Semplice](#-tool-semplice)
-5. [Agente AI](#-agente-ai)
-6. [Pipeline](#-pipeline)
-7. [Sistema RAG](#-sistema-rag)
+- [Installazione & setup](#installazione--setup)
+- [Setup client](#setup-client)
+  - [Conversazione con Memoria e creazione di un chatbot](#conversazione-con-memoria-e-creazione-di-un-chatbot)
+- [Client Personalizzato](#client-personalizzato)
+  - [Esempio: Ollama Locale](#esempio-ollama-locale)
+- [Tool Semplice](#tool-semplice)
+  - [Calcolatrice e Meteo](#calcolatrice-e-meteo)
+  - [Tool con Side Effects](#tool-con-side-effects)
+- [Agente AI](#agente-ai)
+  - [Agente Singolo](#agente-singolo)
+  - [Sistema Multi-Agente](#sistema-multi-agente)
+- [Pipeline](#pipeline)
+  - [Pipeline di Analisi Sentiment](#pipeline-di-analisi-sentiment)
+  - [Pipeline con Branching](#pipeline-con-branching)
+- [Sistema RAG](#sistema-rag)
+  - [Setup Veloce RAG](#setup-veloce-rag)
+  - [RAG Avanzato con Reranking](#rag-avanzato-con-reranking)
+- [Prossimi Passi](#prossimi-passi)
 
 ---
 
@@ -114,7 +125,7 @@ danzano sullo schermo blu—
 nasce un nuovo mondo
 ```
 
-### Conversazione con Memoria e creazione di un chatbot
+### Creazione di un chatbot e conservazione della memoria
 Il sistema di memoria permette di mantenere il contesto tra le conversazioni. Ogni turno viene salvato con il ruolo appropriato (USER o ASSISTANT), permettendo al modello di ricordare informazioni precedenti senza dover ripetere tutto il contesto.
 
 ```python
@@ -148,7 +159,7 @@ while True:
 
 ---
 
-## 🔧 Client Personalizzato
+## Client personalizzato
 
 **Descrizione breve:** Integra qualsiasi API o modello locale con la stessa interfaccia DatapizzAI.
 
