@@ -9,10 +9,6 @@
   <a href="https://discord.gg/your-invite-link"><img alt="Discord" src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/></a>
 </p>
 
-<p align="center">
-  <b>Il framework AI più semplice e potente per costruire sistemi intelligenti in pochi minuti</b>
-</p>
-
 ## Indice
 
 - [Installazione & setup](#installazione--setup)
