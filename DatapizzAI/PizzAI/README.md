@@ -106,8 +106,8 @@ while True:
         break
     print("Bot:", bot.send_message(user_input))
 ```
+![Screencast_20250913_154653](https://github.com/user-attachments/assets/56e57e4c-0499-415e-bf12-328e1cf2808f)
 
-![2025-09-12_10-23-16 mp4](https://github.com/user-attachments/assets/8c759d2f-20a7-4231-ab41-382ff816c894)
 
 ---
 
@@ -154,7 +154,8 @@ print(result)
 
 DatapizzAI enables building teams of specialized agents that work together. A coordinator agent can delegate specific tasks to expert agents - for example, one agent fetches data, another analyzes it, and a third writes the final report. Each agent has its own expertise and tools, while the coordinator orchestrates the workflow and combines their outputs into comprehensive results.
 
-![Multi-Agent System Demo](https://github.com/user-attachments/assets/multi-agent-demo-gif)
+
+![Screencast_20250913_155132](https://github.com/user-attachments/assets/4dc42f21-c045-4c44-b0d8-117a6725410f)
 
 ---
 
