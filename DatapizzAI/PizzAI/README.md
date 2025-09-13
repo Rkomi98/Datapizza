@@ -9,6 +9,12 @@
   <a href="https://discord.gg/your-invite-link"><img alt="Discord" src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/></a>
 </p>
 
+<p align="center">
+  <b>Build reliable GenAI solutions fast</b><br/>
+  Datapizza AI provides clear interfaces and predictable behavior for agents and RAG.<br/>
+  End-to-end visibility and reliable orchestration keep engineers in control from PoC to scale.
+</p>
+
 ## Table of contents
 
 - [Quick start](#quick-start)
@@ -30,7 +36,11 @@
 Build AI applications in three simple steps: install `datapizzai`, configure your API key, and create a client with `ClientFactory.create()`.
 
 ```bash
-pip install datapizzai
+# Recommended (fast installer)
+uv pip install -U datapizzai
+
+# Or with pip
+pip install -U datapizzai
 ```
 
 Create a `.env` file with your API keys:
@@ -306,8 +316,10 @@ print(result["reporter"]["report"])
 Now that you've seen the power and simplicity of DatapizzAI, here's how to continue:
 
 1. **Explore complete examples** in the `/examples` folder
-2. **Join the community** on Discord for support and ideas  
-3. **Contribute** to the project on GitHub
+2. **Join the community** on [Discord](https://discord.gg/3UhRVba8) for support and ideas  
+
+### Contribution
+The Datapizza-ai team welcomes contributions and project participation. Whether you want to report bugs, contribute new features, or have any questions, please refer to our [Contributor Guide](https://github.com/Rkomi98/Datapizza/blob/main/DatapizzAI/PizzAI/README.md) for detailed information.
 
 <p align="center">
   <img src="https://via.placeholder.com/600x200/FF0000/FFFFFF?text=Start+Building+Today!" alt="CTA">
