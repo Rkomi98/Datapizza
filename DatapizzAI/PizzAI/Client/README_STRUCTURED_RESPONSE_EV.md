@@ -1,4 +1,4 @@
-# Guide: Structured Responses (JSON and structured_response)
+# Guide: Structured responses (JSON and structured_response)
 
 This guide shows two practical ways to get structured outputs with DatapizzAI:
 - Classic prompting for raw JSON + client-side parsing
