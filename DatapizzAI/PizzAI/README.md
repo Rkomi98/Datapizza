@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img width="1549" height="539" alt="DatapizzAI Banner" src="https://github.com/user-attachments/assets/f4b9c2e5-2a56-47e9-8db4-6ec41a7c6e3a" />
+  <img width="1549" height="539" alt="DatapizzAI Banner" src="https://github.com/user-attachments/assets/a5782efb-9aed-4fb8-b2cd-03c542a811ba" />
 </h1>
 
 <p>
