@@ -1,6 +1,6 @@
-# Multi‑Tool Framework - DatapizzAI
+# Multi‑Tool cookbook
 
-Concise guide to creating and using tools with DatapizzAI. Tools let the model perform actions (call Python functions) while reasoning.
+In this guide we will show you how to create and use tools with DatapizzAI. Tools let the model perform actions (call Python functions) while reasoning.
 
 ## Table of Contents
 
