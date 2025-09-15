@@ -80,7 +80,6 @@ class DatapizzAIAgentDemo:
             "google": "gemini-2.0-flash",
             "anthropic": "claude-3.5-sonnet",
             "mistral": "mistral-large",
-            "azure_openai": "gpt-35-turbo"
         }
         
         if not model:

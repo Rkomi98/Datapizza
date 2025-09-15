@@ -39,8 +39,8 @@ print("Titolo:", data["title"])  # es.: "Migrazione a microservizi"
 ```
 
 Suggerimenti:
-- Valida lo schema (pydantic/jsonschema) per robustezza
-- Chiedi sempre “JSON valido, senza testo extra” per minimizzare pre/post‑testo
+- Valida con Pydantic/JSON Schema per maggiore robustezza
+- Specifica “JSON valido, senza testo extra” per ridurre testo pre/post testo.
 
 ## 2) Output tipizzato con structured_response
 
@@ -87,8 +87,8 @@ for task in structured.tasks:
 ```
 
 Note pratiche:
-- Usa classi Pydantic per definire la struttura dati invece di JSON Schema
-- Le classi Pydantic forniscono validazione automatica e type hints
-- Il risultato è disponibile in `response.structured_data[0]` (primo oggetto strutturato)
-- In caso di provider non compatibile, usa l'approccio JSON + parsing del metodo 1
-- Logga sia l'output grezzo sia quello strutturato per debug
+- Preferisci modelli Pydantic per definire la struttura e validare l'output
+- Le classi Pydantic offrono validazione automatica e type hints con poco boilerplate
+- I dati sono disponibili in `response.structured_data[0]` (primo oggetto)
+- Se il provider non supporta output strutturati, usa JSON + parsing (metodo 1)
+- Per il debug, logga sia l'output grezzo sia quello strutturato
