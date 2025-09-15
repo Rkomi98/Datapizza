@@ -174,7 +174,8 @@ flowchart LR
     S6 --> P2[Plan Review]
     P2 --> E[End]
 ```
-
+<!--
 ## Additional information
 
 - The `agent_complete.py` file contains complete implementations and advanced scenarios.
+-->
