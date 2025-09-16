@@ -228,6 +228,7 @@ def advanced_rag_query(question: str) -> str:
 response = advanced_rag_query("What is DatapizzAI?")
 print(response)
 ```
+![RAG_2](https://github.com/user-attachments/assets/495a6668-dc7f-4f72-96f8-ebad6742b22a)
 
 ---
 
