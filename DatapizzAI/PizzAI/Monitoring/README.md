@@ -30,7 +30,6 @@ pip install psutil python-dotenv requests
 
 ```bash
 cp env.example .env
-# Modifica .env con le tue API keys
 ```
 
 ### 3. Setup Docker (opzionale ma raccomandato)

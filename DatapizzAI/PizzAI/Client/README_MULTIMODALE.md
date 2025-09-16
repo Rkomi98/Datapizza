@@ -136,7 +136,6 @@ from datapizzai.clients import ClientFactory
 from datapizzai.memory import Memory
 from datapizzai.type import ROLE, TextBlock, Media, MediaBlock
 
-# Carica variabili d'ambiente
 load_dotenv('../.env')
 
 def create_mediablock_from_file(file_path: str) -> MediaBlock:

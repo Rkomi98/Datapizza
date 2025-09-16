@@ -93,7 +93,6 @@ I servizi usano le porte: 3000, 8000, 9090, 9411. Assicurati siano libere.
 ### API key mancante
 ```bash
 export OPENAI_API_KEY='sk-...'
-# Oppure crea file .env con OPENAI_API_KEY=sk-...
 ```
 
 ### Importazioni corrette

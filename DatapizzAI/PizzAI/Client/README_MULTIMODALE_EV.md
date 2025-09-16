@@ -103,7 +103,6 @@ from datapizzai.clients import ClientFactory
 from datapizzai.type import Media, MediaBlock, TextBlock
 
 # It is recommended to create a dedicated client for audio analysis
-# Make sure GOOGLE_API_KEY is in your .env file
 load_dotenv()
 analysis_client_google = ClientFactory.create(
     provider="google",
@@ -143,7 +142,6 @@ from datapizzai.clients import ClientFactory
 from datapizzai.memory import Memory
 from datapizzai.type import ROLE, TextBlock, Media, MediaBlock
 
-# Load environment variables
 load_dotenv('../.env')
 
 def create_mediablock_from_file(file_path: str) -> MediaBlock:

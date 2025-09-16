@@ -34,7 +34,6 @@ from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 from datapizzai.type import TextBlock
 
-# Load variables from .env (project root)
 load_dotenv()
 
 client = ClientFactory.create(

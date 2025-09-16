@@ -26,7 +26,6 @@ pip install python-dotenv
 Create a `.env` file in your project root with at least one API key:
 
 ```bash
-# .env file - add only the keys you need
 OPENAI_API_KEY=sk-your-openai-api-key-here
 ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key-here
 GOOGLE_API_KEY=your-google-api-key-here
@@ -42,7 +41,6 @@ This code block handles the minimal initialization—loading environment variabl
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 # Required imports
@@ -248,7 +246,6 @@ pip install ibm-watsonx-ai
 
 Environment variables:
 ```bash
-# .env file
 IBM_WATSONX_API_KEY=your-ibm-watsonx-api-key
 IBM_WATSONX_PROJECT_ID=your-project-id
 IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com

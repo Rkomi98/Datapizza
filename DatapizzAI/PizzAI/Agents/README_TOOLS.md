@@ -246,7 +246,6 @@ from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
 
-# Assicurati di avere GOOGLE_API_KEY nel file .env
 client = ClientFactory.create(
     provider="google",
     api_key=os.getenv("GOOGLE_API_KEY"),

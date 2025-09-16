@@ -39,7 +39,6 @@ pip install datapizzai
 ```bash
 # Copia il template e inserisci le tue API key
 cp env.example .env
-# Modifica .env con le tue credenziali reali
 
 # O usa il diagnostic tool
 python fix_api_key_issue.py
@@ -138,8 +137,7 @@ Se vedi errori come `Error code: 401 - invalid_api_key`:
 # Diagnosi automatica
 python fix_api_key_issue.py
 
-# Controlla manualmente il file .env
-cat .env  # Verifica che OPENAI_API_KEY sia corretta
+cat .env
 ```
 
 **Problemi comuni:**

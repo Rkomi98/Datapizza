@@ -46,7 +46,6 @@ pip install -U datapizzai
 Create a `.env` file with your API keys:
 
 ```python
-# .env file
 OPENAI_API_KEY=sk-your-key-here
 ```
 
@@ -55,7 +54,6 @@ import os
 from dotenv import load_dotenv
 from datapizzai.clients import ClientFactory
 
-# Load environment variables
 load_dotenv()
 
 # Create your first client in one line
