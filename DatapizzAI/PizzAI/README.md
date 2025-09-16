@@ -292,5 +292,6 @@ print(result["reporter"]["report"])
 
 
 ---
+TODO DA CAMBIARE CON STARS UFFICIALI
 
-<p align="center">⭐⭐⭐⭐⭐</p>
+[![GitHub stars](https://img.shields.io/github/stars/tensorflow/tensorflow)](https://github.com/tensorflow/tensorflow)
