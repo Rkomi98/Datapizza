@@ -228,7 +228,8 @@ def advanced_rag_query(question: str) -> str:
 response = advanced_rag_query("What is DatapizzAI?")
 print(response)
 ```
-![RAG_2](https://github.com/user-attachments/assets/495a6668-dc7f-4f72-96f8-ebad6742b22a)
+![RAG_3](https://github.com/user-attachments/assets/4b6f86ef-8a4c-4ba7-b0f5-93553758eb64)
+
 
 ---
 
@@ -287,6 +288,8 @@ pipeline.connect("analyzer", "reporter", "results", "results")
 result = pipeline.run({})
 print(result["reporter"]["report"])
 ```
+![Pipeline](https://github.com/user-attachments/assets/71beba27-351e-49c2-9aef-5f3288522a47)
+
 
 ---
 
