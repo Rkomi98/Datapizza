@@ -18,28 +18,31 @@
 ## Table of contents
 
 - [Quick start](#quick-start)
-- [Chatbot with memory](#chatbot-with-memory)
 - [Agents](#agents)
   - [Single agent](#single-agent)
   - [Multi-agent system](#multi-agent-system)
+- [Chatbot with memory](#chatbot-with-memory)
 - [RAG system](#rag-system)
   - [Document ingestion](#document-ingestion)
   - [Advanced retrieval](#advanced-retrieval)
 - [Pipeline](#pipeline)
   - [Sentiment analysis pipeline](#sentiment-analysis-pipeline)
-- [Next steps](#next-steps)
 
 ---
 
 ## Quick start
 
-Build AI applications in three simple steps: install `datapizzai`, configure your API key, and create a client with `ClientFactory.create()`.
+Build AI applications in three simple steps: install `datapizzai`, configure your API key, and create an `OpenAIClient`.
+
+Install with `uv pip`:
 
 ```bash
-# Recommended (fast installer)
 uv pip install -U datapizzai
+```
 
-# Or with pip
+Install with `pip`:
+
+```bash
 pip install -U datapizzai
 ```
 
@@ -52,60 +55,19 @@ OPENAI_API_KEY=sk-your-key-here
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 
 load_dotenv()
 
-# Create your first client in one line
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o"
+    model="gpt-4o",
+    system_prompt="You are a pizza domain expert who answers concisely."
 )
 
-# Instant test
-response = client.invoke("Tell me an interesting fact about pizza 🍕")
+response = client.invoke("Tell me an interesting fact about pizza")
 print(response.text)
 ```
-
----
-
-## Chatbot with memory
-
-Build conversational AI that remembers context across interactions.
-
-```python
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-
-class SimpleChatbot:
-    def __init__(self):
-        self.client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
-        self.memory = Memory()
-    
-    def send_message(self, user_input: str) -> str:
-        # Add user message to memory
-        self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-        
-        # Get AI response with full conversation context
-        response = self.client.invoke("", memory=self.memory)
-        
-        # Save AI response to memory
-        self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-        return response.text
-
-# Usage
-bot = SimpleChatbot()
-
-while True:
-    user_input = input("You: ").strip()
-    if user_input.lower() in ["exit", "quit"]:
-        break
-    print("Bot:", bot.send_message(user_input))
-```
-![Screencast_20250913_154653](https://github.com/user-attachments/assets/56e57e4c-0499-415e-bf12-328e1cf2808f)
-
 
 ---
 
@@ -116,35 +78,32 @@ Create autonomous agents that reason, plan, and act using tools.
 ### Single agent
 
 ```python
+import os
+from dotenv import load_dotenv
 from datapizzai.agents import Agent
+from datapizzai.clients import OpenAIClient
 from datapizzai.tools import tool
 
-@tool
-def web_search(query: str) -> str:
-    """Search information on the web"""
-    return f"Results for '{query}': DatapizzAI is the simplest AI framework"
+load_dotenv()
 
-@tool
-def analyze_sentiment(text: str) -> str:
-    """Analyze sentiment of text"""
-    return "Sentiment: Positive (95% confidence)"
-
-@tool
-def calculate(expression: str) -> str:
-    """Perform mathematical calculations"""
-    return str(eval(expression))
-
-# Create specialized agent
-agent = Agent(
-    name="ResearchBot",
-    client=client,
-    system_prompt="You are an expert researcher. Always analyze sources and sentiment.",
-    tools=[web_search, analyze_sentiment, calculate],
-    planning_interval=3  # Replan every 3 steps
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="You are a thoughtful planner who explains reasoning before delegating calculations."
 )
 
-# Agent plans and executes autonomously
-result = agent.run("What do developers think about DatapizzAI? Also calculate 127 * 89")
+@tool(name="calculator")
+def calculator(expression: str) -> str:
+    return str(eval(expression))
+
+agent = Agent(
+    name="PlannerBot",
+    client=client,
+    system_prompt="You design solution steps and offload arithmetic to the calculator tool.",
+    tools=[calculator]
+)
+
+result = agent.run("Outline the pricing strategy for 128 pizzas sold at 12.5 euros each and compute the total revenue.")
 print(result)
 ```
 
@@ -152,8 +111,47 @@ print(result)
 
 DatapizzAI enables building teams of specialized agents that work together. A coordinator agent can delegate specific tasks to expert agents - for example, one agent fetches data, another analyzes it, and a third writes the final report. Each agent has its own expertise and tools, while the coordinator orchestrates the workflow and combines their outputs into comprehensive results.
 
-
 ![Screencast_20250913_155132](https://github.com/user-attachments/assets/4dc42f21-c045-4c44-b0d8-117a6725410f)
+
+---
+
+## Chatbot with memory
+
+Build conversational AI that remembers context across interactions.
+
+```python
+import os
+from dotenv import load_dotenv
+from datapizzai.clients import OpenAIClient
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock, ROLE
+
+load_dotenv()
+
+class SimpleChatbot:
+    def __init__(self):
+        self.client = OpenAIClient(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model="gpt-4o",
+            system_prompt="You are a friendly assistant who keeps track of past replies."
+        )
+        self.memory = Memory()
+
+    def send_message(self, user_input: str) -> str:
+        self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+        response = self.client.invoke("", memory=self.memory)
+        self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+        return response.text
+
+bot = SimpleChatbot()
+
+while True:
+    user_input = input("You: ").strip()
+    if user_input.lower() in ["exit", "quit"]:
+        break
+    print("Bot:", bot.send_message(user_input))
+```
+![Screencast_20250913_154653](https://github.com/user-attachments/assets/56e57e4c-0499-415e-bf12-328e1cf2808f)
 
 ---
 
@@ -168,7 +166,6 @@ from datapizzai.modules.parsers.text_parser import parse_text
 from datapizzai.modules.splitters import TextSplitter
 from datapizzai.embedders import NodeEmbedder
 from datapizzai.vectorstores import QdrantVectorstore
-# 1. Setup Qdrant
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
@@ -180,27 +177,23 @@ clientQ.create_collection(
 
 vectorstore = QdrantVectorstore(host="localhost", port=6333, https=False)
 
-# 1. Prepare documents
 text = """
 DatapizzAI is a revolutionary AI framework.
 It enables rapid development of intelligent systems.
 Its simplicity makes it accessible to all developers.
 """
 
-# 2. Parse and split documents
 document = parse_text(text)
 
 splitter = TextSplitter(max_char=100, overlap=20)
-chunks = splitter(text)  # Use text directly
+chunks = splitter(text)
 
-# 3. Generate embeddings
 embedder = NodeEmbedder(
     client=client,
     model_name="text-embedding-3-small"
 )
 embedded_chunks = embedder(chunks)
 
-# 4. Store in vector database
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
 for chunk in embedded_chunks:
     vectorstore.add(chunk, collection_name="docs")
@@ -209,40 +202,29 @@ for chunk in embedded_chunks:
 ### Advanced retrieval
 
 ```python
-ffrom datapizzai.modules.rerankers import CohereReranker
-from datapizzai.modules.metatagger import KeywordMetatagger
+import os
+from datapizzai.modules.rerankers import CohereReranker
 from datapizzai.embedders import ClientEmbedder
 
-# Add metadata to chunks for better retrieval
-metatagger = KeywordMetatagger(client=client)
-tagged_chunks = metatagger(chunks)
-
-# Initialize reranker for improved relevance
 reranker = CohereReranker(
     api_key=os.getenv("COHERE_API_KEY"),
     endpoint="https://api.cohere.com/v1",
-    top_n=3,
+    top_n=3
 )
 
-# Query embedder
 query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
 
 def advanced_rag_query(question: str) -> str:
-    # 1. Embed query
     query_vec = query_embedder(question)
-    
-    # 2. Initial retrieval (cast wide net)
     candidates = vectorstore.search(
         query_vector=query_vec,
-        collection_name="docs",
+        collection_name="docs"
     )
-    
-    # 4. Generate final answer with best context
-    context = "\n".join([d.text for d in candidates])
+    reranked = reranker.invoke({"query": question, "documents": candidates})
+    context = "\n".join([chunk.text for chunk in reranked])
     response = client.invoke(f"Context: {context}\n\nQuestion: {question}")
     return response.text
 
-# Query the system
 response = advanced_rag_query("What is DatapizzAI?")
 print(response)
 ```
@@ -293,43 +275,18 @@ class GenerateReport(PipelineComponent):
     async def _a_run(self, **kwargs):
         return self._run(**kwargs)
 
-# Build pipeline
 pipeline = DagPipeline()
 pipeline.add_module("loader", LoadReviews())
 pipeline.add_module("analyzer", AnalyzeSentiment())
 pipeline.add_module("reporter", GenerateReport())
 
-# Connect components
 pipeline.connect("loader", "analyzer", "reviews", "reviews")
 pipeline.connect("analyzer", "reporter", "results", "results")
 
-# Execute
 result = pipeline.run({})
 print(result["reporter"]["report"])
 ```
 
 ---
 
-## Next steps
-
-Now that you've seen the power and simplicity of DatapizzAI, here's how to continue:
-
-1. **Explore complete examples** in the `/examples` folder
-2. **Join the community** on [Discord](https://discord.gg/3UhRVba8) for support and ideas  
-
-### Contribution
-The Datapizza-ai team welcomes contributions and project participation. Whether you want to report bugs, contribute new features, or have any questions, please refer to our [Contributor Guide](https://github.com/Rkomi98/Datapizza/blob/main/DatapizzAI/PizzAI/README.md) for detailed information.
-
-<p align="center">
-  <img src="https://via.placeholder.com/600x200/FF0000/FFFFFF?text=Start+Building+Today!" alt="CTA">
-</p>
-
-<p align="center">
-  <b>🍕 DatapizzAI - AI as simple as ordering pizza!</b>
-</p>
-
----
-
-<p align="center">
-  Made with ❤️ by the DataPizza Team
-</p>
+<p align="center">⭐⭐⭐⭐⭐</p>
