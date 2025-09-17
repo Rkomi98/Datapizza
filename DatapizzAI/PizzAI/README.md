@@ -157,138 +157,20 @@ while True:
 
 ## RAG system
 
-Build complete Retrieval-Augmented Generation systems in minutes.
+Build complete Retrieval-Augmented Generation systems in minutes. The following is only an example to implement a vanilla RAG with `datapizza-ai`. We invite you to browse the RAG folder for more accurate examples.
 
-### Document ingestion
+![RAG](https://github.com/user-attachments/assets/0d2bfab9-4edc-4936-a4af-59c03a5b3727)
 
-```python
-from datapizzai.modules.parsers.text_parser import parse_text
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import NodeEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
-
-clientQ = QdrantClient(host="localhost", port=6333)
-clientQ.create_collection(
-    collection_name="docs",
-    vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
-)
-
-vectorstore = QdrantVectorstore(host="localhost", port=6333, https=False)
-
-text = """
-DatapizzAI is a revolutionary AI framework.
-It enables rapid development of intelligent systems.
-Its simplicity makes it accessible to all developers.
-"""
-
-document = parse_text(text)
-
-splitter = TextSplitter(max_char=100, overlap=20)
-chunks = splitter(text)
-
-embedder = NodeEmbedder(
-    client=client,
-    model_name="text-embedding-3-small"
-)
-embedded_chunks = embedder(chunks)
-
-vectorstore = QdrantVectorstore(host="localhost", port=6333)
-for chunk in embedded_chunks:
-    vectorstore.add(chunk, collection_name="docs")
-```
-
-### Advanced retrieval
-
-```python
-import os
-from datapizzai.modules.rerankers import CohereReranker
-from datapizzai.embedders import ClientEmbedder
-
-reranker = CohereReranker(
-    api_key=os.getenv("COHERE_API_KEY"),
-    endpoint="https://api.cohere.com/v1",
-    top_n=3
-)
-
-query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
-
-def advanced_rag_query(question: str) -> str:
-    query_vec = query_embedder(question)
-    candidates = vectorstore.search(
-        query_vector=query_vec,
-        collection_name="docs"
-    )
-    reranked = reranker.invoke({"query": question, "documents": candidates})
-    context = "\n".join([chunk.text for chunk in reranked])
-    response = client.invoke(f"Context: {context}\n\nQuestion: {question}")
-    return response.text
-
-response = advanced_rag_query("What is DatapizzAI?")
-print(response)
-```
-![RAG_3](https://github.com/user-attachments/assets/4b6f86ef-8a4c-4ba7-b0f5-93553758eb64)
 
 
 ---
 
 ## Pipeline
 
-Build complex processing workflows with modular components.
+Build complex processing workflows with modular components. The following is only an example to implement a sentiment analysis with `datapizza-ai`. We invite you to Pipeline folder for more accurate examples.
 
-### Sentiment analysis pipeline
+![pipeline](https://github.com/user-attachments/assets/a5a99722-f696-469a-bd91-838b7b0276c0)
 
-```python
-from datapizzai.pipeline import DagPipeline
-from datapizzai.core.models import PipelineComponent
-
-class LoadReviews(PipelineComponent):
-    def _run(self, **kwargs):
-        return {"reviews": [
-            "Amazing product, highly recommend!",
-            "Terrible experience, avoid at all costs",
-            "Average quality, nothing special"
-        ]}
-    async def _a_run(self, **kwargs):
-        return self._run(**kwargs)
-
-class AnalyzeSentiment(PipelineComponent):
-    def _run(self, reviews, **kwargs):
-        sentiments = []
-        print(reviews)
-        for review in reviews:
-            if "amazing" in review.lower() or "recommend" in review.lower():
-                sentiments.append({"text": review, "sentiment": "positive"})
-            elif "terrible" in review.lower() or "avoid" in review.lower():
-                sentiments.append({"text": review, "sentiment": "negative"})
-            else:
-                sentiments.append({"text": review, "sentiment": "neutral"})
-        return {"results": sentiments}
-    async def _a_run(self, **kwargs):
-        return self._run(**kwargs)
-
-class GenerateReport(PipelineComponent):
-    def _run(self, results, **kwargs):
-        pos = sum(1 for r in results if r["sentiment"] == "positive")
-        neg = sum(1 for r in results if r["sentiment"] == "negative")
-        neu = len(results) - pos - neg
-        return {"report": f"📊 Positive: {pos}, Negative: {neg}, Neutral: {neu}"}
-    async def _a_run(self, **kwargs):
-        return self._run(**kwargs)
-
-pipeline = DagPipeline()
-pipeline.add_module("loader", LoadReviews())
-pipeline.add_module("analyzer", AnalyzeSentiment())
-pipeline.add_module("reporter", GenerateReport())
-
-pipeline.connect("loader", "analyzer", "reviews", "reviews")
-pipeline.connect("analyzer", "reporter", "results", "results")
-
-result = pipeline.run({})
-print(result["reporter"]["report"])
-```
-![Pipeline](https://github.com/user-attachments/assets/71beba27-351e-49c2-9aef-5f3288522a47)
 
 
 ---
