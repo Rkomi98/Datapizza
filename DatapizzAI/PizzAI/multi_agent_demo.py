@@ -1,73 +1,130 @@
 #!/usr/bin/env python3
+"""Showcase a true multi-agent interaction with dynamic delegation."""
+
 import os
+
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
+
 from datapizzai.agents import Agent
+from datapizzai.clients import ClientFactory
 from datapizzai.tools import tool
+
 
 load_dotenv()
 
-@tool
-def get_info(topic: str) -> str:
-    """Get information about a topic"""
-    return f"Info about {topic}: Revenue 2.5M, Costs 1.8M, Users 15000"
 
-@tool
-def extract_numbers(text: str) -> str:
-    """Extract numbers from text"""
-    return "Revenue: 2.5M, Costs: 1.8M, Users: 15000"
+@tool(name="company_snapshot")
+def get_company_snapshot(topic: str) -> str:
+    """Return a mocked data snapshot for a company."""
+    return (
+        f"Snapshot for {topic}: revenue=2.5M, costs=1.8M, users=15000, churn=4%."
+    )
 
-@tool
-def calculate(expression: str) -> str:
-    """Calculate mathematical expressions"""
+
+@tool(name="extract_metrics")
+def extract_metrics(text: str) -> str:
+    """Isolate key metrics from a text blob."""
+    return "revenue=2.5M; costs=1.8M; users=15000; churn=4%"
+
+
+@tool(name="calculate")
+def safe_calculate(expression: str) -> str:
+    """Evaluate simple expressions; understands values expressed in millions."""
     try:
-        result = eval(expression.replace("M", "*1000000"))
-        return str(result)
-    except:
-        return "Error in calculation"
+        sanitized = expression.replace("M", "*1_000_000")
+        return str(eval(sanitized, {"__builtins__": {}}, {}))
+    except Exception as exc:  # noqa: BLE001
+        return f"calculation_error: {exc}"
 
-def main():
-    print("Multi-agent workflow demo...")
-    
-    client = ClientFactory.create(
+
+def build_client():
+    return ClientFactory.create(
         provider="openai",
         api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o"
+        model="gpt-4o",
     )
-    
-    # Agent 1: Research agent with info and extraction tools
-    researcher = Agent(
+
+
+def make_delegate_tool(agent: Agent, description: str):
+    @tool(name=agent.name, description=description)
+    def delegate(task: str) -> str:
+        return agent.run(task)
+
+    return delegate
+
+
+def main() -> None:
+    print("Dynamic multi-agent delegation demo...")
+
+    client = build_client()
+
+    research_agent = Agent(
         name="Researcher",
         client=client,
-        system_prompt="Get info and extract numbers. Be brief.",
-        tools=[get_info, extract_numbers]
+        system_prompt=(
+            "You gather business intelligence. When needed, call tools to fetch a snapshot "
+            "and extract structured metrics."
+        ),
+        tools=[get_company_snapshot, extract_metrics],
+        max_steps=3,
     )
-    
-    # Agent 2: Calculator agent
-    calculator = Agent(
-        name="Calculator",
+
+    finance_agent = Agent(
+        name="FinancialAnalyst",
         client=client,
-        system_prompt="Do calculations. Be brief.",
-        tools=[calculate]
+        system_prompt=(
+            "You analyse numeric metrics. Derive profits, margins and explain how you got them."
+        ),
+        tools=[safe_calculate],
+        max_steps=3,
     )
-    
-    # Agent 3: Formatter agent
-    formatter = Agent(
-        name="Formatter",
+
+    writer_agent = Agent(
+        name="Writer",
         client=client,
-        system_prompt="Format output nicely. Be brief."
+        system_prompt=(
+            "You synthesise insights into a polished executive summary that cites numbers."
+        ),
+        max_steps=3,
     )
-    
-    print("1. Researcher gathering data...")
-    research_result = researcher.run("Get company performance data and extract key numbers")
-    
-    print("2. Calculator computing profit...")
-    calc_result = calculator.run(f"Calculate profit: 2.5M - 1.8M using this data: {research_result}")
-    
-    print("3. Formatter creating final report...")
-    final_result = formatter.run(f"Format this into a nice summary: {research_result} Profit: {calc_result}")
-    
-    print(f"\nFinal Report:\n{final_result}")
+
+    research_delegate = make_delegate_tool(
+        research_agent,
+        "Retrieve business intel and structured metrics",
+    )
+    finance_delegate = make_delegate_tool(
+        finance_agent,
+        "Perform financial calculations based on provided metrics",
+    )
+    writer_delegate = make_delegate_tool(
+        writer_agent,
+        "Compose an executive summary that references the numbers",
+    )
+
+    coordinator = Agent(
+        name="Coordinator",
+        client=client,
+        system_prompt=(
+            "You are the orchestrator. Decide on the fly which specialist to involve to satisfy the "
+            "user's request. Use Researcher to gather facts, FinancialAnalyst for computations, and "
+            "Writer to craft the final wording. Keep delegating until the answer is complete."
+        ),
+        tools=[research_delegate, finance_delegate, writer_delegate],
+        max_steps=6,
+        planning_interval=2,
+    )
+
+    question = (
+        "L'utente vuole un quadro sui risultati dell'ultimo trimestre di DatapizzAI: "
+        "recupera i numeri principali, calcola il profitto e il margine e poi scrivi "
+        "un riassunto esecutivo."
+    )
+
+    final_report = coordinator.run(question)
+
+    print("\nFinal Report from Coordinator:\n")
+    print(final_report)
+
 
 if __name__ == "__main__":
     main()

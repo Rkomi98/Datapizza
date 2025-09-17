@@ -519,7 +519,7 @@ def demo_conversational_analysis():
         memory.add_turn(input_blocks, ROLE.USER)
         
         try:
-            response = client.invoke("", memory=memory)
+            response = client.invoke(text_content, memory=memory)
             memory.add_turn([TextBlock(content=response.content)], ROLE.ASSISTANT)
             
             print(f"🤖 Assistente: {response.content}")

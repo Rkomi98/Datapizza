@@ -77,7 +77,7 @@ def esempio_tracciamento_base():
         memory.add_turn([TextBlock(content="Spiega cos'è il machine learning")], ROLE.USER)
         
         # Invoca il client: l'operazione viene tracciata automaticamente
-        response = client.invoke("", memory=memory)
+        response = client.invoke("Spiega cos'è il machine learning", memory=memory)
         
         # Aggiunge la risposta alla memoria
         memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)

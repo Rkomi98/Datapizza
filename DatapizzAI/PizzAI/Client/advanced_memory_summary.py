@@ -468,7 +468,7 @@ RIASSUNTO:"""
         
         try:
             # Chiama il modello
-            response = self.client.invoke("", memory=self.memory)
+            response = self.client.invoke(user_input, memory=self.memory)
             
             # Aggiungi risposta alla memoria
             self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)

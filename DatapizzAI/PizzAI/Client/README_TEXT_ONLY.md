@@ -70,7 +70,7 @@ memory = Memory()
 memory.add_turn([TextBlock(content="Ciao, sono Mirko")], ROLE.USER)
 
 # Invocazione con contesto
-response = client.invoke("", memory=memory)
+response = client.invoke("Ciao, sono Mirko", memory=memory)
 # Salvataggio risposta (usa SEMPRE una stringa)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
@@ -140,7 +140,7 @@ class Chatbot:
 
     def send(self, user_input: str) -> str:
         self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-        response = self.client.invoke("", memory=self.memory)
+        response = self.client.invoke(user_input, memory=self.memory)
         self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         # Stampa metriche minime (opzionale)
         total_tokens = (response.prompt_tokens_used or 0) + (response.completion_tokens_used or 0)

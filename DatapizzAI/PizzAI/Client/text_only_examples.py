@@ -362,7 +362,7 @@ def demo_conversational_advanced():
         memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
         
         try:
-            response = client.invoke("", memory=memory)
+            response = client.invoke(user_input, memory=memory)
             
             # Aggiungi risposta alla memoria
             memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
@@ -543,7 +543,7 @@ def demo_sliding_window_chat():
             memory.memory = memory.memory[-window_size:]
         
         # Genera risposta con memoria ottimizzata
-        response = client.invoke("", memory=memory)
+        response = client.invoke(user_input, memory=memory)
         
         # Aggiungi risposta alla memoria
         memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
@@ -633,7 +633,7 @@ def demo_complex_chatbot_creation():
         chatbot_memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
         
         try:
-            response = client.invoke("", memory=chatbot_memory)
+            response = client.invoke(user_input, memory=chatbot_memory)
             chatbot_memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
             
             print(f"🤖 Consulente: {response.text}")
@@ -664,7 +664,7 @@ def demo_complex_chatbot_creation():
         chatbot_memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
         
         try:
-            response = client.invoke("", memory=chatbot_memory)
+            response = client.invoke(user_input, memory=chatbot_memory)
             chatbot_memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
             
             print(f"🤖 Consulente: {response.text}")
@@ -694,7 +694,7 @@ def demo_complex_chatbot_creation():
         chatbot_memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
         
         try:
-            response = client.invoke("", memory=chatbot_memory)
+            response = client.invoke(user_input, memory=chatbot_memory)
             chatbot_memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
             
             print(f"🤖 Consulente: {response.text}")

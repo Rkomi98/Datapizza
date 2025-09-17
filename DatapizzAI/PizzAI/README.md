@@ -139,7 +139,7 @@ class SimpleChatbot:
 
     def send_message(self, user_input: str) -> str:
         self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-        response = self.client.invoke("", memory=self.memory)
+        response = self.client.invoke(user_input, memory=self.memory)
         self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         return response.text
 

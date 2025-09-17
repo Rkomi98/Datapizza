@@ -7,7 +7,7 @@ Questo file contiene esempi dettagliati su come configurare e utilizzare
 tutti i tipi di client disponibili nella libreria datapizzai, con esempi
 pratici per ogni funzionalità avanzata.
 
-Autore: Marco Calcaterra
+Autore: Mirko Calcaterra
 Data: 2025
 """
 
@@ -218,19 +218,19 @@ def esempio_memoria():
     
     # 1. Aggiungi il primo turno dell'utente
     print("1. Primo turno - Utente presenta se stesso:")
-    user_message = TextBlock(content="Ciao! Mi chiamo Marco e sono uno sviluppatore Python.")
+    user_message = TextBlock(content="Ciao! Mi chiamo Mirko e sono uno sviluppatore Python.")
     memory.add_turn([user_message], ROLE.USER)
     
     try:
-        response = client.invoke("", memory=memory)
+        response = client.invoke(user_message, memory=memory)
         # Aggiungi la risposta dell'assistente alla memoria
         assistant_message = TextBlock(content=response.text)
         memory.add_turn([assistant_message], ROLE.ASSISTANT)
         print(f"   Assistente: {response.text}")
     except Exception as e:
-        print(f"   ⚠️ Simulazione risposta: Ciao Marco! Piacere di conoscerti. Come posso aiutarti con Python?")
+        print(f"   ⚠️ Simulazione risposta: Ciao Mirko! Piacere di conoscerti. Come posso aiutarti con Python?")
         # Simula l'aggiunta alla memoria
-        simulated_response = TextBlock(content="Ciao Marco! Piacere di conoscerti.")
+        simulated_response = TextBlock(content="Ciao Mirko! Piacere di conoscerti.")
         memory.add_turn([simulated_response], ROLE.ASSISTANT)
     
     # 2. Secondo turno - L'assistente dovrebbe ricordare il nome
@@ -239,10 +239,10 @@ def esempio_memoria():
     memory.add_turn([user_question], ROLE.USER)
     
     try:
-        response = client.invoke("", memory=memory)
+        response = client.invoke(user_question, memory=memory)
         print(f"   Assistente: {response.text}")
     except Exception as e:
-        print(f"   ⚠️ Simulazione: Il tuo nome è Marco, come mi hai detto prima!")
+        print(f"   ⚠️ Simulazione: Il tuo nome è Mirko, come mi hai detto prima!")
     
     # 3. Informazioni sulla memoria
     print(f"\n3. Informazioni sulla memoria:")
@@ -537,7 +537,7 @@ def esempio_risposte_strutturate():
     # Esempio 1: Estrazione di informazioni su una persona
     try:
         response = client.structured_response(
-            input="Marco Rossi, 35 anni, ingegnere software di Milano. Ama il calcio e la fotografia.",
+            input="Mirko Rossi, 35 anni, ingegnere software di Milano. Ama il calcio e la fotografia.",
             output_cls=PersonaInfo
         )
         
@@ -552,7 +552,7 @@ def esempio_risposte_strutturate():
     except Exception as e:
         print(f"   ⚠️ Simulazione estrazione persona:")
         persona_sim = PersonaInfo(
-            nome="Marco Rossi",
+            nome="Mirko Rossi",
             eta=35,
             professione="ingegnere software",
             citta="Milano",

@@ -165,7 +165,7 @@ def test_conversation_monitoring():
             memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
             
             # Genera risposta
-            response = client.invoke("", memory=memory)
+            response = client.invoke(user_input, memory=memory)
             
             # Aggiungi risposta alla memoria
             memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)

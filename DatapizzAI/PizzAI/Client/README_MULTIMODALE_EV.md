@@ -164,7 +164,7 @@ memory = Memory()
 # First turn: user sends image with request
 image_block = create_mediablock_from_file("Example.png")
 memory.add_turn([TextBlock("Analyze this photo, what do you see?"), image_block], ROLE.USER)
-resp = client.invoke("", memory=memory)
+resp = client.invoke("Analyze this photo, what do you see?", memory=memory)
 memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)  # Add assistant response to memory
 
 # Second turn: follow-up that builds on the previous image

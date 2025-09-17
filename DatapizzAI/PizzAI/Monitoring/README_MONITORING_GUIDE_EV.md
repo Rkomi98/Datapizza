@@ -77,7 +77,7 @@ def basic_tracing_example():
         memory.add_turn([TextBlock(content="Explain what machine learning is")], ROLE.USER)
         
         # Invoke the client: the operation is traced automatically
-        response = client.invoke("", memory=memory)
+        response = client.invoke("Explain what machine learning is", memory=memory)
         
         # Add the response to memory
         memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)

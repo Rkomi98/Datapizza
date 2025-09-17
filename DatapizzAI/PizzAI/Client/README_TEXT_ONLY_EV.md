@@ -70,7 +70,7 @@ memory = Memory()
 memory.add_turn([TextBlock(content="Hi, I'm Mirko")], ROLE.USER)
 
 # Invoke with context
-response = client.invoke("", memory=memory)
+response = client.invoke("Hi, I'm Mirko", memory=memory)
 # Save assistant reply (always a string)
 memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
@@ -138,7 +138,7 @@ class Chatbot:
 
     def send(self, user_input: str) -> str:
         self.memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-        response = self.client.invoke("", memory=self.memory)
+        response = self.client.invoke(user_input, memory=self.memory)
         self.memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
         total_tokens = (response.prompt_tokens_used or 0) + (response.completion_tokens_used or 0)
         print(f"[metrics] total tokens: {total_tokens}")

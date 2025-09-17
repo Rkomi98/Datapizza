@@ -237,7 +237,7 @@ RIASSUNTO:"""
         
         try:
             # Genera risposta
-            response = self.client.invoke("", memory=self.memory)
+            response = self.client.invoke(user_input, memory=self.memory)
             response_text = response.text
             
             # Aggiungi risposta alla memoria
