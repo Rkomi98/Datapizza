@@ -158,9 +158,7 @@ while True:
 ## RAG system
 
 Build complete Retrieval-Augmented Generation systems in minutes. The following is only an example to implement a vanilla RAG with `datapizza-ai`. We invite you to browse the RAG folder for more accurate examples.
-
-![RAG](https://github.com/user-attachments/assets/0d2bfab9-4edc-4936-a4af-59c03a5b3727)
-
+![rag_diagram_fixed](https://github.com/user-attachments/assets/8e5d6c30-9dfe-4840-913f-360b5430a91c)
 
 
 ---
