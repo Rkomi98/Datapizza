@@ -3,3 +3,7 @@
  
 # Environment files
 firebase-config-local.js 
+
+*xlsx
+*csv
+*png
