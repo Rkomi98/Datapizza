@@ -287,13 +287,7 @@ Test rapido da CLI:
 ollama run gemma3n:e2b "Ciao! Presentati brevemente."
 ```
 
-Ora vediamo l'adapter Python con DatapizzAI:
-
-Implementazione dell'adapter Python:
-
-Trovi l'implementazione completa e commentata nel file [`Client/custom_client_ollama.py`](Client/custom_client_ollama.py). Usa la stessa interfaccia `invoke` e semplifica l'integrazione con DatapizzAI una volta che il demone Ollama è attivo (`ollama serve`).
-
-Esempio rapido di utilizzo:
+Ora vediamo come usare l'adapter Python con DatapizzAI, per la configurazione ti invitiamo a consultare la [guida specifica](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md). Nota che usa la stessa interfaccia `invoke` dei clienti sopra descritti:
 
 ```python
 from custom_client_ollama import OllamaClient
@@ -303,69 +297,6 @@ response = client.invoke("Ciao! Riassumi in una frase il teorema di Pitagora.")
 print(response.text)
 ```
 
-
 ---
-
-## Esempio completo di utilizzo
-
-Questo script completo permette di verificare che il setup e la configurazione del client scelto funzionino correttamente end‑to‑end.
-
-```python
-#!/usr/bin/env python3
-"""
-Esempio completo di utilizzo client DatapizzAI
-"""
-
-import os
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.clients.factory import Provider
-
-# Setup
-load_dotenv()
-
-def main():
-    # Scegli il tuo provider preferito
-    client = ClientFactory.create(
-        provider=Provider.OPENAI,  # Cambia qui per testare altri provider
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o",
-        system_prompt="Sei un assistente AI utile e professionale.",
-        temperature=0.7
-    )
-    
-    # Test del client
-    print("Test del client DatapizzAI")
-    print("-" * 30)
-    
-    response = client.invoke("Ciao! Presentati brevemente.")
-    print(f"Risposta: {response.text}")
-    print(f"Token usati: {response.prompt_tokens_used + response.completion_tokens_used}")
-    print(f"Stop reason: {response.stop_reason}")
-
-if __name__ == "__main__":
-    main()
-```
-
----
-
-## Prossimi passi
-
-Una volta validata la configurazione di base, è possibile esplorare le funzionalità avanzate della libreria.
-
-1. **Gestione della memoria** per conversazioni multi‑turno
-2. **Cache lato libreria** (`MemoryCache`, `RedisCache`) per ottimizzare costi/latency
-3. **Tools e function calling** per funzionalità avanzate
-4. **Risposte strutturate** con modelli Pydantic
-5. **Streaming** per risposte in tempo reale
-
-Per una spiegazione passo-passo degli adapter personalizzati visita la guida [`README_CUSTOM_CLIENT.md`](README_CUSTOM_CLIENT.md).
-
-Suggerimenti di personalizzazione ad alto impatto:
-- Pre‑processing del prompt: normalizzazione, iniezione di contesto, safety filters
-- Policy di memoria: riassunti periodici (es. ogni 5 turni), pin di messaggi chiave
-- Cache: passare da `MemoryCache` a `RedisCache` per ambienti multi‑istanza
-- Error handling: retry con backoff, fallback cross‑provider
-- Logging/metrics: hook post‑invoke per telemetria e valutazioni
 
 Questa guida copre tutti gli aspetti della configurazione dei client. Per funzionalità avanzate, consulta la documentazione completa di DatapizzAI.
