@@ -1,13 +1,14 @@
 # Guida alla configurazione dei client DatapizzAI
 
 Questa guida ti aiuterà a configurare tutti i tipi di client disponibili nella libreria DatapizzAI per interagire con diversi provider di modelli LLM.
+Per due esempi completi di adapter personalizzati consulta anche la guida dedicata [`README_CUSTOM_CLIENT.md`](README_CUSTOM_CLIENT.md).
 
 ## Indice
 
 - [Prerequisiti](#prerequisiti)
 - [Setup base del codice](#setup-base-del-codice)
-- [Metodo 1: Utilizzo del ClientFactory (raccomandato)](#metodo-1-utilizzo-del-clientfactory-raccomandato)
-- [Metodo 2: Configurazione diretta dei client](#metodo-2-configurazione-diretta-dei-client)
+- [Metodo 1: Configurazione diretta dei client](#metodo-1-configurazione-diretta-dei-client)
+- [Metodo 2: Utilizzo del ClientFactory (raccomandato)](#metodo-2-utilizzo-del-clientfactory-raccomandato)
 - [Metodo 3: Provider personalizzato via API (es. IBM WatsonX)](#metodo-3-provider-personalizzato-via-api-es-ibm-watsonX)
 - [Metodo 4: Modello locale (Ollama/Gemma)](#metodo-4-modello-locale-ollamagemma)
 - [Esempio completo di utilizzo](#esempio-completo-di-utilizzo)
@@ -57,77 +58,7 @@ from datapizzai.clients.factory import Provider
 
 ---
 
-## Metodo 1: Utilizzo del ClientFactory (raccomandato)
-
-Il `ClientFactory` astrae i dettagli specifici del provider, permettendo di creare rapidamente un client coerente e riducendo il rischio di errori.
-
-### OpenAI client
-```python
-# Configurazione base
-openai_client = ClientFactory.create(
-    provider=Provider.OPENAI,  # o semplicemente "openai"
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
-    system_prompt="Sei un assistente AI utile.",
-    temperature=0.7
-)
-```
-
-### Anthropic client (Claude)
-```python
-# Configurazione base
-anthropic_client = ClientFactory.create(
-    provider=Provider.ANTHROPIC,  # o "anthropic"
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-sonnet-4-20250514",
-    system_prompt="Sei Claude, un assistente AI di Anthropic.",
-    temperature=0.5
-)
-```
-
-### Google client (Gemini)
-```python
-# Configurazione base
-google_client = ClientFactory.create(
-    provider=Provider.GOOGLE,  # o "google"
-    api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.5-flash",
-    system_prompt="Sei Gemini, l'assistente AI di Google.",
-    temperature=0.6
-)
-```
-
-### Mistral client
-```python
-# Configurazione base
-mistral_client = ClientFactory.create(
-    provider=Provider.MISTRAL,  # o "mistral"
-    api_key=os.getenv("MISTRAL_API_KEY"),
-    model="mistral-small-latest",
-    system_prompt="Sei un assistente AI basato su Mistral.",
-    temperature=0.7
-)
-```
-
-### Azure OpenAI client
-```python
-# Configurazione base
-azure_client = ClientFactory.create(
-    provider=Provider.AZURE_OPENAI,  # o "azure_openai"
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    model="gpt-4o",
-    system_prompt="Sei un assistente aziendale professionale.",
-    temperature=0.5,
-    # Parametri specifici per Azure
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
-    api_version="2024-02-15-preview"
-)
-```
-
----
-
-## Metodo 2: Configurazione diretta dei client
+## Metodo 1: Configurazione diretta dei client
 
 La configurazione diretta offre un controllo granulare sui parametri specifici di ciascun provider, come opzioni di caching o endpoint personalizzati.
 
@@ -225,6 +156,76 @@ print(f"Risposta: {response.text}")
 
 ---
 
+## Metodo 2: Utilizzo del ClientFactory (raccomandato)
+
+Il `ClientFactory` astrae i dettagli specifici del provider, permettendo di creare rapidamente un client coerente e riducendo il rischio di errori.
+
+### OpenAI client
+```python
+# Configurazione base
+openai_client = ClientFactory.create(
+    provider=Provider.OPENAI,  # o semplicemente "openai"
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="Sei un assistente AI utile.",
+    temperature=0.7
+)
+```
+
+### Anthropic client (Claude)
+```python
+# Configurazione base
+anthropic_client = ClientFactory.create(
+    provider=Provider.ANTHROPIC,  # o "anthropic"
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    model="claude-sonnet-4-20250514",
+    system_prompt="Sei Claude, un assistente AI di Anthropic.",
+    temperature=0.5
+)
+```
+
+### Google client (Gemini)
+```python
+# Configurazione base
+google_client = ClientFactory.create(
+    provider=Provider.GOOGLE,  # o "google"
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-2.5-flash",
+    system_prompt="Sei Gemini, l'assistente AI di Google.",
+    temperature=0.6
+)
+```
+
+### Mistral client
+```python
+# Configurazione base
+mistral_client = ClientFactory.create(
+    provider=Provider.MISTRAL,  # o "mistral"
+    api_key=os.getenv("MISTRAL_API_KEY"),
+    model="mistral-small-latest",
+    system_prompt="Sei un assistente AI basato su Mistral.",
+    temperature=0.7
+)
+```
+
+### Azure OpenAI client
+```python
+# Configurazione base
+azure_client = ClientFactory.create(
+    provider=Provider.AZURE_OPENAI,  # o "azure_openai"
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="Sei un assistente aziendale professionale.",
+    temperature=0.5,
+    # Parametri specifici per Azure
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+    api_version="2024-02-15-preview"
+)
+```
+
+---
+
 ## Metodo 3: Provider personalizzato via API (es. IBM WatsonX)
 
 Per integrare provider personalizzati come IBM Watson, puoi creare un adapter che rispetti l'interfaccia standard `invoke(input, memory)`.
@@ -245,128 +246,22 @@ IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com
 
 Implementazione dell'adapter:
 
+L'implementazione completa e commentata è ora disponibile nel file [`Client/custom_client_external.py`](Client/custom_client_external.py). Il modulo mostra come mappare un provider esterno sull'interfaccia `invoke` standard di DatapizzAI.
+
+Esempio rapido di utilizzo:
+
 ```python
-import os
-from typing import Optional, List, Dict, Any
-from ibm_watsonx_ai import Credentials
-from ibm_watsonx_ai.foundation_models import ModelInference
-from ibm_watsonx_ai import APIClient
+from dotenv import load_dotenv
+from custom_client_external import IBMWatsonXClient
 
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-from datapizzai.clients import ClientResponse
+load_dotenv()
 
-
-class IBMWatsonXClient:
-    def __init__(self, model_id: str = "ibm/granite-3-2-8b-instruct", temperature: float = 0.7):
-        self.model_id = model_id
-        self.temperature = temperature
-        
-        # Configurazione credenziali IBM WatsonX
-        self.credentials = Credentials(
-            url=os.getenv("IBM_WATSONX_URL", "https://us-south.ml.cloud.ibm.com"),
-            api_key=os.getenv("IBM_WATSONX_API_KEY")
-        )
-        
-        # Inizializza il client API
-        self.client = APIClient(self.credentials)
-        self.project_id = os.getenv("IBM_WATSONX_PROJECT_ID")
-        
-        # Imposta il progetto di default
-        if self.project_id:
-            self.client.set.default_project(self.project_id)
-        
-        # Inizializza il modello
-        self.model = self._initialize_model()
-    
-    def _initialize_model(self):
-        """Inizializza il modello IBM WatsonX una sola volta per ottimizzare le performance."""
-        model_params = {
-            "max_new_tokens": 1000,
-            "temperature": self.temperature,
-            "stop_sequences": ["Human:", "Assistant:"]
-        }
-        
-        return ModelInference(
-            model_id=self.model_id,
-            api_client=self.client,
-            params=model_params
-        )
-    
-    def _build_prompt(self, input_text: str = None, memory: Optional[Memory] = None) -> str:
-        """Costruisce il prompt includendo la memoria della conversazione."""
-        prompt_parts = []
-        
-        # Aggiungi contesto dalla memoria
-        if memory is not None:
-            for turn in memory.memory:
-                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
-                content = " ".join(getattr(block, "content", "") for block in turn.blocks)
-                if content:
-                    if role.lower() == "user":
-                        prompt_parts.append(f"Human: {content}")
-                    elif role.lower() == "assistant":
-                        prompt_parts.append(f"Assistant: {content}")
-        
-        # Aggiungi input corrente
-        if input_text:
-            prompt_parts.append(f"Human: {input_text}")
-        
-        prompt_parts.append("Assistant:")
-        return "\n\n".join(prompt_parts)
-    
-    def invoke(self, input_text: str = None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Invoca il modello IBM Watson e restituisce una risposta compatibile."""
-        try:
-            prompt = self._build_prompt(input_text, memory)
-            
-            # Chiamata al modello IBM Watson
-            response = self.model.generate_text(prompt=prompt)
-            
-            # Estrai il testo della risposta
-            if isinstance(response, dict):
-                text = response.get("generated_text", "").strip()
-                # Rimuovi il prefisso "Assistant:" se presente
-                if text.startswith("Assistant:"):
-                    text = text[10:].strip()
-            else:
-                text = str(response).strip()
-            
-            # Stima approssimativa dei token (IBM Watson non sempre fornisce metriche dettagliate)
-            estimated_prompt_tokens = len(prompt.split()) * 1.3  # Stima approssimativa
-            estimated_completion_tokens = len(text.split()) * 1.3
-            
-            return ClientResponse(
-                content=[TextBlock(content=text)],
-                prompt_tokens_used=int(estimated_prompt_tokens),
-                completion_tokens_used=int(estimated_completion_tokens),
-                stop_reason="stop"
-            )
-            
-        except Exception as e:
-            return ClientResponse(
-                content=[TextBlock(content=f"Errore IBM Watson: {str(e)}")],
-                prompt_tokens_used=0,
-                completion_tokens_used=0,
-                stop_reason="error"
-            )
-
-
-# Esempio di utilizzo
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv()
-    
-    # Crea il client IBM WatsonX
-    watsonx_client = IBMWatsonXClient(
-        model_id="ibm/granite-3-2-8b-instruct",
-        temperature=0.7
-    )
-    
-    # Test del client
-    response = watsonx_client.invoke("Ciao! Presentati brevemente.")
-    print(f"Risposta: {response.text}")
-    print(f"Token usati: {response.prompt_tokens_used + response.completion_tokens_used}")
+client = IBMWatsonXClient(
+    model_id="ibm/granite-3-2-8b-instruct",
+    temperature=0.7,
+)
+response = client.invoke("Ciao! Presentati brevemente.")
+print(response.text)
 ```
 
 ## Metodo 4: Modello locale (Ollama/Gemma)
@@ -394,96 +289,19 @@ ollama run gemma3n:e2b "Ciao! Presentati brevemente."
 
 Ora vediamo l'adapter Python con DatapizzAI:
 
+Implementazione dell'adapter Python:
+
+Trovi l'implementazione completa e commentata nel file [`Client/custom_client_ollama.py`](Client/custom_client_ollama.py). Usa la stessa interfaccia `invoke` e semplifica l'integrazione con DatapizzAI una volta che il demone Ollama è attivo (`ollama serve`).
+
+Esempio rapido di utilizzo:
+
 ```python
-import requests
-from typing import Optional, Union, List
-from pydantic import BaseModel
+from custom_client_ollama import OllamaClient
 
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-from datapizzai.clients import ClientResponse
-
-
-class OllamaClient:
-    def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434"):
-        self.model = model
-        self.base_url = base_url.rstrip("/")
-
-    def _build_messages(self, input=None, memory: Optional[Memory] = None):
-        """Costruisce i messaggi per la chat API di Ollama includendo la memoria."""
-        msgs = []
-        if memory is not None:
-            for turn in memory.memory:
-                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
-                content = " ".join(getattr(b, "content", "") for b in turn.blocks)
-                if content:
-                    msgs.append({"role": role, "content": content})
-        if isinstance(input, str) and input:
-            msgs.append({"role": "user", "content": input})
-        return msgs
-
-    def _estimate_tokens(self, text: str) -> int:
-        """Stima approssimativa del numero di token basata sul conteggio delle parole."""
-        return int(len(text.split()) * 1.3)  # Fattore di conversione approssimativo
-
-    def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Invoca il modello Ollama e restituisce una risposta compatibile con DatapizzAI."""
-        messages = self._build_messages(input, memory)
-        payload = {
-            "model": self.model, 
-            "messages": messages, 
-            "stream": False
-        }
-        
-        try:
-            response = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
-            response.raise_for_status()
-            data = response.json()
-            
-            # Estrai il testo della risposta
-            text = data.get("message", {}).get("content", "").strip()
-            if not text:
-                text = str(data)
-            
-            # Calcola stime dei token utilizzati
-            prompt_text = " ".join([msg["content"] for msg in messages])
-            prompt_tokens = self._estimate_tokens(prompt_text)
-            completion_tokens = self._estimate_tokens(text)
-            
-            return ClientResponse(
-                content=[TextBlock(content=text)],
-                prompt_tokens_used=prompt_tokens,
-                completion_tokens_used=completion_tokens,
-                stop_reason="stop"
-            )
-            
-        except requests.RequestException as e:
-            return ClientResponse(
-                content=[TextBlock(content=f"Errore connessione Ollama: {str(e)}")],
-                prompt_tokens_used=0,
-                completion_tokens_used=0,
-                stop_reason="error"
-            )
-        except Exception as e:
-            return ClientResponse(
-                content=[TextBlock(content=f"Errore Ollama: {str(e)}")],
-                prompt_tokens_used=0,
-                completion_tokens_used=0,
-                stop_reason="error"
-            )
-
-
-if __name__ == "__main__":
-    # Test del client locale
-    client = OllamaClient()
-    response = client.invoke("Ciao! Riassumi in una frase il teorema di Pitagora.")
-    
-    print(f"Risposta: {response.text}")
-    print(f"Token prompt: {response.prompt_tokens_used}")
-    print(f"Token completion: {response.completion_tokens_used}")
-    print(f"Stop reason: {response.stop_reason}")
+client = OllamaClient()
+response = client.invoke("Ciao! Riassumi in una frase il teorema di Pitagora.")
+print(response.text)
 ```
-
 
 
 ---
@@ -540,6 +358,8 @@ Una volta validata la configurazione di base, è possibile esplorare le funziona
 3. **Tools e function calling** per funzionalità avanzate
 4. **Risposte strutturate** con modelli Pydantic
 5. **Streaming** per risposte in tempo reale
+
+Per una spiegazione passo-passo degli adapter personalizzati visita la guida [`README_CUSTOM_CLIENT.md`](README_CUSTOM_CLIENT.md).
 
 Suggerimenti di personalizzazione ad alto impatto:
 - Pre‑processing del prompt: normalizzazione, iniezione di contesto, safety filters
