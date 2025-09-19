@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -43,11 +42,11 @@
   <section>
     <h2>Procedura di analisi</h2>
     <ul>
-      <li>Raccolta dei due file CSV prima e dopo il corso erogato (esportati da Notion).</li>
-      <li>Allineamento delle colonne confrontabili: normalizzazione dei nomi, rimozione dei duplicati per partecipante e armonizzazione delle scale (Likert 1–4 e frequenze 1–3) in valori numerici.</li>
-      <li>Individuazione delle domande non sovrapponibili e creazione di due dataset “puliti” e comparabili per familiarità, frequenza d’uso, atteggiamento, impatto percepito e valutazioni post corso.</li>
-      <li>Calcolo delle statistiche descrittive chiave e verifica dei min/max per ogni colonna (riassunti in <code>scale_summary.csv</code> e nella dashboard Plotly).</li>
-      <li>Analisi qualitativa delle risposte aperte per identificare temi ricorrenti pre e post corso.</li>
+      <li>Raccolta dei due file CSV prima e dopo il corso erogato.</li>
+      <li>Allineamento delle colonne confrontabili: normalizzazione delle rispettive colonne, e armonizzazione delle scale in valori numerici.</li>
+      <li>Individuazione delle domande non sovrapponibili e creazione di due dataset “puliti” e comparabili per le variabili principali (familiarità, frequenza d’uso, focus sui singoli chatbot usati, percezioni di impatto, valutazioni post corso).</li>
+      <li>Calcolo delle statistiche descrittive chiave.</li>
+      <li>Analisi dei commenti aperti per estrarre temi ricorrenti pre e post corso.</li>
     </ul>
   </section>
 
@@ -60,12 +59,12 @@
       <div class="card"><strong>0%</strong>Indecisi sull’impatto dell’AI sul lavoro dopo il corso</div>
     </div>
     <ul>
-      <li>La familiarità minima post corso non scende sotto 2/5: la platea è più autonoma e competente.</li>
-      <li>Gli “sperimentatori occasionali” crollano dal 18% al 2%, con forte spinta verso l’uso quotidiano.</li>
-      <li>L’incertezza sull’impatto dell’AI sparisce: nessuno “vuole pensarci meglio” né risponde “per niente”.</li>
-      <li>La percezione del rischio di “perdere capacità” si riequilibra: +5 pt sul “Per niente”, -2 pt sul “Del tutto”.</li>
-      <li>Il corso è valutato positivamente (medie 3.1 su 4 su chiarezza e attività pratiche); collaborazione tra colleghi resta a 2.40/4.</li>
-      <li>Nei commenti emergono esigenze di automazione nello sviluppo, use case marketing/operations e supporto continuo.</li>
+      <li>La familiarità media con l’AI passa da 3.29/5 a 3.92/5 (+0.63 punti), con il valore minimo post corso che non scende mai sotto 2: la platea risulta decisamente più competente.</li>
+      <li>L’uso quotidiano di strumenti AI cresce dal 56% al 82% dei rispondenti, mentre gli “sperimentatori occasionali” crollano dal 18% al 2%.</li>
+      <li>Cala l’incertezza: le persone che “vogliono pensarci meglio” sull’impatto sul lavoro passano da 20% a 0%, e spariscono i “per niente d’accordo”.</li>
+      <li>La percezione del rischio di “perdere capacità” resta articolata ma si sposta verso il “Per niente”: +5 punti, segno di maggior fiducia nel mantenere le competenze.</li>
+      <li>Il corso è valutato positivamente (soddisfazione media 3.81/5), con picchi sulle esercitazioni pratiche (medie tra 3.1 e 3.2 su scala 1–4) e punto debole nella domanda sulla collaborazione fra colleghi (2.40/4).</li>
+      <li>Temi ricorrenti nei commenti: forte domanda di automazione nello sviluppo software, necessità di use case mirati per marketing/operations, desiderio di integrazione con strumenti aziendali e supporto continuo.</li>
     </ul>
   </section>
 
@@ -93,83 +92,43 @@
         <div id="chart-risk"></div>
       </div>
     </div>
-    <h3>Familiarità e frequenza d’uso</h3>
     <ul>
-      <li>Familiarità con l’AI (1–5): media +0.63; valori alti (4–5) salgono dal 58% all’80%, nessuno sotto 2 post corso.</li>
-      <li>Frequenza d’uso (1=sporadico, 3=quotidiano): media 2.38 → 2.80; rimane solo una persona che dichiara uso sporadico.</li>
+      <li><strong>Familiarità con l’AI (scala 1–5)</strong>: media +0.63; Nessuno, stando ai risultati post erogazione si colloca sotto il livello 2.</li>
+      <li><strong>Frequenza d’uso (1=sporadico, 3=quotidiano)</strong>: media da 2.38 a 2.80; rimane solo una persona che preferisce non usare questi tool AI.</li>
+      <li><strong>Atteggiamento verso l’introduzione dell’AI in azienda</strong>: gli entusiasti passano dal 58% al 67%; scompare il profilo “preoccupato, voglio più informazioni”.</li>
+      <li><strong>Impatto percepito</strong>:
+        <ul>
+          <li>Sul lavoro: “Del tutto” passa dal 47% al 67%, gli indecisi scendono a zero.</li>
+          <li>Sulla società: aumento del 9% di “Del tutto” e dimezzamento di “Voglio pensarci meglio”.</li>
+          <li>Rischio di perdita di capacità: “Per niente” sale al 29%, “Del tutto” scende al 10%, indicando una percezione del rischio più equilibrata.</li>
+        </ul>
+      </li>
+      <li><strong>Utilizzo strumenti specifici (scala 0–2)</strong>: Copilot Chat (+0.65) e Copilot Office (+0.58) sono i salti maggiori; lieve arretramento per Gemini (–0.18).</li>
+      <li><strong>Valutazione del corso (scala 1–4)</strong>: Chiarezza argomenti 3.12, utilità attività pratiche 3.10, capacità di applicare quanto visto 2.94. Coinvolgimento 2.75 e collaborazione 2.40 suggeriscono margini di miglioramento. La soddisfazione complessiva è 3.81/5, con il 67% delle risposte con punteggi 4 e 5.</li>
+      <li><strong>Min/max per colonna</strong>: il riepilogo completo con scale e range è disponibile nella dashboard e in <code>scale_summary.csv</code> (es. frequenza sempre 1–3, familiarità 1–5 pre vs 2–5 post, tutte le metriche post-course comprese fra 1 e 4).</li>
     </ul>
-    <h3>Atteggiamento e impatto percepito</h3>
-    <ul>
-      <li>Atteggiamento verso l’introduzione dell’AI: entusiasti 58% → 67%; sparisce il profilo “preoccupato, voglio informazioni”.</li>
-      <li>Impatto sul lavoro: risposte “Del tutto” passano dal 47% al 67%, gli indecisi scendono a zero.</li>
-      <li>Impatto sulla società: +9 pt su “Del tutto”, dimezzamento dei “Voglio pensarci meglio”.</li>
-      <li>Rischio di perdita capacità: “Per niente” 24% → 29%, “Del tutto” 12% → 10% (percezione più bilanciata).</li>
-    </ul>
-    <h3>Strumenti utilizzati</h3>
-    <ul>
-      <li>Copilot Chat +0.65 (scala 0–2), Copilot Office +0.58: sono i salti maggiori nell’adozione.</li>
-      <li>ChatGPT cresce moderatamente (+0.11), Gemini arretra leggermente (–0.18).</li>
-    </ul>
-    <h3>Valutazione del corso (scala 1–4)</h3>
-    <ul>
-      <li>Chiarezza argomenti 3.12, attività pratiche 3.10, applicabilità 2.94.</li>
-      <li>Coinvolgimento 2.75 e collaborazione 2.40: aree da rafforzare.</li>
-    </ul>
-    <p class="note">Il riepilogo completo dei range min/max per ogni variabile è presente in <code>scale_summary.csv</code> e nella dashboard Plotly.</p>
   </section>
 
   <section>
     <h2>Evidenze qualitative</h2>
-    <h3>Temi emersi prima del corso</h3>
     <ul>
-      <li>Richieste di automazione nello sviluppo (refactoring, unit test, documentazione) e knowledge management interno.</li>
-      <li>Esigenze marketing/operations: analisi competitive, campagne data-driven, gestione template e presentazioni.</li>
-      <li>Dubbi su prompt engineering, privacy e performance degli strumenti.</li>
-    </ul>
-    <h3>Feedback post corso</h3>
-    <ul>
-      <li>Apprezzamento per esempi pratici, prompt engineering contestualizzato e integrazione con lo stack Microsoft.</li>
-      <li>Richiesta di esempi più aderenti ai reparti, follow-up tecnici, Q&amp;A dedicati e materiali aggiornati.</li>
-      <li>Interesse per community interne, attivazione licenze e guidance per misurare benefici reali.</li>
+      <li><strong>Esigenze pre corso</strong>: richieste molto concrete su automazione dello sviluppo (refactoring, unit test, integrazione con codebase), knowledge management interno (ricerca fra documenti, casi precedenti, check-list), marketing analytics e pianificazione campagne, oltre a dubbi su prompt, privacy e performance degli strumenti.</li>
+      <li><strong>Cosa ha funzionato nel corso</strong>: grande apprezzamento per esempi e use case pratici, focus su prompt engineering contestualizzato, integrazione con stack Microsoft (Copilot, Office).</li>
+      <li><strong>Miglioramenti richiesti</strong>: esempi ancora più aderenti ai reparti, slot di Q&A futuri dedicati per team, maggiore profondità tecnica “low level”, supporto continuativo (community, office hour), materiali aggiornati e percorsi differenziati per ruoli.</li>
+      <li><strong>Suggerimenti extra</strong>: guida su automazioni interne, accompagnamento nel misurare benefici reali delle soluzioni AI.</li>
     </ul>
   </section>
 
   <section>
     <h2>Conclusioni</h2>
     <ul>
-      <li>Il corso ha consolidato l’adozione quotidiana dell’AI e alzato il livello di familiarità generale.</li>
-      <li>L’atteggiamento verso l’AI in azienda è oggi più positivo e informato, con minore incertezza.</li>
-      <li>Perman gono bisogni su applicazioni verticali e collaborazione tra team, da affrontare in step successivi.</li>
-      <li>La percezione del rischio richiede un presidio continuo per accompagnare l’uso responsabile.</li>
+      <li>Il corso ha consolidato competenze di base e aumentato significativamente la frequenza d’uso quotidiano degli strumenti AI, soprattutto nelle aree Copilot e prompting.</li>
+      <li>L’atteggiamento complessivo è diventato più positivo e informato, con la quasi totale scomparsa delle posizioni contrarie e una riduzione dell’incertezza percepita sull’impatto futuro.</li>
+      <li>Permangono esigenze di supporto su applicazioni verticali e collaborazione tra team: le metriche più basse riguardano proprio questi aspetti.</li>
+      <li>La percezione del rischio legato alla perdita di capacità resta presente ma si riequilibra, segno che la consapevolezza sull’uso responsabile è stata affrontata ma richiede continuità.</li>
     </ul>
   </section>
 
-  <section>
-    <h2>Raccomandazioni</h2>
-    <ol>
-      <li><strong>Moduli avanzati per team</strong>: follow-up mirati (dev, marketing, operations) con casi d’uso dedicati e sessioni Q&amp;A.</li>
-      <li><strong>Playbook operativo</strong>: guide di prompt e checklist per trasferire rapidamente le migliori pratiche.</li>
-      <li><strong>Community &amp; supporto continuo</strong>: canale Teams/office hour per condividere esperimenti e risolvere problemi.</li>
-      <li><strong>Misurazione degli impatti</strong>: definire KPI operativi (tempo risparmiato, qualità, errori evitati) per monitorare il ROI.</li>
-      <li><strong>Collaborazione cross-team</strong>: esercitazioni congiunte e progetti pilota per aumentare il punteggio di collaborazione.</li>
-    </ol>
-  </section>
-
-  <section>
-    <h2>Output disponibili</h2>
-    <ul>
-      <li><span class="pill">Dashboard</span><a href="dashboard_feedback.html">dashboard_feedback.html</a> – grafici interattivi, breakdown delta e tabella min/max.</li>
-      <li><span class="pill">Dettaglio</span><code>dashboard_table.csv</code> – variazioni per partecipante.</li>
-      <li><span class="pill">Scale</span><code>scale_summary.csv</code> – range min/max per ciascuna voce.</li>
-      <li><span class="pill">Script</span><code>feedback_dashboard.py</code> – generatore della dashboard Plotly.</li>
-      <li><span class="pill">Narrativa</span><code>report_pre_post_AI.md</code> – versione testuale del presente documento.</li>
-    </ul>
-    <p class="note">Tutti i file sono disponibili nella cartella di progetto Bluenext.</p>
-  </section>
-
-  <footer>
-    © 2025 Bluenext · Datapizza — Analisi curata con dati interni pre/post corso AI.
-  </footer>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <script>
     const PRE_COLOR = '#7f7f7f';
