@@ -24,9 +24,16 @@
     .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 18px; }
     .card { background: linear-gradient(135deg, rgba(209,43,46,0.1), rgba(31,119,180,0.08)); padding: 18px 20px; border-radius: 14px; }
     .card strong { font-size: 1.4rem; display: block; color: #d12b2e; }
-    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; margin-top: 18px; }
+    .chart-grid { display: grid; grid-template-columns: repeat(3, minmax(240px, 1fr)); gap: 28px; margin-top: 18px; }
     .chart-card { background: #f9f9fc; border-radius: 14px; padding: 18px; box-shadow: inset 0 0 0 1px rgba(31, 58, 147, 0.08); }
     .chart-card h3 { margin-top: 0; color: #1f1f1f; }
+    .chart-caption { margin-top: 12px; font-size: 0.85rem; color: #4d5a6b; }
+    @media (max-width: 1100px) {
+      .chart-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+    }
+    @media (max-width: 720px) {
+      .chart-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -74,22 +81,32 @@
       <div class="chart-card">
         <h3>Familiarità media con l’AI</h3>
         <div id="chart-familiarity"></div>
+        <p class="chart-caption">Media pre e post corso sulla scala 1–5; incremento complessivo di +0.63 punti.</p>
       </div>
       <div class="chart-card">
         <h3>Frequenza d’uso degli strumenti AI</h3>
         <div id="chart-frequency"></div>
+        <p class="chart-caption">Distribuzione percentuale dei rispondenti tra uso quotidiano, settimanale e sporadico.</p>
       </div>
       <div class="chart-card">
         <h3>Atteggiamento verso l’introduzione dell’AI</h3>
         <div id="chart-attitude"></div>
+        <p class="chart-caption">Confronto dei profili (entusiasti, curiosi, neutrali, preoccupati) prima e dopo il corso.</p>
       </div>
       <div class="chart-card">
         <h3>Impatto dell’AI sul lavoro</h3>
         <div id="chart-impact-work"></div>
+        <p class="chart-caption">Percezione dell’impatto sul lavoro, con crollo degli indecisi e crescita dei “Del tutto”.</p>
       </div>
       <div class="chart-card">
         <h3>Percezione del rischio di perdita di capacità</h3>
         <div id="chart-risk"></div>
+        <p class="chart-caption">Valutazioni del rischio di perdere capacità professionali, distribuite sulle quattro opzioni.</p>
+      </div>
+      <div class="chart-card">
+        <h3>Valutazione del corso</h3>
+        <div id="chart-course-eval"></div>
+        <p class="chart-caption">Medie su scala 1–4 per i principali aspetti del corso; soddisfazione complessiva 3.81/5 (67% risposte 4–5).</p>
       </div>
     </div>
     <ul>
@@ -99,7 +116,7 @@
       <li><strong>Impatto percepito</strong>:
         <ul>
           <li>Sul lavoro: “Del tutto” passa dal 47% al 67%, gli indecisi scendono a zero.</li>
-          <li>Sulla società: aumento del 9% di “Del tutto” e dimezzamento di “Voglio pensarci meglio”.</li>
+          <li>Sulla società: aumento del 9% di “Del tutto” e dimezzamento dei partecipanti che hanno risposto “Voglio pensarci meglio”.</li>
           <li>Rischio di perdita di capacità: “Per niente” sale al 29%, “Del tutto” scende al 10%, indicando una percezione del rischio più equilibrata.</li>
         </ul>
       </li>
@@ -234,6 +251,33 @@
       margin: { t: 30, r: 10, b: 80, l: 50 },
       yaxis: { title: '% rispondenti', range: [0, 100] },
       legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.25 }
+    }, {responsive: true});
+
+    Plotly.newPlot('chart-course-eval', [
+      {
+        x: ['Chiarezza argomenti', 'Attività pratiche', 'Applicabilità', 'Coinvolgimento', 'Collaborazione'],
+        y: [3.12, 3.10, 2.94, 2.75, 2.40],
+        type: 'bar',
+        marker: { color: POST_COLOR },
+        text: ['3.12', '3.10', '2.94', '2.75', '2.40'],
+        textposition: 'outside'
+      }
+    ], {
+      margin: { t: 30, r: 10, b: 100, l: 50 },
+      yaxis: { title: 'Scala 1–4', range: [0, 4] },
+      annotations: [
+        {
+          text: 'Soddisfazione complessiva: 3.81/5 (67% punteggi 4-5)',
+          xref: 'paper',
+          yref: 'paper',
+          x: 0,
+          y: -0.25,
+          showarrow: false,
+          font: { size: 12, color: '#333' },
+          align: 'left'
+        }
+      ],
+      showlegend: false
     }, {responsive: true});
   </script>
 </body>
