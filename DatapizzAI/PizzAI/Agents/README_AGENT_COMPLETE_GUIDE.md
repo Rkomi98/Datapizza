@@ -193,23 +193,31 @@ analysis_agent = Agent(
 @tool
 def call_research_agent(query: str, top_k: int = 3) -> str:
     """Delega la raccolta di intelligence di mercato al ricercatore specializzato."""
-    prompt = f"Raccogli intelligence su: {query}. Fornisci massimo {top_k} fonti numerate."
-    return research_agent.run(prompt)
+    try:
+        prompt = f"Raccogli intelligence su: {query}. Fornisci massimo {top_k} fonti numerate."
+        result = research_agent.run(prompt)
+        return result if result is not None else "L'agente di ricerca non ha restituito risultati."
+    except Exception as e:
+        return f"Errore agente di ricerca: {str(e)}"
 
 @tool
 def call_analysis_agent(research_data: str) -> str:
     """Delega l'analisi quantitativa allo specialista di analisi dati."""
-    prompt = dedent(f"""
-        Fornisci analisi di livello executive sui dati di ricerca sottostanti:
-        1. Estrai insight quantitativi usando il tuo tool di analisi
-        2. Riassumi i risultati chiave
-        3. Valuta rischi e opportunità
-        4. Fornisci raccomandazioni strategiche
-        
-        DATI DI RICERCA:
-        {research_data}
-    """).strip()
-    return analysis_agent.run(prompt)
+    try:
+        prompt = dedent(f"""
+            Fornisci analisi di livello executive sui dati di ricerca sottostanti:
+            1. Estrai insight quantitativi usando il tuo tool di analisi
+            2. Riassumi i risultati chiave
+            3. Valuta rischi e opportunità
+            4. Fornisci raccomandazioni strategiche
+            
+            DATI DI RICERCA:
+            {research_data}
+        """).strip()
+        result = analysis_agent.run(prompt)
+        return result if result is not None else "L'agente di analisi non ha restituito risultati."
+    except Exception as e:
+        return f"Errore agente di analisi: {str(e)}"
 
 # DecisionHub come Agente
 decision_hub_agent = Agent(
@@ -227,11 +235,25 @@ decision_hub_agent = Agent(
     max_steps=5,
 )
 
-# Test del sistema
+# Test del sistema con gestione errori
 user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e una valutazione completa dei rischi."
-final_answer = decision_hub_agent.run(user_query)
-print(final_answer)
+
+try:
+    final_answer = decision_hub_agent.run(user_query)
+    if final_answer is None:
+        final_answer = "L'agente DecisionHub non ha restituito una risposta. Verifica la configurazione."
+    print(final_answer)
+except Exception as e:
+    print(f"Errore di sistema: {str(e)}")
+    print("Assicurati che tutti gli agenti siano configurati correttamente con chiavi API e modelli validi.")
 ```
+
+### Note sulla gestione errori
+
+I tool di coordinamento includono gestione errori appropriata per prevenire ritorni `None` che possono causare errori di rendering della console Rich. Assicurati sempre che:
+- Le risposte degli agenti siano validate prima di essere passate ai sistemi di visualizzazione
+- La gestione delle eccezioni avvolga tutte le chiamate agli agenti  
+- Siano forniti messaggi di fallback quando gli agenti non riescono a rispondere
 
 - Una volta pubblicato il tool DuckDuckGo sarà sufficiente sostituire `simulated_web_search` con la nuova integrazione e rimuovere la nota sulla simulazione.
 ## 4. Planning interval

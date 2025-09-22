@@ -207,23 +207,31 @@ analysis_agent = Agent(
 @tool
 def call_research_agent(query: str, top_k: int = 3) -> str:
     """Delegate market intelligence gathering to the research specialist."""
-    prompt = f"Gather intelligence on: {query}. Provide up to {top_k} numbered sources."
-    return research_agent.run(prompt)
+    try:
+        prompt = f"Gather intelligence on: {query}. Provide up to {top_k} numbered sources."
+        result = research_agent.run(prompt)
+        return result if result is not None else "Research agent returned no results."
+    except Exception as e:
+        return f"Research agent error: {str(e)}"
 
 @tool
 def call_analysis_agent(research_data: str) -> str:
     """Delegate quantitative analysis to the data analysis specialist."""
-    prompt = dedent(f"""
-        Provide executive-level analysis of the research data below:
-        1. Extract quantitative insights using your analysis tool
-        2. Summarize key findings 
-        3. Assess risks and opportunities
-        4. Provide strategic recommendations
-        
-        RESEARCH DATA:
-        {research_data}
-    """).strip()
-    return analysis_agent.run(prompt)
+    try:
+        prompt = dedent(f"""
+            Provide executive-level analysis of the research data below:
+            1. Extract quantitative insights using your analysis tool
+            2. Summarize key findings 
+            3. Assess risks and opportunities
+            4. Provide strategic recommendations
+            
+            RESEARCH DATA:
+            {research_data}
+        """).strip()
+        result = analysis_agent.run(prompt)
+        return result if result is not None else "Analysis agent returned no results."
+    except Exception as e:
+        return f"Analysis agent error: {str(e)}"
 
 # DecisionHub as an Agent
 decision_hub_agent = Agent(
@@ -241,11 +249,25 @@ decision_hub_agent = Agent(
     max_steps=5,
 )
 
-# Test the system
+# Test the system with error handling
 user_query = "We need an update on generative AI commercial opportunities in fintech and a comprehensive risk assessment."
-final_answer = decision_hub_agent.run(user_query)
-print(final_answer)
+
+try:
+    final_answer = decision_hub_agent.run(user_query)
+    if final_answer is None:
+        final_answer = "DecisionHub agent returned no response. Please check your configuration."
+    print(final_answer)
+except Exception as e:
+    print(f"System error: {str(e)}")
+    print("Ensure all agents are properly configured with valid API keys and models.")
 ```
+
+### Error handling notes
+
+The coordination tools include proper error handling to prevent `None` returns that can cause Rich console rendering errors. Always ensure:
+- Agent responses are validated before being passed to display systems
+- Exception handling wraps all agent calls
+- Fallback messages are provided when agents fail to respond
 
 - Once the DuckDuckGo tool becomes available, simply replace `simulated_web_search` with the real integration and remove the simulation disclaimer.
 ## 4. Planning interval
