@@ -8,7 +8,7 @@ Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libr
 
 - [1. Creare un agente](#1-creare-un-agente)
 - [2. Eseguire un agente](#2-eseguire-un-agente)
-- [3. Sistema multi‑agente](#3-sistema-multi-agente)
+- [3. Sistema multi‑agente](#3-sistema-multiagente)
 - [4. Planning interval](#4-planning-interval)
 
 ## 1. Creare un agente
