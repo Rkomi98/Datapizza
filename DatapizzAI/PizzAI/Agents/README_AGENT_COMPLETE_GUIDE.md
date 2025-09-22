@@ -74,13 +74,13 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-Un sistema multi-agente sofisticato richiede routing intelligente basato sulla natura della richiesta. Il pattern `DecisionHub` analizza le query in arrivo e le instrada condizionalmente agli agenti specializzati:
+Un sistema multi‑agente maturo richiede un instradamento intelligente basato sulla natura della richiesta. Il pattern `DecisionHub` seguente analizza le query in ingresso e le instrada in modo condizionale verso agenti specializzati:
 
 ```mermaid
 graph TD
-    U["Input utente"] --> H{"DecisionHub"}
-    H -->|Se serve scouting| R{"Research Agent"}
-    H -->|Se servono KPI/rischi| D{"DataAnalysis Agent"}
+    U["Richiesta utente"] --> H{"DecisionHub"}
+    H -->|Se serve scouting| R{"Agente Research"}
+    H -->|Se servono KPI/rischi| D{"Agente DataAnalysis"}
     R --> H
     D --> H
     H --> F["Risposta finale"]
@@ -106,70 +106,71 @@ openai_client = OpenAIClient(
 
 @tool
 def simulated_web_search(query: str, top_k: int = 3) -> str:
-    """Restituisce un elenco numerato di fonti (in attesa del tool DuckDuckGo reale)."""
+    """Restituisce un elenco numerato di fonti (placeholder in attesa del tool DuckDuckGo)."""
     canonical_results = {
         "fintech": [
-            "1. McKinsey 2025 – Investimenti generative AI nel fintech a 18B€",
-            "2. Deloitte Insight – Riduzione costi media del 22% nei processi di prestito",
-            "3. BCE Tech Watch – Rischi chiave: compliance e privacy dei dati",
+            "1. McKinsey 2025 – Investimenti in generative AI nel fintech a 18B€",
+            "2. Deloitte Insight – I processi di prestito valgono in media il 22% di 200M$",
+            "3. BCE Tech Watch – Rischi chiave: compliance e privacy dei dati costano 70M alle aziende UE",
         ],
         "default": [
             "1. Industry Report – Adozione enterprise AI +30% YoY",
-            "2. Vendor Study – Automazione documentale con ROI medio 180%",
-            "3. Regolatore UE – Linee guida per gestione dati sensibili",
+            "2. Vendor Study – ROI dell'automazione documentale in media 180M $",
+            "3. Regolatore UE – Linee guida per gestire il 100% dei dati sensibili",
         ],
     }
     bucket = canonical_results["fintech" if "fintech" in query.lower() else "default"]
-    return "".join(bucket[: max(1, top_k)])
+    return "\n".join(bucket[: max(1, top_k)])
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
-    """Estrae valori numerici dal testo e produce un'analisi Markdown completa."""
-    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k|b|miliardi|milioni)?", re.IGNORECASE)
+    """Estrae valori numerici dal testo e restituisce un'analisi Markdown completa."""
+    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k|b|billion|million|miliardi|milioni)?", re.IGNORECASE)
     rows = []
     for line in raw_text.splitlines():
         matches = pattern.findall(line)
         if matches:
             cleaned = [match.replace(',', '.').strip() for match in matches]
             rows.append((line.strip(), ", ".join(cleaned)))
-    
+
     if not rows:
         return """## Analisi quantitativa
-        
+
 | Metrica | Valore | Valutazione |
 | --- | --- | --- |
-| Dati quantificabili non trovati | - | Dati insufficienti per l'analisi |
+| Nessun dato quantificabile trovato | - | Dati insufficienti per l'analisi |
 
-**Implicazioni strategiche**: L'analisi richiede più fonti quantitative."""
-    
-    # Costruisce analisi completa
+**Implicazioni strategiche**: l'analisi richiede più fonti quantitative."""
+
+    # Crea un'analisi completa
     analysis = ["## Analisi quantitativa", ""]
     analysis.append("| Metrica | Valore | Valutazione |")
     analysis.append("| --- | --- | --- |")
-    
+
     for entry, values in rows:
-        # Analizza i valori per contesto strategico
+        # Analizza i valori nel loro contesto strategico
         assessment = "Monitorare trend"
         if any(char in values.lower() for char in ['%']):
             if any(int(re.findall(r'\d+', val)[0]) > 20 for val in values.split(',') if re.findall(r'\d+', val)):
                 assessment = "Indicatore ad alto impatto"
             else:
                 assessment = "Segnale di crescita moderata"
-        elif any(char in values.lower() for char in ['b', 'miliardi']):
+        elif any(char in values.lower() for char in ['b', 'billion', 'miliardi']):
             assessment = "Grande opportunità di mercato"
         elif any(char in values.lower() for char in ['€', 'eur']):
-            assessment = "KPI finanziario - tracciare ROI"
-            
+            assessment = "KPI finanziario - tracciare il ROI"
+
         analysis.append(f"| {entry[:50]}... | {values} | {assessment} |")
-    
+
     return "\n".join(analysis)
 
+# Agenti specializzati
 research_agent = Agent(
-    name="Ricerche",
+    name="Research",
     client=openai_client,
     system_prompt=(
-        "Sei lo specialista di scouting: chiama simulated_web_search esattamente una volta e "
-        "riporta l'elenco numerato senza commenti aggiuntivi."
+        "Ti occupi di market intelligence: chiama simulated_web_search esattamente una volta e "
+        "restituisci l'elenco numerato senza commenti aggiuntivi."
     ),
     tools=[simulated_web_search],
     terminate_on_text=True,
@@ -180,92 +181,80 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=openai_client,
     system_prompt=(
-        "Sei un analista strategico dei dati. Estrai insight quantitativi usando il tuo tool, "
-        "poi fornisci analisi di livello executive con: (1) Riepilogo dei risultati chiave, "
-        "(2) Valutazione dei rischi, (3) Raccomandazioni strategiche, (4) Includi la tabella dettagliata."
+        "Sei un'analista strategico dei dati. Estrai i numeri più importanti dall'analisi e formattali in una tabella."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
-    max_steps=3,
+    max_steps=2,
 )
 
-# DecisionHub coordination tools
+# Strumenti di coordinamento del DecisionHub
 @tool
 def call_research_agent(query: str, top_k: int = 3) -> str:
-    """Delega la raccolta di intelligence di mercato al ricercatore specializzato."""
+    """Delega la raccolta di market intelligence allo specialista di ricerca."""
     try:
-        prompt = f"Raccogli intelligence su: {query}. Fornisci massimo {top_k} fonti numerate."
+        prompt = f"Raccogli intelligence su: {query}. Fornisci al massimo {top_k} fonti numerate."
         result = research_agent.run(prompt)
         return result if result is not None else "L'agente di ricerca non ha restituito risultati."
     except Exception as e:
-        return f"Errore agente di ricerca: {str(e)}"
+        return f"Errore dell'agente di ricerca: {str(e)}"
 
 @tool
 def call_analysis_agent(research_data: str) -> str:
-    """Delega l'analisi quantitativa allo specialista di analisi dati.
-    Richiede dati di ricerca reali, non solo una stringa di query."""
+    """Delega l'analisi quantitativa allo specialista di data analysis."""
     try:
-        # Valida che abbiamo dati di ricerca sostanziali
-        if len(research_data.strip()) < 50 or not any(char.isdigit() or char in "%.€$" for char in research_data):
-            return (
-                f"Dati di ricerca insufficienti per l'analisi. Ricevuto: '{research_data[:100]}...' "
-                "Raccogli prima intelligence di mercato usando call_research_agent."
-            )
-        
         prompt = dedent(f"""
-            Fornisci analisi di livello executive sui dati di ricerca sottostanti:
+            Fornisci un'analisi di livello executive sui dati di ricerca sottostanti:
             1. Estrai insight quantitativi usando il tuo tool di analisi
             2. Riassumi i risultati chiave
             3. Valuta rischi e opportunità
             4. Fornisci raccomandazioni strategiche
-            
+
             DATI DI RICERCA:
             {research_data}
         """).strip()
         result = analysis_agent.run(prompt)
         return result if result is not None else "L'agente di analisi non ha restituito risultati."
     except Exception as e:
-        return f"Errore agente di analisi: {str(e)}"
+        return f"Errore dell'agente di analisi: {str(e)}"
 
-# DecisionHub come Agente  
+# DecisionHub come agente
 decision_hub_agent = Agent(
     name="DecisionHub",
     client=openai_client,
     system_prompt=(
-        "Sei un agente di coordinamento intelligente che instrada query complesse ad agenti specializzati. "
-        "Segui questa sequenza ESATTA per query complete: "
-        "1. PRIMA: Chiama sempre call_research_agent per raccogliere intelligence di mercato e fonti dati "
-        "2. POI: Se serve analisi quantitativa, chiama call_analysis_agent con i risultati della ricerca "
-        "3. NON chiamare mai call_analysis_agent solo con la query originale - ha bisogno di dati di ricerca reali "
-        "4. Sintetizza tutti i risultati in un brief esecutivo completo "
-        "Per query su trend, opportunità, rischi o intelligence di mercato, inizia SEMPRE con la raccolta di ricerca."
+        "Sei un agente di coordinamento intelligente che instrada query complesse verso agenti specializzati. "
+        "Analizza la richiesta dell'utente e decidi quali agenti coinvolgere: "
+        "- Usa call_research_agent per market intelligence, trend, opportunità, scenario competitivo "
+        "- Usa call_analysis_agent per analisi quantitativa, KPI, valutazione dei rischi, interpretazione dei dati "
+        "Sintetizza sempre i risultati di più agenti in un briefing esecutivo completo."
     ),
     tools=[call_research_agent, call_analysis_agent],
     terminate_on_text=True,
-    max_steps=5,
+    max_steps=3,
 )
 
-# Test del sistema con gestione errori
-user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e una valutazione completa dei rischi."
+# Test del sistema con gestione degli errori
+user_query = "Abbiamo bisogno di un aggiornamento sulle opportunità commerciali dell'AI generativa nel fintech. Voglio una tabella con tutti i KPI"
 
 try:
     final_answer = decision_hub_agent.run(user_query)
     if final_answer is None:
-        final_answer = "L'agente DecisionHub non ha restituito una risposta. Verifica la configurazione."
+        final_answer = "L'agente DecisionHub non ha restituito risposta. Controlla la configurazione."
     print(final_answer)
 except Exception as e:
     print(f"Errore di sistema: {str(e)}")
     print("Assicurati che tutti gli agenti siano configurati correttamente con chiavi API e modelli validi.")
 ```
 
-### Note sulla gestione errori
+### Note sulla gestione degli errori
 
-I tool di coordinamento includono gestione errori appropriata per prevenire ritorni `None` che possono causare errori di rendering della console Rich. Assicurati sempre che:
-- Le risposte degli agenti siano validate prima di essere passate ai sistemi di visualizzazione
-- La gestione delle eccezioni avvolga tutte le chiamate agli agenti  
-- Siano forniti messaggi di fallback quando gli agenti non riescono a rispondere
+Gli strumenti di coordinamento includono una gestione degli errori pensata per evitare che valori `None` causino problemi di rendering con Rich. Assicurati sempre che:
+- Le risposte degli agenti vengano validate prima di passarle ai sistemi di visualizzazione
+- Le chiamate agli agenti siano sempre protette da gestione delle eccezioni
+- Siano previsti messaggi di fallback quando un agente non risponde
 
-- Una volta pubblicato il tool DuckDuckGo sarà sufficiente sostituire `simulated_web_search` con la nuova integrazione e rimuovere la nota sulla simulazione.
+- Quando il tool DuckDuckGo sarà disponibile, sostituisci semplicemente `simulated_web_search` con l'integrazione reale e rimuovi l'avviso sulla simulazione.
 ## 4. Planning interval
 
 Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.
