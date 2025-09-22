@@ -284,11 +284,7 @@ The addendum includes a ready-to-use version tailored to [IBM WatsonX](https://g
 
 If you rely on a local model, make sure the runtime is running and the desired model is downloaded before invoking the adapter.
 
-Among the detailed examples you'll find a dedicated walkthrough for [a local client setup](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md#esempio-b--modello-locale-ollama).
-
-### For a complete example, click here
-
-Check out the dedicated guides [`README_CUSTOM_CLIENT_EV.md`](README_CUSTOM_CLIENT_EV.md) or the Italian version [`README_CUSTOM_CLIENT.md`](README_CUSTOM_CLIENT.md) for a full walkthrough with error handling, metrics, and tests.
+Among the detailed examples you'll find a dedicated walkthrough for [a local client setup](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-b--local-model-ollama).
 
 ---
 
