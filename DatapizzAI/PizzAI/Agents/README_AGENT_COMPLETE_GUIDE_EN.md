@@ -88,16 +88,16 @@ Once configured, the agent can be run in different modes:
 ## 3. Multi‑agent system
 
 A lightweight function can coordinate specialised agents without introducing nested plans. In the example below the `decision_hub_pipeline` function:
-1. Asks the `Research` agent (powered by Google) to retrieve a numbered list of key sources.
-2. Sends those notes to the `DataAnalysis` agent, which extracts the figures via a custom tool and renders a Markdown table.
-3. Returns a final answer ready to be displayed.
+1. Simulates a web search via the `Research` agent, returning a numbered list of sources.
+2. Hands the notes to the `DataAnalysis` agent, which extracts the figures with a dedicated tool and produces a Markdown table.
+3. Returns a ready-to-display final answer.
 
 ```mermaid
 graph TD
     U["User request"] --> P["DecisionHub function"]
-    P -->|Research prompt| R{"Research Agent"}
+    P -->|Simulated search| R{"Research Agent"}
     R -->|Numbered notes| P
-    P -->|Numeric analysis| D{"DataAnalysis Agent"}
+    P -->|Numeric extraction| D{"DataAnalysis Agent"}
     D -->|Summary + table| P
     P --> F["Final Markdown response"]
 ```
@@ -110,7 +110,6 @@ from dotenv import load_dotenv
 from datapizzai.agents import Agent
 from datapizzai.clients import GoogleClient
 from datapizzai.tools import tool
-from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
 
@@ -119,6 +118,25 @@ google_client = GoogleClient(
     model="gemini-2.5-flash",
     temperature=0.2,
 )
+
+@tool
+def simulated_web_search(query: str, top_k: int = 3) -> str:
+    """Simulates a web search returning a numbered list of sources."""
+    database = {
+        "fintech": [
+            "1. McKinsey 2025: Generative AI investments reach €18B",
+            "2. Deloitte Insight: Lending workflows save 22% costs on average",
+            "3. ECB Brief: Compliance and privacy flagged as key risks",
+        ],
+        "default": [
+            "1. Industry Report 2024: AI adoption up 30%",
+            "2. Vendor X Study: Document automation ROI at 180%",
+            "3. Regulatory Note: Guidance on sensitive data handling",
+        ],
+    }
+    key = "fintech" if "fintech" in query.lower() else "default"
+    return "
+".join(database[key][:top_k])
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
@@ -143,10 +161,10 @@ research_agent = Agent(
     name="Research",
     client=google_client,
     system_prompt=(
-        "You act as a research specialist. Use the google_search_tool ONCE, keep top_k ≤ 3, "
-        "and return only a numbered list (1., 2., 3.) with title and source."
+        "You act as a research specialist. Use the simulated_web_search tool ONCE and return only the numbered list "
+        "(1., 2., 3.) produced by the tool."
     ),
-    tools=[google_search_tool],
+    tools=[simulated_web_search],
     terminate_on_text=True,
     max_steps=2,
 )
@@ -156,7 +174,7 @@ analysis_agent = Agent(
     client=google_client,
     system_prompt=(
         "You receive the research notes and must extract every figure or percentage. "
-        "You MUST call extract_numeric_table exactly once, then provide a two-sentence overview followed by the table."
+        "You must call extract_numeric_table exactly once, then provide a two-sentence overview and paste the table."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
@@ -190,7 +208,7 @@ RESEARCH NOTES:
 "
         "---
 "
-        "Sources collected via google_search_tool."
+        "Sources simulated via simulated_web_search."
     )
 
 user_query = "Share a commercial outlook for generative AI in fintech and highlight potential risks."
@@ -198,7 +216,7 @@ final_answer = decision_hub_pipeline(user_query)
 print(final_answer)
 ```
 
-- You can enrich the orchestrator with additional routing logic (classification, rule engines, user feedback) before deciding which agents to call.
+- The orchestrator can integrate additional routing logic (classification, rule engines, user feedback) before deciding which agents to call.
 ## 4. Planning interval
 
 With `planning_interval=N` the agent reviews its plan every N steps. Useful for long/branched tasks.

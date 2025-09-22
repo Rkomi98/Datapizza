@@ -75,18 +75,18 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 ## 3. Sistema multi‑agente
 
 In alcuni flussi è utile orchestrare agenti con competenze diverse senza complicare il ciclo principale. L'esempio seguente usa una funzione applicativa `decision_hub_pipeline` che:
-1. Chiede all'agente `Ricerche` (basato su Google) di raccogliere fonti sintetiche relative al tema richiesto.
-2. Passa i risultati all'agente `DataAnalysis`, che estrae i numeri chiave con un tool dedicato e produce una tabella Markdown.
+1. Simula una ricerca web con l'agente `Ricerche`, restituendo un elenco numerato di fonti.
+2. Passa le note all'agente `DataAnalysis`, che estrae i numeri principali tramite un tool dedicato e genera una tabella Markdown.
 3. Restituisce la risposta finale già pronta per la visualizzazione.
 
 ```mermaid
 graph TD
-    U["Input utente"] --> H["Funzione DecisionHub"]
-    H -->|Prompt ricerca| R{"Agente Ricerche"}
-    R -->|Risultati sintetici| H
-    H -->|Prompt analisi numerica| D{"Agente DataAnalysis"}
-    D -->|Sintesi + tabella| H
-    H --> F["Risposta finale (Markdown)"]
+    U["Input utente"] --> P["Funzione DecisionHub"]
+    P -->|Simulazione ricerca| R{"Agente Ricerche"}
+    R -->|Note numerate| P
+    P -->|Analisi numerica| D{"Agente DataAnalysis"}
+    D -->|Sintesi + tabella| P
+    P --> F["Risposta finale (Markdown)"]
 ```
 
 ```python
@@ -97,7 +97,6 @@ from dotenv import load_dotenv
 from datapizzai.agents import Agent
 from datapizzai.clients import GoogleClient
 from datapizzai.tools import tool
-from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
 
@@ -106,6 +105,25 @@ google_client = GoogleClient(
     model="gemini-2.5-flash",
     temperature=0.2,
 )
+
+@tool
+def simulated_web_search(query: str, top_k: int = 3) -> str:
+    """Simula una ricerca web restituendo un elenco numerato di fonti."""
+    database = {
+        "fintech": [
+            "1. McKinsey 2025: Investimenti fintech AI a 18B€",
+            "2. Deloitte Insight: Risparmio costi medio 22% sui processi di prestito",
+            "3. Banca Centrale UE: compliance e privacy come fattori critici",
+        ],
+        "default": [
+            "1. Report Industria 2024: adozione AI in crescita del 30%",
+            "2. Studio Vendor X: automazione documentale con ROI del 180%",
+            "3. Nota Regolatoria: linee guida sulla gestione dei dati sensibili",
+        ],
+    }
+    key = "fintech" if "fintech" in query.lower() else "default"
+    return "
+".join(database[key][:top_k])
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
@@ -130,10 +148,10 @@ research_agent = Agent(
     name="Ricerche",
     client=google_client,
     system_prompt=(
-        "Sei uno specialista di ricerca. Usa il tool google_search_tool UNA sola volta, "
-        "fissa top_k a 3 e restituisci soltanto un elenco numerato (1., 2., 3.) con titolo e fonte."
+        "Sei lo specialista di scouting. Usa il tool simulated_web_search UNA sola volta "
+        "e restituisci solo l'elenco numerato generato dal tool."
     ),
-    tools=[google_search_tool],
+    tools=[simulated_web_search],
     terminate_on_text=True,
     max_steps=2,
 )
@@ -143,8 +161,7 @@ analysis_agent = Agent(
     client=google_client,
     system_prompt=(
         "Ricevi le note di ricerca e devi estrarre ogni cifra o percentuale. "
-        "Prima di rispondere devi SEMPRE usare il tool extract_numeric_table passando il testo completo. "
-        "Dopo il tool fornisci una sintesi di due frasi e incolla la tabella ottenuta."
+        "Devi SEMPRE chiamare extract_numeric_table una volta, poi produrre una sintesi di due frasi e incollare la tabella."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
@@ -154,12 +171,12 @@ analysis_agent = Agent(
 def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
     research_prompt = (
         f"Analizza il tema: {user_query}. Usa il tool per elencare al massimo {top_k} risultati. "
-        "Rispondi solo con un elenco numerato."
+        "Rispondi solo con l'elenco numerato."
     )
     research_notes = research_agent.run(research_prompt)
 
     analysis_prompt = (
-        "Sintetizza l'elenco seguente. Estrai i numeri rilevanti, usa il tool extract_numeric_table, "
+        "Sintetizza l'elenco seguente. Estrai i numeri rilevanti, usa extract_numeric_table, "
         "poi fornisci uno scenario e la tabella."
     )
     structured_output = analysis_agent.run(
@@ -178,7 +195,7 @@ ELENCO FONTI:
 "
         "---
 "
-        "Fonti ottenute con google_search_tool."
+        "Fonti simulate via simulated_web_search."
     )
 
 user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
@@ -186,7 +203,7 @@ final_answer = decision_hub_pipeline(user_query)
 print(final_answer)
 ```
 
-- L'orchestratore può incorporare regole aggiuntive (classificatori, feedback umano, memorie condivise) prima di decidere quali agenti invocare.
+- L'approccio resta estendibile: puoi collegare tool reali (API) o sostituire la simulazione con ricerche effettive quando disponibili.
 ## 4. Planning interval
 
 Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.
