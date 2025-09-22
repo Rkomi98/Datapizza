@@ -25,6 +25,8 @@ def timer_tool(duration: str) -> str:
 
 ## Esecuzione minimale con invoke
 
+Il modo più semplice per usare un tool è passarlo direttamente al metodo `invoke`. Il modello deciderà se e come usarlo in base al prompt.
+
 ```python
 from datapizzai.clients import OpenAIClient
 from dotenv import load_dotenv
@@ -151,7 +153,7 @@ print(response.text)
 
 ## Conversazione con memoria
 
-Chatbot interattivo con tools che continua fino a quando l'utente digita "fine":
+Per un'esperienza più realistica, uniamo i concetti visti finora in un chatbot interattivo. Lo script gestisce un ciclo di conversazione continuo, accetta input dall'utente e sfrutta i tool quando necessario, mantenendo il contesto grazie alla memoria. Il ciclo termina solo quando l'utente digita "fine".
 
 ```python
 import os
@@ -207,7 +209,7 @@ while True:
     try:
         # Invoca il modello con tools
         response = client.invoke(
-            input="",
+            input=response,
             memory=memory,
             tools=tools,
             tool_choice="auto"
