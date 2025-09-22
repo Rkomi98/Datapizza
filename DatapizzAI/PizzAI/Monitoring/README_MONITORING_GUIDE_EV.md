@@ -65,7 +65,7 @@ from datapizzai.type import TextBlock, ROLE
 
 # Initialize components
 tracer = ContextTracing()
-client = OpenAIClient("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 memory = Memory()
 
 def basic_tracing_example():

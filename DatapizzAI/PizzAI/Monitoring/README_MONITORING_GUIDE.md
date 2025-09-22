@@ -68,7 +68,7 @@ from datapizzai.cache import MemoryCache
 # Inizializza i componenti
 tracer = ContextTracing()
 
-client = OpenAIClient("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 memory = Memory()
 
 def esempio_tracciamento_base():
@@ -255,7 +255,7 @@ def esempio_zipkin():
     tracer = setup_esportatore_zipkin()  # Restituisce il ContextTracing configurato
     
     with tracer.trace("zipkin_example") as trace:
-        client = OpenAIClient("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+        client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
         
         response = client.invoke([
             TextBlock(content="Crea un riassunto di 50 parole")
@@ -404,7 +404,7 @@ def esempio_chatbot_con_monitoraggio():
     monitor = SimpleChatbotMonitor("mio-chatbot")
     
     # Inizializza client e memoria
-    client = OpenAIClient("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+    client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
     memory = Memory()
     
     # Simula una conversazione

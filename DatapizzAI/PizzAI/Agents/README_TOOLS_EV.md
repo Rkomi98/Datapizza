@@ -85,7 +85,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = OpenAIClient(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 tools = [calculator, search_info]
 memory = Memory()
@@ -216,12 +216,18 @@ while True:
                     result = google_search_tool(**args)
                 else:
                     result = f"Unknown tool: {tool_name}"
-                
+
+                # Normalise to text (some tools yield ClientResponse objects)
+                if hasattr(result, "text"):
+                    result_payload = result.text
+                else:
+                    result_payload = str(result)
+
                 # Add result to memory
                 tool_result_block = FunctionCallResultBlock(
                     id=f_call.id,
                     tool=f_call.tool,
-                    result=result,
+                    result=result_payload,
                 )
                 memory.add_turn([tool_result_block], ROLE.TOOL)
             
@@ -299,7 +305,8 @@ for f_call in response.function_calls or []:
     elif not params_are_valid(args):
         result = "Parameters are missing or invalid"
     else:
-        result = tools_map[tool_name](**args)
+        result_obj = tools_map[tool_name](**args)
+        result = result_obj.text if hasattr(result_obj, "text") else str(result_obj)
 
     tool_result = FunctionCallResultBlock(
         id=f_call.id,
