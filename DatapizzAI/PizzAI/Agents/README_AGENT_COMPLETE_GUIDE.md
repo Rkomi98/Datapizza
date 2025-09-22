@@ -75,7 +75,7 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 Per gestire richieste eterogenee basta un agente orchestratore che inoltra la domanda agli specialisti e poi costruisce la risposta finale. Nel flusso seguente chiamiamo questo agente "DecisionHub": decide se coinvolgere gli specialisti disponibili (ricerche, analisi) e unisce i risultati in un'unica risposta strutturata.
 
-![multi-agent-svg-animation(1)](https://github.com/user-attachments/assets/31742ff3-3abd-468b-acc0-dd1e5cd12341)
+![multi-agent-svg-animation](https://github.com/user-attachments/assets/c8fb075e-50bc-4bfa-bbb8-032166abbb41)
 
 ```python
 import os
