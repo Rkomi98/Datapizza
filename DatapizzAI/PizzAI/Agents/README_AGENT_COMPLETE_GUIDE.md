@@ -20,6 +20,7 @@ import os
 from dotenv import load_dotenv
 from datapizzai.clients import OpenAIClient
 from datapizzai.tools import tool
+from datapizzai.tools.google import google_search_tool
 from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents import Agent, ClientManager
 
 load_dotenv()
@@ -73,102 +74,119 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-Per gestire richieste eterogenee può bastare un orchestratore applicativo che decide quando raccogliere informazioni dal modello e quando sintetizzarle in un'unica risposta finale. Nell'esempio seguente l'orchestratore `decision_hub_pipeline` richiama due agenti specializzati: `Ricerche` (per ottenere un elenco numerato di fonti) e `DataAnalysis` (per trasformare tali note in scenario e prossimi passi).
+In alcuni flussi è utile orchestrare agenti con competenze diverse senza complicare il ciclo principale. L'esempio seguente usa una funzione applicativa `decision_hub_pipeline` che:
+1. Chiede all'agente `Ricerche` (basato su Google) di raccogliere fonti sintetiche relative al tema richiesto.
+2. Passa i risultati all'agente `DataAnalysis`, che estrae i numeri chiave con un tool dedicato e produce una tabella Markdown.
+3. Restituisce la risposta finale già pronta per la visualizzazione.
 
 ```mermaid
 graph TD
-    U["Input utente"] --> P["Funzione DecisionHub"]
-    P -->|Prompt ricerca| R{"Agente Ricerche"}
-    R -->|Note numerate| P
-    P -->|Prompt analisi| D{"Agente DataAnalysis"}
-    D -->|Sintesi finale| P
-    P --> F["Risposta finale"]
+    U["Input utente"] --> H["Funzione DecisionHub"]
+    H -->|Prompt ricerca| R{"Agente Ricerche"}
+    R -->|Risultati sintetici| H
+    H -->|Prompt analisi numerica| D{"Agente DataAnalysis"}
+    D -->|Sintesi + tabella| H
+    H --> F["Risposta finale (Markdown)"]
 ```
 
 ```python
 import os
+import re
 from dotenv import load_dotenv
 
 from datapizzai.agents import Agent
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import GoogleClient
 from datapizzai.tools import tool
+from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
 
-base_client = ClientFactory.create(
-    provider="openai",
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o-mini",
-    temperature=0.4,
+google_client = GoogleClient(
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-2.5-flash",
+    temperature=0.2,
 )
 
 @tool
-def web_digest(topic: str, top_k: int = 3) -> str:
-    """Restituisce un elenco sintetico di top_k trend o fonti rilevanti."""
-    return (
-        "1. Report Gartner 2025 su trend AI\n"
-        "2. Studio interno DatapizzAI sul ROI dei modelli small\n"
-        "3. Nota di regolamentazione UE sugli AI Act sandbox"
-    )
-
-@tool
-def synthesize_insights(research_notes: str) -> str:
-    """Condensa le note di ricerca in scenario e prossimi passi."""
-    bullets = [line.strip() for line in research_notes.splitlines() if line.strip()]
-    summary = \"; \".join(bullets[:3])
-    return (
-        f"Scenario: {summary}\n\n"
-        "Prossimi passi:\n"
-        "- Validare gli impatti regolatori con il team legale\n"
-        "- Prioritizzare i use case a ROI più alto"
-    )
+def extract_numeric_table(raw_text: str) -> str:
+    """Estrae valori numerici e li organizza in tabella Markdown."""
+    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k)?", re.IGNORECASE)
+    rows = []
+    for line in raw_text.splitlines():
+        matches = pattern.findall(line)
+        if matches:
+            cleaned = [m.replace(',', '.').strip() for m in matches]
+            rows.append((line.strip(), ", ".join(cleaned)))
+    if not rows:
+        return "| Voce | Valore |
+| --- | --- |
+| Nessun numero individuato | - |"
+    table = ["| Voce | Valore |", "| --- | --- |"]
+    table += [f"| {voice} | {value} |" for voice, value in rows]
+    return "
+".join(table)
 
 research_agent = Agent(
     name="Ricerche",
-    client=base_client,
+    client=google_client,
     system_prompt=(
-        "Sei lo specialista di scouting. Usa il tool web_digest UNA sola volta"
-        " e restituisci sempre un elenco numerato (1., 2., 3.)."
+        "Sei uno specialista di ricerca. Usa il tool google_search_tool UNA sola volta, "
+        "fissa top_k a 3 e restituisci soltanto un elenco numerato (1., 2., 3.) con titolo e fonte."
     ),
-    tools=[web_digest],
+    tools=[google_search_tool],
     terminate_on_text=True,
     max_steps=2,
 )
 
 analysis_agent = Agent(
     name="DataAnalysis",
-    client=base_client,
+    client=google_client,
     system_prompt=(
-        "Ricevi le note di ricerca e devi sintetizzarle."
-        " Usa il tool synthesize_insights UNA sola volta e restituisci la risposta così com'è."
+        "Ricevi le note di ricerca e devi estrarre ogni cifra o percentuale. "
+        "Prima di rispondere devi SEMPRE usare il tool extract_numeric_table passando il testo completo. "
+        "Dopo il tool fornisci una sintesi di due frasi e incolla la tabella ottenuta."
     ),
-    tools=[synthesize_insights],
+    tools=[extract_numeric_table],
     terminate_on_text=True,
-    max_steps=2,
+    max_steps=3,
 )
 
 def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
     research_prompt = (
-        f"Fornisci al massimo {top_k} trend numerati (1., 2., 3.) su: {user_query}. "
-        "Non aggiungere altro testo."
+        f"Analizza il tema: {user_query}. Usa il tool per elencare al massimo {top_k} risultati. "
+        "Rispondi solo con un elenco numerato."
     )
     research_notes = research_agent.run(research_prompt)
 
     analysis_prompt = (
-        "Trasforma le seguenti note in scenario e prossimi passi usando il tool synthesize_insights."
+        "Sintetizza l'elenco seguente. Estrai i numeri rilevanti, usa il tool extract_numeric_table, "
+        "poi fornisci uno scenario e la tabella."
     )
-    analysis_input = f"{analysis_prompt}\n\nNOTE DI RICERCA:\n{research_notes}"
+    structured_output = analysis_agent.run(
+        f"{analysis_prompt}
 
-    insights = analysis_agent.run(analysis_input)
-    return f"Scenario multi-agente per '{user_query}'\n\n{insights}"
+ELENCO FONTI:
+{research_notes}"
+    )
+
+    return (
+        f"### Aggiornamento su '{user_query}'
+
+"
+        f"{structured_output}
+
+"
+        "---
+"
+        "Fonti ottenute con google_search_tool."
+    )
 
 user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
 final_answer = decision_hub_pipeline(user_query)
 print(final_answer)
 ```
 
-- L'orchestratore può essere arricchito con logiche di routing più sofisticate (classificazione, regole, feedback utenti) prima di decidere quali agenti coinvolgere.
-
+- L'orchestratore può incorporare regole aggiuntive (classificatori, feedback umano, memorie condivise) prima di decidere quali agenti invocare.
 ## 4. Planning interval
 
 Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.
