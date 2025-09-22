@@ -76,15 +76,7 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 Un sistema multi‑agente maturo richiede un instradamento intelligente basato sulla natura della richiesta. Il pattern `DecisionHub` seguente analizza le query in ingresso e le instrada in modo condizionale verso agenti specializzati:
 
-```mermaid
-graph TD
-    U["Richiesta utente"] --> H{"DecisionHub"}
-    H -->|Se serve scouting| R{"Agente Research"}
-    H -->|Se servono KPI/rischi| D{"Agente DataAnalysis"}
-    R --> H
-    D --> H
-    H --> F["Risposta finale"]
-```
+![multi-agent-svg-animation](https://github.com/user-attachments/assets/a3d6beae-8f9a-4266-92f2-d7fd01d61389)
 
 ```python
 import os
