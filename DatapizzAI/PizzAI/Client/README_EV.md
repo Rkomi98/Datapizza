@@ -1,27 +1,27 @@
 # DatapizzAI Client Configuration Guide
 
-This guide will help you set up all kind of clients available in the DatapizzAI library to interact with different LLM model providers.
-For two fully worked custom adapters take a look at [`README_CUSTOM_CLIENT_EV.md`](README_CUSTOM_CLIENT_EV.md).
+This guide walks you through configuring every client available in the DatapizzAI library so you can work with different LLM providers.
+For two fully worked custom adapter examples, check the dedicated guide [`README_CUSTOM_CLIENT_EV.md`](README_CUSTOM_CLIENT_EV.md).
 
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
 - [Basic code setup](#basic-code-setup)
 - [Method 1: Direct client configuration](#method-1-direct-client-configuration)
-- [Method 2: Using ClientFactory (recommended)](#method-2-using-clientfactory-recommended)
+- [Method 2: Using the ClientFactory (recommended)](#method-2-using-the-clientfactory-recommended)
 - [Method 3: Custom clients (external provider or local model)](#method-3-custom-clients-external-provider-or-local-model)
 
 ## Prerequisites
 
-This step prepares your environment by installing dependencies and configuring API keys to prevent runtime errors.
+Prepare your environment by installing the required dependencies and configuring API keys to avoid runtime errors.
 
-### Installing dependencies
+### Install dependencies
 ```bash
 pip install python-dotenv
 ```
 
-### Environment variables configuration
-Create a `.env` file in your project root with at least one API key:
+### Set environment variables
+Create a `.env` file in the root of your project with at least one API key:
 
 ```bash
 OPENAI_API_KEY=sk-your-openai-api-key-here
@@ -34,7 +34,7 @@ AZURE_OPENAI_DEPLOYMENT=your-deployment-name
 ```
 
 ### Basic code setup
-This code block handles the minimal initialization—loading environment variables and importing the required clients—used in all examples.
+This code block provides the minimal initialization shared by all examples: it loads environment variables and imports the required clients.
 ```python
 import os
 from dotenv import load_dotenv
@@ -43,19 +43,20 @@ load_dotenv()
 
 # Required imports
 from datapizzai.clients import (
-    ClientFactory, 
+    ClientFactory,
     OpenAIClient,
-    AnthropicClient, 
+    AnthropicClient,
     GoogleClient,
     MistralClient,
     AzureOpenAIClient
 )
 from datapizzai.clients.factory import Provider
+```
 ---
 
 ## Method 1: Direct client configuration
 
-Direct configuration offers fine-grained control over provider-specific parameters, such as caching options or custom endpoints.
+Direct configuration gives you fine-grained control over provider-specific parameters such as caching options or custom endpoints.
 
 ### Direct OpenAI client
 ```python
@@ -128,7 +129,7 @@ mistral_client = MistralClient(
 )
 
 # Test the client
-response = mistral_client.invoke("Translate 'Hello world' to Italian and French")
+response = mistral_client.invoke("Translate 'Hello world' into Italian and French")
 print(f"Response: {response.text}")
 ```
 
@@ -137,7 +138,7 @@ print(f"Response: {response.text}")
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     model="gpt-4o",
-    system_prompt="You are a business assistant for Microsoft Azure.",
+    system_prompt="You are a Microsoft Azure business assistant.",
     temperature=0.5,
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
     azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
@@ -145,13 +146,15 @@ azure_client = AzureOpenAIClient(
 )
 
 # Test the client
-response = azure_client.invoke("Explain Azure AI services")
+response = azure_client.invoke("Explain Azure AI services to me")
 print(f"Response: {response.text}")
+```
+
 ---
 
-## Method 2: Using ClientFactory (recommended)
+## Method 2: Using the ClientFactory (recommended)
 
-The `ClientFactory` abstracts away provider-specific details, allowing you to create a consistent client quickly while reducing configuration mistakes.
+`ClientFactory` abstracts provider-specific details, letting you spin up a consistent client quickly while reducing the chance of mistakes.
 
 ### OpenAI client
 ```python
@@ -215,11 +218,13 @@ azure_client = ClientFactory.create(
     azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
     api_version="2024-02-15-preview"
 )
+```
+
 ---
 
 ## Method 3: Custom clients (external provider or local model)
 
-Need a provider that's not bundled or a model that runs locally? Define a base adapter and then specialize it for the remote API or local runtime you prefer. The interface stays `invoke(input_text, memory=None)` just like the standard clients. You can find the full deep dive in the [dedicated guide](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md). Let's walk through it step by step.
+Need a provider that is not bundled or a model that runs locally? Define a base adapter first, then specialize it for the remote API or local runtime you want to use. The interface remains `invoke(input_text, memory=None)` just like the other clients. You can explore the full walkthrough in the [deep-dive section](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md). Let's go step by step.
 
 ### Step 1: Define the base adapter structure
 
@@ -259,24 +264,24 @@ class CustomProviderClient:
         raw_response = self._execute_request(payload).strip()
         return ClientResponse(
             content=[TextBlock(content=raw_response)],
-            prompt_tokens_used=0,  # optional: replace with real metrics
+            prompt_tokens_used=0,  # Optional: replace with a real metric
             completion_tokens_used=0,
             stop_reason="stop"
         )
 ```
 
-### Step 2: Connect an external provider (e.g., IBM WatsonX)
+### Step 2: Wire up an external provider (e.g., IBM WatsonX)
 
-Reuse the base class, inject the provider credentials, and map the SDK response back into a `ClientResponse`. Install the needed libraries and configure the required API keys before wiring everything together.
+Reuse the base class, supply the provider credentials, and map the SDK response back into a `ClientResponse`. Install the necessary libraries and set up the API keys before connecting everything.
 
-The addendum includes a ready-to-use version tailored to [IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-a--external-provider-ibm-watsonx).
+The addendum includes a ready-to-use implementation tuned for [IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-a--external-provider-ibm-watsonx).
 
-### Step 3: Connect a local model (e.g., Ollama/Gemma)
+### Step 3: Wire up a local model (e.g., Ollama/Gemma)
 
-If you rely on a local model, make sure the runtime is running and the desired model is downloaded before invoking the adapter.
+If you're relying on a local model, start the service first, then download and launch the model you intend to use.
 
-Among the detailed examples you'll find a dedicated walkthrough for [a local client setup](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-b--local-model-ollama).
+Among the detailed examples you'll find a dedicated guide for [a local client setup](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-b--local-model-ollama).
 
 ---
 
-This guide covers all aspects of client configuration. For advanced features, consult the complete DatapizzAI documentation.
+This guide covers every aspect of client configuration. For advanced features, refer to the full DatapizzAI documentation.
