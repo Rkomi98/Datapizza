@@ -160,11 +160,18 @@ decision_hub.can_call([research_agent, analysis_agent])
 user_query = (
     "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
 )
-final_answer = decision_hub.run(user_query)
-print(final_answer)
+
+import asyncio
+
+async def main():
+    final_answer = await decision_hub.a_run(user_query)
+    print(final_answer)
+
+asyncio.run(main())
 ```
 
 - `can_call` (`List[Agent]`): consente a un agente di invocare altri agenti come fossero tool, passando di volta in volta il sotto-compito opportuno.
+- Nota: dato che gli agenti collegati vengono eseguiti in modalità asincrona, usa `a_run` e `asyncio.run(...)` come nell'esempio per evitare l'errore sugli async tool.
 
 ## 4. Planning interval
 

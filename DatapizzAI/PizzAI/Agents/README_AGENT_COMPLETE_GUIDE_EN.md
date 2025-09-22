@@ -172,11 +172,18 @@ decision_hub.can_call([research_agent, analysis_agent])
 user_query = (
     "Share a commercial outlook for generative AI in fintech and highlight potential risks."
 )
-final_answer = decision_hub.run(user_query)
-print(final_answer)
+
+import asyncio
+
+async def main():
+    final_answer = await decision_hub.a_run(user_query)
+    print(final_answer)
+
+asyncio.run(main())
 ```
 
 - `can_call` (`List[Agent]`): lets an agent invoke other agents as if they were tools, delegating the appropriate subtask on demand.
+- Note: because the delegated agents run asynchronously, call `a_run` and wrap it in `asyncio.run(...)` as in the snippet to avoid the async-tool runtime error.
 
 ## 4. Planning interval
 
