@@ -73,13 +73,16 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-Per problemi complessi, è efficace combinare agenti specializzati che collaborano tra loro. Nel flusso seguente un agente "Ricerche" raccoglie le fonti, un agente "DataAnalysis" sintetizza gli insight principali e un agente "Aggregator" produce la risposta finale.
+Per gestire richieste eterogenee è utile introdurre uno strato di routing che sceglie quali specialisti coinvolgere e un aggregatore che unisce i risultati. Nel flusso seguente la richiesta passa a un agente "Router" che decide se attivare gli specialisti disponibili; gli output confluiscono infine nell'agente "Aggregator" che produce la risposta finale.
 
 ```mermaid
 graph TD
-    U["Richiesta utente"] --> R{"Agente Ricerche"}
-    R -->|Top-k risultati| D{"Agente DataAnalysis"}
-    D -->|Insight strutturati| G{"Agente Aggregator"}
+    U["Input utente"] --> T{"Router"}
+    T -->|Se serve ricerca| R{"Agente Ricerche"}
+    T -->|Se servono analisi| D{"Agente DataAnalysis"}
+    R --> T
+    D --> T
+    T --> G{"Agente Aggregator"}
     G --> F["Risposta finale"]
 ```
 
@@ -101,31 +104,32 @@ base_client = ClientFactory.create(
 )
 
 @tool
-def fetch_research(topic: str, top_k: int = 3) -> str:
-    """Restituisce un elenco di top_k spunti rilevanti per il topic richiesto."""
+def web_digest(topic: str, top_k: int = 3) -> str:
+    """Restituisce un elenco sintetico di top_k trend o fonti rilevanti."""
     return (
-        "1. Studio ESA sui nanosatelliti\n"
-        "2. Report NASA sulla propulsione elettrica\n"
-        "3. Articolo IEEE su costellazioni commerciali"
+        "1. Report Gartner 2025 su trend AI\n"
+        "2. Studio interno DatapizzAI sul ROI dei modelli small\n"
+        "3. Nota di regolamentazione UE sugli AI Act sandbox"
     )
 
 @tool
-def analyse_findings(items: str) -> str:
-    """Analizza i risultati forniti e sintetizza metriche e rischi principali."""
-    return (
-        "Sintesi: crescita investimenti +45% YoY;"
-        " principali rischi: congestione orbitale, debris."
-    )
+def compute_metrics(raw_numbers: str) -> str:
+    """Calcola KPI chiave a partire da dati testuali (es. ricavi, costi, margini)."""
+    return "KPI: ricavi 4.2M€, margine 28%, crescita +12% QoQ"
+
+@tool
+def risk_matrix(context: str) -> str:
+    """Elenca rischi principali e livello di impatto."""
+    return "Rischi: conformità medio, sicurezza alto, reputazione medio"
 
 research_agent = Agent(
     name="Ricerche",
     client=base_client,
     system_prompt=(
-        "Sei il decision maker per la fase di ricerca.\n"
-        "Usa il tool fetch_research per reperire fonti e restituisci sempre esattamente top_k voci"
-        " numerate con breve motivazione."
+        "Sei lo specialista di scouting informativo. Usa web_digest per recuperare non più di top_k punti\n"
+        "e restituisci sempre un elenco numerato con breve giustificazione."
     ),
-    tools=[fetch_research],
+    tools=[web_digest],
     terminate_on_text=True,
 )
 
@@ -133,10 +137,21 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=base_client,
     system_prompt=(
-        "Ricevi un elenco di spunti dal collega Ricerche.\n"
-        "Usa analyse_findings per produrre insight quantitativi e raccomandazioni operative concise."
+        "Ricevi dati grezzi o appunti dal router e rispondi con insight quantitativi."
+        " Se presenti numeri, usa compute_metrics; per aspetti qualitativi integra risk_matrix."
     ),
-    tools=[analyse_findings],
+    tools=[compute_metrics, risk_matrix],
+    terminate_on_text=True,
+)
+
+router_agent = Agent(
+    name="Router",
+    client=base_client,
+    system_prompt=(
+        "Valuta ogni richiesta. Decidi se coinvolgere Ricerche, DataAnalysis o entrambi."
+        " Se attivi uno specialista, riassumi il risultato in JSON con chiave 'outputs'."
+    ),
+    can_call=[research_agent, analysis_agent],
     terminate_on_text=True,
 )
 
@@ -144,21 +159,22 @@ aggregator_agent = Agent(
     name="Aggregator",
     client=base_client,
     system_prompt=(
-        "Coordini la pipeline.\n"
-        "1) Chiedi a Ricerche i top_k risultati pertinenti.\n"
-        "2) Passa l'elenco a DataAnalysis per l'elaborazione.\n"
-        "3) Redigi la risposta finale integrando motivazioni e prossimi passi."
+        "Sei il coordinatore finale."
+        " 1) Chiedi a Router di orchestrare gli specialisti necessari."
+        " 2) Combina quanto ricevuto in una risposta strutturata con sezioni 'Scenario' e 'Prossimi passi'."
     ),
-    can_call=[research_agent, analysis_agent],
+    can_call=[router_agent],
     terminate_on_text=True,
 )
 
-prompt = "Aggiorna il team sulle novità riguardo i cubesat per telecomunicazioni."
-final_answer = aggregator_agent.run(prompt)
+user_query = (
+    "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
+)
+final_answer = aggregator_agent.run(user_query)
 print(final_answer)
 ```
 
-- `can_call` (`List[Agent]`): rende gli agenti nella lista disponibili come "strumenti" per l'aggregatore, che li invoca passando un sotto-compito specifico.
+- `can_call` (`List[Agent]`): consente a un agente di invocare altri agenti come fossero tool, passando di volta in volta il sotto-compito opportuno.
 
 ## 4. Planning interval
 
