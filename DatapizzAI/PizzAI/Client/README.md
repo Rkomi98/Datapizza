@@ -10,7 +10,6 @@ Per due esempi completi di adapter personalizzati consulta anche la guida dedica
 - [Metodo 1: Configurazione diretta dei client](#metodo-1-configurazione-diretta-dei-client)
 - [Metodo 2: Utilizzo del ClientFactory (raccomandato)](#metodo-2-utilizzo-del-clientfactory-raccomandato)
 - [Metodo 3: Client custom (provider esterno o modello locale)](#metodo-3-client-custom-provider-esterno-o-modello-locale)
-  - [Per un esempio completo clicca qui](#per-un-esempio-completo-clicca-qui)
 
 ## Prerequisiti
 

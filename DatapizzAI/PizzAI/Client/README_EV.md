@@ -10,7 +10,6 @@ For two fully worked custom adapters take a look at [`README_CUSTOM_CLIENT_EV.md
 - [Method 1: Direct client configuration](#method-1-direct-client-configuration)
 - [Method 2: Using ClientFactory (recommended)](#method-2-using-clientfactory-recommended)
 - [Method 3: Custom clients (external provider or local model)](#method-3-custom-clients-external-provider-or-local-model)
-  - [For a complete example, click here](#for-a-complete-example-click-here)
 
 ## Prerequisites
 
@@ -104,13 +103,13 @@ google_client = GoogleClient(
 
 # Vertex AI configuration (enterprise deployment)
 google_vertex_client = GoogleClient(
-    model="gemini-1.5-pro",
+    model="gemini-2.5-pro",
     system_prompt="You are a business assistant.",
     temperature=0.5,
     # Vertex AI parameters
-    project_id="your-gcp-project-id",
+    project_id=os.getenv("VERTEX_PROJECT_ID"),
     location="us-central1",
-    credentials_path="/path/to/service-account.json",
+    credentials_path="service-account.json",
     use_vertexai=True
 )
 
@@ -164,8 +163,6 @@ openai_client = ClientFactory.create(
     system_prompt="You are a helpful AI assistant.",
     temperature=0.7
 )
-
- 
 ```
 
 ### Anthropic client (Claude)
@@ -178,8 +175,6 @@ anthropic_client = ClientFactory.create(
     system_prompt="You are Claude, an Anthropic AI assistant.",
     temperature=0.5
 )
-
- 
 ```
 
 ### Google client (Gemini)
@@ -192,8 +187,6 @@ google_client = ClientFactory.create(
     system_prompt="You are Gemini, Google's AI assistant.",
     temperature=0.6
 )
-
- 
 ```
 
 ### Mistral client
@@ -206,8 +199,6 @@ mistral_client = ClientFactory.create(
     system_prompt="You are an AI assistant based on Mistral.",
     temperature=0.7
 )
-
- 
 ```
 
 ### Azure OpenAI client
@@ -228,7 +219,7 @@ azure_client = ClientFactory.create(
 
 ## Method 3: Custom clients (external provider or local model)
 
-Need a provider that's not bundled or a model that runs locally? Build a custom adapter once, then plug it into any backend while keeping the familiar `invoke(input_text, memory=None)` contract. You can find the full deep-dive in the [dedicated guide](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md). Below is the high-level workflow.
+Need a provider that's not bundled or a model that runs locally? Define a base adapter and then specialize it for the remote API or local runtime you prefer. The interface stays `invoke(input_text, memory=None)` just like the standard clients. You can find the full deep dive in the [dedicated guide](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md). Let's walk through it step by step.
 
 ### Step 1: Define the base adapter structure
 
