@@ -137,21 +137,45 @@ def simulated_web_search(query: str, top_k: int = 3) -> str:
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
-    """Extracts numeric values from text and outputs a compact Markdown table."""
-    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k)?", re.IGNORECASE)
+    """Extracts numeric values from text and outputs a comprehensive Markdown analysis."""
+    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k|b|billion|million)?", re.IGNORECASE)
     rows = []
     for line in raw_text.splitlines():
         matches = pattern.findall(line)
         if matches:
             cleaned = [match.replace(',', '.').strip() for match in matches]
             rows.append((line.strip(), ", ".join(cleaned)))
+    
     if not rows:
-        return """| Item | Value |
-| --- | --- |
-| No numbers found | - |"""
-    table = ["| Item | Value |", "| --- | --- |"]
-    table += [f"| {entry} | {value} |" for entry, value in rows]
-    return "\n".join(table)
+        return """## Quantitative Analysis
+        
+| Metric | Value | Assessment |
+| --- | --- | --- |
+| No quantifiable data found | - | Insufficient data for analysis |
+
+**Strategic Implications**: Analysis requires more quantitative sources."""
+    
+    # Build comprehensive analysis
+    analysis = ["## Quantitative Analysis", ""]
+    analysis.append("| Metric | Value | Assessment |")
+    analysis.append("| --- | --- | --- |")
+    
+    for entry, values in rows:
+        # Analyze the values for strategic context
+        assessment = "Monitor trend"
+        if any(char in values.lower() for char in ['%']):
+            if any(int(re.findall(r'\d+', val)[0]) > 20 for val in values.split(',') if re.findall(r'\d+', val)):
+                assessment = "High impact indicator"
+            else:
+                assessment = "Moderate growth signal"
+        elif any(char in values.lower() for char in ['b', 'billion']):
+            assessment = "Major market opportunity"
+        elif any(char in values.lower() for char in ['€', 'eur']):
+            assessment = "Financial KPI - track ROI"
+            
+        analysis.append(f"| {entry[:50]}... | {values} | {assessment} |")
+    
+    return "\n".join(analysis)
 
 # Specialized agents
 research_agent = Agent(
@@ -170,65 +194,56 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=openai_client,
     system_prompt=(
-        "You extract and analyze quantitative data. Invoke extract_numeric_table once, "
-        "then provide strategic insights and include the Markdown table in your response."
+        "You are a strategic data analyst. Extract quantitative insights using your tool, "
+        "then provide executive-level analysis with: (1) Key findings summary, "
+        "(2) Risk assessment, (3) Strategic recommendations, (4) Include the detailed data table."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
     max_steps=3,
 )
 
-class DecisionHub:
-    """Intelligent routing hub that analyzes queries and delegates to appropriate agents."""
-    
-    def __init__(self, research_agent, analysis_agent):
-        self.research_agent = research_agent
-        self.analysis_agent = analysis_agent
-    
-    def needs_research(self, query: str) -> bool:
-        """Determine if query requires market intelligence gathering."""
-        research_keywords = ["update", "trends", "market", "opportunities", "landscape", "competition"]
-        return any(keyword in query.lower() for keyword in research_keywords)
-    
-    def needs_analysis(self, query: str) -> bool:
-        """Determine if query requires quantitative analysis."""
-        analysis_keywords = ["kpi", "metrics", "numbers", "data", "analysis", "risk", "performance"]
-        return any(keyword in query.lower() for keyword in analysis_keywords)
-    
-    def process_query(self, user_query: str, top_k: int = 3) -> str:
-        """Route query to appropriate agents based on content analysis."""
-        results = {}
-        
-        if self.needs_research(user_query):
-            research_prompt = f"Gather intelligence on: {user_query}. Provide up to {top_k} numbered sources."
-            results["research"] = self.research_agent.run(research_prompt)
-        
-        if self.needs_analysis(user_query) and "research" in results:
-            analysis_prompt = dedent(f"""
-                Analyze the research data below for key metrics and risks.
-                1. Extract numeric values using your tool
-                2. Provide strategic assessment
-                3. Include the data table
-                
-                RESEARCH DATA:
-                {results["research"]}
-            """).strip()
-            results["analysis"] = self.analysis_agent.run(analysis_prompt)
-        
-        # Synthesize final response
-        if "analysis" in results:
-            return f"### Intelligence Brief: {user_query}\n\n{results['analysis']}\n\n---\n*Sources simulated (awaiting official DuckDuckGo tool)*"
-        elif "research" in results:
-            return f"### Market Intelligence: {user_query}\n\n{results['research']}\n\n---\n*Sources simulated (awaiting official DuckDuckGo tool)*"
-        else:
-            return f"Query '{user_query}' doesn't match available agent capabilities."
+# DecisionHub coordination tools
+@tool
+def call_research_agent(query: str, top_k: int = 3) -> str:
+    """Delegate market intelligence gathering to the research specialist."""
+    prompt = f"Gather intelligence on: {query}. Provide up to {top_k} numbered sources."
+    return research_agent.run(prompt)
 
-# Initialize DecisionHub
-hub = DecisionHub(research_agent, analysis_agent)
+@tool
+def call_analysis_agent(research_data: str) -> str:
+    """Delegate quantitative analysis to the data analysis specialist."""
+    prompt = dedent(f"""
+        Provide executive-level analysis of the research data below:
+        1. Extract quantitative insights using your analysis tool
+        2. Summarize key findings 
+        3. Assess risks and opportunities
+        4. Provide strategic recommendations
+        
+        RESEARCH DATA:
+        {research_data}
+    """).strip()
+    return analysis_agent.run(prompt)
+
+# DecisionHub as an Agent
+decision_hub_agent = Agent(
+    name="DecisionHub",
+    client=openai_client,
+    system_prompt=(
+        "You are an intelligent coordination agent that routes complex queries to specialized agents. "
+        "Analyze the user's request and determine which agents to engage: "
+        "- Use call_research_agent for market intelligence, trends, opportunities, competitive landscape "
+        "- Use call_analysis_agent for quantitative analysis, KPIs, risk assessment, data interpretation "
+        "Always synthesize results from multiple agents into a comprehensive executive brief."
+    ),
+    tools=[call_research_agent, call_analysis_agent],
+    terminate_on_text=True,
+    max_steps=5,
+)
 
 # Test the system
-user_query = "We need an update on generative AI commercial opportunities in fintech and a risk assessment."
-final_answer = hub.process_query(user_query)
+user_query = "We need an update on generative AI commercial opportunities in fintech and a comprehensive risk assessment."
+final_answer = decision_hub_agent.run(user_query)
 print(final_answer)
 ```
 

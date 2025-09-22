@@ -74,17 +74,15 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-In molti scenari è sufficiente coordinare componenti specializzati senza ricorrere a piani complessi. L'esempio seguente mostra una funzione `decision_hub_pipeline` che:
-1. Recupera (per ora in modo simulato, in attesa del tool DuckDuckGo) un elenco numerato di fonti tramite l'agente `Ricerche`.
-2. Estrae i valori numerici principali e costruisce una tabella Markdown.
-3. Restituisce un riepilogo finale pronto da mostrare all'utente.
+Un sistema multi-agente sofisticato richiede routing intelligente basato sulla natura della richiesta. Il pattern `DecisionHub` analizza le query in arrivo e le instrada condizionalmente agli agenti specializzati:
 
 ```mermaid
 graph TD
-    U["Input utente"] --> H["Funzione DecisionHub"]
-    H -->|Simulatore ricerca| R["Raccolta fonti"]
-    R -->|Elenco numerato| T["Estrazione numeri"]
-    T -->|Tabella Markdown| H
+    U["Input utente"] --> H{"DecisionHub"}
+    H -->|Se serve scouting| R{"Research Agent"}
+    H -->|Se servono KPI/rischi| D{"DataAnalysis Agent"}
+    R --> H
+    D --> H
     H --> F["Risposta finale"]
 ```
 
@@ -126,21 +124,45 @@ def simulated_web_search(query: str, top_k: int = 3) -> str:
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
-    """Estrae valori numerici dal testo e produce una tabella Markdown compatta."""
-    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k)?", re.IGNORECASE)
+    """Estrae valori numerici dal testo e produce un'analisi Markdown completa."""
+    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k|b|miliardi|milioni)?", re.IGNORECASE)
     rows = []
     for line in raw_text.splitlines():
         matches = pattern.findall(line)
         if matches:
             cleaned = [match.replace(',', '.').strip() for match in matches]
             rows.append((line.strip(), ", ".join(cleaned)))
+    
     if not rows:
-        return """| Voce | Valore |
-| --- | --- |
-| Nessun numero individuato | - |"""
-    table = ["| Voce | Valore |", "| --- | --- |"]
-    table += [f"| {voice} | {value} |" for voice, value in rows]
-    return "".join(table)
+        return """## Analisi quantitativa
+        
+| Metrica | Valore | Valutazione |
+| --- | --- | --- |
+| Dati quantificabili non trovati | - | Dati insufficienti per l'analisi |
+
+**Implicazioni strategiche**: L'analisi richiede più fonti quantitative."""
+    
+    # Costruisce analisi completa
+    analysis = ["## Analisi quantitativa", ""]
+    analysis.append("| Metrica | Valore | Valutazione |")
+    analysis.append("| --- | --- | --- |")
+    
+    for entry, values in rows:
+        # Analizza i valori per contesto strategico
+        assessment = "Monitorare trend"
+        if any(char in values.lower() for char in ['%']):
+            if any(int(re.findall(r'\d+', val)[0]) > 20 for val in values.split(',') if re.findall(r'\d+', val)):
+                assessment = "Indicatore ad alto impatto"
+            else:
+                assessment = "Segnale di crescita moderata"
+        elif any(char in values.lower() for char in ['b', 'miliardi']):
+            assessment = "Grande opportunità di mercato"
+        elif any(char in values.lower() for char in ['€', 'eur']):
+            assessment = "KPI finanziario - tracciare ROI"
+            
+        analysis.append(f"| {entry[:50]}... | {values} | {assessment} |")
+    
+    return "\n".join(analysis)
 
 research_agent = Agent(
     name="Ricerche",
@@ -158,41 +180,56 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=openai_client,
     system_prompt=(
-        "Ricevi note puntate e devi estrarre cifre/percentuali rilevanti. "
-        "Usa extract_numeric_table una volta, poi fornisci due frasi di scenario e incolla la tabella Markdown."
+        "Sei un analista strategico dei dati. Estrai insight quantitativi usando il tuo tool, "
+        "poi fornisci analisi di livello executive con: (1) Riepilogo dei risultati chiave, "
+        "(2) Valutazione dei rischi, (3) Raccomandazioni strategiche, (4) Includi la tabella dettagliata."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
     max_steps=3,
 )
 
-def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
-    research_prompt = (
-        f"Analizza il tema: {user_query}. Elenca massimo {top_k} risultati numerati (1., 2., 3.) tramite il tool disponibile."
-    )
-    research_notes = research_agent.run(research_prompt)
+# DecisionHub coordination tools
+@tool
+def call_research_agent(query: str, top_k: int = 3) -> str:
+    """Delega la raccolta di intelligence di mercato al ricercatore specializzato."""
+    prompt = f"Raccogli intelligence su: {query}. Fornisci massimo {top_k} fonti numerate."
+    return research_agent.run(prompt)
 
-    analysis_prompt = dedent(
-        """
-        Sintetizza l'elenco numerato sottostante.
-        1. Invoca extract_numeric_table per ottenere una tabella valori.
-        2. Offri due frasi di commento strategico.
-        3. Riporta la tabella in output.
-        """
-    ).strip()
-    analysis_input = f"""{analysis_prompt}
-ELENCO NOTE:
-{research_notes}"""
-    structured_output = analysis_agent.run(analysis_input)
+@tool
+def call_analysis_agent(research_data: str) -> str:
+    """Delega l'analisi quantitativa allo specialista di analisi dati."""
+    prompt = dedent(f"""
+        Fornisci analisi di livello executive sui dati di ricerca sottostanti:
+        1. Estrai insight quantitativi usando il tuo tool di analisi
+        2. Riassumi i risultati chiave
+        3. Valuta rischi e opportunità
+        4. Fornisci raccomandazioni strategiche
+        
+        DATI DI RICERCA:
+        {research_data}
+    """).strip()
+    return analysis_agent.run(prompt)
 
-    return (
-        f"### Aggiornamento su '{user_query}'"
-        f"{structured_output}"
-        "---"
-        "Fonti simulate (in attesa del tool DuckDuckGo ufficiale)."
-    )
-user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
-final_answer = decision_hub_pipeline(user_query)
+# DecisionHub come Agente
+decision_hub_agent = Agent(
+    name="DecisionHub",
+    client=openai_client,
+    system_prompt=(
+        "Sei un agente di coordinamento intelligente che instrada query complesse ad agenti specializzati. "
+        "Analizza la richiesta dell'utente e determina quali agenti attivare: "
+        "- Usa call_research_agent per intelligence di mercato, trend, opportunità, panorama competitivo "
+        "- Usa call_analysis_agent per analisi quantitativa, KPI, valutazione rischi, interpretazione dati "
+        "Sintetizza sempre i risultati di più agenti in un brief esecutivo completo."
+    ),
+    tools=[call_research_agent, call_analysis_agent],
+    terminate_on_text=True,
+    max_steps=5,
+)
+
+# Test del sistema
+user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e una valutazione completa dei rischi."
+final_answer = decision_hub_agent.run(user_query)
 print(final_answer)
 ```
 
