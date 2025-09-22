@@ -53,7 +53,7 @@ for f_call in response.function_calls or []:
 
 ## Client multi‑tool
 
-Esempio con due strumenti: una calcolatrice e una ricerca informazioni.
+Esempio con due strumenti: una calcolatrice e una ricerca informazioni molto semplice.
 
 ```python
 from datapizzai.tools import tool
@@ -75,7 +75,7 @@ def cerca_informazioni(query: str) -> str:
     return f"(risultati sintetici per: {query})"
 ```
 
-### Esecuzione
+Che poi si integrano così:
 
 ```python
 from datapizzai.clients import OpenAIClient
@@ -132,6 +132,7 @@ print(response.text)
 ```
 
 ## Esempio completo con Google Search
+In `datapizzai` è implementato il tool di ricerca `Google_search_tool`, che funziona solo con `GoogleClient`.
 
 ```python
 import os
@@ -153,8 +154,7 @@ print(response.text)
 
 ## Conversazione con memoria
 
-Per un'esperienza più realistica, uniamo i concetti visti finora in un chatbot interattivo. Lo script gestisce un ciclo di conversazione continuo, accetta input dall'utente e sfrutta i tool quando necessario, mantenendo il contesto grazie alla memoria. Il ciclo termina solo quando l'utente digita "fine".
-
+Per un'esperienza più realistica, uniamo i concetti visti finora in un chatbot interattivo. 
 ```python
 import os
 from dotenv import load_dotenv
@@ -182,7 +182,7 @@ def calcolatrice(expr: str) -> str:
 # Client Gemini con tools
 client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
 )
 
 tools = [calcolatrice, google_search_tool]
