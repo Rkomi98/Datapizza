@@ -74,15 +74,15 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-In alcuni flussi è utile orchestrare agenti con competenze diverse senza complicare il ciclo principale. L'esempio seguente usa una funzione applicativa `decision_hub_pipeline` che:
-1. Simula una ricerca web con l'agente `Ricerche`, restituendo un elenco numerato di fonti.
-2. Passa le note all'agente `DataAnalysis`, che estrae i numeri principali tramite un tool dedicato e genera una tabella Markdown.
-3. Restituisce la risposta finale già pronta per la visualizzazione.
+In alcuni flussi è utile orchestrare agenti con competenze diverse senza introdurre piani nidificati complessi. L'esempio seguente usa una funzione `decision_hub_pipeline` che:
+1. Simula (in attesa del futuro tool DuckDuckGo) una ricerca tramite l'agente `Ricerche`, restituendo un elenco numerato di fonti pertinenti.
+2. Passa le note all'agente `DataAnalysis`, che estrae i numeri principali con un tool dedicato e genera una tabella Markdown.
+3. Compone la risposta finale già pronta per la visualizzazione.
 
 ```mermaid
 graph TD
     U["Input utente"] --> P["Funzione DecisionHub"]
-    P -->|Simulazione ricerca| R{"Agente Ricerche"}
+    P -->|Simula ricerca| R{"Agente Ricerche"}
     R -->|Note numerate| P
     P -->|Analisi numerica| D{"Agente DataAnalysis"}
     D -->|Sintesi + tabella| P
@@ -92,6 +92,7 @@ graph TD
 ```python
 import os
 import re
+from textwrap import dedent
 from dotenv import load_dotenv
 
 from datapizzai.agents import Agent
@@ -108,32 +109,32 @@ google_client = GoogleClient(
 
 @tool
 def simulated_web_search(query: str, top_k: int = 3) -> str:
-    """Simula una ricerca web restituendo un elenco numerato di fonti."""
-    database = {
+    """Restituisce un elenco numerato di fonti, in attesa del tool DuckDuckGo reale."""
+    canonical_results = {
         "fintech": [
-            "1. McKinsey 2025: Investimenti fintech AI a 18B€",
-            "2. Deloitte Insight: Risparmio costi medio 22% sui processi di prestito",
-            "3. Banca Centrale UE: compliance e privacy come fattori critici",
+            "1. McKinsey 2025 – Investimenti generative AI nel fintech a 18B€",
+            "2. Deloitte Insight – Riduzione costi media del 22% nei processi di prestito",
+            "3. BCE Tech Watch – Rischi chiave: compliance e privacy dei dati",
         ],
         "default": [
-            "1. Report Industria 2024: adozione AI in crescita del 30%",
-            "2. Studio Vendor X: automazione documentale con ROI del 180%",
-            "3. Nota Regolatoria: linee guida sulla gestione dei dati sensibili",
+            "1. Industry Report – Adozione enterprise AI +30% YoY",
+            "2. Vendor Study – Automazione documentale con ROI medio 180%",
+            "3. Regolatore UE – Linee guida per gestione dati sensibili",
         ],
     }
-    key = "fintech" if "fintech" in query.lower() else "default"
+    bucket = canonical_results["fintech" if "fintech" in query.lower() else "default"]
     return "
-".join(database[key][:top_k])
+".join(bucket[: max(1, top_k)])
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
-    """Estrae valori numerici e li organizza in tabella Markdown."""
+    """Estrae valori numerici dal testo e produce una tabella Markdown compatta."""
     pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k)?", re.IGNORECASE)
     rows = []
     for line in raw_text.splitlines():
         matches = pattern.findall(line)
         if matches:
-            cleaned = [m.replace(',', '.').strip() for m in matches]
+            cleaned = [match.replace(',', '.').strip() for match in matches]
             rows.append((line.strip(), ", ".join(cleaned)))
     if not rows:
         return "| Voce | Valore |
@@ -148,8 +149,8 @@ research_agent = Agent(
     name="Ricerche",
     client=google_client,
     system_prompt=(
-        "Sei lo specialista di scouting. Usa il tool simulated_web_search UNA sola volta "
-        "e restituisci solo l'elenco numerato generato dal tool."
+        "Sei lo specialista di scouting: chiama simulated_web_search esattamente una volta e "
+        "riporta l'elenco numerato senza commenti aggiuntivi."
     ),
     tools=[simulated_web_search],
     terminate_on_text=True,
@@ -160,8 +161,8 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=google_client,
     system_prompt=(
-        "Ricevi le note di ricerca e devi estrarre ogni cifra o percentuale. "
-        "Devi SEMPRE chiamare extract_numeric_table una volta, poi produrre una sintesi di due frasi e incollare la tabella."
+        "Ricevi note puntate e devi estrarre cifre/percentuali rilevanti. "
+        "Usa extract_numeric_table una volta, poi fornisci due frasi di scenario e incolla la tabella Markdown."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
@@ -170,21 +171,24 @@ analysis_agent = Agent(
 
 def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
     research_prompt = (
-        f"Analizza il tema: {user_query}. Usa il tool per elencare al massimo {top_k} risultati. "
-        "Rispondi solo con l'elenco numerato."
+        f"Analizza il tema: {user_query}. Elenca massimo {top_k} risultati numerati (1., 2., 3.) "
+        "tramite il tool disponibile."
     )
     research_notes = research_agent.run(research_prompt)
 
-    analysis_prompt = (
-        "Sintetizza l'elenco seguente. Estrai i numeri rilevanti, usa extract_numeric_table, "
-        "poi fornisci uno scenario e la tabella."
-    )
-    structured_output = analysis_agent.run(
-        f"{analysis_prompt}
+    analysis_prompt = dedent(
+        """
+        Sintetizza l'elenco numerato sottostante.
+        1. Invoca extract_numeric_table per ottenere una tabella valori.
+        2. Offri due frasi di commento strategico.
+        3. Riporta la tabella in output.
+        """
+    ).strip()
+    analysis_input = f"{analysis_prompt}
 
-ELENCO FONTI:
+ELENCO NOTE:
 {research_notes}"
-    )
+    structured_output = analysis_agent.run(analysis_input)
 
     return (
         f"### Aggiornamento su '{user_query}'
@@ -195,7 +199,7 @@ ELENCO FONTI:
 "
         "---
 "
-        "Fonti simulate via simulated_web_search."
+        "Fonti simulate (in attesa del tool DuckDuckGo ufficiale)."
     )
 
 user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
@@ -203,7 +207,7 @@ final_answer = decision_hub_pipeline(user_query)
 print(final_answer)
 ```
 
-- L'approccio resta estendibile: puoi collegare tool reali (API) o sostituire la simulazione con ricerche effettive quando disponibili.
+- L'approccio resta estendibile: quando il tool DuckDuckGo sarà disponibile basterà sostituire `simulated_web_search` con la nuova implementazione e rimuovere la nota.
 ## 4. Planning interval
 
 Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.

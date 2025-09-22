@@ -87,10 +87,10 @@ Once configured, the agent can be run in different modes:
 
 ## 3. Multi‑agent system
 
-A lightweight function can coordinate specialised agents without introducing nested plans. In the example below the `decision_hub_pipeline` function:
-1. Simulates a web search via the `Research` agent, returning a numbered list of sources.
-2. Hands the notes to the `DataAnalysis` agent, which extracts the figures with a dedicated tool and produces a Markdown table.
-3. Returns a ready-to-display final answer.
+A lightweight orchestration function can coordinate specialised agents while we wait for the official DuckDuckGo tool. The `decision_hub_pipeline` below:
+1. Simulates the search step through the `Research` agent, returning a numbered list of sources.
+2. Hands the list to the `DataAnalysis` agent, which extracts the figures with a dedicated tool and outputs a Markdown table.
+3. Produces a final response ready to be displayed.
 
 ```mermaid
 graph TD
@@ -105,6 +105,7 @@ graph TD
 ```python
 import os
 import re
+from textwrap import dedent
 from dotenv import load_dotenv
 
 from datapizzai.agents import Agent
@@ -121,32 +122,32 @@ google_client = GoogleClient(
 
 @tool
 def simulated_web_search(query: str, top_k: int = 3) -> str:
-    """Simulates a web search returning a numbered list of sources."""
-    database = {
+    """Returns a numbered list of sources while waiting for the DuckDuckGo tool."""
+    canonical_results = {
         "fintech": [
-            "1. McKinsey 2025: Generative AI investments reach €18B",
-            "2. Deloitte Insight: Lending workflows save 22% costs on average",
-            "3. ECB Brief: Compliance and privacy flagged as key risks",
+            "1. McKinsey 2025 – Generative AI investments hit €18B in fintech",
+            "2. Deloitte Insight – Lending automation cuts costs by 22% on average",
+            "3. ECB Tech Brief – Key risks: compliance and data privacy",
         ],
         "default": [
-            "1. Industry Report 2024: AI adoption up 30%",
-            "2. Vendor X Study: Document automation ROI at 180%",
-            "3. Regulatory Note: Guidance on sensitive data handling",
+            "1. Industry Report – Enterprise AI adoption up 30% YoY",
+            "2. Vendor Study – Document automation ROI reaches 180%",
+            "3. EU Regulator – Guidance on handling sensitive data",
         ],
     }
-    key = "fintech" if "fintech" in query.lower() else "default"
+    bucket = canonical_results["fintech" if "fintech" in query.lower() else "default"]
     return "
-".join(database[key][:top_k])
+".join(bucket[: max(1, top_k)])
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
-    """Extracts numeric values and organises them in a Markdown table."""
+    """Extracts numeric values from text and returns a compact Markdown table."""
     pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k)?", re.IGNORECASE)
     rows = []
     for line in raw_text.splitlines():
         matches = pattern.findall(line)
         if matches:
-            cleaned = [m.replace(',', '.').strip() for m in matches]
+            cleaned = [match.replace(',', '.').strip() for match in matches]
             rows.append((line.strip(), ", ".join(cleaned)))
     if not rows:
         return "| Item | Value |
@@ -161,8 +162,8 @@ research_agent = Agent(
     name="Research",
     client=google_client,
     system_prompt=(
-        "You act as a research specialist. Use the simulated_web_search tool ONCE and return only the numbered list "
-        "(1., 2., 3.) produced by the tool."
+        "You are the research specialist: call simulated_web_search exactly once and "
+        "return the numbered list verbatim."
     ),
     tools=[simulated_web_search],
     terminate_on_text=True,
@@ -173,8 +174,8 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=google_client,
     system_prompt=(
-        "You receive the research notes and must extract every figure or percentage. "
-        "You must call extract_numeric_table exactly once, then provide a two-sentence overview and paste the table."
+        "You receive the bullet list and must extract relevant figures. "
+        "Use extract_numeric_table once, then provide a two-sentence overview and paste the Markdown table."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
@@ -183,21 +184,23 @@ analysis_agent = Agent(
 
 def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
     research_prompt = (
-        f"Collect up to {top_k} numbered bullet points (1., 2., 3.) about: {user_query}. "
-        "Reply with the list only."
+        f"Collect up to {top_k} numbered bullet points (1., 2., 3.) about {user_query} using the available tool."
     )
     research_notes = research_agent.run(research_prompt)
 
-    analysis_prompt = (
-        "Summarise the list below. Extract the relevant numbers, call extract_numeric_table, "
-        "then provide an overview and the table."
-    )
-    structured_output = analysis_agent.run(
-        f"{analysis_prompt}
+    analysis_prompt = dedent(
+        """
+        Summarise the numbered list below.
+        1. Call extract_numeric_table to obtain a value table.
+        2. Provide a two-sentence strategic overview.
+        3. Include the table in the final output.
+        """
+    ).strip()
+    analysis_input = f"{analysis_prompt}
 
 RESEARCH NOTES:
 {research_notes}"
-    )
+    structured_output = analysis_agent.run(analysis_input)
 
     return (
         f"### Update on '{user_query}'
@@ -208,7 +211,7 @@ RESEARCH NOTES:
 "
         "---
 "
-        "Sources simulated via simulated_web_search."
+        "Sources simulated while waiting for the official DuckDuckGo tool."
     )
 
 user_query = "Share a commercial outlook for generative AI in fintech and highlight potential risks."
@@ -216,7 +219,7 @@ final_answer = decision_hub_pipeline(user_query)
 print(final_answer)
 ```
 
-- The orchestrator can integrate additional routing logic (classification, rule engines, user feedback) before deciding which agents to call.
+- Once the DuckDuckGo tool is released you can swap `simulated_web_search` with the real implementation and remove the simulation notice.
 ## 4. Planning interval
 
 With `planning_interval=N` the agent reviews its plan every N steps. Useful for long/branched tasks.
