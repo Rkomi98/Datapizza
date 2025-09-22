@@ -16,31 +16,27 @@ Esempi rapidi per usare il framework **DatapizzAI** con input/output multimedial
 **Cosa fa**: Il `MediaBlock` incapsula l'immagine (URL, base64 o file) e la combina con il testo per creare input multimodale. L'AI analizza sia il prompt testuale che il contenuto visivo.
 
 ```python
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.type import TextBlock, MediaBlock, Media
 from dotenv import load_dotenv
 import os
 
 load_dotenv('../.env')
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o"
 )
 
-# Analizza immagine da URL
 media = Media(
     extension="jpg",        # Estensione senza punto per MIME type corretto
     media_type="image",     # Tipo di media (image, audio, video)
     source_type="url",      # Fonte: url, base64, o file
     source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint",
-    detail="high"           # Livello di dettaglio (low|high|auto, se supportato)
+    detail="high"
 )
-
-# Combina testo e immagine per input multimodale
 response = client.invoke([
     TextBlock(content="Descrivi questa immagine in dettaglio"),
-    MediaBlock(media=media)  # Wrapper che contiene l'immagine
+    MediaBlock(media=media)
 ])
 
 print(response.text)
@@ -63,25 +59,20 @@ def load_image_as_base64(path: str) -> str:
     """Converte file immagine in stringa base64 per trasmissione sicura"""
     return base64.b64encode(Path(path).read_bytes()).decode("utf-8")
 
-# Carica immagine locale e converti in base64
 image_b64 = load_image_as_base64("Example.png")
 
-# Crea oggetto Media con metadati dell'immagine
 media = Media(
     extension="jpg",        # Estensione file per MIME type
     media_type="image",     # Tipo di contenuto
     source_type="base64",   # Formato di trasmissione
     source=image_b64,       # Dati immagine codificati
-    detail="high"           # Qualità analisi (high per dettagli)
+    detail="high"           
 )
-
-# Prompt specifico per analisi tecnica
 prompt = "Analizza questa immagine e dammi una descrizione tecnica."
 
-# Invoca AI con input multimodale (testo + immagine)
 response = client.invoke([
     TextBlock(content=prompt),
-    MediaBlock(media=media)  # Wrapper per l'immagine
+    MediaBlock(media=media)
 ])
 
 print(response.text)
@@ -99,18 +90,20 @@ print(response.text)
 from pathlib import Path
 from datapizzai.type import Media, MediaBlock, TextBlock
 
-analysis_client_google = client = ClientFactory.create(
-            model="gemini-2.5-flash",
-            api_key=GOOGLE_API_KEY,
-            system_prompt="Sei un assistente AI esperto nell'analisi di audio. Rispondi in italiano.",
-            temperature=0.5
-        )
+from datapizzai.clients import GoogleClient
+
+analysis_client_google = GoogleClient(
+    model="gemini-2.5-flash",
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    system_prompt="Sei un assistente AI esperto nell'analisi di audio. Rispondi in italiano.",
+    temperature=0.5
+)
 
 media = Media(
     extension="wav",
     media_type="audio",
     source_type="path",
-    source="TI0TpOD_.wav"        # <— percorso al file
+    source="TI0TpOD_.wav"
 )
 
 prompt = "Trascrivi questo audio e riassumi il contenuto principale."
@@ -132,7 +125,7 @@ import base64
 from pathlib import Path
 from dotenv import load_dotenv
 
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.memory import Memory
 from datapizzai.type import ROLE, TextBlock, Media, MediaBlock
 
@@ -152,20 +145,16 @@ def create_mediablock_from_file(file_path: str) -> MediaBlock:
     )
     return MediaBlock(media=media)
 
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
 )
 memory = Memory()
-
-# Primo turno: utente invia immagine con richiesta
 image_block = create_mediablock_from_file("Example.png")
 memory.add_turn([TextBlock("Analizza questa foto, cosa vedi?"), image_block], ROLE.USER)
 resp = client.invoke("Analizza questa foto, cosa vedi?", memory=memory)
-memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT) #Aggiungo risposta alla memori
+memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)
 
-# Secondo turno: follow-up che si basa sull'immagine precedente
 resp = client.invoke("Quali miglioramenti consiglieresti", memory=memory)
 print(resp.text)
 ```

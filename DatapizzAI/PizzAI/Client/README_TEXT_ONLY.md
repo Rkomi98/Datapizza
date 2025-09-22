@@ -20,13 +20,12 @@ Per parlare con un modello serve un client configurato con provider, chiave, tem
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.type import TextBlock
 
 load_dotenv()
 
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
     temperature=1
@@ -72,8 +71,7 @@ Dettagli di implementazione: la cache è gestita dalla libreria `datapizzai` (no
 from datapizzai.cache import MemoryCache
 import time
 
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
     temperature=1,
@@ -100,11 +98,10 @@ print(f"⏱️ tempo (seconda): {t3 - t2:.3f}s")
 # Alternativa: usare Redis come cache condivisa
 from datapizzai.cache import RedisCache
 redis_cache = RedisCache(host="localhost", port=6379, db=0)
-client_redis = ClientFactory.create(
-    provider="openai",
+client_redis = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
-    cache=redis_cache,
+    cache=redis_cache
 )
 
 ```
@@ -114,9 +111,10 @@ Qui un esempio riassuntivo che unisce tutto quello visto oggi con un esempio di 
 
 ```python
 import os
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
+from datapizzai.cache import MemoryCache
 
 class Chatbot:
     def __init__(self, client):
@@ -131,11 +129,10 @@ class Chatbot:
         print(f"[metriche] token totali: {total_tokens}")
         return response.text
 
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
-    temperature=1,
+    temperature=1
 )
 
 bot = Chatbot(client)

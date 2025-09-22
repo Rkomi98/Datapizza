@@ -9,14 +9,14 @@ Questa guida mostra due modi per ottenere risposte strutturate dai modelli con D
 ```python
 import os, json
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 
 load_dotenv()
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-5",
-    temperature=1,
+    model="gpt-4o",
+    system_prompt="Sei un assistente AI utile.",
+    temperature=0.7
 )
 
 prompt = (
@@ -65,10 +65,11 @@ class ProjectSummary(BaseModel):
     tasks: List[Task]
 
 load_dotenv()
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
+    system_prompt="Sei un assistente AI utile.",
+    temperature=0.7
 )
 
 # Uso del metodo structured_response con classe Pydantic

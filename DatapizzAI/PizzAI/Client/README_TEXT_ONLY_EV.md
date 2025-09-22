@@ -19,13 +19,12 @@ To talk to a model you need a client configured with provider, API key, temperat
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.type import TextBlock
 
 load_dotenv()
 
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
     temperature=1
@@ -72,8 +71,7 @@ Implementation details: caching is handled by the `datapizzai` library (not by t
 from datapizzai.cache import MemoryCache
 import time
 
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
     temperature=1,
@@ -100,8 +98,7 @@ print(f"⏱️ time (second): {t3 - t2:.3f}s")
 # Alternative: use Redis as a shared cache
 from datapizzai.cache import RedisCache
 redis_cache = RedisCache(host="localhost", port=6379, db=0)
-client_redis = ClientFactory.create(
-    provider="openai",
+client_redis = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
     cache=redis_cache,
@@ -131,11 +128,10 @@ class Chatbot:
         print(f"[metrics] total tokens: {total_tokens}")
         return response.text
 
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
-    temperature=1,
+    temperature=1
 )
 
 bot = Chatbot(client)

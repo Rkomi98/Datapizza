@@ -119,15 +119,13 @@ config = SummaryConfig(
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.cache import MemoryCache
 from advanced_memory_summary import AdvancedMemoryManager, SummaryConfig, SummaryStrategy
 
 load_dotenv()
 
-# Client con cache
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
     temperature=0.7,

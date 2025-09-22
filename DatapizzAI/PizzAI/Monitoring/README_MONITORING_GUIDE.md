@@ -35,8 +35,9 @@ Arrivati a questo punto può sembrare banale, ma come sembre iniziamo dalla conf
 import os
 from dotenv import load_dotenv
 from opentelemetry import trace
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.tracing import ContextTracing
+from datapizzai.cache import MemoryCache
 
 load_dotenv()
 
@@ -44,8 +45,7 @@ load_dotenv()
 tracer = ContextTracing()
 
 # Configura il client
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-5",
     temperature=1
@@ -60,13 +60,15 @@ Il tracciamento automatico dei client permette di monitorare tutte le interazion
 
 ```python
 from datapizzai.tracing import ContextTracing
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
+from datapizzai.cache import MemoryCache
 
 # Inizializza i componenti
 tracer = ContextTracing()
-client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+
+client = OpenAIClient("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
 memory = Memory()
 
 def esempio_tracciamento_base():
@@ -253,7 +255,7 @@ def esempio_zipkin():
     tracer = setup_esportatore_zipkin()  # Restituisce il ContextTracing configurato
     
     with tracer.trace("zipkin_example") as trace:
-        client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+        client = OpenAIClient("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
         
         response = client.invoke([
             TextBlock(content="Crea un riassunto di 50 parole")
@@ -274,7 +276,7 @@ def esempio_zipkin():
 
 ```python
 import os
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.memory import Memory
 from dotenv import load_dotenv
 load_dotenv()
@@ -288,7 +290,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.trace import ProxyTracerProvider
 from prometheus_client import Counter, Histogram, start_http_server
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.memory import Memory
 from datapizzai.type import TextBlock, ROLE
 from datapizzai.tracing import ContextTracing
@@ -402,7 +404,7 @@ def esempio_chatbot_con_monitoraggio():
     monitor = SimpleChatbotMonitor("mio-chatbot")
     
     # Inizializza client e memoria
-    client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
+    client = OpenAIClient("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
     memory = Memory()
     
     # Simula una conversazione

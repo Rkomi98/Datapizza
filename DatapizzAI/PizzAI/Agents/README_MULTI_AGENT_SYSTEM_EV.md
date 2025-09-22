@@ -60,6 +60,7 @@ Each agent has:
 
 ```python
 from datapizzai.tools import Tool
+from datapizzai.clients import OpenAIClient
 
 @Tool
 def advanced_calculate(expression: str, calculation_type: str = "base") -> str:
@@ -147,8 +148,8 @@ class SpecializedAgent:
         self.memory = Memory()
         
         # Specialized OpenAI client
-        self.client = ClientFactory.create(
-            provider="openai",
+        
+        self.client = OpenAIClient(
             api_key=os.getenv("OPENAI_API_KEY"),
             model="gpt-4o",
             system_prompt=system_prompt

@@ -9,7 +9,8 @@ Guida concisa per creare e usare strumenti (tools) con DatapizzAI. I tools conse
 3. [Client multi‑tool](#client-multi-tool)
 4. [Conversazione con memoria](#conversazione-con-memoria)
 5. [Best practices](#best-practices)
-6. [Guida passo‑passo: tool custom](#guida-passo-passo-tool-custom)
+6. [Perché intervenire manualmente sui tool](#perche-intervenire-manualmente-sui-tool)
+
 ## Struttura base di un tool
 
 ```python
@@ -25,17 +26,16 @@ def timer_tool(duration: str) -> str:
 ## Esecuzione minimale con invoke
 
 ```python
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = ClientFactory.create(
-    provider="openai", 
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"), 
     model="gpt-5",
     temperature=1
-    )
+)
 
 response = client.invoke(
     "Set a timer for 5 minutes",
@@ -43,9 +43,8 @@ response = client.invoke(
     tool_choice="auto"
 )
 
-print(response.text)  # Qualsiasi risposta testuale
+print(response.text)
 for f_call in response.function_calls or []:
-    # Esegui il tool locale con gli argomenti suggeriti
     result = timer_tool(**(f_call.arguments or {}))
     print("tool result:", result)
 ```
@@ -77,15 +76,14 @@ def cerca_informazioni(query: str) -> str:
 ### Esecuzione
 
 ```python
-# Client e Memory  
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import OpenAIClient
 from datapizzai.memory import Memory
 from datapizzai.type import FunctionCallResultBlock, ROLE
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+client = OpenAIClient(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 tools = [calcolatrice, cerca_informazioni]
 memory = Memory()
@@ -96,8 +94,6 @@ response = client.invoke(
     tool_choice="auto",
     memory=memory
 )
-
-# Esecuzione iterativa dei function call
 while hasattr(response, "function_calls") and response.function_calls:
     # Aggiungi la risposta dell'assistant alla memoria
     memory.add_turn(response.content, ROLE.ASSISTANT)
@@ -144,8 +140,7 @@ from datapizzai.type import TextBlock, ROLE
 
 def create_conversational_client():
     memory = Memory()
-    client = ClientFactory.create(
-        provider="openai",
+    client = OpenAIClient(
         api_key=os.getenv("OPENAI_API_KEY"),
         model="gpt-4o",
     )
@@ -225,9 +220,6 @@ print(f"📊 Turni totali: {len(memory.memory)}")
 print(f"💬 Blocchi totali: {len(list(memory.iter_blocks()))}")
 ```
 
-<!-- Sezione esempi ripetitivi rimossa per evitare ridondanza -->
-
-
 ## Best practices
 
 ### Design dei tool
@@ -241,13 +233,12 @@ print(f"💬 Blocchi totali: {len(list(memory.iter_blocks()))}")
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
+from datapizzai.clients import GoogleClient
 from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
 
-client = ClientFactory.create(
-    provider="google",
+client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
     model="gemini-2.0-flash",
 )
@@ -256,3 +247,54 @@ response = client.invoke("Quando iniziano le olimpiadi invernali?", tools=[googl
 
 print(response.text)
 ```
+
+## Perché intervenire manualmente sui tool
+
+I tool mantengono l'umano nel loop: ogni volta che il modello propone una `function_call` puoi decidere se eseguirla, modificarla o bloccarla.
+
+### Quando conviene intervenire
+- **Operazioni irreversibili o sensibili**: cancellazioni, scritture su filesystem, transazioni
+- **Parametri incerti**: il modello potrebbe allucinare percorsi, ID o query; serve validazione
+- **Vincoli esterni**: rate limiting, permessi per utente/ruolo, policy aziendali
+- **Costi e performance**: chiamate costose (es. API a pagamento) da eseguire solo se davvero necessarie
+- **Esperienza utente**: vuoi confermare o riformulare l'azione prima di procedere
+
+Per task idempotenti e a basso rischio (es. piccole trasformazioni di stringhe) puoi invece lasciare l'esecuzione completamente automatica.
+
+### Flusso di gestione consigliato
+1. Ispeziona `response.function_calls` e identifica lo strumento richiesto
+2. Valida che i parametri siano completi, coerenti e autorizzati
+3. Esegui il tool o nega l'operazione motivandolo al modello
+4. Restituisci il risultato (o l'errore) al modello tramite `FunctionCallResultBlock`
+
+### Esempio di gating personalizzato
+```python
+# Funzioni helper definite da te
+tools_map = {
+    "web_search": web_search,
+    "file_delete": file_delete,
+}
+
+for f_call in response.function_calls or []:
+    tool_name = f_call.name
+    args = f_call.arguments or {}
+
+    if tool_name == "file_delete":
+        result = "Operazione bloccata: richiede approvazione esplicita"
+    elif not params_are_valid(args):
+        result = "Parametri non validi o incompleti"
+    else:
+        result = tools_map[tool_name](**args)
+
+    tool_result = FunctionCallResultBlock(
+        id=f_call.id,
+        tool=f_call.tool,
+        result=result,
+    )
+    memory.add_turn([tool_result], ROLE.TOOL)
+```
+Quindi, in conclusione, quando e perché conviene usarlo?
+- **Governance**: puoi applicare policy diverse in base a chi sta usando l'assistente
+- **Osservabilità**: log controllato su quando e perché un tool viene autorizzato o negato
+- **Recupero rapido**: fornisci al modello messaggi mirati per riprovare con parametri corretti
+- **Tutela dei sistemi**: eviti effetti collaterali su risorse critiche o dati sensibili

@@ -41,15 +41,16 @@ from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents im
 
 load_dotenv()
 
-# Cache in-process
+# Configurazione con cache
 cache = MemoryCache()
 
 # Client OpenAI con cache
 openai_client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
-    temperature=0.3,
-    cache=cache,
+    system_prompt="Sei un assistente AI utile.",
+    temperature=0.7,
+    cache=cache
 )
 
 # Test veloce del client (la seconda chiamata è un cache hit)
