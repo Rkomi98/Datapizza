@@ -13,51 +13,24 @@ Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libr
 
 ## 1. Creare un agente
 
-Un agente è un'entità autonoma che utilizza un modello linguistico (LLM) per ragionare e usare strumenti (`tools`) per risolvere problemi.
-
-```mermaid
-graph TD;
-    subgraph Single Agent Architecture;
-        A["User Query"] --> B{"Agent (Brain)"};
-        B --> C["LLM Client (Reasoning)"];
-        B --> D["Tools (Actions)"];
-        B --> E["Memory (Context)"];
-        C --> B;
-        D --> B;
-        E --> B;
-        B --> F["Final Response"];
-    end;
-```
-
-La sua creazione richiede la configurazione di diversi parametri che ne definiscono il comportamento.
+Un agente è un'entità autonoma che utilizza un LLM per ragionare, usare strumenti (`tools`) e risolvere problemi. La sua creazione richiede la configurazione di diversi parametri che ne definiscono il comportamento.
 
 ```python
 import os
 from dotenv import load_dotenv
 from datapizzai.clients import OpenAIClient
-from datapizzai.cache import MemoryCache
 from datapizzai.tools import tool
 from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents import Agent, ClientManager
 
 load_dotenv()
 
-# Configurazione con cache
-cache = MemoryCache()
-
-# Client OpenAI con cache
+# Client OpenAI
 openai_client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
     system_prompt="Sei un assistente AI utile.",
     temperature=0.7,
-    cache=cache
 )
-
-# Test veloce del client (la seconda chiamata è un cache hit)
-r1 = openai_client.invoke("Ciao!")
-print("Risposta 1:", r1.text)
-r2 = openai_client.invoke("Ciao!")
-print("Risposta 2 (cache hit):", r2.text)
 
 # Tool
 @tool
@@ -100,38 +73,92 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-Per problemi complessi, è efficace combinare più agenti specializzati. Un agente "coordinatore" riceve la richiesta, la scompone e delega i sotto-compiti agli agenti più adatti.
-
-Questo si ottiene tramite il parametro `can_call`.
+Per problemi complessi, è efficace combinare agenti specializzati che collaborano tra loro. Nel flusso seguente un agente "Ricerche" raccoglie le fonti, un agente "DataAnalysis" sintetizza gli insight principali e un agente "Aggregator" produce la risposta finale.
 
 ```mermaid
 graph TD
-    subgraph Multi-Agent System
-        A["Complex User Query"] --> B{"Coordinator Agent"}
-        B -- Plan --> P((Plan))
-        B -- Task 1 --> C["text_analysis_tool"]:::tool
-        B -- Task 2 --> D["calculator_tool"]:::tool
-        C -- Result --> B
-        D -- Result --> B
-        B -- Synthesize --> E["Final Response"]
-    end
-
-classDef tool fill:#E6F7FF,stroke:#1890FF,color:#003A8C
-classDef agent fill:#FFF7E6,stroke:#FA8C16,color:#613400
-class B agent
+    U["Richiesta utente"] --> R{"Agente Ricerche"}
+    R -->|Top-k risultati| D{"Agente DataAnalysis"}
+    D -->|Insight strutturati| G{"Agente Aggregator"}
+    G --> F["Risposta finale"]
 ```
 
 ```python
-analyst_agent = Agent(name="Analyst_Agent", tools=[text_analysis_tool])
-calculator_agent = Agent(name="Calculator_Agent", tools=[calculator_tool])
+import os
+from dotenv import load_dotenv
 
-coordinator = Agent(name="Coordinator_Agent", can_call=[analyst_agent, calculator_agent])
-response = coordinator.run("Analizza il testo 'AI is powerful' e calcola 1024 / 256")
+from datapizzai.agents import Agent
+from datapizzai.clients import ClientFactory
+from datapizzai.tools import tool
+
+load_dotenv()
+
+base_client = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o-mini",
+    temperature=0.4,
+)
+
+@tool
+def fetch_research(topic: str, top_k: int = 3) -> str:
+    """Restituisce un elenco di top_k spunti rilevanti per il topic richiesto."""
+    return (
+        "1. Studio ESA sui nanosatelliti\n"
+        "2. Report NASA sulla propulsione elettrica\n"
+        "3. Articolo IEEE su costellazioni commerciali"
+    )
+
+@tool
+def analyse_findings(items: str) -> str:
+    """Analizza i risultati forniti e sintetizza metriche e rischi principali."""
+    return (
+        "Sintesi: crescita investimenti +45% YoY;"
+        " principali rischi: congestione orbitale, debris."
+    )
+
+research_agent = Agent(
+    name="Ricerche",
+    client=base_client,
+    system_prompt=(
+        "Sei il decision maker per la fase di ricerca.\n"
+        "Usa il tool fetch_research per reperire fonti e restituisci sempre esattamente top_k voci"
+        " numerate con breve motivazione."
+    ),
+    tools=[fetch_research],
+    terminate_on_text=True,
+)
+
+analysis_agent = Agent(
+    name="DataAnalysis",
+    client=base_client,
+    system_prompt=(
+        "Ricevi un elenco di spunti dal collega Ricerche.\n"
+        "Usa analyse_findings per produrre insight quantitativi e raccomandazioni operative concise."
+    ),
+    tools=[analyse_findings],
+    terminate_on_text=True,
+)
+
+aggregator_agent = Agent(
+    name="Aggregator",
+    client=base_client,
+    system_prompt=(
+        "Coordini la pipeline.\n"
+        "1) Chiedi a Ricerche i top_k risultati pertinenti.\n"
+        "2) Passa l'elenco a DataAnalysis per l'elaborazione.\n"
+        "3) Redigi la risposta finale integrando motivazioni e prossimi passi."
+    ),
+    can_call=[research_agent, analysis_agent],
+    terminate_on_text=True,
+)
+
+prompt = "Aggiorna il team sulle novità riguardo i cubesat per telecomunicazioni."
+final_answer = aggregator_agent.run(prompt)
+print(final_answer)
 ```
 
-- `can_call` (`List[Agent]`): Rende gli agenti nella lista disponibili come "strumenti" per il coordinatore, che può quindi invocarli passandogli un compito specifico.
-
-```
+- `can_call` (`List[Agent]`): rende gli agenti nella lista disponibili come "strumenti" per l'aggregatore, che li invoca passando un sotto-compito specifico.
 
 ## 4. Planning interval
 
@@ -163,7 +190,3 @@ flowchart LR
     S6 --> P2[Revisione Piano]
     P2 --> E[End]
 ```
-
-## Informazioni aggiuntive
-
-- Il file `agent_complete.py` contiene implementazioni complete e scenari avanzati.

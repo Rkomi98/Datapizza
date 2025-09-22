@@ -13,50 +13,23 @@ This guide shows how to build and orchestrate AI agents using the `datapizzai` l
 
 ## 1. Create an agent
 
-An agent is an autonomous entity that uses a language model (LLM) to reason, use tools, and maintain conversational memory to solve problems.
-
-```mermaid
-graph TD;
-    subgraph Single Agent Architecture;
-        A["User Query"] --> B{"Agent (Brain)"};
-        B --> C["LLM Client (Reasoning)"];
-        B --> D["Tools (Actions)"];
-        B --> E["Memory (Context)"];
-        C --> B;
-        D --> B;
-        E --> B;
-        B --> F["Final Response"];
-    end;
-```
-
-Its creation requires configuring several parameters that define its behavior.
+An agent is an autonomous entity that uses a LLM to reason, operate tools, and solve problems. Creating one means configuring the parameters that shape its behaviour.
 
 ```python
 import os
 from dotenv import load_dotenv
 from datapizzai.clients import OpenAIClient
-from datapizzai.cache import MemoryCache
 from datapizzai.tools import tool
 from datapizzai.agents import Agent  # alternatively: from datapizzai.agents import Agent, ClientManager
 
 load_dotenv()
 
-# In‑process cache
-cache = MemoryCache()
-
-# OpenAI client with cache
+# OpenAI client
 openai_client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
     temperature=0.3,
-    cache=cache,
 )
-
-# Quick client test (second call is a cache hit)
-r1 = openai_client.invoke("Hello!")
-print("Response 1:", r1.text)
-r2 = openai_client.invoke("Hello!")
-print("Response 2 (cache hit):", r2.text)
 
 # Tool
 @tool
@@ -113,36 +86,92 @@ Once configured, the agent can be run in different modes:
 
 ## 3. Multi‑agent system
 
-For complex problems, it is effective to combine multiple specialized agents. A "coordinator" agent receives the request, breaks it down, and delegates the sub-tasks to the most suitable agents.
-
-This is achieved through the `can_call` parameter.
+For complex problems it is useful to orchestrate specialised agents. In the following pipeline a "Research" agent collects the top findings, a "DataAnalysis" agent extracts the core insights, and an "Aggregator" drafts the final answer.
 
 ```mermaid
 graph TD
-    subgraph Multi-Agent System
-        A["Complex User Query"] --> B{"Coordinator Agent"}
-        B -- Plan --> P((Plan))
-        B -- Task 1 --> C["text_analysis_tool"]:::tool
-        B -- Task 2 --> D["calculator_tool"]:::tool
-        C -- Result --> B
-        D -- Result --> B
-        B -- Synthesize --> E["Final Response"]
-    end
-
-classDef tool fill:#E6F7FF,stroke:#1890FF,color:#003A8C
-classDef agent fill:#FFF7E6,stroke:#FA8C16,color:#613400
-class B agent
+    U["User request"] --> R{"Research Agent"}
+    R -->|Top-k findings| D{"DataAnalysis Agent"}
+    D -->|Structured insights| G{"Aggregator Agent"}
+    G --> F["Final response"]
 ```
 
 ```python
-analyst_agent = Agent(name="Analyst_Agent", tools=[text_analysis_tool])
-calculator_agent = Agent(name="Calculator_Agent", tools=[calculator_tool])
+import os
+from dotenv import load_dotenv
 
-coordinator = Agent(name="Coordinator_Agent", can_call=[analyst_agent, calculator_agent])
-response = coordinator.run("Analyze the text 'AI is powerful' and calculate 1024 / 256")
+from datapizzai.agents import Agent
+from datapizzai.clients import ClientFactory
+from datapizzai.tools import tool
+
+load_dotenv()
+
+base_client = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o-mini",
+    temperature=0.4,
+)
+
+@tool
+def fetch_research(topic: str, top_k: int = 3) -> str:
+    """Returns a shortlist of top_k relevant findings for the requested topic."""
+    return (
+        "1. ESA study on nanosatellites\n"
+        "2. NASA report on electric propulsion\n"
+        "3. IEEE article on commercial constellations"
+    )
+
+@tool
+def analyse_findings(items: str) -> str:
+    """Analyses the supplied findings and surfaces metrics plus key risks."""
+    return (
+        "Summary: investments up 45% YoY;"
+        " key risks: orbital congestion, debris management."
+    )
+
+research_agent = Agent(
+    name="Research",
+    client=base_client,
+    system_prompt=(
+        "You make go/no-go decisions for the discovery phase.\n"
+        "Use the fetch_research tool to collect sources and always return exactly top_k numbered"
+        " items with a short justification."
+    ),
+    tools=[fetch_research],
+    terminate_on_text=True,
+)
+
+analysis_agent = Agent(
+    name="DataAnalysis",
+    client=base_client,
+    system_prompt=(
+        "You receive the shortlist from the Research agent.\n"
+        "Use analyse_findings to produce quantitative insights and concise operational advice."
+    ),
+    tools=[analyse_findings],
+    terminate_on_text=True,
+)
+
+aggregator_agent = Agent(
+    name="Aggregator",
+    client=base_client,
+    system_prompt=(
+        "Coordinate the pipeline.\n"
+        "1) Ask Research for the relevant top_k findings.\n"
+        "2) Hand the list to DataAnalysis for processing.\n"
+        "3) Deliver the final answer, citing decisions and suggested next steps."
+    ),
+    can_call=[research_agent, analysis_agent],
+    terminate_on_text=True,
+)
+
+prompt = "Update the team on the latest cubesat developments for telecommunications."
+final_answer = aggregator_agent.run(prompt)
+print(final_answer)
 ```
 
-- `can_call` (`List[Agent]`): Makes the agents in the list available as "tools" for the coordinator, who can then invoke them by passing a specific task.
+- `can_call` (`List[Agent]`): makes the listed agents available as "tools" for the aggregator, which delegates specific subtasks to them.
 
 ## 4. Planning interval
 
