@@ -112,8 +112,8 @@ load_dotenv()
 base_client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o-mini",
-    temperature=0.4,
+    model="gpt-5",
+    temperature=1,
 )
 
 @tool
@@ -164,9 +164,9 @@ router_agent = Agent(
         "Assess each incoming request and decide whether Research, DataAnalysis or both are required."
         " Whenever you call a specialist, summarise the outcome in JSON under the 'outputs' key."
     ),
-    can_call=[research_agent, analysis_agent],
     terminate_on_text=True,
 )
+router_agent.can_call([research_agent, analysis_agent])
 
 aggregator_agent = Agent(
     name="Aggregator",
@@ -176,9 +176,9 @@ aggregator_agent = Agent(
         " 1) Ask Router to orchestrate the needed specialists."
         " 2) Combine the collected material into sections 'Overview' and 'Next steps'."
     ),
-    can_call=[router_agent],
     terminate_on_text=True,
 )
+aggregator_agent.can_call(router_agent)
 
 user_query = (
     "Share a commercial outlook for generative AI in fintech and highlight potential risks."

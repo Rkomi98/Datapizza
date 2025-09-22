@@ -73,17 +73,17 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-Per gestire richieste eterogenee è utile introdurre uno strato di routing che sceglie quali specialisti coinvolgere e un aggregatore che unisce i risultati. Nel flusso seguente la richiesta passa a un agente "Router" che decide se attivare gli specialisti disponibili; gli output confluiscono infine nell'agente "Aggregator" che produce la risposta finale.
+Per gestire richieste eterogenee basta un agente orchestratore che inoltra la domanda agli specialisti e poi costruisce la risposta finale. Nel flusso seguente chiamiamo questo agente "DecisionHub": decide se coinvolgere gli specialisti disponibili (ricerche, analisi) e unisce i risultati in un'unica risposta strutturata.
 
 ```mermaid
 graph TD
-    U["Input utente"] --> T{"Router"}
-    T -->|Se serve ricerca| R{"Agente Ricerche"}
-    T -->|Se servono analisi| D{"Agente DataAnalysis"}
-    R --> T
-    D --> T
-    T --> G{"Agente Aggregator"}
-    G --> F["Risposta finale"]
+    U["Input utente"] --> H{"DecisionHub"}
+    H -->|Se serve scouting| R{"Agente Ricerche"}
+    H -->|Se servono KPI
+ o rischi| D{"Agente DataAnalysis"}
+    R --> H
+    D --> H
+    H --> F["Risposta finale"]
 ```
 
 ```python
@@ -137,40 +137,30 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=base_client,
     system_prompt=(
-        "Ricevi dati grezzi o appunti dal router e rispondi con insight quantitativi."
+        "Ricevi dati grezzi o appunti dal collega DecisionHub e rispondi con insight quantitativi."
         " Se presenti numeri, usa compute_metrics; per aspetti qualitativi integra risk_matrix."
     ),
     tools=[compute_metrics, risk_matrix],
     terminate_on_text=True,
 )
 
-router_agent = Agent(
-    name="Router",
+decision_hub = Agent(
+    name="DecisionHub",
     client=base_client,
     system_prompt=(
-        "Valuta ogni richiesta. Decidi se coinvolgere Ricerche, DataAnalysis o entrambi."
-        " Se attivi uno specialista, riassumi il risultato in JSON con chiave 'outputs'."
+        "Sei l'orchestratore."
+        " 1) Valuta la richiesta e chiama Ricerche e/o DataAnalysis quando serve."
+        " 2) Dopo ogni chiamata, riassumi i risultati in un elenco strutturato."
+        " 3) Fornisci una risposta finale con sezioni 'Scenario' e 'Prossimi passi'."
     ),
-    can_call=[research_agent, analysis_agent],
     terminate_on_text=True,
 )
-
-aggregator_agent = Agent(
-    name="Aggregator",
-    client=base_client,
-    system_prompt=(
-        "Sei il coordinatore finale."
-        " 1) Chiedi a Router di orchestrare gli specialisti necessari."
-        " 2) Combina quanto ricevuto in una risposta strutturata con sezioni 'Scenario' e 'Prossimi passi'."
-    ),
-    can_call=[router_agent],
-    terminate_on_text=True,
-)
+decision_hub.can_call([research_agent, analysis_agent])
 
 user_query = (
     "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
 )
-final_answer = aggregator_agent.run(user_query)
+final_answer = decision_hub.run(user_query)
 print(final_answer)
 ```
 
