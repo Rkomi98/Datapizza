@@ -86,17 +86,16 @@ Once configured, the agent can be run in different modes:
 
 ## 3. Multi‑agent system
 
-To handle diverse requests you can add a routing layer that decides which specialists to involve, plus an aggregator that merges their outputs. In the flow below the input hits a "Router" agent that chooses which specialists to activate; their results are then handed to an "Aggregator" agent that crafts the final answer.
+To handle varied requests you can rely on a single orchestrator agent that routes work to specialists and then produces the final response. In the flow below the "DecisionHub" agent evaluates the task, optionally calls the research/analysis specialists, and returns a consolidated answer.
 
 ```mermaid
 graph TD
-    U["User request"] --> T{"Router"}
-    T -->|Trigger research| R{"Research Agent"}
-    T -->|Trigger analysis| D{"DataAnalysis Agent"}
-    R --> T
-    D --> T
-    T --> G{"Aggregator Agent"}
-    G --> F["Final response"]
+    U["User request"] --> H{"DecisionHub"}
+    H -->|If scouting needed| R{"Research Agent"}
+    H -->|If KPIs / risks needed| D{"DataAnalysis Agent"}
+    R --> H
+    D --> H
+    H --> F["Final response"]
 ```
 
 ```python
@@ -112,8 +111,8 @@ load_dotenv()
 base_client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-5",
-    temperature=1,
+    model="gpt-4o-mini",
+    temperature=0.4,
 )
 
 @tool
@@ -150,40 +149,30 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=base_client,
     system_prompt=(
-        "You enrich quantitative or qualitative notes coming from the router."
+        "You enrich quantitative or qualitative notes coming from DecisionHub."
         " For numbers call compute_metrics; for qualitative aspects complement with risk_matrix."
     ),
     tools=[compute_metrics, risk_matrix],
     terminate_on_text=True,
 )
 
-router_agent = Agent(
-    name="Router",
+decision_hub = Agent(
+    name="DecisionHub",
     client=base_client,
     system_prompt=(
-        "Assess each incoming request and decide whether Research, DataAnalysis or both are required."
-        " Whenever you call a specialist, summarise the outcome in JSON under the 'outputs' key."
+        "You orchestrate the workflow."
+        " 1) Inspect each request and call Research and/or DataAnalysis only when needed."
+        " 2) After each call, produce a structured summary."
+        " 3) Deliver the final answer with sections 'Overview' and 'Next steps'."
     ),
     terminate_on_text=True,
 )
-router_agent.can_call([research_agent, analysis_agent])
-
-aggregator_agent = Agent(
-    name="Aggregator",
-    client=base_client,
-    system_prompt=(
-        "You are the final coordinator."
-        " 1) Ask Router to orchestrate the needed specialists."
-        " 2) Combine the collected material into sections 'Overview' and 'Next steps'."
-    ),
-    terminate_on_text=True,
-)
-aggregator_agent.can_call(router_agent)
+decision_hub.can_call([research_agent, analysis_agent])
 
 user_query = (
     "Share a commercial outlook for generative AI in fintech and highlight potential risks."
 )
-final_answer = aggregator_agent.run(user_query)
+final_answer = decision_hub.run(user_query)
 print(final_answer)
 ```
 
