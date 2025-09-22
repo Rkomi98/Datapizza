@@ -89,15 +89,7 @@ Once configured, you can execute the agent in several modes:
 
 A sophisticated multi-agent system requires intelligent routing based on the nature of the request. The `DecisionHub` pattern below analyzes incoming queries and conditionally routes them to specialized agents:
 
-```mermaid
-graph TD
-    U["User request"] --> H{"DecisionHub"}
-    H -->|If scouting needed| R{"Research Agent"}
-    H -->|If KPIs/risks needed| D{"DataAnalysis Agent"}
-    R --> H
-    D --> H
-    H --> F["Final response"]
-```
+![multi-agent-svg-animation](https://github.com/user-attachments/assets/4d2fcdad-24f7-4dd5-b6bd-26110c3dcc9e)
 
 ```python
 import os
