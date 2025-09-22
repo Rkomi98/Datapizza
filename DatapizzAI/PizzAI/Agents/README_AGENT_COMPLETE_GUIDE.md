@@ -73,9 +73,17 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-Per gestire richieste eterogenee basta un agente orchestratore che inoltra la domanda agli specialisti e poi costruisce la risposta finale. Nel flusso seguente chiamiamo questo agente "DecisionHub": decide se coinvolgere gli specialisti disponibili (ricerche, analisi) e unisce i risultati in un'unica risposta strutturata.
+Per gestire richieste eterogenee può bastare un orchestratore applicativo che decide quando raccogliere informazioni dal modello e quando sintetizzarle in un'unica risposta finale. Nell'esempio seguente l'orchestratore `decision_hub_pipeline` richiama due agenti specializzati: `Ricerche` (per ottenere un elenco numerato di fonti) e `DataAnalysis` (per trasformare tali note in scenario e prossimi passi).
 
-![multi-agent-svg-animation](https://github.com/user-attachments/assets/c8fb075e-50bc-4bfa-bbb8-032166abbb41)
+```mermaid
+graph TD
+    U["Input utente"] --> P["Funzione DecisionHub"]
+    P -->|Prompt ricerca| R{"Agente Ricerche"}
+    R -->|Note numerate| P
+    P -->|Prompt analisi| D{"Agente DataAnalysis"}
+    D -->|Sintesi finale| P
+    P --> F["Risposta finale"]
+```
 
 ```python
 import os
@@ -105,73 +113,61 @@ def web_digest(topic: str, top_k: int = 3) -> str:
 
 @tool
 def synthesize_insights(research_notes: str) -> str:
-    """Trasforma le note di ricerca in insight quantitativi e rischi principali."""
+    """Condensa le note di ricerca in scenario e prossimi passi."""
+    bullets = [line.strip() for line in research_notes.splitlines() if line.strip()]
+    summary = \"; \".join(bullets[:3])
     return (
-        "Sintesi quantitativa: mercato fintech AI +18% YoY; budget medio 2.3M€.\n"
-        "Rischi principali: compliance regolatoria, privacy dei dati."
+        f"Scenario: {summary}\n\n"
+        "Prossimi passi:\n"
+        "- Validare gli impatti regolatori con il team legale\n"
+        "- Prioritizzare i use case a ROI più alto"
     )
 
 research_agent = Agent(
     name="Ricerche",
     client=base_client,
     system_prompt=(
-        "Sei lo specialista di scouting informativo. Usa web_digest una sola volta per recuperare al massimo top_k punti\n"
-        "e restituisci sempre un elenco numerato con breve giustificazione."
+        "Sei lo specialista di scouting. Usa il tool web_digest UNA sola volta"
+        " e restituisci sempre un elenco numerato (1., 2., 3.)."
     ),
     tools=[web_digest],
     terminate_on_text=True,
+    max_steps=2,
 )
 
 analysis_agent = Agent(
     name="DataAnalysis",
     client=base_client,
     system_prompt=(
-        "Ricevi le note di ricerca dal DecisionHub e fornisci insight sintetici."
-        " Usa il tool synthesize_insights esattamente una volta per trasformare il testo in metriche e rischi."
+        "Ricevi le note di ricerca e devi sintetizzarle."
+        " Usa il tool synthesize_insights UNA sola volta e restituisci la risposta così com'è."
     ),
     tools=[synthesize_insights],
     terminate_on_text=True,
+    max_steps=2,
 )
 
-decision_hub = Agent(
-    name="DecisionHub",
-    client=base_client,
-    system_prompt=(
-        "Sei l'orchestratore.\n"
-        "Segui SEMPRE questi passi:\n"
-        "1) Analizza la richiesta.\n"
-        "2) Se servono fonti, chiama una sola volta l'agente Ricerche (usa web_digest con top_k<=5).\n"
-        "3) Se servono insight, chiama una sola volta l'agente DataAnalysis passando nel parametro 'research_notes' esattamente l'elenco numerato ricevuto da Ricerche.\n"
-        "4) Integra i risultati in una risposta finale con sezioni 'Scenario' e 'Prossimi passi'.\n"
-        "5) Dopo aver scritto la risposta finale, termina immediatamente senza richiamare altri tool o agenti.\n"
-        "Non richiamare mai lo stesso specialista due volte."
-    ),
-    terminate_on_text=True,
-    max_steps=4,
-)
-decision_hub.can_call([research_agent, analysis_agent])
+def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
+    research_prompt = (
+        f"Fornisci al massimo {top_k} trend numerati (1., 2., 3.) su: {user_query}. "
+        "Non aggiungere altro testo."
+    )
+    research_notes = research_agent.run(research_prompt)
 
-user_query = (
-    "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
-)
+    analysis_prompt = (
+        "Trasforma le seguenti note in scenario e prossimi passi usando il tool synthesize_insights."
+    )
+    analysis_input = f"{analysis_prompt}\n\nNOTE DI RICERCA:\n{research_notes}"
 
-import asyncio
+    insights = analysis_agent.run(analysis_input)
+    return f"Scenario multi-agente per '{user_query}'\n\n{insights}"
 
-async def main():
-    final_answer = await decision_hub.a_run(user_query)
-    print(final_answer)
+user_query = "Serve un aggiornamento sulle opportunità commerciali dell'AI generativa in fintech e un check dei rischi."
+final_answer = decision_hub_pipeline(user_query)
+print(final_answer)
+```
 
-if __name__ == "__main__":
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        asyncio.run(main())
-    else:
-        loop.create_task(main())
-``````
-
-- `can_call` (`List[Agent]`): consente a un agente di invocare altri agenti come fossero tool, passando di volta in volta il sotto-compito opportuno.
-- Nota: dato che gli agenti collegati vengono eseguiti in modalità asincrona, usa `a_run` e gestisci il loop come mostrato nell'esempio (`asyncio.run` o `loop.create_task`) per evitare errori sugli async tool.
+- L'orchestratore può essere arricchito con logiche di routing più sofisticate (classificazione, regole, feedback utenti) prima di decidere quali agenti coinvolgere.
 
 ## 4. Planning interval
 

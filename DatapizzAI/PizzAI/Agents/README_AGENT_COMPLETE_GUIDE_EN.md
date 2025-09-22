@@ -86,16 +86,16 @@ Once configured, the agent can be run in different modes:
 
 ## 3. Multi‑agent system
 
-To handle varied requests you can rely on a single orchestrator agent that routes work to specialists and then produces the final response. In the flow below the "DecisionHub" agent evaluates the task, optionally calls the research/analysis specialists, and returns a consolidated answer.
+A lightweight application-level orchestrator can decide when to gather information from the model and when to merge it into one coherent answer. In the example below the `decision_hub_pipeline` calls two specialised agents: `Research` (to obtain a numbered list of sources) and `DataAnalysis` (to convert those notes into an overview and action items).
 
 ```mermaid
 graph TD
-    U["User request"] --> H{"DecisionHub"}
-    H -->|If scouting needed| R{"Research Agent"}
-    H -->|If KPIs / risks needed| D{"DataAnalysis Agent"}
-    R --> H
-    D --> H
-    H --> F["Final response"]
+    U["User request"] --> P["DecisionHub function"]
+    P -->|Research prompt| R{"Research Agent"}
+    R -->|Numbered notes| P
+    P -->|Analysis prompt| D{"DataAnalysis Agent"}
+    D -->|Final synthesis| P
+    P --> F["Final response"]
 ```
 
 ```python
@@ -126,74 +126,60 @@ def web_digest(topic: str, top_k: int = 3) -> str:
 
 @tool
 def synthesize_insights(research_notes: str) -> str:
-    """Turns the research notes into key metrics and risk highlights."""
+    """Condenses the research notes into an overview and suggested next steps."""
+    bullets = [line.strip() for line in research_notes.splitlines() if line.strip()]
+    summary = \"; \".join(bullets[:3])
     return (
-        "Quantitative outlook: fintech generative AI +18% YoY; avg budget €2.3M.\n"
-        "Major risks: regulatory compliance, data privacy."
+        f"Overview: {summary}\n\n"
+        "Next steps:\n"
+        "- Validate regulatory impacts with the legal team\n"
+        "- Prioritise the highest-return use cases"
     )
 
 research_agent = Agent(
     name="Research",
     client=base_client,
     system_prompt=(
-        "You scout for external signals. Use web_digest once to fetch up to top_k bullet points
-"
-        "and always return a numbered list with a one-line justification."
+        "You scout for external signals. Use the web_digest tool ONCE and always return a numbered list (1., 2., 3.)."
     ),
     tools=[web_digest],
     terminate_on_text=True,
+    max_steps=2,
 )
 
 analysis_agent = Agent(
     name="DataAnalysis",
     client=base_client,
     system_prompt=(
-        "You receive the research notes from DecisionHub and output concise insights."
-        " Call synthesize_insights exactly once to convert the text into metrics and risks."
+        "You receive the research notes and must turn them into a concise synthesis."
+        " Use the synthesize_insights tool ONCE and return the tool output verbatim."
     ),
     tools=[synthesize_insights],
     terminate_on_text=True,
+    max_steps=2,
 )
 
-decision_hub = Agent(
-    name="DecisionHub",
-    client=base_client,
-    system_prompt=(
-        "You orchestrate the workflow.\n"
-        "Always follow these steps:\n"
-        "1) Inspect the request.\n"
-        "2) If sources are needed, call the Research agent once (web_digest with top_k<=5).\n"
-        "3) If insights are needed, call the DataAnalysis agent once passing the numbered list as 'research_notes'.\n"
-        "4) Merge the findings into a final answer with sections 'Overview' and 'Next steps'.\n"
-        "5) After writing the final answer, stop immediately without calling any further tools or agents.\n"
-        "Never call the same specialist twice."
-    ),
-    terminate_on_text=True,
-    max_steps=4,
-)
-decision_hub.can_call([research_agent, analysis_agent])
+def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
+    research_prompt = (
+        f"Provide up to {top_k} numbered bullet points (1., 2., 3.) about: {user_query}. "
+        "Do not add extra text."
+    )
+    research_notes = research_agent.run(research_prompt)
 
-user_query = (
-    "Share a commercial outlook for generative AI in fintech and highlight potential risks."
-)
+    analysis_prompt = (
+        "Turn the following notes into an overview and next steps using the synthesize_insights tool."
+    )
+    analysis_input = f"{analysis_prompt}\n\nRESEARCH NOTES:\n{research_notes}"
 
-import asyncio
+    insights = analysis_agent.run(analysis_input)
+    return f"Multi-agent scenario for '{user_query}'\n\n{insights}"
 
-async def main():
-    final_answer = await decision_hub.a_run(user_query)
-    print(final_answer)
+user_query = "Share a commercial outlook for generative AI in fintech and highlight potential risks."
+final_answer = decision_hub_pipeline(user_query)
+print(final_answer)
+```
 
-if __name__ == "__main__":
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        asyncio.run(main())
-    else:
-        loop.create_task(main())
-``````
-
-- `can_call` (`List[Agent]`): lets an agent invoke other agents as if they were tools, delegating the appropriate subtask on demand.
-- Note: because the delegated agents run asynchronously, call `a_run` and manage the loop as shown (either `asyncio.run` or `loop.create_task`) to avoid async-tool runtime errors.
+- The orchestrator can incorporate richer routing logic (classification, rules, user feedback) before deciding which agents to call.
 
 ## 4. Planning interval
 
