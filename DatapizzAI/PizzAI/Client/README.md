@@ -9,10 +9,8 @@ Per due esempi completi di adapter personalizzati consulta anche la guida dedica
 - [Setup base del codice](#setup-base-del-codice)
 - [Metodo 1: Configurazione diretta dei client](#metodo-1-configurazione-diretta-dei-client)
 - [Metodo 2: Utilizzo del ClientFactory (raccomandato)](#metodo-2-utilizzo-del-clientfactory-raccomandato)
-- [Metodo 3: Provider personalizzato via API (es. IBM WatsonX)](#metodo-3-provider-personalizzato-via-api-es-ibm-watsonX)
-- [Metodo 4: Modello locale (Ollama/Gemma)](#metodo-4-modello-locale-ollamagemma)
-- [Esempio completo di utilizzo](#esempio-completo-di-utilizzo)
-- [Prossimi passi](#prossimi-passi)
+- [Metodo 3: Client custom (provider esterno o modello locale)](#metodo-3-client-custom-provider-esterno-o-modello-locale)
+  - [Per un esempio completo clicca qui](#per-un-esempio-completo-clicca-qui)
 
 ## Prerequisiti
 
@@ -55,14 +53,13 @@ from datapizzai.clients import (
 )
 from datapizzai.clients.factory import Provider
 ```
-
 ---
 
 ## Metodo 1: Configurazione diretta dei client
 
 La configurazione diretta offre un controllo granulare sui parametri specifici di ciascun provider, come opzioni di caching o endpoint personalizzati.
 
-### OpenAI client avanzato
+### OpenAI client diretto
 ```python
 from datapizzai.cache import MemoryCache
 
@@ -82,7 +79,7 @@ response = openai_client.invoke("Ciao! Come stai?")
 print(f"Risposta: {response.text}")
 ```
 
-### Anthropic client avanzato
+### Anthropic client diretto
 ```python
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -96,7 +93,7 @@ response = anthropic_client.invoke("Scrivi una breve poesia sulla tecnologia")
 print(f"Risposta: {response.text}")
 ```
 
-### Google client avanzato
+### Google client diretto
 ```python
 # Configurazione standard (GenAI API)
 google_client = GoogleClient(
@@ -123,7 +120,7 @@ response = google_client.invoke("Spiegami il teorema di Pitagora")
 print(f"Risposta: {response.text}")
 ```
 
-### Mistral client avanzato
+### Mistral client diretto
 ```python
 mistral_client = MistralClient(
     api_key=os.getenv("MISTRAL_API_KEY"),
@@ -137,7 +134,7 @@ response = mistral_client.invoke("Traduci 'Hello world' in italiano e francese")
 print(f"Risposta: {response.text}")
 ```
 
-### Azure OpenAI client avanzato
+### Azure OpenAI client diretto
 ```python
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -226,76 +223,66 @@ azure_client = ClientFactory.create(
 
 ---
 
-## Metodo 3: Provider personalizzato via API (es. IBM WatsonX)
+## Metodo 3: Client custom (provider esterno o modello locale)
 
-Per integrare provider personalizzati come IBM Watson, puoi creare un adapter che rispetti l'interfaccia standard `invoke(input, memory)`.
+Questo metodo segue un percorso unico per tutti i provider non nativi: definisci un adapter base, poi specializzalo verso l'API remota o il modello locale che vuoi utilizzare. In ogni caso l'interfaccia resta `invoke(input_text, memory=None)` come per gli altri client. Come si può vedere nella [sezione di approfondimento](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md). Vediamo passo passo come fare.
 
-### Configurazione IBM Watson
-
-Prerequisiti:
-```bash
-pip install ibm-watsonx-ai
-```
-
-Variabili d'ambiente:
-```bash
-IBM_WATSONX_API_KEY=your-ibm-watsonx-api-key
-IBM_WATSONX_PROJECT_ID=your-project-id
-IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com
-```
-
-Implementazione dell'adapter:
-
-L'implementazione completa e commentata è ora disponibile nel file [`Client/custom_client_external.py`](Client/custom_client_external.py). Il modulo mostra come mappare un provider esterno sull'interfaccia `invoke` standard di DatapizzAI.
-
-Esempio rapido di utilizzo:
+### Passo 1: Definisci la struttura base dell'adapter
 
 ```python
-from dotenv import load_dotenv
-from custom_client_external import IBMWatsonXClient
+from typing import Optional, Dict, Any
 
-load_dotenv()
+from datapizzai.clients import ClientResponse
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock
 
-client = IBMWatsonXClient(
-    model_id="ibm/granite-3-2-8b-instruct",
-    temperature=0.7,
-)
-response = client.invoke("Ciao! Presentati brevemente.")
-print(response.text)
+
+class CustomProviderClient:
+    def __init__(self, api_key: str, model: str, **default_params: Any) -> None:
+        self.api_key = api_key
+        self.model = model
+        self.default_params = default_params  # es. temperature, top_p, ecc.
+
+    def _build_payload(self, prompt: str, memory: Optional[Memory] = None) -> Dict[str, Any]:
+        messages = []
+        if memory is not None:
+            for turn in memory.memory:
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(
+                    getattr(block, "content", "") for block in turn.blocks if getattr(block, "content", "")
+                )
+                if content:
+                    messages.append({"role": role, "content": content})
+        messages.append({"role": "user", "content": prompt})
+        return {"model": self.model, "messages": messages, **self.default_params}
+
+    def _execute_request(self, payload: Dict[str, Any]) -> str:
+        # Qui va la chiamata HTTP/SDK verso il provider o il runtime locale
+        raise NotImplementedError("Sostituisci con la richiesta al tuo provider custom")
+
+    def invoke(self, input_text: str, memory: Optional[Memory] = None) -> ClientResponse:
+        payload = self._build_payload(input_text, memory)
+        raw_response = self._execute_request(payload).strip()
+        return ClientResponse(
+            content=[TextBlock(content=raw_response)],
+            prompt_tokens_used=0,  # opzionale: sostituisci con metrica reale
+            completion_tokens_used=0,
+            stop_reason="stop"
+        )
 ```
 
-## Metodo 4: Modello locale (Ollama/Gemma)
+### Passo 2: Collega un provider esterno (es. IBM WatsonX)
 
-L'esecuzione di modelli in locale garantisce privacy, controllo dei costi e bassa latenza, senza dipendere da servizi esterni. Con [Ollama](https://ollama.com) puoi eseguire Gemma (o altri modelli) in locale e integrarlo con la stessa interfaccia `invoke`.
+Reimpiega la classe base passando le credenziali del provider e mappando la risposta dell'SDK sul `ClientResponse`. Installa le librerie e imposta le API Keys necessarie.
 
-Prerequisiti (Linux/macOS):
+In questo addendum analalizziamo nello specifico un'implementazione già pronta che estende lo schema visto sopra applicato ad un cliento specifico ([IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md#esempio-a--provider-esterno-ibm-watsonx)).
 
-```bash
-# Installa Ollama
-curl -fsSL https://ollama.com/install.sh | sh
 
-# Avvia il servizio (in un terminale separato)
-ollama serve | cat
+### Passo 3: Collega un modello locale (es. Ollama/Gemma)
 
-# Scarica il modello Gemma (sostituisci il tag se usi una variante diversa)
-ollama pull gemma3n:e2b
-```
+Se si usa un modello locale, in primis deve essere avviato servizio e successivamente deve essere scaricato ed avviato il modello scelto.
 
-Test rapido da CLI:
-
-```bash
-ollama run gemma3n:e2b "Ciao! Presentati brevemente."
-```
-
-Ora vediamo come usare l'adapter Python con DatapizzAI, per la configurazione ti invitiamo a consultare la [guida specifica](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md). Nota che usa la stessa interfaccia `invoke` dei clienti sopra descritti:
-
-```python
-from custom_client_ollama import OllamaClient
-
-client = OllamaClient()
-response = client.invoke("Ciao! Riassumi in una frase il teorema di Pitagora.")
-print(response.text)
-```
+Tra gli esempi specifici è presente una guida ad hoc per configurare [un client locale](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md#esempio-b--modello-locale-ollama).
 
 ---
 
