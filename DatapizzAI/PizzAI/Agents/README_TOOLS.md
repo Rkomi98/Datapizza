@@ -1,6 +1,6 @@
 # Multi‑Tool Framework - DatapizzAI
 
-Guida concisa per creare e usare strumenti (tools) con DatapizzAI. I tools consentono al modello di compiere azioni (esecuzione di funzioni Python) durante il ragionamento.
+Guida per creare e usare strumenti (tools) con DatapizzAI. 
 
 ## Indice
 
@@ -8,7 +8,7 @@ Guida concisa per creare e usare strumenti (tools) con DatapizzAI. I tools conse
 2. [Esecuzione minimale con invoke](#esecuzione-minimale-con-invoke)
 3. [Client multi‑tool](#client-multi-tool)
 4. [Conversazione con memoria](#conversazione-con-memoria)
-5. [Best practices](#best-practices)
+5. [Esempio con Google Search](#esempio-completo-con-google-search)
 6. [Perché intervenire manualmente sui tool](#perche-intervenire-manualmente-sui-tool)
 
 ## Struttura base di un tool
@@ -95,7 +95,6 @@ response = client.invoke(
     memory=memory
 )
 while hasattr(response, "function_calls") and response.function_calls:
-    # Aggiungi la risposta dell'assistant alla memoria
     memory.add_turn(response.content, ROLE.ASSISTANT)
     
     # Crea i risultati dei tool e aggiungili uno per volta alla memoria
@@ -130,105 +129,7 @@ while hasattr(response, "function_calls") and response.function_calls:
 print(response.text)
 ```
 
-## Conversazione con memoria
-
-Ora uniamo tutto in un ciclo conversazionale minimal e verosimile.
-
-```python
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-
-def create_conversational_client():
-    memory = Memory()
-    client = OpenAIClient(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o",
-    )
-    return client, memory
-
-# 3. Configura conversazione multi-turno
-client, memory = create_conversational_client()
-tools = [calcolatrice, cerca_informazioni]
-
-def chat_turn(user_input, memory, client, tools):
-    """Gestisce un singolo turno di conversazione con tools"""
-    print(f"👤 Utente: {user_input}")
-    
-    # Aggiungi input utente alla memoria
-    memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-    
-    # Prima chiamata al modello
-    response = client.invoke(
-        input="",  # Input vuoto perché usiamo la memory
-        memory=memory,
-        tools=tools,
-        tool_choice="auto"
-    )
-    
-    # Gestione iterativa dei function calls
-    while hasattr(response, "function_calls") and response.function_calls:
-        print("🔧 Esecuzione tool calls...")
-        
-        # Aggiungi la risposta dell'assistant alla memoria
-        memory.add_turn(response.content, ROLE.ASSISTANT)
-        
-        # Esegui ogni function call
-        for f_call in response.function_calls:
-            print(f"   📞 {f_call.name}({f_call.arguments})")
-            
-            # Esegui il tool (il tuo codice esistente va bene)
-            result = {
-                "calcolatrice": calcolatrice,
-                "cerca_informazioni": cerca_informazioni,
-            }.get(f_call.name, lambda **_: f"Tool sconosciuto: {f_call.name}")(**(f_call.arguments or {}))
-            
-            print(f"   ✅ {result}")
-            
-            # Crea il blocco risultato
-            tool_result_block = FunctionCallResultBlock(
-                id=f_call.id, 
-                tool=f_call.tool, 
-                result=result
-            )
-            memory.add_turn([tool_result_block], ROLE.TOOL)
-        response = client.invoke(
-            input="",
-            memory=memory,
-            tools=tools,
-            tool_choice="auto"
-        )
-    
-    # Aggiungi la risposta finale alla memoria
-    if response.text:
-        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-        print(f"🤖 Assistant: {response.text}")
-
-# 4. Esempio di conversazione multi-turno
-conversation = [
-    "Ciao! Sono Mirko, sto lavorando su un progetto AI",
-    "Cerca informazioni sui framework Python per AI",
-    "Calcola il costo se spendo 500€ al mese per 2 anni",
-    "Ricordi il mio nome e cosa sto facendo?"
-]
-
-for user_input in conversation:
-    chat_turn(user_input, memory, client, tools)
-    print()  # Spazio tra turni
-
-# 5. Statistiche conversazione
-print(f"📊 Turni totali: {len(memory.memory)}")
-print(f"💬 Blocchi totali: {len(list(memory.iter_blocks()))}")
-```
-
-## Best practices
-
-### Design dei tool
-- **Nome descrittivo**: Usa nomi chiari e specifici
-- **Descrizione dettagliata**: Spiega esattamente cosa fa il tool
-- **Schema input chiaro**: Definisci precisamente il formato di input
-- **Gestione errori**: Gestisci sempre le eccezioni e restituisci ToolResult appropriati
-
-### Esempio completo con Google Search
+## Esempio completo con Google Search
 
 ```python
 import os
@@ -240,13 +141,124 @@ load_dotenv()
 
 client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
 )
 
 response = client.invoke("Quando iniziano le olimpiadi invernali?", tools=[google_search_tool])
 
 print(response.text)
 ```
+
+## Conversazione con memoria
+
+Chatbot interattivo con tools che continua fino a quando l'utente digita "fine":
+
+```python
+import os
+from dotenv import load_dotenv
+from datapizzai.clients import GoogleClient
+from datapizzai.memory import Memory
+from datapizzai.type import TextBlock, ROLE, FunctionCallResultBlock
+from datapizzai.tools import tool
+from datapizzai.tools.google import google_search_tool
+
+load_dotenv()
+
+# Calcolatrice semplice
+@tool
+def calcolatrice(expr: str) -> str:
+    """Esegue calcoli matematici semplici in modo sicuro."""
+    try:
+        allowed = set("0123456789+-*/(). ")
+        if not set(expr) <= allowed:
+            return "Errore: caratteri non validi nel calcolo"
+        result = eval(expr)
+        return f"Risultato: {result}"
+    except Exception as e:
+        return f"Errore nel calcolo: {e}"
+
+# Client Gemini con tools
+client = GoogleClient(
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-2.0-flash",
+)
+
+tools = [calcolatrice, google_search_tool]
+memory = Memory()
+
+print("🤖 Chatbot con tools avviato! Scrivi 'fine' per uscire.")
+print("Posso fare calcoli e cercare informazioni sul web.")
+
+while True:
+    # Input utente
+    user_input = input("\n👤 Tu: ").strip()
+    
+    # Controlla condizioni di uscita
+    if user_input.lower() in ["fine", "end", "exit", "quit", "esci"]:
+        print("👋 Arrivederci!")
+        break
+    
+    if not user_input:
+        continue
+        
+    # Aggiungi input utente alla memoria
+    memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
+    
+    try:
+        # Invoca il modello con tools
+        response = client.invoke(
+            input="",
+            memory=memory,
+            tools=tools,
+            tool_choice="auto"
+        )
+        
+        # Gestisci function calls se presenti
+        while hasattr(response, "function_calls") and response.function_calls:
+            # Aggiungi risposta assistant alla memoria
+            memory.add_turn(response.content, ROLE.ASSISTANT)
+            
+            # Esegui ogni function call
+            for f_call in response.function_calls:
+                tool_name = f_call.name
+                args = f_call.arguments or {}
+                
+                print(f"🔧 Uso tool: {tool_name}")
+                
+                # Esegui il tool appropriato
+                if tool_name == "calcolatrice":
+                    result = calcolatrice(**args)
+                elif tool_name == "google_search_tool":
+                    result = google_search_tool(**args)
+                else:
+                    result = f"Tool sconosciuto: {tool_name}"
+                
+                # Aggiungi risultato alla memoria
+                tool_result_block = FunctionCallResultBlock(
+                    id=f_call.id,
+                    tool=f_call.tool,
+                    result=result,
+                )
+                memory.add_turn([tool_result_block], ROLE.TOOL)
+            
+            # Richiama il modello con i risultati dei tools
+            response = client.invoke(
+                input="",
+                memory=memory,
+                tools=tools,
+                tool_choice="auto"
+            )
+        
+        # Mostra risposta finale
+        if response.text:
+            print(f"🤖 Assistant: {response.text}")
+            memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
+            
+    except Exception as e:
+        print(f"❌ Errore: {e}")
+        print("Riprova con una domanda diversa.")
+```
+
 
 ## Perché intervenire manualmente sui tool
 
