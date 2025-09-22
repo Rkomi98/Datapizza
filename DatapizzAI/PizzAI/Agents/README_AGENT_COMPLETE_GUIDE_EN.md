@@ -125,20 +125,19 @@ def web_digest(topic: str, top_k: int = 3) -> str:
     )
 
 @tool
-def compute_metrics(raw_numbers: str) -> str:
-    """Computes core KPIs from raw textual numbers (e.g., revenue, costs, margins)."""
-    return "KPIs: revenue €4.2M, margin 28%, growth +12% QoQ"
-
-@tool
-def risk_matrix(context: str) -> str:
-    """Lists main risks with impact level."""
-    return "Risks: compliance medium, security high, reputation medium"
+def synthesize_insights(research_notes: str) -> str:
+    """Turns the research notes into key metrics and risk highlights."""
+    return (
+        "Quantitative outlook: fintech generative AI +18% YoY; avg budget €2.3M.\n"
+        "Major risks: regulatory compliance, data privacy."
+    )
 
 research_agent = Agent(
     name="Research",
     client=base_client,
     system_prompt=(
-        "You scout for external signals. Use web_digest to fetch no more than top_k bullet points\n"
+        "You scout for external signals. Use web_digest once to fetch up to top_k bullet points
+"
         "and always return a numbered list with a one-line justification."
     ),
     tools=[web_digest],
@@ -149,10 +148,10 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=base_client,
     system_prompt=(
-        "You enrich quantitative or qualitative notes coming from DecisionHub."
-        " For numbers call compute_metrics; for qualitative aspects complement with risk_matrix."
+        "You receive the research notes from DecisionHub and output concise insights."
+        " Call synthesize_insights exactly once to convert the text into metrics and risks."
     ),
-    tools=[compute_metrics, risk_matrix],
+    tools=[synthesize_insights],
     terminate_on_text=True,
 )
 
@@ -160,12 +159,17 @@ decision_hub = Agent(
     name="DecisionHub",
     client=base_client,
     system_prompt=(
-        "You orchestrate the workflow."
-        " 1) Inspect each request and call Research and/or DataAnalysis only when needed."
-        " 2) After each call, produce a structured summary."
-        " 3) Deliver the final answer with sections 'Overview' and 'Next steps'."
+        "You orchestrate the workflow.
+"
+        ""Always follow these steps:\n"
+        ""1) Review the request.\n"
+        ""2) If sources are needed, call the Research agent once.\n"
+        ""3) If insights are needed, call the DataAnalysis agent once passing the numbered list in the 'research_notes' parameter.\n"
+        ""4) Produce the final answer with sections 'Overview' and 'Next steps' and stop.\n"
+        ""Do not recall a specialist unless you have new information."
     ),
     terminate_on_text=True,
+    max_steps=6,
 )
 decision_hub.can_call([research_agent, analysis_agent])
 
@@ -179,11 +183,17 @@ async def main():
     final_answer = await decision_hub.a_run(user_query)
     print(final_answer)
 
-asyncio.run(main())
-```
+if __name__ == "__main__":
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        asyncio.run(main())
+    else:
+        loop.create_task(main())
+``````
 
 - `can_call` (`List[Agent]`): lets an agent invoke other agents as if they were tools, delegating the appropriate subtask on demand.
-- Note: because the delegated agents run asynchronously, call `a_run` and wrap it in `asyncio.run(...)` as in the snippet to avoid the async-tool runtime error.
+- Note: because the delegated agents run asynchronously, call `a_run` and manage the loop as shown (either `asyncio.run` or `loop.create_task`) to avoid async-tool runtime errors.
 
 ## 4. Planning interval
 

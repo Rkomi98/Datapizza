@@ -113,20 +113,18 @@ def web_digest(topic: str, top_k: int = 3) -> str:
     )
 
 @tool
-def compute_metrics(raw_numbers: str) -> str:
-    """Calcola KPI chiave a partire da dati testuali (es. ricavi, costi, margini)."""
-    return "KPI: ricavi 4.2M€, margine 28%, crescita +12% QoQ"
-
-@tool
-def risk_matrix(context: str) -> str:
-    """Elenca rischi principali e livello di impatto."""
-    return "Rischi: conformità medio, sicurezza alto, reputazione medio"
+def synthesize_insights(research_notes: str) -> str:
+    """Trasforma le note di ricerca in insight quantitativi e rischi principali."""
+    return (
+        "Sintesi quantitativa: mercato fintech AI +18% YoY; budget medio 2.3M€.\n"
+        "Rischi principali: compliance regolatoria, privacy dei dati."
+    )
 
 research_agent = Agent(
     name="Ricerche",
     client=base_client,
     system_prompt=(
-        "Sei lo specialista di scouting informativo. Usa web_digest per recuperare non più di top_k punti\n"
+        "Sei lo specialista di scouting informativo. Usa web_digest una sola volta per recuperare al massimo top_k punti\n"
         "e restituisci sempre un elenco numerato con breve giustificazione."
     ),
     tools=[web_digest],
@@ -137,10 +135,10 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=base_client,
     system_prompt=(
-        "Ricevi dati grezzi o appunti dal collega DecisionHub e rispondi con insight quantitativi."
-        " Se presenti numeri, usa compute_metrics; per aspetti qualitativi integra risk_matrix."
+        "Ricevi le note di ricerca dal DecisionHub e fornisci insight sintetici."
+        " Usa il tool synthesize_insights esattamente una volta per trasformare il testo in metriche e rischi."
     ),
-    tools=[compute_metrics, risk_matrix],
+    tools=[synthesize_insights],
     terminate_on_text=True,
 )
 
@@ -148,12 +146,17 @@ decision_hub = Agent(
     name="DecisionHub",
     client=base_client,
     system_prompt=(
-        "Sei l'orchestratore."
-        " 1) Valuta la richiesta e chiama Ricerche e/o DataAnalysis quando serve."
-        " 2) Dopo ogni chiamata, riassumi i risultati in un elenco strutturato."
-        " 3) Fornisci una risposta finale con sezioni 'Scenario' e 'Prossimi passi'."
+        "Sei l'orchestratore.
+"
+        ""Segui SEMPRE questi passi:\n"
+        ""1) Valuta la richiesta.\n"
+        ""2) Se servono fonti, chiama una sola volta l'agente Ricerche.\n"
+        ""3) Se servono insight, chiama una sola volta l'agente DataAnalysis passando nel parametro 'research_notes' l'elenco ricevuto da Ricerche.\n"
+        ""4) Scrivi la risposta finale con sezioni 'Scenario' e 'Prossimi passi' e termina.\n"
+        ""Non richiamare uno specialista se non hai nuove informazioni."
     ),
     terminate_on_text=True,
+    max_steps=6,
 )
 decision_hub.can_call([research_agent, analysis_agent])
 
@@ -167,11 +170,17 @@ async def main():
     final_answer = await decision_hub.a_run(user_query)
     print(final_answer)
 
-asyncio.run(main())
-```
+if __name__ == "__main__":
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        asyncio.run(main())
+    else:
+        loop.create_task(main())
+``````
 
 - `can_call` (`List[Agent]`): consente a un agente di invocare altri agenti come fossero tool, passando di volta in volta il sotto-compito opportuno.
-- Nota: dato che gli agenti collegati vengono eseguiti in modalità asincrona, usa `a_run` e `asyncio.run(...)` come nell'esempio per evitare l'errore sugli async tool.
+- Nota: dato che gli agenti collegati vengono eseguiti in modalità asincrona, usa `a_run` e gestisci il loop come mostrato nell'esempio (`asyncio.run` o `loop.create_task`) per evitare errori sugli async tool.
 
 ## 4. Planning interval
 
