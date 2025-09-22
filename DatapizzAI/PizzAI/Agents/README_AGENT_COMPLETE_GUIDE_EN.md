@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide shows how to build and orchestrate AI agents using the `datapizzai` library (>= 3.0.8). The goal is a clear, hands‑on understanding of how agents work and interact in complex systems, with minimal, practical examples.
+This guide demonstrates how to build and orchestrate AI agents using the `datapizzai` library (>= 3.0.8). You'll gain a thorough, hands-on understanding of how agents operate and collaborate in complex systems through concise, practical examples.
 
 ## Table of contents
 
@@ -13,7 +13,7 @@ This guide shows how to build and orchestrate AI agents using the `datapizzai` l
 
 ## 1. Create an agent
 
-An agent is an autonomous entity that uses a LLM to reason, operate tools, and solve problems. Creating one means configuring the parameters that shape its behaviour.
+An agent is an autonomous entity that leverages an LLM to reason, operate tools, and solve problems. Creating one involves configuring the parameters that define its behavior and capabilities.
 
 ```python
 import os
@@ -52,31 +52,31 @@ print(response)
 
 ### Input parameters
 
-Each agent parameter has a specific role:
+Each agent parameter serves a specific purpose:
 
-- `name` (`str`): An identifying name, useful for logging and in multi-agent systems.
-- `client` (`Client`): The instance of the LLM client (e.g., `OpenAIClient`, `GoogleClient`) that the agent will use to "think". It is created via `ClientFactory`.
-- `system_prompt` (`str`): The basic instructions that define the agent's personality, role, and directives. It is the most important element for guiding its behavior.
-- `tools` (`List[Tool]`): A list of tools (Python functions decorated with `@tool`) that the agent can decide to use to perform actions (e.g., calculations, file searches, external APIs).
-- `max_steps` (`int`): The maximum number of reasoning steps (thought -> action) the agent can take before stopping. Useful for preventing infinite loops.
-- `memory` (`Memory`): A `Memory` instance to maintain the context of past conversations. If not provided, the agent operates without a memory of previous interactions.
-- `stateless` (`bool`): If `True`, the memory is not automatically updated between `.run()` calls. It defaults to `False` when a memory is provided.
-- `terminate_on_text` (`bool`): If `True`, the agent stops as soon as it produces a final text response, without attempting to use other tools.
-- `planning_interval` (`int`): If set to a value `> 0`, the agent stops every `N` steps to review its action plan, improving effectiveness on complex tasks. `0` disables explicit planning.
+- `name` (`str`): An identifier useful for logging and debugging multi-agent systems.
+- `client` (`Client`): The LLM client instance (e.g., `OpenAIClient`, `GoogleClient`) that powers the agent's reasoning. Created via `ClientFactory`.
+- `system_prompt` (`str`): Core instructions defining the agent's personality, role, and behavior patterns. This is the most critical element for directing agent actions.
+- `tools` (`List[Tool]`): Python functions decorated with `@tool` that the agent can invoke to perform actions (calculations, file operations, API calls, etc.).
+- `max_steps` (`int`): Maximum reasoning cycles (thought → action) before termination. Prevents infinite loops.
+- `memory` (`Memory`): Maintains conversation context across interactions. Without this, the agent is stateless.
+- `stateless` (`bool`): When `True`, memory isn't automatically updated between `.run()` calls. Defaults to `False` when memory is provided.
+- `terminate_on_text` (`bool`): When `True`, stops execution immediately after generating a text response, bypassing further tool use.
+- `planning_interval` (`int`): When `> 0`, pauses every N steps to reassess strategy. Improves performance on complex, multi-step tasks. Set to `0` to disable.
 
 ## 2. Run an agent
 
-Once configured, the agent can be run in different modes:
+Once configured, you can execute the agent in several modes:
 
-- **Synchronous**: A blocking execution that waits for the final response.
+- **Synchronous**: Blocking execution that waits for complete response.
   ```python
   response = agent.run("Calculate 25 * 4 + 100")
   ```
-- **Asynchronous**: For non-blocking I/O operations, ideal for web applications.
+- **Asynchronous**: Non-blocking I/O operations, perfect for web applications.
   ```python
   response = await agent.a_run("Explain what AI is")
   ```
-- **Streaming**: Receives the response one piece at a time (chunk), showing both intermediate steps and the final text.
+- **Streaming**: Real-time response chunks, revealing both intermediate reasoning steps and final output.
   ```python
   for chunk in agent.stream_invoke("Tell me a joke"):
       if isinstance(chunk, str):
@@ -87,17 +87,15 @@ Once configured, the agent can be run in different modes:
 
 ## 3. Multi‑agent system
 
-Sometimes a lightweight orchestrator is enough to combine specialised capabilities. The `decision_hub_pipeline` below:
-1. Calls the (simulated) `Research` step to obtain a numbered list of sources while we wait for the DuckDuckGo tool.
-2. Extracts key figures and renders a Markdown table.
-3. Produces a final summary ready to display.
+A sophisticated multi-agent system requires intelligent routing based on the nature of the request. The `DecisionHub` pattern below analyzes incoming queries and conditionally routes them to specialized agents:
 
 ```mermaid
 graph TD
-    U["User request"] --> H["DecisionHub function"]
-    H -->|Simulated search| R["Collect sources"]
-    R -->|Numbered list| T["Extract metrics"]
-    T -->|Markdown table| H
+    U["User request"] --> H{"DecisionHub"}
+    H -->|If scouting needed| R{"Research Agent"}
+    H -->|If KPIs/risks needed| D{"DataAnalysis Agent"}
+    R --> H
+    D --> H
     H --> F["Final response"]
 ```
 
@@ -139,7 +137,7 @@ def simulated_web_search(query: str, top_k: int = 3) -> str:
 
 @tool
 def extract_numeric_table(raw_text: str) -> str:
-    """Extracts numeric values from the text and outputs a compact Markdown table."""
+    """Extracts numeric values from text and outputs a compact Markdown table."""
     pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k)?", re.IGNORECASE)
     rows = []
     for line in raw_text.splitlines():
@@ -155,12 +153,13 @@ def extract_numeric_table(raw_text: str) -> str:
     table += [f"| {entry} | {value} |" for entry, value in rows]
     return "\n".join(table)
 
+# Specialized agents
 research_agent = Agent(
     name="Research",
     client=openai_client,
     system_prompt=(
-        "You handle scouting: call simulated_web_search exactly once and return the numbered list "
-        "without extra commentary."
+        "You handle market intelligence: call simulated_web_search exactly once and return "
+        "the numbered list without additional commentary."
     ),
     tools=[simulated_web_search],
     terminate_on_text=True,
@@ -171,49 +170,72 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=openai_client,
     system_prompt=(
-        "You receive bullet notes and must extract relevant figures/percentages. "
-        "Invoke extract_numeric_table once, then provide two strategic sentences and append the Markdown table."
+        "You extract and analyze quantitative data. Invoke extract_numeric_table once, "
+        "then provide strategic insights and include the Markdown table in your response."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
     max_steps=3,
 )
 
-def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
-    research_prompt = (
-        f"Analyse the topic: {user_query}. List up to {top_k} results numbered (1., 2., 3.) using the available tool."
-    )
-    research_notes = research_agent.run(research_prompt)
+class DecisionHub:
+    """Intelligent routing hub that analyzes queries and delegates to appropriate agents."""
+    
+    def __init__(self, research_agent, analysis_agent):
+        self.research_agent = research_agent
+        self.analysis_agent = analysis_agent
+    
+    def needs_research(self, query: str) -> bool:
+        """Determine if query requires market intelligence gathering."""
+        research_keywords = ["update", "trends", "market", "opportunities", "landscape", "competition"]
+        return any(keyword in query.lower() for keyword in research_keywords)
+    
+    def needs_analysis(self, query: str) -> bool:
+        """Determine if query requires quantitative analysis."""
+        analysis_keywords = ["kpi", "metrics", "numbers", "data", "analysis", "risk", "performance"]
+        return any(keyword in query.lower() for keyword in analysis_keywords)
+    
+    def process_query(self, user_query: str, top_k: int = 3) -> str:
+        """Route query to appropriate agents based on content analysis."""
+        results = {}
+        
+        if self.needs_research(user_query):
+            research_prompt = f"Gather intelligence on: {user_query}. Provide up to {top_k} numbered sources."
+            results["research"] = self.research_agent.run(research_prompt)
+        
+        if self.needs_analysis(user_query) and "research" in results:
+            analysis_prompt = dedent(f"""
+                Analyze the research data below for key metrics and risks.
+                1. Extract numeric values using your tool
+                2. Provide strategic assessment
+                3. Include the data table
+                
+                RESEARCH DATA:
+                {results["research"]}
+            """).strip()
+            results["analysis"] = self.analysis_agent.run(analysis_prompt)
+        
+        # Synthesize final response
+        if "analysis" in results:
+            return f"### Intelligence Brief: {user_query}\n\n{results['analysis']}\n\n---\n*Sources simulated (awaiting official DuckDuckGo tool)*"
+        elif "research" in results:
+            return f"### Market Intelligence: {user_query}\n\n{results['research']}\n\n---\n*Sources simulated (awaiting official DuckDuckGo tool)*"
+        else:
+            return f"Query '{user_query}' doesn't match available agent capabilities."
 
-    analysis_prompt = dedent(
-        """
-        Summarise the numbered list below.
-        1. Invoke extract_numeric_table to obtain a table of values.
-        2. Offer two strategic commentary sentences.
-        3. Include the table in the output.
-        """
-    ).strip()
-    analysis_input = f"""{analysis_prompt}
-NOTES:
-{research_notes}"""
-    structured_output = analysis_agent.run(analysis_input)
+# Initialize DecisionHub
+hub = DecisionHub(research_agent, analysis_agent)
 
-    return (
-        f"### Update on '{user_query}'"
-        f"{structured_output}"
-        "---"
-        "Sources simulated (awaiting the official DuckDuckGo tool)."
-    )
-
-user_query = "We need an update on generative AI commercial opportunities in fintech and a risk check."
-final_answer = decision_hub_pipeline(user_query)
+# Test the system
+user_query = "We need an update on generative AI commercial opportunities in fintech and a risk assessment."
+final_answer = hub.process_query(user_query)
 print(final_answer)
 ```
 
-- When the DuckDuckGo tool ships, simply replace `simulated_web_search` with the actual integration and drop the simulation notice.
+- Once the DuckDuckGo tool becomes available, simply replace `simulated_web_search` with the real integration and remove the simulation disclaimer.
 ## 4. Planning interval
 
-With `planning_interval=N` the agent reviews its plan every N steps. Useful for long/branched tasks.
+Setting `planning_interval=N` forces the agent to reassess its strategy every N steps. This is particularly valuable for complex, multi-phase tasks.
 
 ```python
 from datapizzai.agents import Agent
@@ -223,22 +245,22 @@ agent = Agent(
     planning_interval=3,  # plan every 3 steps
 )
 
-response = agent.run("Write a plan to migrate a monolith to microservices and estimate the effort")
+response = agent.run("Write a migration plan from monolith to microservices and estimate the effort")
 print(response)
 ```
 
-Conceptual execution (planning every 3 steps):
+Conceptual execution flow (reassessing strategy every 3 steps):
 
 ```mermaid
 flowchart LR
     A[Start] --> S1[Step 1]
     S1 --> S2[Step 2]
     S2 --> S3[Step 3]
-    S3 --> P[Plan Review]
+    S3 --> P[Strategy Review]
     P --> S4[Step 4]
     S4 --> S5[Step 5]
     S5 --> S6[Step 6]
-    S6 --> P2[Plan Review]
+    S6 --> P2[Strategy Review]
     P2 --> E[End]
 ```
 <!--
