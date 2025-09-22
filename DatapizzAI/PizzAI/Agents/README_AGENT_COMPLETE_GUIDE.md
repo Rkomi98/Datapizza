@@ -75,9 +75,9 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 ## 3. Sistema multi‑agente
 
 In alcuni flussi è utile orchestrare agenti con competenze diverse senza introdurre piani nidificati complessi. L'esempio seguente usa una funzione `decision_hub_pipeline` che:
-1. Simula (in attesa del futuro tool DuckDuckGo) una ricerca tramite l'agente `Ricerche`, restituendo un elenco numerato di fonti pertinenti.
+1. Sfrutta l'agente `Ricerche` per simulare (in attesa del futuro tool DuckDuckGo) una ricerca e restituire un elenco numerato di fonti.
 2. Passa le note all'agente `DataAnalysis`, che estrae i numeri principali con un tool dedicato e genera una tabella Markdown.
-3. Compone la risposta finale già pronta per la visualizzazione.
+3. Compone una risposta finale pronta per la visualizzazione.
 
 ```mermaid
 graph TD
@@ -96,20 +96,20 @@ from textwrap import dedent
 from dotenv import load_dotenv
 
 from datapizzai.agents import Agent
-from datapizzai.clients import GoogleClient
+from datapizzai.clients import OpenAIClient
 from datapizzai.tools import tool
 
 load_dotenv()
 
-google_client = GoogleClient(
-    api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.5-flash",
+openai_client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o-mini",
     temperature=0.2,
 )
 
 @tool
 def simulated_web_search(query: str, top_k: int = 3) -> str:
-    """Restituisce un elenco numerato di fonti, in attesa del tool DuckDuckGo reale."""
+    """Restituisce un elenco numerato di fonti (in attesa del tool DuckDuckGo reale)."""
     canonical_results = {
         "fintech": [
             "1. McKinsey 2025 – Investimenti generative AI nel fintech a 18B€",
@@ -147,7 +147,7 @@ def extract_numeric_table(raw_text: str) -> str:
 
 research_agent = Agent(
     name="Ricerche",
-    client=google_client,
+    client=openai_client,
     system_prompt=(
         "Sei lo specialista di scouting: chiama simulated_web_search esattamente una volta e "
         "riporta l'elenco numerato senza commenti aggiuntivi."
@@ -159,7 +159,7 @@ research_agent = Agent(
 
 analysis_agent = Agent(
     name="DataAnalysis",
-    client=google_client,
+    client=openai_client,
     system_prompt=(
         "Ricevi note puntate e devi estrarre cifre/percentuali rilevanti. "
         "Usa extract_numeric_table una volta, poi fornisci due frasi di scenario e incolla la tabella Markdown."

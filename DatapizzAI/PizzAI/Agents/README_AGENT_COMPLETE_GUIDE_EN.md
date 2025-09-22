@@ -87,10 +87,10 @@ Once configured, the agent can be run in different modes:
 
 ## 3. Multi‑agent system
 
-A lightweight orchestration function can coordinate specialised agents while we wait for the official DuckDuckGo tool. The `decision_hub_pipeline` below:
-1. Simulates the search step through the `Research` agent, returning a numbered list of sources.
-2. Hands the list to the `DataAnalysis` agent, which extracts the figures with a dedicated tool and outputs a Markdown table.
-3. Produces a final response ready to be displayed.
+Sometimes you need to orchestrate specialised agents without adding heavy multi-step plans. The `decision_hub_pipeline` function below:
+1. Uses the `Research` agent to simulate (until DuckDuckGo is available) a search and return a numbered list of sources.
+2. Sends the list to the `DataAnalysis` agent, which extracts the key figures via a dedicated tool and renders a Markdown table.
+3. Produces a ready-to-display final answer.
 
 ```mermaid
 graph TD
@@ -109,20 +109,20 @@ from textwrap import dedent
 from dotenv import load_dotenv
 
 from datapizzai.agents import Agent
-from datapizzai.clients import GoogleClient
+from datapizzai.clients import OpenAIClient
 from datapizzai.tools import tool
 
 load_dotenv()
 
-google_client = GoogleClient(
-    api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.5-flash",
+openai_client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o-mini",
     temperature=0.2,
 )
 
 @tool
 def simulated_web_search(query: str, top_k: int = 3) -> str:
-    """Returns a numbered list of sources while waiting for the DuckDuckGo tool."""
+    """Returns a numbered list of sources while we wait for the DuckDuckGo tool."""
     canonical_results = {
         "fintech": [
             "1. McKinsey 2025 – Generative AI investments hit €18B in fintech",
@@ -160,7 +160,7 @@ def extract_numeric_table(raw_text: str) -> str:
 
 research_agent = Agent(
     name="Research",
-    client=google_client,
+    client=openai_client,
     system_prompt=(
         "You are the research specialist: call simulated_web_search exactly once and "
         "return the numbered list verbatim."
@@ -172,10 +172,10 @@ research_agent = Agent(
 
 analysis_agent = Agent(
     name="DataAnalysis",
-    client=google_client,
+    client=openai_client,
     system_prompt=(
-        "You receive the bullet list and must extract relevant figures. "
-        "Use extract_numeric_table once, then provide a two-sentence overview and paste the Markdown table."
+        "You receive a bullet list and must extract relevant figures. "
+        "Call extract_numeric_table once, then provide a two-sentence overview and paste the Markdown table."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
@@ -184,14 +184,14 @@ analysis_agent = Agent(
 
 def decision_hub_pipeline(user_query: str, top_k: int = 3) -> str:
     research_prompt = (
-        f"Collect up to {top_k} numbered bullet points (1., 2., 3.) about {user_query} using the available tool."
+        f"Collect up to {top_k} numbered bullet points (1., 2., 3.) using the available tool about {user_query}."
     )
     research_notes = research_agent.run(research_prompt)
 
     analysis_prompt = dedent(
         """
         Summarise the numbered list below.
-        1. Call extract_numeric_table to obtain a value table.
+        1. Invoke extract_numeric_table to produce a value table.
         2. Provide a two-sentence strategic overview.
         3. Include the table in the final output.
         """
@@ -211,7 +211,7 @@ RESEARCH NOTES:
 "
         "---
 "
-        "Sources simulated while waiting for the official DuckDuckGo tool."
+        "Sources simulated (awaiting the official DuckDuckGo tool)."
     )
 
 user_query = "Share a commercial outlook for generative AI in fintech and highlight potential risks."
@@ -219,7 +219,7 @@ final_answer = decision_hub_pipeline(user_query)
 print(final_answer)
 ```
 
-- Once the DuckDuckGo tool is released you can swap `simulated_web_search` with the real implementation and remove the simulation notice.
+- Once the DuckDuckGo tool ships, replace `simulated_web_search` with the real integration and drop the simulation notice.
 ## 4. Planning interval
 
 With `planning_interval=N` the agent reviews its plan every N steps. Useful for long/branched tasks.
