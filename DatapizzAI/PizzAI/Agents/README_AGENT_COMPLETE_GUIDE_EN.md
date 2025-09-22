@@ -159,17 +159,17 @@ decision_hub = Agent(
     name="DecisionHub",
     client=base_client,
     system_prompt=(
-        "You orchestrate the workflow.
-"
-        ""Always follow these steps:\n"
-        ""1) Review the request.\n"
-        ""2) If sources are needed, call the Research agent once.\n"
-        ""3) If insights are needed, call the DataAnalysis agent once passing the numbered list in the 'research_notes' parameter.\n"
-        ""4) Produce the final answer with sections 'Overview' and 'Next steps' and stop.\n"
-        ""Do not recall a specialist unless you have new information."
+        "You orchestrate the workflow.\n"
+        "Always follow these steps:\n"
+        "1) Inspect the request.\n"
+        "2) If sources are needed, call the Research agent once (web_digest with top_k<=5).\n"
+        "3) If insights are needed, call the DataAnalysis agent once passing the numbered list as 'research_notes'.\n"
+        "4) Merge the findings into a final answer with sections 'Overview' and 'Next steps'.\n"
+        "5) After writing the final answer, stop immediately without calling any further tools or agents.\n"
+        "Never call the same specialist twice."
     ),
     terminate_on_text=True,
-    max_steps=6,
+    max_steps=4,
 )
 decision_hub.can_call([research_agent, analysis_agent])
 

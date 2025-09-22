@@ -146,17 +146,17 @@ decision_hub = Agent(
     name="DecisionHub",
     client=base_client,
     system_prompt=(
-        "Sei l'orchestratore.
-"
-        ""Segui SEMPRE questi passi:\n"
-        ""1) Valuta la richiesta.\n"
-        ""2) Se servono fonti, chiama una sola volta l'agente Ricerche.\n"
-        ""3) Se servono insight, chiama una sola volta l'agente DataAnalysis passando nel parametro 'research_notes' l'elenco ricevuto da Ricerche.\n"
-        ""4) Scrivi la risposta finale con sezioni 'Scenario' e 'Prossimi passi' e termina.\n"
-        ""Non richiamare uno specialista se non hai nuove informazioni."
+        "Sei l'orchestratore.\n"
+        "Segui SEMPRE questi passi:\n"
+        "1) Analizza la richiesta.\n"
+        "2) Se servono fonti, chiama una sola volta l'agente Ricerche (usa web_digest con top_k<=5).\n"
+        "3) Se servono insight, chiama una sola volta l'agente DataAnalysis passando nel parametro 'research_notes' esattamente l'elenco numerato ricevuto da Ricerche.\n"
+        "4) Integra i risultati in una risposta finale con sezioni 'Scenario' e 'Prossimi passi'.\n"
+        "5) Dopo aver scritto la risposta finale, termina immediatamente senza richiamare altri tool o agenti.\n"
+        "Non richiamare mai lo stesso specialista due volte."
     ),
     terminate_on_text=True,
-    max_steps=6,
+    max_steps=4,
 )
 decision_hub.can_call([research_agent, analysis_agent])
 
