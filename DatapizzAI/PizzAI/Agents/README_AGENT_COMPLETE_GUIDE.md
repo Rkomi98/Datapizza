@@ -202,8 +202,16 @@ def call_research_agent(query: str, top_k: int = 3) -> str:
 
 @tool
 def call_analysis_agent(research_data: str) -> str:
-    """Delega l'analisi quantitativa allo specialista di analisi dati."""
+    """Delega l'analisi quantitativa allo specialista di analisi dati.
+    Richiede dati di ricerca reali, non solo una stringa di query."""
     try:
+        # Valida che abbiamo dati di ricerca sostanziali
+        if len(research_data.strip()) < 50 or not any(char.isdigit() or char in "%.€$" for char in research_data):
+            return (
+                f"Dati di ricerca insufficienti per l'analisi. Ricevuto: '{research_data[:100]}...' "
+                "Raccogli prima intelligence di mercato usando call_research_agent."
+            )
+        
         prompt = dedent(f"""
             Fornisci analisi di livello executive sui dati di ricerca sottostanti:
             1. Estrai insight quantitativi usando il tuo tool di analisi
@@ -219,16 +227,18 @@ def call_analysis_agent(research_data: str) -> str:
     except Exception as e:
         return f"Errore agente di analisi: {str(e)}"
 
-# DecisionHub come Agente
+# DecisionHub come Agente  
 decision_hub_agent = Agent(
     name="DecisionHub",
     client=openai_client,
     system_prompt=(
         "Sei un agente di coordinamento intelligente che instrada query complesse ad agenti specializzati. "
-        "Analizza la richiesta dell'utente e determina quali agenti attivare: "
-        "- Usa call_research_agent per intelligence di mercato, trend, opportunità, panorama competitivo "
-        "- Usa call_analysis_agent per analisi quantitativa, KPI, valutazione rischi, interpretazione dati "
-        "Sintetizza sempre i risultati di più agenti in un brief esecutivo completo."
+        "Segui questa sequenza ESATTA per query complete: "
+        "1. PRIMA: Chiama sempre call_research_agent per raccogliere intelligence di mercato e fonti dati "
+        "2. POI: Se serve analisi quantitativa, chiama call_analysis_agent con i risultati della ricerca "
+        "3. NON chiamare mai call_analysis_agent solo con la query originale - ha bisogno di dati di ricerca reali "
+        "4. Sintetizza tutti i risultati in un brief esecutivo completo "
+        "Per query su trend, opportunità, rischi o intelligence di mercato, inizia SEMPRE con la raccolta di ricerca."
     ),
     tools=[call_research_agent, call_analysis_agent],
     terminate_on_text=True,

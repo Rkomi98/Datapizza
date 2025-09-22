@@ -123,13 +123,13 @@ def simulated_web_search(query: str, top_k: int = 3) -> str:
     canonical_results = {
         "fintech": [
             "1. McKinsey 2025 – Generative AI investments in fintech at €18B",
-            "2. Deloitte Insight – Lending processes average 22% cost reduction",
-            "3. ECB Tech Watch – Key risks: compliance and data privacy",
+            "2. Deloitte Insight – Lending processes average 22% of $200M",
+            "3. ECB Tech Watch – Key risks: compliance and data privacy costs 70M to EU companies",
         ],
         "default": [
             "1. Industry Report – Enterprise AI adoption +30% YoY",
-            "2. Vendor Study – Document automation ROI averages 180%",
-            "3. EU Regulator – Guidelines for handling sensitive data",
+            "2. Vendor Study – Document automation ROI averages 180M dollars",
+            "3. EU Regulator – Guidelines for handling 100% of sensitive data",
         ],
     }
     bucket = canonical_results["fintech" if "fintech" in query.lower() else "default"]
@@ -194,13 +194,11 @@ analysis_agent = Agent(
     name="DataAnalysis",
     client=openai_client,
     system_prompt=(
-        "You are a strategic data analyst. Extract quantitative insights using your tool, "
-        "then provide executive-level analysis with: (1) Key findings summary, "
-        "(2) Risk assessment, (3) Strategic recommendations, (4) Include the detailed data table."
+        "You are a strategic data analyst. Extract most important numbers of the analysis and format in a table."
     ),
     tools=[extract_numeric_table],
     terminate_on_text=True,
-    max_steps=3,
+    max_steps=2,
 )
 
 # DecisionHub coordination tools
@@ -246,11 +244,11 @@ decision_hub_agent = Agent(
     ),
     tools=[call_research_agent, call_analysis_agent],
     terminate_on_text=True,
-    max_steps=5,
+    max_steps=3,
 )
 
 # Test the system with error handling
-user_query = "We need an update on generative AI commercial opportunities in fintech and a comprehensive risk assessment."
+user_query = "We need an update on generative AI commercial opportunities in fintech. I want a table with all KPI"
 
 try:
     final_answer = decision_hub_agent.run(user_query)
