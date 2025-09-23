@@ -77,6 +77,13 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 Per orchestrare analisi complesse possiamo usare un "agente di agenti". Il coordinatore `StrategicPlanner` usa due specialisti come strumenti: `AnalystAgent` e `RiskAgent`. Il primo estrae KPI numerici con un'unica chiamata al tool `extract_kpi`, il secondo individua rischi operativi tramite `identify_risks`. Entrambi sono incapsulati in tool riutilizzabili che il planner invoca in sequenza per consegnare un report con **Sintesi KPI**, **Aree di Rischio** e una **Raccomandazione** finale.
 
 ```python
+"""
+Sistema "Agente di Agenti" per Analisi Strategica con DatapizzAI
+================================================================
+Un agente coordinatore (`StrategicPlanner`) orchestra due agenti
+specializzati (`AnalystAgent`, `RiskAgent`) usandoli come tools
+per produrre un'analisi di business completa.
+"""
 import os
 import re
 from dotenv import load_dotenv
@@ -100,70 +107,64 @@ shared_client = ClientFactory.create(
 def extract_kpi(context: str) -> str:
     """Estrae KPI e metriche quantitative dal testo."""
     patterns = {
-        "Fatturato": r"(?:revenue|fatturato)[:\s]*([€$]?\d+[\d,.]*[MBK]?)",
-        "Crescita": r"(\d+[\d,.]*%)\s*(?:growth|yoy)",
+        'Fatturato': r'(?:revenue|fatturato)[:\s]*([€$]?\d+[\d,.]*[MBK]?)',
+        'Crescita': r'(\d+[\d,.]*%)\s*(?:growth|yoy)',
     }
-    metrics = [
-        f"{name}: {match.group(1)}"
-        for name, pattern in patterns.items()
-        if (match := re.search(pattern, context, re.IGNORECASE))
-    ]
+    metrics = [f"{n}: {m.group(1)}" for n, p in patterns.items() if (m := re.search(p, context, re.IGNORECASE))]
     return " | ".join(metrics) if metrics else "Nessun KPI numerico rilevato."
-
 
 @tool
 def identify_risks(context: str) -> str:
     """Identifica rischi basandosi su parole chiave nel testo."""
-    risk_map = {"Compliance": ["gdpr", "normativa"], "Budget": ["budget", "costo"]}
+    risk_map = {'Compliance': ['gdpr', 'normativa'], 'Budget': ['budget', 'costo']}
     risks = [name for name, keywords in risk_map.items() if any(k in context.lower() for k in keywords)]
     return " | ".join(risks) if risks else "Nessun rischio operativo evidente."
 
-
+# Creazione degli Agenti Specializzati con PROMPT ANTI-LOOP
 analyst_agent = Agent(
     name="AnalystAgent",
     client=shared_client,
+    # CORREZIONE: Prompt che enfatizza l'azione singola e terminale.
     system_prompt=(
-        "Chiama ESATTAMENTE UNA VOLTA il tool `extract_kpi(context=<<TESTO>>)`.\n"
-        "Subito dopo, emetti un UNICO messaggio di testo con ESATTAMENTE il contenuto "
-        "restituito dal tool.\nÈ VIETATO richiamare altri tool dopo il primo.\n"
-        "Formato d'uscita:\n{{RISULTATO_TOOL}}\n"
+         "Chiama ESATTAMENTE UNA VOLTA il tool `extract_kpi(context=<<TESTO>>)`.\n"
+          "Subito dopo, emetti un UNICO messaggio di testo con ESATTAMENTE il contenuto restituito dal tool.\n"
+          "È VIETATO richiamare altri tool dopo il primo.\n"
+          "Formato d'uscita:\n"
+          "{{RISULTATO_TOOL}}\n"
     ),
     tools=[extract_kpi],
-    terminate_on_text=True,
-    max_steps=3,
+    terminate_on_text=True, max_steps=3, # max_steps=2 è sufficiente: 1 per pensare, 1 per rispondere.
 )
-
 
 risk_agent = Agent(
     name="RiskAgent",
     client=shared_client,
+    # CORREZIONE: Prompt che enfatizza l'azione singola e terminale.
     system_prompt=(
         "Chiama ESATTAMENTE UNA VOLTA il tool `identify_risks(context=<<TESTO>>)`.\n"
         "Subito dopo EMETTI un UNICO messaggio di testo che contiene ESATTAMENTE "
         "l'output del tool. Poi FERMATI. È VIETATO richiamare altri tool."
     ),
     tools=[identify_risks],
-    terminate_on_text=True,
-    max_steps=3,
+    terminate_on_text=True, max_steps=3,
 )
 
-
+# --- 3. Tool che Incapsulano gli Agenti Specializzati ---
 @tool
 def run_kpi_analysis(query: str) -> str:
-    """Delega l'analisi dei KPI all'agente specializzato."""
-    print("  -> Delegating to AnalystAgent...")
+    """Delega l'analisi dei KPI all'agente specializzato (AnalystAgent)."""
+    print(f"  -> Delegating to AnalystAgent...")
     result = analyst_agent.run(query)
     return result or "Analisi KPI non completata."
 
-
 @tool
 def run_risk_assessment(query: str) -> str:
-    """Delega la valutazione dei rischi all'agente specializzato."""
-    print("  -> Delegating to RiskAgent...")
+    """Delega la valutazione dei rischi all'agente specializzato (RiskAgent)."""
+    print(f"  -> Delegating to RiskAgent...")
     result = risk_agent.run(query)
     return result or "Valutazione rischi non completata."
 
-
+# --- 4. Agente Coordinatore ("Agente di Agenti") ---
 strategic_planner_agent = Agent(
     name="StrategicPlanner",
     client=shared_client,
@@ -171,15 +172,14 @@ strategic_planner_agent = Agent(
         "Sei un consulente strategico. Orchestra un'analisi di business seguendo questi passi:\n"
         "1. Invoca `run_kpi_analysis` sulla richiesta originale per ottenere le metriche.\n"
         "2. Invoca `run_risk_assessment` sulla richiesta originale per identificare i rischi.\n"
-        "3. Sintetizza i risultati in un report finale con **Sintesi KPI**, **Aree di Rischio**, e "
-        "una **Raccomandazione** strategica di una riga."
+        "3. Sintetizza i risultati in un report finale con **Sintesi KPI**, **Aree di Rischio**, e una **Raccomandazione** strategica di una riga."
     ),
     tools=[run_kpi_analysis, run_risk_assessment],
     terminate_on_text=True,
     max_steps=5,
 )
 
-
+# --- 5. Esecuzione della Demo ---
 if __name__ == "__main__":
     scenarios = [
         "Prodotto fintech con crescita 30% YoY, fatturato 2M€ e necessità di compliance GDPR.",
@@ -187,9 +187,9 @@ if __name__ == "__main__":
     ]
 
     for scenario in scenarios:
-        print(f"{'-' * 60}\n>> Query per lo Strategic Planner: \"{scenario}\"")
+        print(f"{'-'*60}\n▶️  Query per lo Strategic Planner: \"{scenario}\"")
         final_report = strategic_planner_agent.run(scenario)
-        print(f"\nReport finale generato:\n{final_report or 'Impossibile generare il report finale.'}\n")
+        print(f"\n✅ Report Finale Generato:\n{final_report or 'Impossibile generare il report finale.'}\n")
 ```
 
 ### Note di orchestrazione
