@@ -87,179 +87,129 @@ Once configured, you can execute the agent in several modes:
 
 ## 3. Multi‑agent system
 
-A sophisticated multi-agent system requires intelligent routing based on the nature of the request. The `DecisionHub` pattern below analyzes incoming queries and conditionally routes them to specialized agents:
-
-![multi-agent-svg-animation](https://github.com/user-attachments/assets/4d2fcdad-24f7-4dd5-b6bd-26110c3dcc9e)
+An "agent-of-agents" orchestrator coordinates two specialists: `AnalystAgent` (extracts KPI signals) and `RiskAgent` (surfaces operational risks). Each specialist is wrapped as a tool so the planner can call them in sequence and produce a report with **KPI Summary**, **Risk Areas**, and a one-line **Recommendation**.
 
 ```python
 import os
 import re
-from textwrap import dedent
 from dotenv import load_dotenv
 
 from datapizzai.agents import Agent
-from datapizzai.clients import OpenAIClient
+from datapizzai.clients import ClientFactory
 from datapizzai.tools import tool
 
+# --- 1. Shared Client Setup ---
 load_dotenv()
-
-openai_client = OpenAIClient(
+shared_client = ClientFactory.create(
+    provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o-mini",
-    temperature=0.2,
+    temperature=0.0,
 )
 
+# --- 2. Specialized Tools and Agents ---
+
 @tool
-def simulated_web_search(query: str, top_k: int = 3) -> str:
-    """Returns a numbered list of sources (placeholder until the DuckDuckGo tool is available)."""
-    canonical_results = {
-        "fintech": [
-            "1. McKinsey 2025 – Generative AI investments in fintech at €18B",
-            "2. Deloitte Insight – Lending processes average 22% of $200M",
-            "3. ECB Tech Watch – Key risks: compliance and data privacy costs 70M to EU companies",
-        ],
-        "default": [
-            "1. Industry Report – Enterprise AI adoption +30% YoY",
-            "2. Vendor Study – Document automation ROI averages 180M dollars",
-            "3. EU Regulator – Guidelines for handling 100% of sensitive data",
-        ],
+def extract_kpi(context: str) -> str:
+    """Extracts KPIs and quantitative metrics from raw text."""
+    patterns = {
+        "Revenue": r"(?:revenue|fatturato)[:\s]*([€$]?\d+[\d,.]*[MBK]?)",
+        "Growth": r"(\d+[\d,.]*%)\s*(?:growth|yoy)",
     }
-    bucket = canonical_results["fintech" if "fintech" in query.lower() else "default"]
-    return "\n".join(bucket[: max(1, top_k)])
+    metrics = [
+        f"{name}: {match.group(1)}"
+        for name, pattern in patterns.items()
+        if (match := re.search(pattern, context, re.IGNORECASE))
+    ]
+    return " | ".join(metrics) if metrics else "No numeric KPI detected."
+
 
 @tool
-def extract_numeric_table(raw_text: str) -> str:
-    """Extracts numeric values from text and outputs a comprehensive Markdown analysis."""
-    pattern = re.compile(r"[-+]?\d+[\d,.]*\s?(?:%|€|eur|m|k|b|billion|million)?", re.IGNORECASE)
-    rows = []
-    for line in raw_text.splitlines():
-        matches = pattern.findall(line)
-        if matches:
-            cleaned = [match.replace(',', '.').strip() for match in matches]
-            rows.append((line.strip(), ", ".join(cleaned)))
-    
-    if not rows:
-        return """## Quantitative Analysis
-        
-| Metric | Value | Assessment |
-| --- | --- | --- |
-| No quantifiable data found | - | Insufficient data for analysis |
+def identify_risks(context: str) -> str:
+    """Flags risks by scanning for domain keywords."""
+    risk_map = {"Compliance": ["gdpr", "normativa"], "Budget": ["budget", "costo"]}
+    risks = [name for name, keywords in risk_map.items() if any(k in context.lower() for k in keywords)]
+    return " | ".join(risks) if risks else "No material operational risk identified."
 
-**Strategic Implications**: Analysis requires more quantitative sources."""
-    
-    # Build comprehensive analysis
-    analysis = ["## Quantitative Analysis", ""]
-    analysis.append("| Metric | Value | Assessment |")
-    analysis.append("| --- | --- | --- |")
-    
-    for entry, values in rows:
-        # Analyze the values for strategic context
-        assessment = "Monitor trend"
-        if any(char in values.lower() for char in ['%']):
-            if any(int(re.findall(r'\d+', val)[0]) > 20 for val in values.split(',') if re.findall(r'\d+', val)):
-                assessment = "High impact indicator"
-            else:
-                assessment = "Moderate growth signal"
-        elif any(char in values.lower() for char in ['b', 'billion']):
-            assessment = "Major market opportunity"
-        elif any(char in values.lower() for char in ['€', 'eur']):
-            assessment = "Financial KPI - track ROI"
-            
-        analysis.append(f"| {entry[:50]}... | {values} | {assessment} |")
-    
-    return "\n".join(analysis)
 
-# Specialized agents
-research_agent = Agent(
-    name="Research",
-    client=openai_client,
+analyst_agent = Agent(
+    name="AnalystAgent",
+    client=shared_client,
     system_prompt=(
-        "You handle market intelligence: call simulated_web_search exactly once and return "
-        "the numbered list without additional commentary."
+        "Call the tool `extract_kpi(context=<<TEXT>>) EXACTLY ONCE.`\n"
+        "Immediately after, send a SINGLE text message that repeats the tool output verbatim.\n"
+        "You MUST NOT call any other tool.\n"
+        "Output format:\n{{TOOL_RESULT}}\n"
     ),
-    tools=[simulated_web_search],
-    terminate_on_text=True,
-    max_steps=2,
-)
-
-analysis_agent = Agent(
-    name="DataAnalysis",
-    client=openai_client,
-    system_prompt=(
-        "You are a strategic data analyst. Extract most important numbers of the analysis and format in a table."
-    ),
-    tools=[extract_numeric_table],
-    terminate_on_text=True,
-    max_steps=2,
-)
-
-# DecisionHub coordination tools
-@tool
-def call_research_agent(query: str, top_k: int = 3) -> str:
-    """Delegate market intelligence gathering to the research specialist."""
-    try:
-        prompt = f"Gather intelligence on: {query}. Provide up to {top_k} numbered sources."
-        result = research_agent.run(prompt)
-        return result if result is not None else "Research agent returned no results."
-    except Exception as e:
-        return f"Research agent error: {str(e)}"
-
-@tool
-def call_analysis_agent(research_data: str) -> str:
-    """Delegate quantitative analysis to the data analysis specialist."""
-    try:
-        prompt = dedent(f"""
-            Provide executive-level analysis of the research data below:
-            1. Extract quantitative insights using your analysis tool
-            2. Summarize key findings 
-            3. Assess risks and opportunities
-            4. Provide strategic recommendations
-            
-            RESEARCH DATA:
-            {research_data}
-        """).strip()
-        result = analysis_agent.run(prompt)
-        return result if result is not None else "Analysis agent returned no results."
-    except Exception as e:
-        return f"Analysis agent error: {str(e)}"
-
-# DecisionHub as an Agent
-decision_hub_agent = Agent(
-    name="DecisionHub",
-    client=openai_client,
-    system_prompt=(
-        "You are an intelligent coordination agent that routes complex queries to specialized agents. "
-        "Analyze the user's request and determine which agents to engage: "
-        "- Use call_research_agent for market intelligence, trends, opportunities, competitive landscape "
-        "- Use call_analysis_agent for quantitative analysis, KPIs, risk assessment, data interpretation "
-        "Always synthesize results from multiple agents into a comprehensive executive brief."
-    ),
-    tools=[call_research_agent, call_analysis_agent],
+    tools=[extract_kpi],
     terminate_on_text=True,
     max_steps=3,
 )
 
-# Test the system with error handling
-user_query = "We need an update on generative AI commercial opportunities in fintech. I want a table with all KPI"
 
-try:
-    final_answer = decision_hub_agent.run(user_query)
-    if final_answer is None:
-        final_answer = "DecisionHub agent returned no response. Please check your configuration."
-    print(final_answer)
-except Exception as e:
-    print(f"System error: {str(e)}")
-    print("Ensure all agents are properly configured with valid API keys and models.")
+risk_agent = Agent(
+    name="RiskAgent",
+    client=shared_client,
+    system_prompt=(
+        "Call the tool `identify_risks(context=<<TEXT>>) EXACTLY ONCE.`\n"
+        "Then send a SINGLE text message that contains the tool output verbatim.\n"
+        "Stop immediately afterwards. No further tool calls are allowed."
+    ),
+    tools=[identify_risks],
+    terminate_on_text=True,
+    max_steps=3,
+)
+
+
+@tool
+def run_kpi_analysis(query: str) -> str:
+    """Delegates KPI extraction to the specialist agent."""
+    print("  -> Delegating to AnalystAgent...")
+    result = analyst_agent.run(query)
+    return result or "KPI analysis did not complete."
+
+
+@tool
+def run_risk_assessment(query: str) -> str:
+    """Delegates risk screening to the specialist agent."""
+    print("  -> Delegating to RiskAgent...")
+    result = risk_agent.run(query)
+    return result or "Risk assessment did not complete."
+
+
+strategic_planner_agent = Agent(
+    name="StrategicPlanner",
+    client=shared_client,
+    system_prompt=(
+        "You are a strategic consultant. Produce a business review by following these steps:\n"
+        "1. Call `run_kpi_analysis` on the original request to capture metrics.\n"
+        "2. Call `run_risk_assessment` on the same request to uncover risks.\n"
+        "3. Merge the findings into a final report with **KPI Summary**, **Risk Areas**, and a one-line **Recommendation**."
+    ),
+    tools=[run_kpi_analysis, run_risk_assessment],
+    terminate_on_text=True,
+    max_steps=5,
+)
+
+
+if __name__ == "__main__":
+    scenarios = [
+        "Fintech product growing 30% YoY, €2M revenue, needs GDPR compliance roadmap.",
+        "AI adoption program: €500K budget, 180% ROI target, six-month deadline.",
+    ]
+
+    for scenario in scenarios:
+        print(f"{'-' * 60}\n>> Strategic Planner query: \"{scenario}\"")
+        final_report = strategic_planner_agent.run(scenario)
+        print(f"\nFinal report:\n{final_report or 'Unable to produce the final report.'}\n")
 ```
 
-### Error handling notes
+### Orchestration notes
 
-The coordination tools include proper error handling to prevent `None` returns that can cause Rich console rendering errors. Always ensure:
-- Agent responses are validated before being passed to display systems
-- Exception handling wraps all agent calls
-- Fallback messages are provided when agents fail to respond
+- The specialist prompts enforce a single tool call to avoid runaway loops.
+- Wrapping `AnalystAgent` and `RiskAgent` as tools makes them easy to reuse across planners.
+- Keeping `max_steps` low caps the number of LLM turns and helps manage latency and cost.
 
-- Once the DuckDuckGo tool becomes available, simply replace `simulated_web_search` with the real integration and remove the simulation disclaimer.
 ## 4. Planning interval
 
 Setting `planning_interval=N` forces the agent to reassess its strategy every N steps. This is particularly valuable for complex, multi-phase tasks.
