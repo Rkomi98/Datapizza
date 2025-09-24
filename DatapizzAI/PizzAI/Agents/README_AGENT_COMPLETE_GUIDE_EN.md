@@ -88,6 +88,7 @@ Once configured, you can execute the agent in several modes:
 ## 3. Multi‑agent system
 
 An "agent-of-agents" orchestrator coordinates two specialists: `AnalystAgent` (extracts KPI signals) and `RiskAgent` (surfaces operational risks). Each specialist is wrapped as a tool so the planner can call them in sequence and produce a report with **KPI Summary**, **Risk Areas**, and a one-line **Recommendation**.
+![Diagramma sistema multi-agente](./multi-agent-svg-animation.svg)
 
 ```python
 import os

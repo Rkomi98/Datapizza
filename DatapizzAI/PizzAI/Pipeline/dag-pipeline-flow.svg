@@ -1,0 +1,257 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="dataLoaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976d2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="sentimentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3e5f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7b1fa2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="statsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff3e0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f57c00;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="metadataGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8f5e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#388e3c;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="reportGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffebee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d32f2f;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#0a0e27">
+    <animate attributeName="fill" values="#0a0e27;#1a1e37;#0a0e27" dur="6s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Grid pattern -->
+  <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="40" height="40" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.1"/>
+  </pattern>
+  <rect width="800" height="600" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="bold" fill="#fff">
+    DAG Pipeline Flow
+    <animate attributeName="fill" values="#fff;#4facfe;#f093fb;#fff" dur="4s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- DataLoader -->
+  <g id="dataLoader">
+    <rect x="60" y="100" width="140" height="60" rx="10" fill="url(#dataLoaderGrad)" filter="url(#shadow)"/>
+    <text x="130" y="135" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      DataLoader
+    </text>
+  </g>
+
+  <!-- SentimentAnalyzer -->
+  <g id="sentiment">
+    <rect x="300" y="100" width="160" height="60" rx="10" fill="url(#sentimentGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="380" y="135" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      SentimentAnalyzer
+    </text>
+  </g>
+
+  <!-- StatisticsCalculator -->
+  <g id="stats">
+    <rect x="540" y="100" width="160" height="60" rx="10" fill="url(#statsGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </rect>
+    <text x="620" y="135" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      StatisticsCalculator
+    </text>
+  </g>
+
+  <!-- MetadataExtractor -->
+  <g id="metadata">
+    <rect x="60" y="250" width="140" height="60" rx="10" fill="url(#metadataGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="130" y="285" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      MetadataExtractor
+    </text>
+  </g>
+
+  <!-- ReportGenerator -->
+  <g id="report">
+    <rect x="320" y="400" width="160" height="60" rx="10" fill="url(#reportGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="2s" repeatCount="indefinite"/>
+    </rect>
+    <text x="400" y="435" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      ReportGenerator
+    </text>
+  </g>
+
+  <!-- Animated connections -->
+  
+  <!-- DataLoader to SentimentAnalyzer -->
+  <line x1="200" y1="130" x2="300" y2="130" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="250" y="120" text-anchor="middle" font-family="Arial" font-size="10" fill="#7b1fa2" font-style="italic">
+    reviews
+  </text>
+  <circle r="5" fill="#1976d2" filter="url(#glow)">
+    <animateMotion dur="0.8s" repeatCount="indefinite">
+      <mpath href="#path1"/>
+    </animateMotion>
+  </circle>
+  <path id="path1" d="M200,130 L300,130" fill="none"/>
+
+  <!-- SentimentAnalyzer to StatisticsCalculator -->
+  <line x1="460" y1="130" x2="540" y2="130" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="500" y="120" text-anchor="middle" font-family="Arial" font-size="10" fill="#f57c00" font-style="italic">
+    sentiment_results
+  </text>
+  <circle r="5" fill="#7b1fa2" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="0.5s" repeatCount="indefinite">
+      <mpath href="#path2"/>
+    </animateMotion>
+  </circle>
+  <path id="path2" d="M460,130 L540,130" fill="none"/>
+
+  <!-- DataLoader to MetadataExtractor -->
+  <line x1="130" y1="160" x2="130" y2="250" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="180" y="205" font-family="Arial" font-size="10" fill="#388e3c" font-style="italic">
+    reviews
+  </text>
+  <circle r="5" fill="#1976d2" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="1s" repeatCount="indefinite">
+      <mpath href="#path3"/>
+    </animateMotion>
+  </circle>
+  <path id="path3" d="M130,160 L130,250" fill="none"/>
+
+  <!-- SentimentAnalyzer to ReportGenerator -->
+  <line x1="380" y1="160" x2="380" y2="400" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="320" y="280" font-family="Arial" font-size="10" fill="#d32f2f" font-style="italic">
+    sentiment_results
+  </text>
+  <circle r="5" fill="#7b1fa2" filter="url(#glow)">
+    <animateMotion dur="1.2s" begin="1.5s" repeatCount="indefinite">
+      <mpath href="#path4"/>
+    </animateMotion>
+  </circle>
+  <path id="path4" d="M380,160 L380,400" fill="none"/>
+
+  <!-- StatisticsCalculator to ReportGenerator -->
+  <line x1="620" y1="160" x2="460" y2="400" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="540" y="280" text-anchor="middle" font-family="Arial" font-size="10" fill="#d32f2f" font-style="italic">
+    statistics
+  </text>
+  <circle r="5" fill="#f57c00" filter="url(#glow)">
+    <animateMotion dur="1.2s" begin="2s" repeatCount="indefinite">
+      <mpath href="#path5"/>
+    </animateMotion>
+  </circle>
+  <path id="path5" d="M620,160 L460,400" fill="none"/>
+
+  <!-- MetadataExtractor to ReportGenerator -->
+  <line x1="130" y1="310" x2="340" y2="400" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="235" y="355" text-anchor="middle" font-family="Arial" font-size="10" fill="#d32f2f" font-style="italic">
+    metadata
+  </text>
+  <circle r="5" fill="#388e3c" filter="url(#glow)">
+    <animateMotion dur="1.2s" begin="2.5s" repeatCount="indefinite">
+      <mpath href="#path6"/>
+    </animateMotion>
+  </circle>
+  <path id="path6" d="M130,310 L340,400" fill="none"/>
+
+  <!-- Status indicators (pulsing rings) -->
+  <g id="status-indicators">
+    <circle cx="130" cy="130" r="80" fill="none" stroke="#1976d2" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="80;90;80" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="380" cy="130" r="90" fill="none" stroke="#7b1fa2" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="90;100;90" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="620" cy="130" r="90" fill="none" stroke="#f57c00" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="90;100;90" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="130" cy="280" r="80" fill="none" stroke="#388e3c" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="80;90;80" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="400" cy="430" r="90" fill="none" stroke="#d32f2f" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="90;100;90" dur="2s" begin="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Floating particles -->
+  <g id="particles">
+    <circle r="2" fill="#fff" opacity="0.3">
+      <animateMotion dur="15s" repeatCount="indefinite">
+        <mpath href="#particlePath"/>
+      </animateMotion>
+    </circle>
+    <circle r="1.5" fill="#4facfe" opacity="0.5">
+      <animateMotion dur="12s" repeatCount="indefinite">
+        <mpath href="#particlePath2"/>
+      </animateMotion>
+    </circle>
+  </g>
+
+  <!-- Hidden paths for particles -->
+  <path id="particlePath" d="M100,80 Q400,50 700,80 Q400,500 100,80" fill="none"/>
+  <path id="particlePath2" d="M700,500 Q400,550 100,500 Q400,100 700,500" fill="none"/>
+
+  <!-- Legend -->
+  <g id="legend" opacity="0.8">
+    <rect x="20" y="550" width="15" height="15" fill="#1976d2"/>
+    <text x="40" y="562" font-family="Arial" font-size="11" fill="#aaa">Data Loading</text>
+    
+    <rect x="130" y="550" width="15" height="15" fill="#7b1fa2"/>
+    <text x="150" y="562" font-family="Arial" font-size="11" fill="#aaa">Analysis</text>
+    
+    <rect x="220" y="550" width="15" height="15" fill="#f57c00"/>
+    <text x="240" y="562" font-family="Arial" font-size="11" fill="#aaa">Statistics</text>
+    
+    <rect x="320" y="550" width="15" height="15" fill="#388e3c"/>
+    <text x="340" y="562" font-family="Arial" font-size="11" fill="#aaa">Metadata</text>
+    
+    <rect x="420" y="550" width="15" height="15" fill="#d32f2f"/>
+    <text x="440" y="562" font-family="Arial" font-size="11" fill="#aaa">Reporting</text>
+  </g>
+
+  <!-- Flow direction indicators -->
+  <g id="flow-indicators">
+    <polygon points="220,125 240,130 220,135" fill="#fff" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="480,125 500,130 480,135" fill="#fff" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" begin="0.5s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+</svg>

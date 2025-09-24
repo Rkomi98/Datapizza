@@ -75,6 +75,7 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 ## 3. Sistema multi‑agente
 
 Per orchestrare analisi complesse possiamo usare un "agente di agenti". Il coordinatore `StrategicPlanner` usa due specialisti come strumenti: `AnalystAgent` e `RiskAgent`. Il primo estrae KPI numerici con un'unica chiamata al tool `extract_kpi`, il secondo individua rischi operativi tramite `identify_risks`. Entrambi sono incapsulati in tool riutilizzabili che il planner invoca in sequenza per consegnare un report con **Sintesi KPI**, **Aree di Rischio** e una **Raccomandazione** finale.
+![Diagramma sistema multi-agente](./multi-agent-svg-animation.svg)
 
 ```python
 """

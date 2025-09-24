@@ -1,0 +1,223 @@
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="docGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="parserGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="splitterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="embedderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="storeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="#0a0e27">
+    <animate attributeName="fill" values="#0a0e27;#1a1e37;#0a0e27" dur="6s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Grid pattern -->
+  <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="40" height="40" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.1"/>
+  </pattern>
+  <rect width="800" height="500" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="bold" fill="#fff">
+    Ingestion Pipeline Flow
+    <animate attributeName="fill" values="#fff;#4facfe;#f093fb;#fff" dur="4s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- Document -->
+  <g id="document">
+    <rect x="50" y="120" width="120" height="60" rx="10" fill="url(#docGrad)" filter="url(#shadow)"/>
+    <text x="110" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      Document
+    </text>
+  </g>
+
+  <!-- TextParser -->
+  <g id="parser">
+    <rect x="220" y="120" width="120" height="60" rx="10" fill="url(#parserGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="280" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      TextParser
+    </text>
+  </g>
+
+  <!-- RecursiveSplitter -->
+  <g id="splitter">
+    <rect x="390" y="120" width="140" height="60" rx="10" fill="url(#splitterGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </rect>
+    <text x="460" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      RecursiveSplitter
+    </text>
+  </g>
+
+  <!-- ClientEmbedder -->
+  <g id="embedder">
+    <rect x="580" y="120" width="120" height="60" rx="10" fill="url(#embedderGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="640" y="155" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      ClientEmbedder
+    </text>
+  </g>
+
+  <!-- Vector Store -->
+  <g id="store">
+    <rect x="300" y="280" width="150" height="60" rx="10" fill="url(#storeGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="2s" repeatCount="indefinite"/>
+    </rect>
+    <text x="375" y="315" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      Vector Store
+    </text>
+  </g>
+
+  <!-- Animated connections -->
+  
+  <!-- Document to Parser -->
+  <line x1="170" y1="150" x2="220" y2="150" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="195" y="140" text-anchor="middle" font-family="Arial" font-size="10" fill="#f093fb" font-style="italic">
+    file path
+  </text>
+  <circle r="5" fill="#667eea" filter="url(#glow)">
+    <animateMotion dur="0.8s" repeatCount="indefinite">
+      <mpath href="#path1"/>
+    </animateMotion>
+  </circle>
+  <path id="path1" d="M170,150 L220,150" fill="none"/>
+
+  <!-- Parser to Splitter -->
+  <line x1="340" y1="150" x2="390" y2="150" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="365" y="140" text-anchor="middle" font-family="Arial" font-size="10" fill="#4facfe" font-style="italic">
+    raw text
+  </text>
+  <circle r="5" fill="#f093fb" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="0.5s" repeatCount="indefinite">
+      <mpath href="#path2"/>
+    </animateMotion>
+  </circle>
+  <path id="path2" d="M340,150 L390,150" fill="none"/>
+
+  <!-- Splitter to Embedder -->
+  <line x1="530" y1="150" x2="580" y2="150" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="555" y="140" text-anchor="middle" font-family="Arial" font-size="10" fill="#43e97b" font-style="italic">
+    text chunks
+  </text>
+  <circle r="5" fill="#4facfe" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="1s" repeatCount="indefinite">
+      <mpath href="#path3"/>
+    </animateMotion>
+  </circle>
+  <path id="path3" d="M530,150 L580,150" fill="none"/>
+
+  <!-- Embedder to Vector Store -->
+  <line x1="640" y1="180" x2="400" y2="280" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="520" y="220" text-anchor="middle" font-family="Arial" font-size="10" fill="#fa709a" font-style="italic">
+    chunks + embeddings
+  </text>
+  <circle r="5" fill="#43e97b" filter="url(#glow)">
+    <animateMotion dur="1s" begin="1.5s" repeatCount="indefinite">
+      <mpath href="#path4"/>
+    </animateMotion>
+  </circle>
+  <path id="path4" d="M640,180 L400,280" fill="none"/>
+
+  <!-- Status indicators (pulsing rings) -->
+  <g id="status-indicators">
+    <!-- Processing rings for each component -->
+    <circle cx="110" cy="150" r="65" fill="none" stroke="#667eea" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="65;75;65" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="280" cy="150" r="70" fill="none" stroke="#f093fb" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="70;80;70" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="460" cy="150" r="80" fill="none" stroke="#4facfe" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="80;90;80" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="640" cy="150" r="70" fill="none" stroke="#43e97b" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="70;80;70" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="375" cy="310" r="85" fill="none" stroke="#fa709a" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="85;95;85" dur="2s" begin="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Floating particles -->
+  <g id="particles">
+    <circle r="2" fill="#fff" opacity="0.3">
+      <animateMotion dur="15s" repeatCount="indefinite">
+        <mpath href="#particlePath"/>
+      </animateMotion>
+    </circle>
+    <circle r="1.5" fill="#4facfe" opacity="0.5">
+      <animateMotion dur="12s" repeatCount="indefinite">
+        <mpath href="#particlePath2"/>
+      </animateMotion>
+    </circle>
+  </g>
+
+  <!-- Hidden paths for particles -->
+  <path id="particlePath" d="M100,80 Q400,50 700,80 Q400,400 100,80" fill="none"/>
+  <path id="particlePath2" d="M700,400 Q400,450 100,400 Q400,100 700,400" fill="none"/>
+
+  <!-- Legend -->
+  <g id="legend" opacity="0.8">
+    <rect x="20" y="450" width="15" height="15" fill="#667eea"/>
+    <text x="40" y="462" font-family="Arial" font-size="11" fill="#aaa">Input</text>
+    
+    <rect x="100" y="450" width="15" height="15" fill="#f093fb"/>
+    <text x="120" y="462" font-family="Arial" font-size="11" fill="#aaa">Parsing</text>
+    
+    <rect x="180" y="450" width="15" height="15" fill="#4facfe"/>
+    <text x="200" y="462" font-family="Arial" font-size="11" fill="#aaa">Splitting</text>
+    
+    <rect x="280" y="450" width="15" height="15" fill="#43e97b"/>
+    <text x="300" y="462" font-family="Arial" font-size="11" fill="#aaa">Embedding</text>
+    
+    <rect x="380" y="450" width="15" height="15" fill="#fa709a"/>
+    <text x="400" y="462" font-family="Arial" font-size="11" fill="#aaa">Storage</text>
+  </g>
+</svg>

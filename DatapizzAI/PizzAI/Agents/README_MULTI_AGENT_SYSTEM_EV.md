@@ -33,6 +33,8 @@ Each agent has:
 
 ## System architecture
 
+![Multi-agent system diagram](./multi-agent-svg-animation.svg)
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │                    MultiAgentSystem                        │

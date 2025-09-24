@@ -116,13 +116,7 @@ print(f"Generated {len(chunks)} chunks from document")
 
 ### Flow diagram
 
-```mermaid
-graph TD
-    A[Document] -->|file path| B[TextParser]
-    B -->|raw text| C[RecursiveSplitter]
-    C -->|text chunks| D[ClientEmbedder]
-    D -->|chunks + embeddings| E[Vector Store]
-```
+![Ingestion Pipeline Flow](ingestion-pipeline-flow.svg)
 
 ### Complete script
 
@@ -273,21 +267,7 @@ print(results["report_generator"]["final_report"])
 
 ### Flow diagram
 
-```mermaid
-graph TD
-    A[DataLoader] -->|reviews| B[SentimentAnalyzer]
-    B -->|sentiment_results| C[StatisticsCalculator]
-    A -->|reviews| D[MetadataExtractor]
-    B -->|sentiment_results| E[ReportGenerator]
-    C -->|statistics| E
-    D -->|metadata| E
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style D fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-    style E fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
-```
+![DAG Pipeline Flow](dag-pipeline-flow.svg)
 
 ### Complete script
 
@@ -435,26 +415,7 @@ results = pipeline.execute()
 
 ### Flow diagram
 
-```mermaid
-graph TD
-    A[DataLoader] --> B[Classifier]
-    B --> C{Condition}
-    C -->|True| D[NotificationPipeline]
-    C -->|False| E[StandardProcessing]
-    
-    D --> F[SendNotification]
-    E --> G[ProcessGeneral]
-    G --> H[BuildReport]
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#ffebee
-    style E fill:#f1f8e9
-    style F fill:#ffebee
-    style G fill:#f1f8e9
-    style H fill:#e8f5e8
-```
+![Functional Pipeline Flow](functional-pipeline-flow.svg)
 
 ### Data flow notes
 
@@ -506,32 +467,7 @@ This example demonstrates:
 
 #### YAML flow diagram
 
-```mermaid
-graph TD
-    A[📄 YAML Config] --> B[FunctionalPipeline.from_yaml]
-    B --> C[Load Modules]
-    C --> D[DocumentLoader]
-    C --> E[TextProcessor] 
-    C --> F[DataValidator]
-    C --> G[ReportBuilder]
-    
-    H[Pipeline Execution] --> I[load_data]
-    I -->|documents| J[process]
-    J -->|processed_documents| K[validate]
-    K -->|validation_results| L[build_report]
-    
-    D --> I
-    E --> J
-    F --> K
-    G --> L
-    
-    L --> M[📊 Final Report]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-```
+![YAML Functional Pipeline Flow](yaml-functional-pipeline-flow.svg)
 
 ## YAML configuration
 
@@ -573,26 +509,7 @@ python3 dag_yaml_example.py
 
 #### DagPipeline YAML flow diagram
 
-```mermaid
-graph TD
-    A[📄 dag_config.yaml] --> B[DagPipeline.from_yaml]
-    B --> C[Load Modules]
-    C --> D[DocumentLoader]
-    C --> E[TextProcessor]
-    
-    F[Pipeline Execution] --> G[data_loader]
-    G -->|documents| H[processor]
-    
-    D --> G
-    E --> H
-    
-    H --> I[📊 Processed Results]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style F fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style I fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-```
+![DAG YAML Pipeline Flow](dag-yaml-pipeline-flow.svg)
 
 ### Example for FunctionalPipeline
 
@@ -626,32 +543,7 @@ The YAML file defines external modules (`DocumentLoader`, `TextProcessor`, `Data
 
 #### FunctionalPipeline YAML flow diagram
 
-```mermaid
-graph TD
-    A[📄 functional_pipeline_config.yaml] --> B[FunctionalPipeline.from_yaml]
-    B --> C[Load Modules]
-    C --> D[DocumentLoader]
-    C --> E[TextProcessor] 
-    C --> F[DataValidator]
-    C --> G[ReportBuilder]
-    
-    H[Pipeline Execution] --> I[load_data]
-    I -->|documents| J[process]
-    J -->|processed_documents| K[validate]
-    K -->|validation_results| L[build_report]
-    
-    D --> I
-    E --> J
-    F --> K
-    G --> L
-    
-    L --> M[📊 Final Report]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-```
+![Functional YAML Pipeline Flow](functional-yaml-pipeline-flow.svg)
 
 ## Pipeline comparison
 
