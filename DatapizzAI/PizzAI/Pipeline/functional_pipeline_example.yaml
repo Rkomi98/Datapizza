@@ -1,0 +1,108 @@
+name: "document_processing_pipeline"
+description: "Functional pipeline with conditional branching for document processing"
+
+# Pipeline steps configuration
+steps:
+  - name: "load_data"
+    component: "DataLoader"
+    description: "Load documents with priorities"
+    
+  - name: "classify"
+    component: "Classifier" 
+    description: "Classify documents by urgency"
+    depends_on: "load_data"
+    input_key: "documents"
+    
+  - name: "notification_branch"
+    type: "conditional_branch"
+    condition: "has_urgent_documents"
+    depends_on: "classify"
+    if_true:
+      - name: "send_notification"
+        component: "NotificationSender"
+        description: "Send urgent notification to team"
+    if_false:
+      - name: "process_documents" 
+        component: "DocumentProcessor"
+        description: "Process documents in foreach loop"
+        type: "foreach"
+        input_key: "classified_documents"
+      - name: "generate_report"
+        component: "ReportGenerator" 
+        description: "Generate final analysis report"
+        depends_on: "process_documents"
+        input_key: "processed_documents"
+
+# Component definitions
+components:
+  DataLoader:
+    class: "pipeline_components.DataLoader"
+    description: "Loads sample documents with different priorities"
+    output_keys:
+      - "documents"
+      
+  Classifier:
+    class: "pipeline_components.Classifier"
+    description: "Classifies documents by priority (urgent/normal)"
+    parameters:
+      priority_field: "priority"
+      urgent_keywords: ["critical", "urgent", "security"]
+    output_keys:
+      - "classified_documents" 
+      - "urgent_documents"
+      - "has_urgent"
+      
+  NotificationSender:
+    class: "pipeline_components.NotificationSender"
+    description: "Sends notifications for urgent documents"
+    parameters:
+      notification_type: "email"
+      recipients: ["team@company.com"]
+    output_keys:
+      - "notification_sent"
+      - "message"
+      - "timestamp"
+      
+  DocumentProcessor:
+    class: "pipeline_components.DocumentProcessor" 
+    description: "Processes individual documents"
+    parameters:
+      extract_metadata: true
+      calculate_metrics: true
+    output_keys:
+      - "processed"
+      - "word_count"
+      - "processing_time"
+      
+  ReportGenerator:
+    class: "pipeline_components.ReportGenerator"
+    description: "Generates comprehensive analysis report"
+    parameters:
+      include_statistics: true
+      format: "markdown"
+    output_keys:
+      - "final_report"
+      - "statistics"
+
+# Global pipeline configuration
+config:
+  async_execution: true
+  error_handling: "continue_on_error"
+  logging_level: "INFO"
+  timeout: 300
+  
+# Example data structure
+sample_data:
+  documents:
+    - id: 1
+      title: "Bug Critical"
+      content: "System crash detected"
+      priority: "urgent"
+    - id: 2  
+      title: "Feature Request"
+      content: "New functionality needed"
+      priority: "normal"
+    - id: 3
+      title: "Security Issue" 
+      content: "Vulnerability found"
+      priority: "urgent"
