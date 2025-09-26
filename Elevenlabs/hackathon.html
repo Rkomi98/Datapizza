@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enterprise Hackathon — ElevenLabs × Datapizza</title>
+  <style>
+    :root{
+      --bg:#0a0c0f; --surface:#0f1318; --elev:#121821; --ink:#e7edf7; --muted:#9fb0c5; --brand:#60e6ff; --accent:#b0ff9f; --line:#1b2531;
+      --pill:#17202a; --shadow:0 12px 40px rgba(0,0,0,.45);
+    }
+    html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,sans-serif}
+    .wrap{max-width:1200px;margin:0 auto;padding:28px 24px 80px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .brand{display:flex;gap:14px;align-items:center}
+    .logo{width:44px;height:44px;border-radius:12px;background:radial-gradient(120% 120% at 0% 0%,var(--brand),transparent 60%),radial-gradient(120% 120% at 100% 100%,var(--accent),transparent 60%),linear-gradient(135deg,#1a2230,#0f141c);box-shadow:var(--shadow)}
+    .title{display:flex;flex-direction:column}
+    .title h1{margin:0;font-size:22px;letter-spacing:.2px}
+    .subtitle{color:var(--muted);font-size:13px}
+
+    /* TAB BAR */
+    .tabs{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(10,12,15,.9),rgba(10,12,15,.65) 60%,rgba(10,12,15,0));backdrop-filter:saturate(140%) blur(8px);padding:8px 0 10px;margin:6px 0 18px;border-bottom:1px solid var(--line)}
+    .tabbar{display:flex;flex-wrap:wrap;gap:8px}
+    .tabbar button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;font-size:14px;letter-spacing:.2px;transition:transform .15s ease, border-color .2s}
+    .tabbar button[aria-selected="true"]{border-color:var(--brand);box-shadow:0 0 0 1px rgba(96,230,255,.15) inset, 0 10px 26px rgba(96,230,255,.12);}
+    .tabbar button:hover{transform:translateY(-1px)}
+
+    /* PANELS */
+    .panel{display:none;border:1px solid var(--line);background:var(--elev);border-radius:18px;box-shadow:var(--shadow);padding:20px}
+    .panel.active{display:block}
+
+    h2{margin:0 0 10px;font-size:20px}
+    h3{margin:16px 0 6px;font-size:16px}
+    p{margin:8px 0}
+    ul{margin:8px 0 8px 20px}
+    li{margin:6px 0}
+    .callout{border-left:3px solid var(--brand);background:linear-gradient(90deg,rgba(96,230,255,.12),transparent);padding:10px 12px;border-radius:12px}
+    .muted{color:var(--muted)}
+    .timegrid{display:grid;gap:10px}
+    .slot{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:flex-start;border:1px solid var(--line);background:rgba(255,255,255,.02);padding:12px;border-radius:14px}
+    .time{color:var(--brand);font-weight:700}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--pill);border:1px solid var(--line);color:var(--muted);font-size:12px;margin-left:8px}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0d1117;border:1px solid #1f2937;padding:2px 6px;border-radius:6px}
+
+    /* Utility */
+    .two{columns:2;column-gap:24px}
+    @media(max-width:900px){.two{columns:1}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <h1>Enterprise Hackathon — ElevenLabs × Datapizza</h1>
+          <span class="subtitle">One‑Pager Operativo • Layout a Tab</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Sezioni documento">
+      <div class="tabbar">
+        <button role="tab" aria-selected="true" aria-controls="tab-exec" id="btn-exec">Executive</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-kpi" id="btn-kpi">Obiettivi & KPI</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-target" id="btn-target">Target</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-format" id="btn-format">Format</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-agenda" id="btn-agenda">Agenda</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-team" id="btn-team">Team</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-challenge" id="btn-challenge">Challenge</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-criteria" id="btn-criteria">Criteri</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-jury" id="btn-jury">Giuria</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-onboard" id="btn-onboard">Onboarding Tech</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-privacy" id="btn-privacy">Privacy</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-log" id="btn-log">Logistica</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-brand" id="btn-brand">Branding</button>
+        <button role="tab" aria-selected="false" aria-controls="tab-form" id="btn-form">Form</button>
+      </div>
+    </div>
+
+    <!-- PANELS -->
+    <section class="panel active" id="tab-exec" role="tabpanel" aria-labelledby="btn-exec">
+      <h2>1) Executive Summary</h2>
+      <ul>
+        <li><b>Scopo:</b> realizzare in una giornata una demo <b>low/no‑code</b> basate su capability <b>voice/AI</b> di ElevenLabs, con <b>fattibilità e scalabilità</b> orientate a contesti enterprise.</li>
+        <li><b>Format:</b> team <b>misti business/tech (decisi in fase di form iscrizione)</b>, con ideazione guidata e brainstorming di gruppo (sticky notes).</li>
+        <li><b>Output atteso:</b> 8–10 prototipi (dipende da come dividiamo i gruppi); alla fine demo + presentazione in 5 minuti davanti a tutti.</li>
+        <li><b>Follow‑up:</b> condotto da ElevenLabs (PoC, trial estesi, workshop dedicati).</li>
+        <li><b>Punti aperti con ElevenLabs:</b> da chiarire in call
+          <ul>
+            <li>1) <b>sticky notes workshop</b> (evita che i partecipanti partano per la tangente con un’idea poco realistica),</li>
+            <li>2) <b>premi</b> (tipologia/budget),</li>
+            <li>2b) eventuale <b>co‑branding</b> dei premi.</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-kpi" role="tabpanel" aria-labelledby="btn-kpi">
+      <h2>2) Obiettivi & KPI</h2>
+      <h3>Obiettivi</h3>
+      <ul>
+        <li>Dimostrare valore enterprise delle soluzioni voice/AI (casi d’uso reali: supporto, sales enablement, RevOps, knowledge).</li>
+        <li>Ottenere demo <b>funzionanti</b> entro la fine della giornata (funzionanti = pronte per essere mostrate all’audience).</li>
+        <li>Abilitare follow‑up concreti (PoC, pilot).</li>
+      </ul>
+      <h3>KPI suggeriti da me</h3>
+      <ul>
+        <li><b>Partecipazione:</b> 40–60 presenti, ≥80% show‑up rate vs registrati.</li>
+        <li><b>Produzione:</b> ≥ 6 demo funzionanti (spero XD); 8 demo sul palco.</li>
+        <li><b>Qualità:</b> NPS evento ≥8/10; soddisfazione giuria ≥8/10.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-target" role="tabpanel" aria-labelledby="btn-target">
+      <h2>3) Target, Personas e Reclutamento</h2>
+      <ul>
+        <li><b>Personas chiave:</b> AI Lead, Head of/Director (Sales, CS, RevOps, Ops), profili tecnici senior; mix business/tech.</li>
+        <li><b>Aziende:</b> <b>enterprise user</b> (meno focus su vendor/reseller/SI/wrapper).</li>
+        <li><b>Selezione:</b> tramite <b>form di iscrizione</b> con domande su ruolo, seniority, interessi, preferenza track; <b>assegnazione team</b> a tavolino prima dell’evento; <b>annuncio la mattina</b>.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-format" role="tabpanel" aria-labelledby="btn-format">
+      <h2>4) Struttura & Format dell’evento</h2>
+      <ul>
+        <li><b>Durata:</b> 9:00–18:00.</li>
+        <li><b>Momenti chiave:</b> keynote introduttivo, <b>ideazione guidata</b> (sticky notes), sviluppo (due sprint), selezione Top 8, demo finali, premi, closing.</li>
+        <li><b>Mentorship:</b> 2–3 mentor (noi + ElevenLabs) per supporto tecnico/di prodotto e per “gate” di fattibilità.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-agenda" role="tabpanel" aria-labelledby="btn-agenda">
+      <h2>5) Agenda dettagliata (run‑of‑show)</h2>
+      <p class="callout muted">Per rispettare lo slot 9–18 con 8/10 demo sul palco: divisione a priori ben ponderata tra profili tech e non tech. La giuria inizia a valutare i gruppi con le demo live dalle 17:00*.
+        <br><i>*Orario variabile in base ai partecipanti. Max 5 persone per gruppo.</i></p>
+
+      <h3>Pre‑apertura (staff)</h3>
+      <div class="timegrid">
+        <div class="slot"><div class="time">08:15–08:45</div><div><b>Setup A/V e spazi</b> <span class="pill">Owner: Marketing + GabriModena e Raul (invito consigliato)</span><div class="muted">Test microfoni, proiezione, Wi‑Fi; predisporre tavoli team e materiali.</div></div></div>
+        <div class="slot"><div class="time">08:45–09:00</div><div><b>Brief staff & accoglienza</b> <span class="pill">Owner: 1 Marketing + 1 ElevenLabs</span><div class="muted">Allineamento ruoli, timekeeper, check‑in.</div></div></div>
+      </div>
+
+      <h3>Mattina</h3>
+      <div class="timegrid">
+        <div class="slot"><div class="time">09:00–09:10</div><div><b>Welcome & Housekeeping</b><div class="muted">MC Datapizza — Agenda, logistica. <b>Deliverable:</b> QR con agenda/criteri sempre accessibile.</div></div></div>
+        <div class="slot"><div class="time">09:10–09:20</div><div><b>Keynote ElevenLabs: visione & capability</b><div class="muted">Speaker ElevenLabs — 3–4 slide high‑level. <b>Richiesta:</b> slide 4/5 gg prima per feedback.</div></div></div>
+        <div class="slot"><div class="time">09:20–09:30</div><div><b>Challenge Overview & Criteri</b><div class="muted">MC + Mentor — 4 challenge card + Wild Card, criteri (focus sostenibilità). <b>Deliverable:</b> link repo materiale.</div></div></div>
+        <div class="slot"><div class="time">09:30–09:40</div><div><b>Annuncio team & seating</b><div class="muted">Team già pre‑definiti; posizionamento ai tavoli. <i>Tip: cartellini con nome team/track.</i></div></div></div>
+        <div class="slot"><div class="time">09:40–09:45</div><div><b>Icebreaker rapido</b><div class="muted">Giro presentazione, max 30s a testa.</div></div></div>
+        <div class="slot"><div class="time">09:45–10:30</div><div><b>Ideation Workshop (sticky notes)</b>
+          <ol>
+            <li><b>Warm‑up (5’):</b> obiettivo team/outcome. <b>Output:</b> frase su sticky (“Il nostro obiettivo oggi è…”).</li>
+            <li><b>Problem framing (10’):</b> 2–3 pain statement (Sales/CS/RevOps). Esempi:
+              <ul>
+                <li>Agente voce che capisce intento, usa <b>RAG</b>, risolve o apre ticket <b>Zendesk</b>.</li>
+                <li>Qualifica lead incoerente: agente con <b>BANT light</b> che aggiorna <b>Salesforce/HubSpot</b> e <b>prenota meeting</b> (Cal.com).</li>
+              </ul>
+            </li>
+            <li><b>Divergenza idee (10’):</b> brainstorming con sticky (quantità > qualità).</li>
+            <li><b>Convergenza (10’):</b> dot‑voting → 1 idea.</li>
+            <li><b>Scope & success criteria (10’):</b> definire MVP, metriche, flusso demo. Domande guida:
+              <ul>
+                <li>Qual è il flusso minimo dimostrabile in 3’?</li>
+                <li>Cosa deve assolutamente funzionare per convincere la giuria?</li>
+              </ul>
+              <b>Output:</b> mini‑mappa + 2–3 criteri (es. ASR/risposta con citazioni; demo fluida &lt;3’).
+            </li>
+          </ol>
+          <div class="muted">Owner: Facilitatori + 1 mentor ElevenLabs. <b>Deliverable:</b> Idea Canvas + schema demo.</div>
+        </div></div>
+        <div class="slot"><div class="time">10:30–10:40</div><div><b>Tech Onboarding Express</b><div class="muted">Tech Lead ElevenLabs — Accesso Studio/API (account test), overview starter kit no‑code. <b>Deliverable:</b> accessi verificati.</div></div></div>
+        <div class="slot"><div class="time">10:40–13:00</div><div><b>Sprint 1 (build)</b><div class="muted"><b>Goal:</b> flusso end‑to‑end minimo. <b>Mentor Checkpoint #1 11:20–11:30</b> — fattibilità, aderenza, piano demo. <b>Deliverable:</b> MVP “respira”.</div></div></div>
+      </div>
+
+      <h3>Pausa pranzo</h3>
+      <div class="timegrid">
+        <div class="slot"><div class="time">13:00–14:00</div><div><b>Lunch & networking</b><div class="muted">Area mentor per Q&A informali.</div></div></div>
+      </div>
+
+      <h3>Pomeriggio</h3>
+      <div class="timegrid">
+        <div class="slot"><div class="time">14:00–16:30</div><div><b>Sprint 2 (refine & integrazioni)</b><div class="muted">Focus: UX demo, robustezza, integrazione dati dummy, logging. <b>Mentor Checkpoint #2 14:10–14:20</b> — pronti a registrare video 90s? <b>Deliverable:</b> MVP rifinito + script.</div></div></div>
+        <div class="slot"><div class="time">16:30–17:00</div><div><b>Preparazione slides e Demo</b><div class="muted">MC + Mentor — Pitch: problema → soluzione → impatto → next steps. <b>Deliverable:</b> Slides + <b>video 90s</b> + link demo (upload entro <b>17:00</b>).</div></div></div>
+        <div class="slot"><div class="time">16:50–17:00</div><div><b>Tech Check Top 8</b><div class="muted">A/V lead + Timekeeper — HDMI, audio, timer.</div></div></div>
+        <div class="slot"><div class="time">17:00–17:50</div><div><b>Demo Live: Top 8</b><div class="muted">Formato: <b>8/10 team × 5’</b> (4’ pitch/demo + 1’ Q&A). <b>Deliverable:</b> scorecard compilate.</div></div></div>
+        <div class="slot"><div class="time">17:50–17:55</div><div><b>Deliberazione giuria</b><div class="muted">Definire 1°/2°/3° premio + menzioni.</div></div></div>
+        <div class="slot"><div class="time">17:55–18:00</div><div><b>Awards & Closing</b><div class="muted">MC + ElevenLabs speaker — Premiazione, foto, CTA per follow‑up.</div></div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-team" role="tabpanel" aria-labelledby="btn-team">
+      <h2>6) Team: composizione, formazione e regole</h2>
+      <ul>
+        <li><b>Dimensione:</b> 4–6 persone; mix bilanciato business/tech e linee (Sales/CS/RevOps).</li>
+        <li><b>Formazione:</b> definita <b>in fase di selezione e screening</b> (ruolo, seniority, track); <b>annuncio la mattina</b>.</li>
+        <li><b>Regole:</b>
+          <ul>
+            <li>Solo <b>dataset dummy/sintetici</b> o pubblici; <b>vietati</b> dati reali.</li>
+            <li>Strumenti <b>low/no‑code</b> affiancati a ElevenLabs (automazione, fogli, DB mock, Lovable, Cursor).</li>
+            <li>Deadline <b>16:30</b>: <b>video 90s</b>, <b>set di slides</b>, link demo.</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-challenge" role="tabpanel" aria-labelledby="btn-challenge">
+      <h2>7) Challenge Design (ibrido “guardrail + libertà”)</h2>
+      <h3>4 Challenge Card (esempi)</h3>
+      <ol>
+        <li><b>Customer Support Voice Agent</b>
+          <ol>
+            <li><b>Obiettivo:</b> ridurre i tempi di risposta gestendo FAQ, creando ticket in Zendesk/HubSpot e facendo handoff umano.</li>
+            <li><b>Output demo:</b> agente che capisce intento, risponde da KB mock via RAG, e apre ticket automatico.</li>
+          </ol>
+        </li>
+        <li><b>Sales Qualification & Enablement</b>
+          <ol>
+            <li><b>Obiettivo:</b> automatizzare la qualifica lead e fornire insight post‑call.</li>
+            <li><b>Output demo:</b> agente che fa 2–3 domande BANT light, aggiorna lead su Salesforce sandbox, e produce recap con next steps.</li>
+          </ol>
+        </li>
+        <li><b>Knowledge Voice QA</b>
+          <ol>
+            <li><b>Obiettivo:</b> dare risposte affidabili da policy/FAQ aziendali.</li>
+            <li><b>Output demo:</b> agente che interroga KB mock, cita la fonte usata, propone escalation se confidenza bassa.</li>
+          </ol>
+        </li>
+        <li><b>Compliance & Analytics Monitor</b>
+          <ol>
+            <li><b>Obiettivo:</b> analizzare conversazioni per trend, sentiment e rischi di non‑compliance.</li>
+            <li><b>Output demo:</b> agente che tagga 2–3 “red flag” in sample calls e genera report sintetico.</li>
+          </ol>
+        </li>
+      </ol>
+      <p><b>Bonus — Wild Card Track:</b> idea libera, purché <b>fattibile in 1 giorno</b> e coerente con voice/AI di ElevenLabs (multilingua, integrazioni tool, training simulato).</p>
+    </section>
+
+    <section class="panel" id="tab-criteria" role="tabpanel" aria-labelledby="btn-criteria">
+      <h2>8) Criteri di Valutazione (focus sostenibilità)</h2>
+      <ol>
+        <li><b>Fattibilità & Scalabilità (30%)</b> – integrabilità, robustezza, passi verso PoC.</li>
+        <li><b>Impatto Business (30%)</b> – valore per Sales/CS/RevOps, metriche chiare.</li>
+        <li><b>Uso tecnologia ElevenLabs (20%)</b> – aderenza e sfruttamento intelligente.</li>
+        <li><b>UX & Demo Readiness (20%)</b> – chiarezza flusso, comprensibilità.</li>
+      </ol>
+      <p><b>Bonus (fino a +5 pt):</b> creatività, collaborazione, qualità pitch.</p>
+    </section>
+
+    <section class="panel" id="tab-jury" role="tabpanel" aria-labelledby="btn-jury">
+      <h2>9) Giuria & Processo</h2>
+      <ul>
+        <li><b>Composizione:</b> 1–2 ElevenLabs, 1–2 Datapizza, 1 eventuale ospite enterprise (se utile).</li>
+        <li><b>Pre‑screen (15:30–15:50):</b> score veloce su video/1‑pager; selezione <b>Top 8</b>.</li>
+        <li><b>Live scoring:</b> scorecard per ciascun criterio; timekeeping rigoroso.</li>
+        <li><b>Deliberazione:</b> 10’; in caso di parità, prevale Fattibilità & Scalabilità.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-onboard" role="tabpanel" aria-labelledby="btn-onboard">
+      <h2>10) Onboarding Tecnologico (low/no‑code)</h2>
+      <ul>
+        <li><b>Accessi:</b> account test ElevenLabs, credenziali condivise in anticipo (o attivazione veloce on‑site).</li>
+        <li><b>Starter Kit:</b> integrazioni <b>no‑code</b> (workflow automazione, fogli dati, webhook semplici) + snippet “hello world”.</li>
+        <li><b>Supporto in sala:</b> 2 mentor ElevenLabs per troubleshooting; FAQ stampata/QR.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-privacy" role="tabpanel" aria-labelledby="btn-privacy">
+      <h2>11) Dati, Privacy & Compliance</h2>
+      <ul>
+        <li><b>Dati reali:</b> <b>vietati</b>; usare <b>dataset sintetici</b> o mock.</li>
+        <li><b>Consenso voce:</b> se registrazioni vocali, informare e ottenere consenso.</li>
+        <li><b>IP:</b> il codice rimane dei team; l’uso post‑evento è oggetto di accordi separati (non in questa giornata).</li>
+        <li><b>Sicurezza:</b> nessun accesso a sistemi produttivi.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-log" role="tabpanel" aria-labelledby="btn-log">
+      <h2>12) Logistica & Infrastruttura</h2>
+      <ul class="two">
+        <li><b>Spazi:</b> sala plenaria (keynote/demo), 6–10 tavoli team, 1 stanza giuria.</li>
+        <li><b>A/V:</b> proiettore, impianto audio, 2 microfoni (mano + gelato), timer visibile.</li>
+        <li><b>Energia & Rete:</b> ciabatte per tavolo, Wi‑Fi enterprise (SSID dedicato), <b>backup 4G</b>.</li>
+        <li><b>Materiali:</b> sticky notes, pennarelli, canvas stampati, lanyard, segnaletica.</li>
+        <li><b>Catering:</b> coffee welcome, pranzo leggero, acqua & caffè pomeriggio.</li>
+        <li><b>Safety:</b> uscite di emergenza segnalate, kit primo soccorso.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-brand" role="tabpanel" aria-labelledby="btn-brand">
+      <h2>13) Branding & Materiali (roll‑up)</h2>
+      <ul>
+        <li><b>Roll‑up:</b> grafica fornita da ElevenLabs; valutare <b>co‑branding</b> (punto aperto).</li>
+        <li><b>Slide master & template:</b> coerenza visiva; <span class="kbd">QR</span> code con agenda/criteri.</li>
+        <li><b>Foto/Video:</b> photobooth “voice/AI” (facoltativo) per eco social.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="tab-form" role="tabpanel" aria-labelledby="btn-form">
+      <h2>14) Registrazione: form, selezione, conferme</h2>
+      <h3>Campi form (chiave)</h3>
+      <ul>
+        <li>Nome, ruolo, <b>profilo (Business/Tech)</b>, seniority, reparto.</li>
+        <li>Aree di interesse (CS, Sales, RevOps, Ops), <b>preferenza challenge</b>.</li>
+        <li>Strumenti usati di frequente (no‑code, automazioni).</li>
+        <li>Consenso policy dati/demo.</li>
+      </ul>
+      <p><b>Selezione & team:</b> mix business/tech bilanciato; 4–6 per team.</p>
+      <p><b>Conferme:</b> invio <b>info pratiche</b> (orari, cosa portare: laptop, cuffie).</p>
+    </section>
+  </div>
+
+  <script>
+    // Basic tabs controller (accessible)
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const panels = document.querySelectorAll('[role="tabpanel"]');
+    function activate(id){
+      tabs.forEach(t=>{const sel = t.id===`btn-${id}`; t.setAttribute('aria-selected', sel)});
+      panels.forEach(p=>p.classList.toggle('active', p.id===`tab-${id}`));
+    }
+    tabs.forEach(t=>t.addEventListener('click', ()=>activate(t.id.replace('btn-',''))));
+    // Keyboard support
+    document.addEventListener('keydown', (e)=>{
+      if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key)) return;
+      const order=[...tabs]; const current=document.activeElement; const i=order.indexOf(current);
+      if(i<0) return; e.preventDefault();
+      let j=i; if(e.key==='ArrowRight') j=(i+1)%order.length; if(e.key==='ArrowLeft') j=(i-1+order.length)%order.length; if(e.key==='Home') j=0; if(e.key==='End') j=order.length-1;
+      order[j].focus(); order[j].click();
+    });
+  </script>
+</body>
+</html>
