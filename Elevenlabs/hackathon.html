@@ -11,40 +11,52 @@
     }
     html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,sans-serif}
     .wrap{max-width:1200px;margin:0 auto;padding:28px 24px 80px}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;padding:6px 0}
     .brand{display:flex;gap:14px;align-items:center}
-    .logo{width:44px;height:44px;border-radius:12px;background:radial-gradient(120% 120% at 0% 0%,var(--brand),transparent 60%),radial-gradient(120% 120% at 100% 100%,var(--accent),transparent 60%),linear-gradient(135deg,#1a2230,#0f141c);box-shadow:var(--shadow)}
-    .title{display:flex;flex-direction:column}
+    .logo{width:48px;height:48px;border-radius:14px;background:radial-gradient(120% 120% at 0% 0%,var(--brand),transparent 60%),radial-gradient(120% 120% at 100% 100%,var(--accent),transparent 60%),linear-gradient(135deg,#1a2230,#0f141c);box-shadow:var(--shadow)}
+    .title{display:flex;flex-direction:column;gap:4px}
     .title h1{margin:0;font-size:22px;letter-spacing:.2px}
     .subtitle{color:var(--muted);font-size:13px}
+    .partner-logos{display:flex;align-items:center;gap:14px;margin-left:32px;padding:6px 16px;border-radius:999px;background:linear-gradient(135deg,rgba(0, 0, 0, 0.92),rgba(52, 75, 106, 0.88));border:1px solid rgba(96,230,255,.16);box-shadow:0 10px 24px rgba(0,0,0,.34)}
+    .partner-logos img{height:26px;width:auto;max-width:140px;object-fit:contain;filter:none;opacity:1}
+    .partner-logos img:first-child{height:35px;max-width:120px}
 
     /* TAB BAR */
-    .tabs{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(10,12,15,.9),rgba(10,12,15,.65) 60%,rgba(10,12,15,0));backdrop-filter:saturate(140%) blur(8px);padding:8px 0 10px;margin:6px 0 18px;border-bottom:1px solid var(--line)}
-    .tabbar{display:flex;flex-wrap:wrap;gap:8px}
-    .tabbar button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;font-size:14px;letter-spacing:.2px;transition:transform .15s ease, border-color .2s}
-    .tabbar button[aria-selected="true"]{border-color:var(--brand);box-shadow:0 0 0 1px rgba(96,230,255,.15) inset, 0 10px 26px rgba(96,230,255,.12);}
-    .tabbar button:hover{transform:translateY(-1px)}
+    .tabs{position:sticky;top:0;z-index:50;display:block;padding:14px 18px;margin:16px 0 26px;border-radius:20px;border:1px solid rgba(96,230,255,.14);background:linear-gradient(180deg,rgba(10,13,18,.95),rgba(10,13,18,.78) 55%,rgba(10,12,15,0));backdrop-filter:saturate(160%) blur(14px);box-shadow:0 22px 60px rgba(0,0,0,.48)}
+    .tabbar{display:flex;flex-wrap:wrap;gap:10px}
+    .tabbar button{appearance:none;position:relative;border:1px solid rgba(96,230,255,.14);background:linear-gradient(135deg,rgba(17,25,36,.98),rgba(12,17,26,.9));color:var(--ink);padding:12px 18px;border-radius:14px;cursor:pointer;font-weight:600;font-size:14px;letter-spacing:.3px;transition:transform .18s ease,border-color .22s ease,box-shadow .22s ease,background .25s ease}
+    .tabbar button::after{content:"";position:absolute;inset:-1px;border-radius:inherit;opacity:0;transition:opacity .25s ease;background:radial-gradient(circle at 50% 0%,rgba(96,230,255,.38),transparent 64%)}
+    .tabbar button[aria-selected="true"]{border-color:rgba(96,230,255,.62);background:linear-gradient(135deg,rgba(96,230,255,.28),rgba(18,28,40,.92));box-shadow:0 14px 32px rgba(96,230,255,.22),0 0 0 1px rgba(96,230,255,.12) inset}
+    .tabbar button[aria-selected="true"]::after{opacity:.95}
+    .tabbar button:hover{transform:translateY(-2px);box-shadow:0 18px 36px rgba(0,0,0,.36)}
+    .tabbar button:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
 
     /* PANELS */
-    .panel{display:none;border:1px solid var(--line);background:var(--elev);border-radius:18px;box-shadow:var(--shadow);padding:20px}
-    .panel.active{display:block}
+    .panel{display:none;position:relative;border:1px solid rgba(96,230,255,.12);background:linear-gradient(155deg,rgba(15,22,32,.97),rgba(9,13,19,.94));border-radius:20px;box-shadow:0 28px 65px rgba(0,0,0,.5);padding:26px;overflow:hidden;z-index:0}
+    .panel::before{content:"";position:absolute;top:-140px;left:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(96,230,255,.2),transparent 70%);opacity:0;transition:opacity .3s ease;pointer-events:none;z-index:-1}
+    .panel.active{display:block;animation:panelIn .28s ease}
+    .panel.active::before{opacity:1}
 
-    h2{margin:0 0 10px;font-size:20px}
-    h3{margin:16px 0 6px;font-size:16px}
+    h2{margin:0 0 14px;font-size:22px;letter-spacing:.2px;display:flex;align-items:flex-start;gap:12px}
+    h2::before{content:"";display:inline-flex;width:10px;height:10px;border-radius:50%;background:var(--brand);box-shadow:0 0 18px rgba(96,230,255,.55);margin-top:8px}
+    h3{margin:18px 0 8px;font-size:16.5px;letter-spacing:.15px}
     p{margin:8px 0}
     ul{margin:8px 0 8px 20px}
     li{margin:6px 0}
     .callout{border-left:3px solid var(--brand);background:linear-gradient(90deg,rgba(96,230,255,.12),transparent);padding:10px 12px;border-radius:12px}
     .muted{color:var(--muted)}
     .timegrid{display:grid;gap:10px}
-    .slot{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:flex-start;border:1px solid var(--line);background:rgba(255,255,255,.02);padding:12px;border-radius:14px}
-    .time{color:var(--brand);font-weight:700}
-    .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--pill);border:1px solid var(--line);color:var(--muted);font-size:12px;margin-left:8px}
+    .slot{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:flex-start;border:1px solid rgba(96,230,255,.1);background:linear-gradient(145deg,rgba(17,25,36,.86),rgba(11,17,25,.82));padding:14px;border-radius:16px;box-shadow:0 16px 36px rgba(0,0,0,.32)}
+    .time{color:var(--brand);font-weight:700;font-size:15px;letter-spacing:.3px}
+    .pill{display:inline-block;padding:3px 10px;border-radius:999px;background:linear-gradient(135deg,rgba(20,28,40,.92),rgba(15,21,30,.88));border:1px solid rgba(96,230,255,.16);color:rgba(231,237,247,.82);font-size:12px;margin-left:8px;box-shadow:0 6px 18px rgba(0,0,0,.35);letter-spacing:.2px}
     .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0d1117;border:1px solid #1f2937;padding:2px 6px;border-radius:6px}
+
+    @keyframes panelIn{from{opacity:.55;transform:translateY(6px);}to{opacity:1;transform:translateY(0)}}
 
     /* Utility */
     .two{columns:2;column-gap:24px}
     @media(max-width:900px){.two{columns:1}}
+    @media(max-width:720px){header{flex-direction:column;align-items:flex-start;gap:16px}.partner-logos{align-self:flex-start;margin-left:0;padding:6px 14px;gap:12px}.partner-logos img{height:22px;max-width:110px}.partner-logos img:first-child{height:20px;max-width:96px}.title h1{font-size:20px}.logo{width:42px;height:42px;border-radius:12px}}
   </style>
 </head>
 <body>
@@ -56,6 +68,10 @@
           <h1>Enterprise Hackathon — ElevenLabs × Datapizza</h1>
           <span class="subtitle">One‑Pager Operativo • Layout a Tab</span>
         </div>
+      </div>
+      <div class="partner-logos" aria-label="Partner Datapizza e ElevenLabs">
+        <img src="datapizzaLogo.png" alt="Datapizza" decoding="async" />
+        <img src="elevenlabs-logo-black.png" alt="ElevenLabs" decoding="async" />
       </div>
     </header>
 
@@ -80,7 +96,7 @@
 
     <!-- PANELS -->
     <section class="panel active" id="tab-exec" role="tabpanel" aria-labelledby="btn-exec">
-      <h2>1) Executive Summary</h2>
+      <h2>Executive Summary</h2>
       <ul>
         <li><b>Scopo:</b> realizzare in una giornata una demo <b>low/no‑code</b> basate su capability <b>voice/AI</b> di ElevenLabs, con <b>fattibilità e scalabilità</b> orientate a contesti enterprise.</li>
         <li><b>Format:</b> team <b>misti business/tech (decisi in fase di form iscrizione)</b>, con ideazione guidata e brainstorming di gruppo (sticky notes).</li>
@@ -97,7 +113,7 @@
     </section>
 
     <section class="panel" id="tab-kpi" role="tabpanel" aria-labelledby="btn-kpi">
-      <h2>2) Obiettivi & KPI</h2>
+      <h2>Obiettivi & KPI</h2>
       <h3>Obiettivi</h3>
       <ul>
         <li>Dimostrare valore enterprise delle soluzioni voice/AI (casi d’uso reali: supporto, sales enablement, RevOps, knowledge).</li>
@@ -113,7 +129,7 @@
     </section>
 
     <section class="panel" id="tab-target" role="tabpanel" aria-labelledby="btn-target">
-      <h2>3) Target, Personas e Reclutamento</h2>
+      <h2>Target, Personas e Reclutamento</h2>
       <ul>
         <li><b>Personas chiave:</b> AI Lead, Head of/Director (Sales, CS, RevOps, Ops), profili tecnici senior; mix business/tech.</li>
         <li><b>Aziende:</b> <b>enterprise user</b> (meno focus su vendor/reseller/SI/wrapper).</li>
@@ -122,7 +138,7 @@
     </section>
 
     <section class="panel" id="tab-format" role="tabpanel" aria-labelledby="btn-format">
-      <h2>4) Struttura & Format dell’evento</h2>
+      <h2>Struttura & Format dell’evento</h2>
       <ul>
         <li><b>Durata:</b> 9:00–18:00.</li>
         <li><b>Momenti chiave:</b> keynote introduttivo, <b>ideazione guidata</b> (sticky notes), sviluppo (due sprint), selezione Top 8, demo finali, premi, closing.</li>
@@ -131,7 +147,7 @@
     </section>
 
     <section class="panel" id="tab-agenda" role="tabpanel" aria-labelledby="btn-agenda">
-      <h2>5) Agenda dettagliata (run‑of‑show)</h2>
+      <h2>Agenda dettagliata (run‑of‑show)</h2>
       <p class="callout muted">Per rispettare lo slot 9–18 con 8/10 demo sul palco: divisione a priori ben ponderata tra profili tech e non tech. La giuria inizia a valutare i gruppi con le demo live dalle 17:00*.
         <br><i>*Orario variabile in base ai partecipanti. Max 5 persone per gruppo.</i></p>
 
@@ -190,7 +206,7 @@
     </section>
 
     <section class="panel" id="tab-team" role="tabpanel" aria-labelledby="btn-team">
-      <h2>6) Team: composizione, formazione e regole</h2>
+      <h2>Team: composizione, formazione e regole</h2>
       <ul>
         <li><b>Dimensione:</b> 4–6 persone; mix bilanciato business/tech e linee (Sales/CS/RevOps).</li>
         <li><b>Formazione:</b> definita <b>in fase di selezione e screening</b> (ruolo, seniority, track); <b>annuncio la mattina</b>.</li>
@@ -205,7 +221,7 @@
     </section>
 
     <section class="panel" id="tab-challenge" role="tabpanel" aria-labelledby="btn-challenge">
-      <h2>7) Challenge Design (ibrido “guardrail + libertà”)</h2>
+      <h2>Challenge Design (ibrido “guardrail + libertà”)</h2>
       <h3>4 Challenge Card (esempi)</h3>
       <ol>
         <li><b>Customer Support Voice Agent</b>
@@ -237,7 +253,7 @@
     </section>
 
     <section class="panel" id="tab-criteria" role="tabpanel" aria-labelledby="btn-criteria">
-      <h2>8) Criteri di Valutazione (focus sostenibilità)</h2>
+      <h2>Criteri di Valutazione (focus sostenibilità)</h2>
       <ol>
         <li><b>Fattibilità & Scalabilità (30%)</b> – integrabilità, robustezza, passi verso PoC.</li>
         <li><b>Impatto Business (30%)</b> – valore per Sales/CS/RevOps, metriche chiare.</li>
@@ -248,7 +264,7 @@
     </section>
 
     <section class="panel" id="tab-jury" role="tabpanel" aria-labelledby="btn-jury">
-      <h2>9) Giuria & Processo</h2>
+      <h2>Giuria & Processo</h2>
       <ul>
         <li><b>Composizione:</b> 1–2 ElevenLabs, 1–2 Datapizza, 1 eventuale ospite enterprise (se utile).</li>
         <li><b>Pre‑screen (15:30–15:50):</b> score veloce su video/1‑pager; selezione <b>Top 8</b>.</li>
@@ -258,7 +274,7 @@
     </section>
 
     <section class="panel" id="tab-onboard" role="tabpanel" aria-labelledby="btn-onboard">
-      <h2>10) Onboarding Tecnologico (low/no‑code)</h2>
+      <h2>Onboarding Tecnologico (low/no‑code)</h2>
       <ul>
         <li><b>Accessi:</b> account test ElevenLabs, credenziali condivise in anticipo (o attivazione veloce on‑site).</li>
         <li><b>Starter Kit:</b> integrazioni <b>no‑code</b> (workflow automazione, fogli dati, webhook semplici) + snippet “hello world”.</li>
@@ -267,7 +283,7 @@
     </section>
 
     <section class="panel" id="tab-privacy" role="tabpanel" aria-labelledby="btn-privacy">
-      <h2>11) Dati, Privacy & Compliance</h2>
+      <h2>Dati, Privacy & Compliance</h2>
       <ul>
         <li><b>Dati reali:</b> <b>vietati</b>; usare <b>dataset sintetici</b> o mock.</li>
         <li><b>Consenso voce:</b> se registrazioni vocali, informare e ottenere consenso.</li>
@@ -277,7 +293,7 @@
     </section>
 
     <section class="panel" id="tab-log" role="tabpanel" aria-labelledby="btn-log">
-      <h2>12) Logistica & Infrastruttura</h2>
+      <h2>Logistica & Infrastruttura</h2>
       <ul class="two">
         <li><b>Spazi:</b> sala plenaria (keynote/demo), 6–10 tavoli team, 1 stanza giuria.</li>
         <li><b>A/V:</b> proiettore, impianto audio, 2 microfoni (mano + gelato), timer visibile.</li>
@@ -289,7 +305,7 @@
     </section>
 
     <section class="panel" id="tab-brand" role="tabpanel" aria-labelledby="btn-brand">
-      <h2>13) Branding & Materiali (roll‑up)</h2>
+      <h2>Branding & Materiali (roll‑up)</h2>
       <ul>
         <li><b>Roll‑up:</b> grafica fornita da ElevenLabs; valutare <b>co‑branding</b> (punto aperto).</li>
         <li><b>Slide master & template:</b> coerenza visiva; <span class="kbd">QR</span> code con agenda/criteri.</li>
@@ -298,7 +314,7 @@
     </section>
 
     <section class="panel" id="tab-form" role="tabpanel" aria-labelledby="btn-form">
-      <h2>14) Registrazione: form, selezione, conferme</h2>
+      <h2>Registrazione: form, selezione, conferme</h2>
       <h3>Campi form (chiave)</h3>
       <ul>
         <li>Nome, ruolo, <b>profilo (Business/Tech)</b>, seniority, reparto.</li>
