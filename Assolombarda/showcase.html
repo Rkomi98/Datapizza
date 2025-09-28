@@ -221,6 +221,28 @@
       box-shadow: 0 12px 22px -16px rgba(15, 23, 42, 0.85);
     }
 
+    /* Text color overrides for better readability in light mode */
+    h1, h2, h3 {
+      color: #000000 !important;
+    }
+    html.dark h1, html.dark h2, html.dark h3 {
+      color: #f1f5f9 !important;
+    }
+    
+    .text-main {
+      color: #1a1a1a !important;
+    }
+    html.dark .text-main {
+      color: #e2e8f0 !important;
+    }
+    
+    .text-secondary {
+      color: #333333 !important;
+    }
+    html.dark .text-secondary {
+      color: #cbd5e1 !important;
+    }
+
     @media (max-width: 640px) {
       .page-shell {
         padding: 2rem 1.25rem;
@@ -251,8 +273,8 @@
 
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-gray-900 dark:text-slate-100">Assolombarda · Lesson Showcase</h1>
-          <p id="subtitle" class="text-gray-800 dark:text-neutral-400 mt-2">Quattro esercizi + Best Practices. Copia o scarica i prompt.</p>
+          <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">Assolombarda · Lesson Showcase</h1>
+          <p id="subtitle" class="text-main mt-2">Quattro esercizi + Best Practices. Copia o scarica i prompt.</p>
         </div>
         <div class="flex items-center gap-2">
           <button id="toggleDark" class="btn" aria-label="Attiva/disattiva dark mode" aria-pressed="false">Dark mode</button>
@@ -266,13 +288,13 @@
 
     <section class="space-y-5">
       <div>
-        <h2 id="tabTitle" class="text-xl font-semibold text-gray-900 dark:text-slate-200"></h2>
-        <p id="tabBlurb" class="text-sm text-gray-800 dark:text-neutral-400 mt-1"></p>
+        <h2 id="tabTitle" class="text-xl font-semibold"></h2>
+        <p id="tabBlurb" class="text-sm text-main mt-1"></p>
       </div>
 
       <div class="card p-4">
-        <div class="text-sm font-semibold mb-2 text-gray-900 dark:text-slate-200">Consigli rapidi</div>
-        <ul id="adviceList" class="list-disc pl-5 text-sm text-gray-800 dark:text-neutral-300 space-y-1"></ul>
+        <div class="text-sm font-semibold mb-2 text-secondary">Consigli rapidi</div>
+        <ul id="adviceList" class="list-disc pl-5 text-sm text-secondary space-y-1"></ul>
       </div>
 
       <div class="space-y-3">
