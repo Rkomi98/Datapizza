@@ -6,44 +6,273 @@
   <title>Assolombarda · Lesson Showcase</title>
   <!-- Tailwind Play CDN -->
   <script>
-    tailwind = { config: { darkMode: 'class' } };
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = { darkMode: 'class' };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
     :root { --radius: 14px; }
-    body { font-family: Poppins, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial; }
-    .btn { @apply px-3 py-2 rounded-xl text-sm border border-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800; }
-    .btn-solid { @apply px-3 py-2 rounded-xl text-sm bg-neutral-900 text-white hover:bg-black; }
-    .card { @apply rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900; }
+    body {
+      font-family: Poppins, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      min-height: 100vh;
+      margin: 0;
+      background: radial-gradient(120% 140% at 50% 0%, #f8fafc 0%, #eef2ff 45%, #e2e8f0 100%);
+      color: #0f172a;
+      transition: background-color 200ms ease, color 200ms ease;
+    }
+    html.dark body {
+      background: radial-gradient(120% 140% at 50% -10%, #0b1220 0%, #111827 50%, #0f172a 100%);
+      color: #e2e8f0;
+    }
+
+    .page-shell {
+      background: rgba(255, 255, 255, 0.78);
+      border-radius: calc(var(--radius) + 10px);
+      border: 1px solid rgba(203, 213, 225, 0.6);
+      box-shadow: 0 30px 60px -45px rgba(15, 23, 42, 0.62);
+      padding: 2.5rem 2rem;
+      backdrop-filter: blur(6px);
+    }
+    html.dark .page-shell {
+      background: rgba(15, 23, 42, 0.72);
+      border-color: rgba(51, 65, 85, 0.62);
+      box-shadow: 0 35px 70px -50px rgba(3, 7, 18, 0.85);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 0.85rem;
+      font-size: 0.875rem;
+      border: 1px solid rgba(212, 212, 216, 0.85);
+      background: rgba(255, 255, 255, 0.8);
+      color: inherit;
+      transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .btn:hover {
+      background: rgba(245, 245, 245, 0.95);
+    }
+    html.dark .btn {
+      background: rgba(17, 24, 39, 0.55);
+      color: #e2e8f0;
+      border-color: rgba(63, 63, 70, 0.85);
+    }
+    html.dark .btn:hover {
+      background: rgba(38, 38, 38, 0.85);
+    }
+
+    .btn-solid {
+      background: #0f172a;
+      color: #f8fafc;
+      border-color: transparent;
+      box-shadow: 0 10px 25px -20px rgba(15, 23, 42, 0.9);
+    }
+    .btn-solid:hover {
+      background: #020617;
+    }
+    html.dark .btn-solid {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    html.dark .btn-solid:hover {
+      background: #e2e8f0;
+    }
+
+    .card {
+      border-radius: var(--radius);
+      border: 1px solid rgba(226, 232, 240, 0.85);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 22px 46px -38px rgba(15, 23, 42, 0.48);
+    }
+    html.dark .card {
+      border-color: rgba(71, 85, 105, 0.65);
+      background: rgba(15, 23, 42, 0.88);
+      box-shadow: 0 22px 46px -34px rgba(15, 23, 42, 0.85);
+    }
+
+    .brand-shelf {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .brand-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: calc(var(--radius) - 4px);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: linear-gradient(135deg, rgba(241, 245, 249, 0.95), rgba(255, 255, 255, 0.99));
+      min-width: 220px;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      text-align: left;
+    }
+    html.dark .brand-card {
+      border-color: rgba(71, 85, 105, 0.55);
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.92));
+    }
+    .brand-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px -28px rgba(15, 23, 42, 0.65);
+    }
+    html.dark .brand-card:hover {
+      box-shadow: 0 18px 36px -24px rgba(15, 23, 42, 0.85);
+    }
+    .brand-card__logo {
+      width: 60px;
+      height: auto;
+    }
+    .brand-card figcaption {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    html.dark .brand-card figcaption {
+      color: #cbd5f5;
+    }
+    .brand-card strong {
+      display: block;
+      font-size: 1.05rem;
+      color: #1f2937;
+      margin-top: 0.2rem;
+    }
+    html.dark .brand-card strong {
+      color: #f8fafc;
+    }
+    .brand-card--datapizza {
+      border-color: rgba(251, 146, 60, 0.55);
+    }
+    .brand-card--assolombarda {
+      border-color: rgba(59, 130, 246, 0.55);
+    }
+    html.dark .brand-card--datapizza {
+      border-color: rgba(251, 146, 60, 0.75);
+    }
+    html.dark .brand-card--assolombarda {
+      border-color: rgba(96, 165, 250, 0.75);
+    }
+    .brand-arrow {
+      font-size: 2rem;
+      line-height: 1;
+      color: #cbd5f5;
+    }
+    html.dark .brand-arrow {
+      color: #475569;
+    }
+
+    .tablist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.4rem;
+      border-radius: 999px;
+      background: rgba(248, 250, 252, 0.88);
+      border: 1px solid rgba(203, 213, 225, 0.75);
+      justify-content: center;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6);
+    }
+    html.dark .tablist {
+      background: rgba(17, 23, 41, 0.6);
+      border-color: rgba(51, 65, 85, 0.7);
+      box-shadow: inset 0 1px 2px rgba(148, 163, 184, 0.35);
+    }
+
+    .tab-button {
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: #475569;
+      cursor: pointer;
+      transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    }
+    .tab-button:hover {
+      background: rgba(226, 232, 240, 0.8);
+      color: #0f172a;
+    }
+    .tab-button.is-active {
+      background: #0f172a;
+      color: #f8fafc;
+      box-shadow: 0 12px 22px -18px rgba(15, 23, 42, 0.75);
+    }
+    html.dark .tab-button {
+      color: #cbd5f5;
+    }
+    html.dark .tab-button:hover {
+      background: rgba(30, 41, 59, 0.65);
+      color: #f8fafc;
+    }
+    html.dark .tab-button.is-active {
+      background: #f1f5f9;
+      color: #0f172a;
+      box-shadow: 0 12px 22px -16px rgba(15, 23, 42, 0.85);
+    }
+
+    @media (max-width: 640px) {
+      .page-shell {
+        padding: 2rem 1.25rem;
+      }
+    }
   </style>
 </head>
 <body class="min-h-full bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
-  <div class="max-w-5xl mx-auto px-6 py-10">
-    <header class="mb-8 flex items-start justify-between gap-4">
-      <div>
-        <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">Assolombarda · Lesson Showcase</h1>
-        <p id="subtitle" class="text-neutral-600 dark:text-neutral-400 mt-2">Quattro esercizi + Best Practices. Copia o scarica i prompt.</p>
+  <div class="max-w-5xl mx-auto px-6 py-10 page-shell">
+    <header class="mb-10 space-y-6">
+      <div class="brand-shelf card">
+        <figure class="brand-card brand-card--datapizza">
+          <img class="brand-card__logo" src="./logos/datapizza.png" alt="Logo Datapizza" />
+          <figcaption>
+            Creato dal team
+            <strong>Datapizza</strong>
+          </figcaption>
+        </figure>
+        <span class="brand-arrow" aria-hidden="true">→</span>
+        <figure class="brand-card brand-card--assolombarda">
+          <img class="brand-card__logo" src="./logos/assolombarda.png" alt="Logo Assolombarda" />
+          <figcaption>
+            Dedicato a
+            <strong>Assolombarda</strong>
+          </figcaption>
+        </figure>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="toggleDark" class="btn" aria-label="Toggle dark mode">Dark mode</button>
-        <button id="downloadAll" class="btn">Scarica tutti (.zip)</button>
+
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Assolombarda · Lesson Showcase</h1>
+          <p id="subtitle" class="text-slate-700 dark:text-neutral-400 mt-2">Quattro esercizi + Best Practices. Copia o scarica i prompt.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="toggleDark" class="btn" aria-label="Attiva/disattiva dark mode" aria-pressed="false">Dark mode</button>
+          <button id="downloadAll" class="btn">Scarica tutti (.zip)</button>
+        </div>
       </div>
     </header>
 
     <!-- Tabs -->
-    <nav id="tabs" class="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-neutral-800 mb-6"></nav>
+    <nav id="tabs" class="tablist mb-6" aria-label="Seleziona prompt" role="tablist"></nav>
 
     <section class="space-y-5">
       <div>
-        <h2 id="tabTitle" class="text-xl font-semibold"></h2>
-        <p id="tabBlurb" class="text-sm text-neutral-600 dark:text-neutral-400 mt-1"></p>
+        <h2 id="tabTitle" class="text-xl font-semibold text-slate-900 dark:text-slate-200"></h2>
+        <p id="tabBlurb" class="text-sm text-slate-700 dark:text-neutral-400 mt-1"></p>
       </div>
 
       <div class="card p-4">
-        <div class="text-sm font-semibold mb-2">Consigli rapidi</div>
-        <ul id="adviceList" class="list-disc pl-5 text-sm text-neutral-700 dark:text-neutral-300 space-y-1"></ul>
+        <div class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-200">Consigli rapidi</div>
+        <ul id="adviceList" class="list-disc pl-5 text-sm text-slate-700 dark:text-neutral-300 space-y-1"></ul>
       </div>
 
       <div class="space-y-3">
@@ -51,10 +280,10 @@
           <button id="copyBtn" class="btn-solid">Copia prompt</button>
           <button id="downloadBtn" class="btn">Scarica .md</button>
         </div>
-        <textarea id="promptArea" readonly class="w-full h-80 p-4 rounded-xl border border-neutral-300 dark:border-neutral-700 font-mono text-sm bg-white dark:bg-neutral-950"></textarea>
+        <textarea id="promptArea" readonly class="w-full h-80 p-4 rounded-xl border border-neutral-300 dark:border-neutral-700 font-mono text-sm bg-white dark:bg-neutral-950" wrap="soft"></textarea>
       </div>
 
-      <footer class="text-xs text-neutral-500 dark:text-neutral-400 mt-10">
+      <footer class="text-xs text-slate-600 dark:text-neutral-400 mt-10">
         Pubblica questo file direttamente su GitHub Pages. Il bundle .zip è creato lato client; Poppins è caricata via Google Fonts.
       </footer>
     </section>
@@ -62,21 +291,28 @@
 
   <script>
     // ---- Data --------------------------------------------------------------
-    const BEST_PRACTICES_MD = `# Best Practices per lo Scraping con Infinite Scroll e Paginazione\n\n## 1. Principi generali\n- Rispetta i ToS e robots.txt; non aggirare protezioni.\n- Preferisci dati strutturati (JSON, API REST/GraphQL, CSV/XLSX) all'HTML.\n- Salva i payload raw per audit e rielaborazioni.\n- Schema dinamico: estrai tutto e normalizza solo a valle.\n\n## 2. Infinite Scroll\n- Cattura le richieste di rete mentre scorri: spesso sono XHR/JSON paginati.\n- Se non esiste endpoint: esegui scroll incrementali, attendi i caricamenti (network idle) e confronta il conteggio elementi.\n- Usa una "sentinella di fine": interrompi quando il conteggio non cresce per N cicli.\n\n## 3. Paginazione classica\n- Pattern comuni: ?page=N, offset, link "Next", pulsanti "Load more".\n- Itera finché non ottieni 0 risultati; cattura e unisci pagina per pagina.\n- Fallback: verifica l'esistenza di sitemap XML.\n\n## 4. Performance e stabilità\n- Sharding dei task (es. blocchi da 100) e checkpoint frequenti.\n- Rate‑limit adattivo (1–2 req/s), backoff esponenziale su 429/5xx.\n- Concorrenza prudente (2–6 worker). Processi idempotenti.\n\n## 5. Normalizzazione e dedup\n- Deduplica su chiavi (es. nome+regione). Unisci i tag quando ci sono duplicati.\n- Conserva sia il testo originale (es. "1–5 addetti") sia il campo numerico derivato.\n\n## 6. Qualità e validazione\n- Campionamento manuale (es. 30–50 righe) vs fonte.\n- Controlli numerici: continuità rank, range plausibili, conteggi attesi.\n- Genera report QA con copertura, nulli, errori e mismatch.\n\n## 7. Audit e trasparenza\n- Ogni record: source_url, extracted_at, record_id.\n- Conserva raw/ e logs/ per ispezioni future.\n\n## 8. Checklist rapida\n- [ ] Endpoint strutturato?\n- [ ] Strategia: API/XHR >> scroll >> paginazione.\n- [ ] Rate‑limit & retry impostati.\n- [ ] Payload raw salvati.\n- [ ] Dedup e normalizzazione.\n- [ ] QA e export finale.\n`;
+    const RANK_PROMPT = "# Prompt per Agent: Scraping di ranking non-tabellari (IMD & INRIX)\\n\\n**Ruolo e obiettivo**\\nSei un agente tecnico autonomo. Il tuo obiettivo è:\\n1. Raccogliere tutte le informazioni tabellari e semi-strutturate disponibili pubblicamente su ranking/list di città da:\\n   - https://www.imd.org/smart-city-observatory/home/rankings/\\n   - https://inrix.com/scorecard/\\n2. Esportare un file Excel con **1 foglio per sorgente** (nomi fogli a tua scelta), **senza fissare le colonne**: includi **tutti** i campi che trovi, preservando i nomi originali dove possibile.\\n3. Garantire **accuratezza ≥99%** tramite controlli qualità, logging e riconciliazioni.\\n4. Rispettare i ToS (Termini di Servizio) dei siti, limitare il ritmo richieste, e salvare **provenienza** per ogni record.\\n\\n---\\n\\n## Vincoli e principi\\n- Nessun hard-coding dello schema: fai **schema-on-ingest** e **schema-on-export** (tutte le colonne che emergono).\\n- Preferisci **fonti ufficiali scaricabili** (es. media pack, report, CSV/XLSX) rispetto al parsing del DOM.\\n- Se una vista web è popolata via richieste XHR/JSON, **intercetta gli endpoint** e usa i payload originali.\\n- Esegui **retry** (backoff esponenziale) su errori temporanei; rispetta **rate-limit** (≈1–2 req/s).\\n- Normalizza solo dove inevitabile (es. rimozione simboli valuta, parsing numeri); **non rinominare** i campi originali se non serve.\\n- Aggiungi **minime colonne di servizio**: `source_name`, `source_url`, `extracted_at`, e un `record_id` stabile (hash dei campi chiave).\\n- Tutto il codice/attività deve poter essere rilanciato in modo idempotente.\\n\\n---\\n\\n## Playbook per IMD Smart City Index\\n1. Naviga alla pagina e cerca link a **media pack** o file strutturati (ZIP/XLSX/CSV).\\n2. Se trovi file ufficiali: scaricali, estrai e leggi tutte le tabelle.\\n3. Se non esistono file: analizza il DOM e cattura le liste/ranking presenti.\\n4. Unisci tutte le tabelle in un DataFrame dinamico (merge outer).\\n5. Aggiungi colonne di servizio.\\n6. **Quality check:**\\n   - conteggio città ≈ valore indicato dall'edizione ufficiale\\n   - continuità del `rank`\\n   - campionamento casuale 20 righe confrontato con la fonte. Controlla così che il lavoro sia coerente con quanto richiesto.\\n7. Salva in un foglio Excel dedicato.\\n\\n---\\n\\n## Playbook per INRIX Scorecard\\n1. Naviga alla pagina, accetta cookie funzionali, raggiungi la **City Ranking List**.\\n2. Avvia cattura di rete per individuare endpoint JSON/XHR; scarica e salva tutti i payload.\\n3. Se non c'è endpoint: fai parsing del DOM con scroll fino a completamento.\\n4. Se necessario, scarica il report PDF tramite form ed estrai le tabelle.\\n5. Unisci tutti i blocchi in un DataFrame dinamico (merge outer).\\n6. Aggiungi colonne di servizio.\\n7. **Quality check:**\\n   - numero città ≈ dichiarato (900+ in 37 paesi)\\n   - coerenza `rank` e plausibilità dei valori numerici\\n   - campione casuale 20 righe verificato con la fonte. Controlla così che il lavoro sia coerente con quanto richiesto.\\n8. Salva in un foglio Excel dedicato.\\n\\n---\\n\\n## Esportazione e logging\\n- Crea cartella `artifacts/` con:\\n  - `raw/` (file scaricati, JSON/XHR, PDF, HTML)\\n  - `qa/` (report di qualità)\\n  - `logs/` (log esecuzione)\\n- Genera `artifacts/output.xlsx` con due fogli, uno per ciascuna fonte.\\n- Mantieni i nomi originali dei campi.\\n- Stampa a video un résumé con conteggi record, elenco colonne, % di nulli e risultato QA.\\n\\n---\\n\\n## Strategie per arrivare al 99%\\n- Usa sempre i payload originali se disponibili (ZIP, JSON, XLSX).\\n- In caso di fonti multiple, definisci priorità: JSON > CSV/XLSX > HTML > PDF OCR.\\n- Deduplica record su (città, anno, rank).\\n- Confronta copertura con i numeri attesi dall'edizione ufficiale.\\n- Logga ogni trasformazione e conserva i file raw.\\n\\n---\\n\\n## Criteri di \"done\"\\n- File `output.xlsx` con due fogli completi.\\n- QA report con mismatch ≤1%.\\n- Tutti i payload originali salvati in `raw/`.";
+
+    const AZIENDE_PROMPT = "# Agent: Batch \\\"numero dipendenti\\\" da elenco aziende (senza API)\\n\\n## Obiettivo\\nDato un file Excel/CSV a **una colonna** con i nomi delle aziende (es. colonna \\\"Nome azienda\\\"), recupera in modo automatizzato il **numero di dipendenti/addetti** dalle pagine pubbliche di *ufficiocamerale.it* (o fonti camerali equivalenti quando disponibili), producendo un output cumulativo con tracciabilità e qualità controllata.\\n\\n## Vincoli e principi\\n- Nessun accesso API; usa solo contenuti pubblici e rispetta ToS/robots.\\n- Architettura **Controller + Workers** con **stato persistente** e **resume**.\\n- **Rate limit adattivo** (≈1–2 richieste/sec a dominio) + backoff esponenziale su 429/5xx.\\n- **Idempotenza**: niente duplicati, checkpoint frequenti, chiave per record stabile.\\n- **Qualità**: per ogni risultato salva `source_url`, `extracted_at`, e un `confidence_score` (0–1).\\n- **Etica**: non superare protezioni, non aggirare CAPTCHA: marca `needs_manual`. Piuttosto fermati e chiedi all'utente di continuare in quel caso\\n\\n## Input\\n- `input.xlsx` o `input.csv` contenente una sola colonna con i nomi (accetta intestazioni: \\\"Nome\\\", \\\"Nome azienda\\\", \\\"ragione sociale\\\").\\n- Parametri di run (con default):\\n  - `shard_size=100`, `max_workers=6`, `retries=3`, `rps_target=1.5`.\\n\\nLo `shard_size` rappresenta la dimensione del blocco di aziende che l'Agent prende in carico in un singolo lotto di lavoro.\\n## Normalizzazione nomi\\n- Uppercase/trim; rimuovi doppi spazi; normalizza forme giuridiche (S.R.L., SRL, SOCIETA' A R.L. → \\\"SRL\\\"; S.P.A. → \\\"SPA\\\"; ecc.).\\n- Genera varianti di query: con/ senza punteggiatura, con/ senza forma giuridica, con virgolette.\\n- Se disponibile, aggiungi il comune/provincia dal nome (tra parentesi) per restringere.\\n\\n## Ricerca & matching\\n- Strategia primaria: query mirata sul motore interno/scheda pubblica di *ufficiocamerale.it*. In alternativa, usa un motore generale con `site:ufficiocamerale.it \\\"ragione sociale\\\"` e apri il primo risultato coerente.\\n- Su elenco risultati: calcola **fuzzy score** (Levenshtein/Jaro-Winkler) tra input normalizzato e denominazione trovata; seleziona il top match se `score ≥ 0.90`. Se 0.80–0.89, marca `low_confidence` e prosegui; <0.80 → `no_match`.\\n- Apri la scheda azienda più promettente.\\n\\n## Estrazione campi\\n- Cerca pattern testuali/DOM relativi a: **\\\"Addetti\\\", \\\"Numero addetti\\\", \\\"Dipendenti\\\", \\\"Unità locali\\\"** e, se presente, l'anno di riferimento (es. 2023/2024).\\n- Preferisci valori **puntuali**; se solo **range** (es. \\\"1–5\\\"), estrai range e calcola un valore centrale ausiliario (solo per metriche): mantieni comunque il **testo originale**.\\n- Estrai eventuali metadati utili: **partita IVA/codice fiscale**, **comune/provincia**, **ATECO**, **stato impresa**.\\n- Salva snapshot raw (HTML/JSON) minimale della sezione da cui proviene il numero.\\n\\n## Persistenza & stato\\n- File di stato `state.jsonl` per ogni azienda: `{id, name_raw, status: pending|in_progress|done|failed|needs_manual, attempts, last_error, last_update}`.\\n- Checkpoint risultati ogni 20 record in `results.parquet` (append idempotente).\\n- Alla ripartenza, processa solo `pending` e `in_progress` scaduti.\\n\\n## Gestione errori\\n- Classifica errori: `transient` (timeout, 5xx), `permanent` (404, pagina incompatibile), `gated` (CAPTCHA/login).\\n- Retry automatico fino a 3 su `transient` con backoff; `gated` → `needs_manual`.\\n\\n## Output\\n- `artifacts/output.xlsx` e `results.parquet` con schema **dinamico**; includi almeno:\\n  - `input_name`, `matched_name`, `employees_value` (numero o `null`), `employees_text` (originale), `year_ref` (se trovato),\\n  - `confidence_score`, `status`, `notes`,\\n  - `source_url`, `extracted_at`, `record_id` (hash stabile di [input_name_normalized, matched_name, source_url]).\\n- `needs_manual.csv` con righe non risolte o a bassa confidenza.\\n- `run_metrics.json` con: copertura %, errori per tipo, median/95p latenza, retry medi.\\n- `logs/session.log` e `raw/` con i frammenti HTML salvati.\\n\\n## Criteri di qualità\\n- **Target**: ≥95% aziende con un valore (`employees_value` o `employees_text`), di cui ≥85% con `confidence_score ≥ 0.90`.\\n- Coerenza: se sulla stessa scheda appaiono più valori/anni, scegli il **più recente**; conserva gli altri in colonne \\\"_alt\\\".\\n- Campionamento: verifica manuale a campione (50 righe) confrontando valore e anno.\\n\\n## Passi operativi (Controller/Workers)\\n1. Carica `input.xlsx/csv`, normalizza nomi, genera `queue.jsonl`.\\n2. Suddividi in shard da `shard_size`, avvia fino a `max_workers` con `rps_target`.\\n3. Per ogni azienda:\\n   - Cerca → seleziona match → apri scheda → estrai campi → salva risultato → aggiorna stato.\\n4. Adatta dinamicamente il rate limit su HTTP 429/5xx; se l'errore rate > X%, riduci concurrency e attendi 60–120s.\\n5. Al termine: merge risultati, export Excel, report metriche, elenco `needs_manual`.\\n6. Stampa un **résumé**: record totali, % copertura, % alta confidenza, top 10 errori, tempo totale.\\n\\n## Done\\nProduci `artifacts/output.xlsx`, `needs_manual.csv`, `run_metrics.json`, `state.jsonl`, `logs/`, `raw/`. Fine.";
+
+    const STARTUP_PROMPT = "# Agent: Dataset \\\"startup → tag → regione\\\" (UI paginata o infinite scroll)\\n\\n## Obiettivo\\nCostruisci un dataset completo di startup con campi almeno: `name`, `tags` (lista), `region`, `source_url`. Non fissare lo schema: cattura tutti i campi disponibili e aggiungi `extracted_at` e `record_id`.\\n\\n## Regole\\n- Rispetta ToS/robots. Non aggirare protezioni o paywall.\\n- Preferisci dati **JSON/API** alla UI: intercetta le richieste di rete della pagina (XHR/GraphQL/REST). Se trovi endpoint paginati, usa quelli.\\n- Se non esiste API: gestisci **infinite scroll** con loop di scroll + attesa rete e **sentinella** (stop quando il numero di card non cresce per N cicli). Se c'è paginazione, segui \\\"Next\\\"/`?page=N`.\\n- Usa **rate limit adattivo**: aumenta/riduci la concorrenza in base alla latenza/429.\\n- Salva sempre i **payload raw** (JSON o HTML della sezione) per audit.\\n\\n## Workflow\\n1) **Discovery**\\n   - Apri la pagina lista e avvia la cattura rete.\\n   - Se vedi endpoint XHR/GraphQL: identifica parametri (page/size/filter). Se GraphQL e consentito, usa introspection per conoscere campi/typenames.\\n   - In parallelo, prova a individuare **Sitemap** o URL con pattern di paginazione.\\n\\n2) **Estrazione**\\n   - **Percorso A (API/XHR)**: itera le pagine finché la risposta è vuota; salva i payload; costruisci record `name/tags/region/source_url`.\\n   - **Percorso B (Infinite scroll)**: esegui scroll progressivo, dopo ogni scroll attendi caricamenti; confronta il numero di elementi; quando stabile per N cicli, estrai tutte le card.\\n   - **Percorso C (Paginazione)**: clicca \\\"Next\\\" o incrementa `page=N` finché non trovi più risultati.\\n\\n3) **Parsing dinamico**\\n   - Mappa solo alla fine su `name`, `tags[]`, `region`, mantenendo **tutti** i campi extra.\\n   - Pulisci `tags` (split su virgole/chips); normalizza `region` se presente; se mancante, prova a inferirla da breadcrumb/URL.\\n\\n4) **Dedup & Qualità**\\n   - Deduplica per `(name_normalized, region)`; unisci i `tags` in un'unica lista.\\n   - Campiona 30 righe: apri `source_url` e verifica i valori.\\n   - Esporta `output.xlsx` (1 foglio) + `raw/` (payload) + `qa_report.json` (copertura, errori, esempi).\\n\\n## Done\\n- `output.xlsx` con tutte le righe; zero duplicati chiave; audit trail disponibile.";
+
+    const BEST_PRACTICES_MD_TEXT = "# Best Practices per lo Scraping con Infinite Scroll e Paginazione\\n\\n## 1. Principi generali\\n- **Rispetta i ToS e robots.txt**: accedi solo a contenuti consentiti, senza aggirare protezioni o paywall.\\n- **Preferisci sempre i dati strutturati**: JSON, API REST, GraphQL o CSV/XLSX ufficiali sono più affidabili dell'HTML.\\n- **Salva i payload raw**: conserva gli oggetti JSON, le risposte HTML o i file originali per audit e verifica successiva.\\n- **Schema dinamico**: non fissare le colonne a priori; estrai tutto e normalizza in una fase finale.\\n\\n---\\n\\n## 2. Infinite Scroll\\n- **Cattura le richieste di rete**: spesso i dati arrivano da chiamate XHR/JSON mentre scorri.  \\n  - Se individui un endpoint paginato, usa direttamente quello.\\n- **Scrolling simulato**: se non c'è endpoint visibile:\\n  - esegui scroll incrementali fino in fondo,\\n  - attendi caricamenti (`networkidle` o `waitForResponse`),\\n  - confronta il numero di elementi caricati.\\n- **Sentinella di fine**: interrompi quando il numero di elementi rimane invariato per N cicli consecutivi.\\n\\n---\\n\\n## 3. Paginazione classica\\n- **Pattern comuni**:  \\n  - URL con `?page=N` o `&offset=`  \\n  - link \\\"Next/Previous\\\" nel DOM  \\n  - pulsanti \\\"Load More\\\" che richiamano endpoint.\\n- **Strategia**: \\n  - incrementa l'indice fino a quando la pagina restituisce 0 risultati,\\n  - cattura e unisci i dataset pagina per pagina.\\n- **Fallback**: cerca eventuali sitemap XML che elencano direttamente tutte le pagine.\\n\\n---\\n\\n## 4. Gestione delle performance\\n- **Sharding**: suddividi la lista di URL/record in blocchi (`shard_size`) per avere checkpoint frequenti e ripresa in caso di errore.\\n- **Rate limiting adattivo**: inizia con 1–2 richieste/secondo, riduci se ricevi 429/timeout.  \\n- **Backoff esponenziale**: attendi 2s → 5s → 15s in caso di errori temporanei.\\n- **Concorrenza controllata**: usa più worker solo se il sito regge; meglio 2–4 che 20.\\n\\n---\\n\\n## 5. Normalizzazione e deduplica\\n- **Deduplica** sui campi chiave (es. nome + regione).\\n- **Unisci i tag** se un'entità appare più volte con metadati diversi.\\n- **Conserva sia il campo \\\"pulito\\\" che il testo originale** (es. range \\\"1–5 addetti\\\" + numero centrale calcolato).\\n\\n---\\n\\n## 6. Qualità e validazione\\n- **Campionamento manuale**: apri un set casuale di record e verifica che i dati corrispondano.\\n- **Confronto con valori attesi**: controlla il numero totale di record o la continuità dei rank.\\n- **Log e report**: genera file `qa_report.json` con conteggi, percentuali di nulli e errori.\\n\\n---\\n\\n## 7. Audit e trasparenza\\n- Ogni record deve avere:\\n  - `source_url`\\n  - `extracted_at` (timestamp)\\n  - `record_id` (hash stabile)\\n- Conserva i file raw per eventuali controlli o rielaborazioni.\\n- Documenta eventuali limiti (es. campi mancanti, pagine bloccate).\\n\\n---\\n\\n## 8. Checklist rapida\\n- [ ] Identificare se esiste un **endpoint strutturato**.  \\n- [ ] Definire la strategia: **API/XHR**, **scroll**, o **paginazione classica**.  \\n- [ ] Impostare rate limit e retry.  \\n- [ ] Estrarre e salvare i payload raw.  \\n- [ ] Deduplicare e unire i dati.  \\n- [ ] Validare con campionamento e controlli numerici.  \\n- [ ] Esportare in Excel/CSV con audit trail.\\n\\n---";
 
     const TABS = [
       {
-        id: 'rank', short: 'Ranking', title: 'Scraping di ranking non‑tabellari',
-        blurb: 'Estrai dataset completi da fonti come IMD Smart City Index e INRIX Scorecard senza fissare colonne e con QA ≥ 99%.',
+        id: 'rank',
+        short: 'Ranking',
+        title: 'Scraping di ranking non‑tabellari',
+        blurb: 'IMD Smart City Index e INRIX Scorecard con schema dinamico, QA ≥99% e log completo.',
         advice: [
-          'Preferisci payload ufficiali (ZIP/XLSX/JSON) al DOM.',
-          'Intercetta XHR/JSON: spesso liste e grafici sono alimentati da endpoint paginati.',
-          'Schema dinamico: cattura tutti i campi, normalizza solo a fine pipeline.',
-          'Qualità: continuità dei rank, campione casuale di 20 righe, salvataggio dei raw per audit.',
-          'Rate‑limit 1–2 req/s + retry/backoff; processi idempotenti e rilanciabili.',
+          'Schema-on-ingest: includi tutte le colonne e `source_name/source_url/extracted_at/record_id`.',
+          'Scarica media pack o payload XHR/JSON ufficiali prima di toccare il DOM.',
+          'IMD: unisci le tabelle, controlla continuità del rank e campiona 20 righe.',
+          'INRIX: intercetta endpoint (o PDF) e verifica copertura (900+ città, 37 paesi).',
         ],
         filename: '01_ranking.md',
-        prompt: `# Agent: Scraping di ranking non-tabellari (IMD & INRIX)\n\n**Obiettivo**  \n1) Raccogli tutte le informazioni tabellari/semi‑strutturate da:  \n   • https://www.imd.org/smart-city-observatory/home/rankings/  \n   • https://inrix.com/scorecard/  \n2) Esporta un Excel con 1 foglio per sorgente **senza fissare colonne** (schema dinamico).  \n3) Garantisci **accuratezza ≥99%** con controlli e log.\n\n**Principi**  \n- Preferisci file/endpoint ufficiali (ZIP/XLSX/CSV/JSON).  \n- Se la pagina usa XHR/JSON, usa i payload originali.  \n- Idempotenza: aggiungi colonne servizio (source_name, source_url, extracted_at, record_id).\n\n**IMD – Playbook**  \n1. Cerca e scarica media pack/risorse strutturate.  \n2. Estrai tabelle → unione outer → qualità (conteggio città atteso, continuità rank, 20 righe a campione).  \n3. Esporta foglio IMD.\n\n**INRIX – Playbook**  \n1. Apri pagina, accetta cookie, vai a “City Ranking List”.  \n2. Cattura XHR/JSON; se assente, scroll + parse DOM; come fallback, report PDF.  \n3. Merge dinamico → qualità (copertura ≈ paesi/città attesi, range plausibile metriche) → export foglio INRIX.\n\n**Done**  \nExcel con 2 fogli; raw salvati; QA report e log.`,
+        prompt: RANK_PROMPT,
       },
       {
         id: 'brief', short: 'Rassegna', title: 'Rassegna stampa automatizzata (quotidiana)',
@@ -91,27 +327,27 @@
       },
       {
         id: 'batch', short: 'Aziende', title: 'Batch aziende camerali (~2000)',
-        blurb: "Senza API: Controller + Worker, shard, stato persistente, resume; estrazione 'numero addetti' con tracciabilità.",
+        blurb: 'Automatizza il dato “numero addetti” da ufficiocamerale.it con controller/workers resilienti.',
         advice: [
-          'Shard di 100 (parametrico) e checkpoint ogni 20 record.',
-          'Worker 3–6 con rate‑limit adattivo (1–2 req/s) e backoff su 429/5xx.',
-          'Matching: normalizza ragione sociale + fuzzy score; salva confidence_score e source_url.',
-          'Errori: transient/permanent/gated → needs_manual; mai aggirare CAPTCHA.',
+          'Controller + workers con state.jsonl, shard da 100 e resume sicuro.',
+          'Rate limit adattivo (≈1–2 req/s) con backoff su 429/5xx; concurrency 3–6.',
+          'Normalizza ragione sociale, fuzzy score ≥0.90, salva confidence_score e source_url.',
+          'Export completo: output.xlsx, results.parquet, needs_manual.csv, run_metrics.json, logs/, raw/.',
         ],
         filename: '03_aziende_camerali.md',
-        prompt: `# Agent: Batch "numero dipendenti" da elenco aziende (senza API)\n\n**Input**  \nExcel/CSV a **una colonna** (nomi). Normalizza forme giuridiche, genera varianti di query.\n\n**Architettura**  \n- Controller: sharding, coda, scheduler, resume da state.jsonl.  \n- Worker: ricerca → match → scheda → estrazione (addetti, anno, metadati) → salvataggio.\n\n**Regole**  \n- Rate‑limit 1–2 req/s; backoff; concorrenza 3–6.  \n- Idempotenza + checkpoint frequenti; chiave record su P.IVA o hash(nome, comune).  \n- Per record: source_url, extracted_at, confidence_score; salva raw/minisnapshot.\n\n**Output**  \nresults.parquet, artifacts/output.xlsx, needs_manual.csv, run_metrics.json, logs/, raw/.\n\n**Done**  \n≥95% copertura, 0 duplicati, audit pronto.`,
+        prompt: AZIENDE_PROMPT,
       },
       {
         id: 'startup', short: 'Startup', title: 'Startup → tag → regione (scroll/paginazione)',
-        blurb: 'Procedura generale con discovery endpoint, gestione infinite scroll/paginazione, dedup e QA.',
+        blurb: 'Lista startup completa con tag e regione gestendo API, infinite scroll o paginazione.',
         advice: [
-          'Discovery: intercetta XHR/GraphQL; se possibile usa sitemap o URL paginati.',
-          'Infinite scroll: loop di scroll + attesa rete; stop quando il conteggio non cresce per N cicli.',
-          'Paginazione: Next o ?page=N fino a 0 risultati; salva tutti i payload raw.',
-          'Dedup per (name_normalized, region) e union dei tag; QA con 30 righe a campione.',
+          'Fase discovery: intercetta XHR/GraphQL o sitemap prima di analizzare il DOM.',
+          'Scroll infinito: loop di scroll + attesa rete con sentinella quando gli elementi si fermano.',
+          'Paginazione: Next oppure `?page=N` finché le risposte sono vuote, salvando tutti i payload raw.',
+          'Dedup `(name_normalized, region)`, unisci i tag e valida 30 righe aprendo la source URL.',
         ],
         filename: '04_startup_scroll_paginazione.md',
-        prompt: `# Agent: Dataset "startup → tag → regione" (UI paginata o infinite scroll)\n\n**Obiettivo**  \nCostruisci dataset con almeno: name, tags[], region, source_url. **Schema dinamico**.\n\n**Workflow**  \n1) Discovery rete (XHR/REST/GraphQL) + sitemap/URL paginati.  \n2) Estrazione:  \n   • API: itera pagine finché vuote.  \n   • Scroll: loop con network idle + sentinella.  \n   • Paginazione: Next/?page=N finché 0 risultati.  \n3) Parsing dinamico + normalizzazione tags/region; conserva raw.  \n4) Dedup e QA (campione 30).  \n5) Export output.xlsx + qa_report.json.\n\n**Done**  \nOutput.xlsx pulito e tracciabile.`,
+        prompt: STARTUP_PROMPT,
       },
       {
         id: 'best', short: 'Best', title: 'Best Practices (riassunto)',
@@ -123,7 +359,7 @@
           'Ogni record deve avere source_url, extracted_at, record_id.',
         ],
         filename: '00_best_practices.md',
-        prompt: BEST_PRACTICES_MD,
+        prompt: BEST_PRACTICES_MD_TEXT,
       },
     ];
 
@@ -146,11 +382,11 @@
       TABS.forEach(t => {
         const btn = document.createElement('button');
         btn.textContent = t.short;
-        btn.className = `px-3 py-2 text-sm rounded-t-lg transition focus:outline-none ${
-          activeId === t.id
-          ? 'border-b-2 border-neutral-900 dark:border-neutral-100 font-semibold text-neutral-900 dark:text-neutral-100'
-          : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
-        }`;
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', activeId === t.id ? 'true' : 'false');
+        btn.tabIndex = activeId === t.id ? 0 : -1;
+        btn.type = 'button';
+        btn.className = `tab-button${activeId === t.id ? ' is-active' : ''}`;
         btn.addEventListener('click', () => { activeId = t.id; render(); });
         tabsEl.appendChild(btn);
       });
@@ -166,10 +402,10 @@
         li.textContent = a;
         adviceEl.appendChild(li);
       });
-      promptEl.value = t.prompt;
-      dlBtn.onclick = () => downloadText(t.prompt, t.filename || `${t.id}.md`);
+      promptEl.value = t.prompt.replace(/\\n/g, '\n');
+      dlBtn.onclick = () => downloadText(t.prompt.replace(/\\n/g, '\n'), t.filename || `${t.id}.md`);
       copyBtn.onclick = async () => {
-        try { await navigator.clipboard.writeText(t.prompt); copyBtn.textContent = 'Copiato ✓'; setTimeout(() => copyBtn.textContent = 'Copia prompt', 1500); } catch {}
+        try { await navigator.clipboard.writeText(t.prompt.replace(/\\n/g, '\n')); copyBtn.textContent = 'Copiato ✓'; setTimeout(() => copyBtn.textContent = 'Copia prompt', 1500); } catch {}
       };
     }
 
@@ -179,7 +415,7 @@
     }
 
     function downloadText(text, filename) {
-      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+      const blob = new Blob([text.replace(/\\n/g, '\n')], { type: 'text/markdown;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = filename;
@@ -225,7 +461,7 @@
     }
 
     dlAllBtn.addEventListener('click', () => {
-      const files = TABS.map(t => ({ name: t.filename || `${t.id}.md`, data: strToUint8(t.prompt) }));
+      const files = TABS.map(t => ({ name: t.filename || `${t.id}.md`, data: strToUint8(t.prompt.replace(/\\n/g, '\n')) }));
       const blob = makeZip(files);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = 'prompts_bundle.zip';
@@ -234,15 +470,33 @@
 
     // Dark mode toggle
     const DARK_KEY = 'assolombarda_dark';
-    function setDark(on) {
-      root.classList.toggle('dark', !!on);
-      toggleDark.textContent = on ? 'Light mode' : 'Dark mode';
-      try { localStorage.setItem(DARK_KEY, on ? '1' : '0'); } catch {}
+    function setDark(on, { persist = true } = {}) {
+      const enabled = !!on;
+      root.classList.toggle('dark', enabled);
+      toggleDark.textContent = enabled ? 'Light mode' : 'Dark mode';
+      toggleDark.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+      if (persist) {
+        try { localStorage.setItem(DARK_KEY, enabled ? '1' : '0'); } catch {}
+      }
     }
+
+    function readStoredTheme() {
+      try { return localStorage.getItem(DARK_KEY); } catch { return null; }
+    }
+
     toggleDark.addEventListener('click', () => {
-      const on = !root.classList.contains('dark'); setDark(on);
+      const next = !root.classList.contains('dark');
+      setDark(next);
     });
-    try { setDark(localStorage.getItem(DARK_KEY) === '1'); } catch {}
+
+    const storedDark = readStoredTheme();
+    if (storedDark === '1') {
+      setDark(true, { persist: false });
+    } else if (storedDark === '0') {
+      setDark(false, { persist: false });
+    } else {
+      setDark(false, { persist: false });
+    }
 
     // Initial render
     render();
