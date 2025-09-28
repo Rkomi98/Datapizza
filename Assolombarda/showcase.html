@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="it" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assolombarda · Lesson Showcase</title>
+  <!-- Tailwind Play CDN -->
+  <script>
+    tailwind = { config: { darkMode: 'class' } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Poppins font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --radius: 14px; }
+    body { font-family: Poppins, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial; }
+    .btn { @apply px-3 py-2 rounded-xl text-sm border border-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800; }
+    .btn-solid { @apply px-3 py-2 rounded-xl text-sm bg-neutral-900 text-white hover:bg-black; }
+    .card { @apply rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900; }
+  </style>
+</head>
+<body class="min-h-full bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    <header class="mb-8 flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">Assolombarda · Lesson Showcase</h1>
+        <p id="subtitle" class="text-neutral-600 dark:text-neutral-400 mt-2">Quattro esercizi + Best Practices. Copia o scarica i prompt.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="toggleDark" class="btn" aria-label="Toggle dark mode">Dark mode</button>
+        <button id="downloadAll" class="btn">Scarica tutti (.zip)</button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav id="tabs" class="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-neutral-800 mb-6"></nav>
+
+    <section class="space-y-5">
+      <div>
+        <h2 id="tabTitle" class="text-xl font-semibold"></h2>
+        <p id="tabBlurb" class="text-sm text-neutral-600 dark:text-neutral-400 mt-1"></p>
+      </div>
+
+      <div class="card p-4">
+        <div class="text-sm font-semibold mb-2">Consigli rapidi</div>
+        <ul id="adviceList" class="list-disc pl-5 text-sm text-neutral-700 dark:text-neutral-300 space-y-1"></ul>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex gap-2">
+          <button id="copyBtn" class="btn-solid">Copia prompt</button>
+          <button id="downloadBtn" class="btn">Scarica .md</button>
+        </div>
+        <textarea id="promptArea" readonly class="w-full h-80 p-4 rounded-xl border border-neutral-300 dark:border-neutral-700 font-mono text-sm bg-white dark:bg-neutral-950"></textarea>
+      </div>
+
+      <footer class="text-xs text-neutral-500 dark:text-neutral-400 mt-10">
+        Pubblica questo file direttamente su GitHub Pages. Il bundle .zip è creato lato client; Poppins è caricata via Google Fonts.
+      </footer>
+    </section>
+  </div>
+
+  <script>
+    // ---- Data --------------------------------------------------------------
+    const BEST_PRACTICES_MD = `# Best Practices per lo Scraping con Infinite Scroll e Paginazione\n\n## 1. Principi generali\n- Rispetta i ToS e robots.txt; non aggirare protezioni.\n- Preferisci dati strutturati (JSON, API REST/GraphQL, CSV/XLSX) all'HTML.\n- Salva i payload raw per audit e rielaborazioni.\n- Schema dinamico: estrai tutto e normalizza solo a valle.\n\n## 2. Infinite Scroll\n- Cattura le richieste di rete mentre scorri: spesso sono XHR/JSON paginati.\n- Se non esiste endpoint: esegui scroll incrementali, attendi i caricamenti (network idle) e confronta il conteggio elementi.\n- Usa una "sentinella di fine": interrompi quando il conteggio non cresce per N cicli.\n\n## 3. Paginazione classica\n- Pattern comuni: ?page=N, offset, link "Next", pulsanti "Load more".\n- Itera finché non ottieni 0 risultati; cattura e unisci pagina per pagina.\n- Fallback: verifica l'esistenza di sitemap XML.\n\n## 4. Performance e stabilità\n- Sharding dei task (es. blocchi da 100) e checkpoint frequenti.\n- Rate‑limit adattivo (1–2 req/s), backoff esponenziale su 429/5xx.\n- Concorrenza prudente (2–6 worker). Processi idempotenti.\n\n## 5. Normalizzazione e dedup\n- Deduplica su chiavi (es. nome+regione). Unisci i tag quando ci sono duplicati.\n- Conserva sia il testo originale (es. "1–5 addetti") sia il campo numerico derivato.\n\n## 6. Qualità e validazione\n- Campionamento manuale (es. 30–50 righe) vs fonte.\n- Controlli numerici: continuità rank, range plausibili, conteggi attesi.\n- Genera report QA con copertura, nulli, errori e mismatch.\n\n## 7. Audit e trasparenza\n- Ogni record: source_url, extracted_at, record_id.\n- Conserva raw/ e logs/ per ispezioni future.\n\n## 8. Checklist rapida\n- [ ] Endpoint strutturato?\n- [ ] Strategia: API/XHR >> scroll >> paginazione.\n- [ ] Rate‑limit & retry impostati.\n- [ ] Payload raw salvati.\n- [ ] Dedup e normalizzazione.\n- [ ] QA e export finale.\n`;
+
+    const TABS = [
+      {
+        id: 'rank', short: 'Ranking', title: 'Scraping di ranking non‑tabellari',
+        blurb: 'Estrai dataset completi da fonti come IMD Smart City Index e INRIX Scorecard senza fissare colonne e con QA ≥ 99%.',
+        advice: [
+          'Preferisci payload ufficiali (ZIP/XLSX/JSON) al DOM.',
+          'Intercetta XHR/JSON: spesso liste e grafici sono alimentati da endpoint paginati.',
+          'Schema dinamico: cattura tutti i campi, normalizza solo a fine pipeline.',
+          'Qualità: continuità dei rank, campione casuale di 20 righe, salvataggio dei raw per audit.',
+          'Rate‑limit 1–2 req/s + retry/backoff; processi idempotenti e rilanciabili.',
+        ],
+        filename: '01_ranking.md',
+        prompt: `# Agent: Scraping di ranking non-tabellari (IMD & INRIX)\n\n**Obiettivo**  \n1) Raccogli tutte le informazioni tabellari/semi‑strutturate da:  \n   • https://www.imd.org/smart-city-observatory/home/rankings/  \n   • https://inrix.com/scorecard/  \n2) Esporta un Excel con 1 foglio per sorgente **senza fissare colonne** (schema dinamico).  \n3) Garantisci **accuratezza ≥99%** con controlli e log.\n\n**Principi**  \n- Preferisci file/endpoint ufficiali (ZIP/XLSX/CSV/JSON).  \n- Se la pagina usa XHR/JSON, usa i payload originali.  \n- Idempotenza: aggiungi colonne servizio (source_name, source_url, extracted_at, record_id).\n\n**IMD – Playbook**  \n1. Cerca e scarica media pack/risorse strutturate.  \n2. Estrai tabelle → unione outer → qualità (conteggio città atteso, continuità rank, 20 righe a campione).  \n3. Esporta foglio IMD.\n\n**INRIX – Playbook**  \n1. Apri pagina, accetta cookie, vai a “City Ranking List”.  \n2. Cattura XHR/JSON; se assente, scroll + parse DOM; come fallback, report PDF.  \n3. Merge dinamico → qualità (copertura ≈ paesi/città attesi, range plausibile metriche) → export foglio INRIX.\n\n**Done**  \nExcel con 2 fogli; raw salvati; QA report e log.`,
+      },
+      {
+        id: 'brief', short: 'Rassegna', title: 'Rassegna stampa automatizzata (quotidiana)',
+        blurb: "Briefing alle 09:00 nel chatbot, in italiano, con citazione della fonte per ogni notizia e sezione 'Fonti consultate'.",
+        advice: [
+          "Copri fonti must‑have + affini; ordina per rilevanza per l'industria italiana.",
+          'Formato: bullet concise (1–2 righe) + link; opzionale Top 3 del giorno.',
+          'Trasparenza: chiudi con elenco completo delle fonti consultate.',
+        ],
+        filename: '02_rassegna.md',
+        prompt: `Search for the latest economic, industrial, and business news and official data releases from Italian and international authoritative sources (e.g., Istat, Ocse/OECD, IMF, European Commission, Banca d'Italia, Il Sole 24 Ore, Ambrosetti, Financial Times, The Economist, La Voce, and other relevant sources). Write the briefing in Italian. Cite every individual story with its source and link. Add a final section "Fonti consultate" listing all sources you checked (even those not used). Prioritize items relevant to Italian industry and policy, and include global developments with impact on Italy. Present concise bullets with 1–2 lines of context/insight for each item.`,
+      },
+      {
+        id: 'batch', short: 'Aziende', title: 'Batch aziende camerali (~2000)',
+        blurb: "Senza API: Controller + Worker, shard, stato persistente, resume; estrazione 'numero addetti' con tracciabilità.",
+        advice: [
+          'Shard di 100 (parametrico) e checkpoint ogni 20 record.',
+          'Worker 3–6 con rate‑limit adattivo (1–2 req/s) e backoff su 429/5xx.',
+          'Matching: normalizza ragione sociale + fuzzy score; salva confidence_score e source_url.',
+          'Errori: transient/permanent/gated → needs_manual; mai aggirare CAPTCHA.',
+        ],
+        filename: '03_aziende_camerali.md',
+        prompt: `# Agent: Batch "numero dipendenti" da elenco aziende (senza API)\n\n**Input**  \nExcel/CSV a **una colonna** (nomi). Normalizza forme giuridiche, genera varianti di query.\n\n**Architettura**  \n- Controller: sharding, coda, scheduler, resume da state.jsonl.  \n- Worker: ricerca → match → scheda → estrazione (addetti, anno, metadati) → salvataggio.\n\n**Regole**  \n- Rate‑limit 1–2 req/s; backoff; concorrenza 3–6.  \n- Idempotenza + checkpoint frequenti; chiave record su P.IVA o hash(nome, comune).  \n- Per record: source_url, extracted_at, confidence_score; salva raw/minisnapshot.\n\n**Output**  \nresults.parquet, artifacts/output.xlsx, needs_manual.csv, run_metrics.json, logs/, raw/.\n\n**Done**  \n≥95% copertura, 0 duplicati, audit pronto.`,
+      },
+      {
+        id: 'startup', short: 'Startup', title: 'Startup → tag → regione (scroll/paginazione)',
+        blurb: 'Procedura generale con discovery endpoint, gestione infinite scroll/paginazione, dedup e QA.',
+        advice: [
+          'Discovery: intercetta XHR/GraphQL; se possibile usa sitemap o URL paginati.',
+          'Infinite scroll: loop di scroll + attesa rete; stop quando il conteggio non cresce per N cicli.',
+          'Paginazione: Next o ?page=N fino a 0 risultati; salva tutti i payload raw.',
+          'Dedup per (name_normalized, region) e union dei tag; QA con 30 righe a campione.',
+        ],
+        filename: '04_startup_scroll_paginazione.md',
+        prompt: `# Agent: Dataset "startup → tag → regione" (UI paginata o infinite scroll)\n\n**Obiettivo**  \nCostruisci dataset con almeno: name, tags[], region, source_url. **Schema dinamico**.\n\n**Workflow**  \n1) Discovery rete (XHR/REST/GraphQL) + sitemap/URL paginati.  \n2) Estrazione:  \n   • API: itera pagine finché vuote.  \n   • Scroll: loop con network idle + sentinella.  \n   • Paginazione: Next/?page=N finché 0 risultati.  \n3) Parsing dinamico + normalizzazione tags/region; conserva raw.  \n4) Dedup e QA (campione 30).  \n5) Export output.xlsx + qa_report.json.\n\n**Done**  \nOutput.xlsx pulito e tracciabile.`,
+      },
+      {
+        id: 'best', short: 'Best', title: 'Best Practices (riassunto)',
+        blurb: 'Linee guida trasversali per scroll, paginazione, qualità, dedup, audit e rispetto dei ToS.',
+        advice: [
+          'Endpoint prima del DOM: JSON/API batte HTML.',
+          'Sharding + checkpoint per resilienza e resume.',
+          'Rate‑limit adattivo, backoff e concorrenza prudente.',
+          'Ogni record deve avere source_url, extracted_at, record_id.',
+        ],
+        filename: '00_best_practices.md',
+        prompt: BEST_PRACTICES_MD,
+      },
+    ];
+
+    // ---- UI state ----------------------------------------------------------
+    const tabsEl = document.getElementById('tabs');
+    const titleEl = document.getElementById('tabTitle');
+    const blurbEl = document.getElementById('tabBlurb');
+    const adviceEl = document.getElementById('adviceList');
+    const promptEl = document.getElementById('promptArea');
+    const copyBtn = document.getElementById('copyBtn');
+    const dlBtn = document.getElementById('downloadBtn');
+    const dlAllBtn = document.getElementById('downloadAll');
+    const toggleDark = document.getElementById('toggleDark');
+    const root = document.documentElement;
+
+    let activeId = TABS[0].id;
+
+    function renderTabs() {
+      tabsEl.innerHTML = '';
+      TABS.forEach(t => {
+        const btn = document.createElement('button');
+        btn.textContent = t.short;
+        btn.className = `px-3 py-2 text-sm rounded-t-lg transition focus:outline-none ${
+          activeId === t.id
+          ? 'border-b-2 border-neutral-900 dark:border-neutral-100 font-semibold text-neutral-900 dark:text-neutral-100'
+          : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+        }`;
+        btn.addEventListener('click', () => { activeId = t.id; render(); });
+        tabsEl.appendChild(btn);
+      });
+    }
+
+    function renderContent() {
+      const t = TABS.find(x => x.id === activeId);
+      titleEl.textContent = t.title;
+      blurbEl.textContent = t.blurb;
+      adviceEl.innerHTML = '';
+      t.advice.forEach(a => {
+        const li = document.createElement('li');
+        li.textContent = a;
+        adviceEl.appendChild(li);
+      });
+      promptEl.value = t.prompt;
+      dlBtn.onclick = () => downloadText(t.prompt, t.filename || `${t.id}.md`);
+      copyBtn.onclick = async () => {
+        try { await navigator.clipboard.writeText(t.prompt); copyBtn.textContent = 'Copiato ✓'; setTimeout(() => copyBtn.textContent = 'Copia prompt', 1500); } catch {}
+      };
+    }
+
+    function render() {
+      renderTabs();
+      renderContent();
+    }
+
+    function downloadText(text, filename) {
+      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // ---- ZIP (store only) --------------------------------------------------
+    function crc32Buf(buf) {
+      let c = ~0;
+      for (let i = 0; i < buf.length; i++) { c ^= buf[i]; for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xEDB88320 & -(c & 1)); }
+      return ~c >>> 0;
+    }
+    function strToUint8(s) { return new TextEncoder().encode(s); }
+    function fileTimeDate(d = new Date()) {
+      const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (Math.floor(d.getSeconds() / 2));
+      const date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+      return { time, date };
+    }
+    function makeZip(files) {
+      const localParts = [], centralParts = []; let offset = 0;
+      const { time, date } = fileTimeDate();
+      files.forEach(({ name, data }) => {
+        const crc = crc32Buf(data), size = data.length, nameBytes = strToUint8(name);
+        const local = new Uint8Array(30 + nameBytes.length + size);
+        const dv = new DataView(local.buffer);
+        dv.setUint32(0, 0x04034b50, true); dv.setUint16(4, 20, true); dv.setUint16(6, 0, true); dv.setUint16(8, 0, true);
+        dv.setUint16(10, time, true); dv.setUint16(12, date, true);
+        dv.setUint32(14, crc, true); dv.setUint32(18, size, true); dv.setUint32(22, size, true);
+        dv.setUint16(26, nameBytes.length, true); dv.setUint16(28, 0, true);
+        local.set(nameBytes, 30); local.set(data, 30 + nameBytes.length); localParts.push(local);
+        const central = new Uint8Array(46 + nameBytes.length); const cv = new DataView(central.buffer);
+        cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0, true); cv.setUint16(10, 0, true);
+        cv.setUint16(12, time, true); cv.setUint16(14, date, true); cv.setUint32(16, crc, true); cv.setUint32(20, size, true); cv.setUint32(24, size, true);
+        cv.setUint16(28, nameBytes.length, true); cv.setUint16(30, 0, true); cv.setUint16(32, 0, true); cv.setUint16(34, 0, true); cv.setUint16(36, 0, true);
+        cv.setUint32(38, 0, true); cv.setUint32(42, offset, true); central.set(nameBytes, 46); centralParts.push(central);
+        offset += local.length;
+      });
+      const centralSize = centralParts.reduce((n, p) => n + p.length, 0); const centralOffset = offset; const end = new Uint8Array(22); const ev = new DataView(end.buffer);
+      ev.setUint32(0, 0x06054b50, true); ev.setUint16(4, 0, true); ev.setUint16(6, 0, true); ev.setUint16(8, TABS.length, true); ev.setUint16(10, TABS.length, true);
+      ev.setUint32(12, centralSize, true); ev.setUint32(16, centralOffset, true); ev.setUint16(20, 0, true);
+      return new Blob([...localParts, ...centralParts, end], { type: 'application/zip' });
+    }
+
+    dlAllBtn.addEventListener('click', () => {
+      const files = TABS.map(t => ({ name: t.filename || `${t.id}.md`, data: strToUint8(t.prompt) }));
+      const blob = makeZip(files);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'prompts_bundle.zip';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Dark mode toggle
+    const DARK_KEY = 'assolombarda_dark';
+    function setDark(on) {
+      root.classList.toggle('dark', !!on);
+      toggleDark.textContent = on ? 'Light mode' : 'Dark mode';
+      try { localStorage.setItem(DARK_KEY, on ? '1' : '0'); } catch {}
+    }
+    toggleDark.addEventListener('click', () => {
+      const on = !root.classList.contains('dark'); setDark(on);
+    });
+    try { setDark(localStorage.getItem(DARK_KEY) === '1'); } catch {}
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
