@@ -251,8 +251,8 @@
 
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Assolombarda · Lesson Showcase</h1>
-          <p id="subtitle" class="text-slate-700 dark:text-neutral-400 mt-2">Quattro esercizi + Best Practices. Copia o scarica i prompt.</p>
+          <h1 class="text-3xl md:text-4xl font-semibold tracking-tight text-gray-900 dark:text-slate-100">Assolombarda · Lesson Showcase</h1>
+          <p id="subtitle" class="text-gray-800 dark:text-neutral-400 mt-2">Quattro esercizi + Best Practices. Copia o scarica i prompt.</p>
         </div>
         <div class="flex items-center gap-2">
           <button id="toggleDark" class="btn" aria-label="Attiva/disattiva dark mode" aria-pressed="false">Dark mode</button>
@@ -266,13 +266,13 @@
 
     <section class="space-y-5">
       <div>
-        <h2 id="tabTitle" class="text-xl font-semibold text-slate-900 dark:text-slate-200"></h2>
-        <p id="tabBlurb" class="text-sm text-slate-700 dark:text-neutral-400 mt-1"></p>
+        <h2 id="tabTitle" class="text-xl font-semibold text-gray-900 dark:text-slate-200"></h2>
+        <p id="tabBlurb" class="text-sm text-gray-800 dark:text-neutral-400 mt-1"></p>
       </div>
 
       <div class="card p-4">
-        <div class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-200">Consigli rapidi</div>
-        <ul id="adviceList" class="list-disc pl-5 text-sm text-slate-700 dark:text-neutral-300 space-y-1"></ul>
+        <div class="text-sm font-semibold mb-2 text-gray-900 dark:text-slate-200">Consigli rapidi</div>
+        <ul id="adviceList" class="list-disc pl-5 text-sm text-gray-800 dark:text-neutral-300 space-y-1"></ul>
       </div>
 
       <div class="space-y-3">
@@ -282,10 +282,6 @@
         </div>
         <textarea id="promptArea" readonly class="w-full h-80 p-4 rounded-xl border border-neutral-300 dark:border-neutral-700 font-mono text-sm bg-white dark:bg-neutral-950" wrap="soft"></textarea>
       </div>
-
-      <footer class="text-xs text-slate-600 dark:text-neutral-400 mt-10">
-        Pubblica questo file direttamente su GitHub Pages. Il bundle .zip è creato lato client; Poppins è caricata via Google Fonts.
-      </footer>
     </section>
   </div>
 
@@ -495,7 +491,7 @@
     } else if (storedDark === '0') {
       setDark(false, { persist: false });
     } else {
-      setDark(false, { persist: false });
+      setDark(true, { persist: false });
     }
 
     // Initial render
