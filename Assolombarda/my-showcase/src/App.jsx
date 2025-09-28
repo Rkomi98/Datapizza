@@ -1,34 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import datapizzaLogo from '../logos/datapizzaLogo.png'
+import assolombardaLogo from '../logos/Asso.png'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+    <div className="page">
+      <header className="brand-header">
+        <figure className="brand-card datapizza">
+          <img src={datapizzaLogo} alt="Logo Datapizza" />
+          <figcaption>Creato dal team Datapizza</figcaption>
+        </figure>
+        <span className="brand-separator" aria-hidden="true">
+          →
+        </span>
+        <figure className="brand-card assolombarda">
+          <img src={assolombardaLogo} alt="Logo Assolombarda" />
+          <figcaption>Per lo showcase Assolombarda</figcaption>
+        </figure>
+      </header>
+
+      <main className="content">
+        <h1>Lesson Showcase</h1>
         <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+          Questo spazio raccoglie i materiali creati per presentare le lezioni
+          dedicate ad Assolombarda. Il percorso nasce dalla collaborazione fra
+          il team Datapizza e gli stakeholder Assolombarda, con l&apos;obiettivo di
+          mettere in luce i risultati più interessanti e le prossime attività.
         </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+        <p className="cta">
+          Esplora i moduli per scoprire le demo, gli insight e le proposte di
+          evoluzione realizzate per la community Assolombarda.
+        </p>
+      </main>
+    </div>
   )
 }
 
