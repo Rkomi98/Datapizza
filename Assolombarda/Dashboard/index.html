@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Startup Innovative Lombardia</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">🏛️</div>
+                    <div class="logo-text">
+                        <h1>Startup Innovative Lombardia</h1>
+                        <span>Dashboard Regionale</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-startups">3,500</div>
+                        <div class="stat-label">Startup Totali</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="active-startups">3,225</div>
+                        <div class="stat-label">Attive</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-employees">12,681</div>
+                        <div class="stat-label">Dipendenti</div>
+                    </div>
+                </div>
+                <button class="btn btn--secondary theme-toggle" id="theme-toggle">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar Filtri -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Filtri</h3>
+                <button class="btn btn--sm btn--outline reset-filters" id="reset-filters">Reset</button>
+            </div>
+
+            <!-- Ricerca Globale -->
+            <div class="filter-section">
+                <label class="form-label">Cerca Startup</label>
+                <input type="text" class="form-control" id="search-input" placeholder="Nome startup...">
+            </div>
+
+            <!-- Filtro Settori -->
+            <div class="filter-section">
+                <label class="form-label">Settore</label>
+                <div class="multi-select">
+                    <input type="text" class="form-control sector-search" placeholder="Cerca settori...">
+                    <div class="sector-options" id="sector-options">
+                        <!-- Dinamically populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtro Anno -->
+            <div class="filter-section">
+                <label class="form-label">Anno di Costituzione</label>
+                <div class="range-slider">
+                    <input type="range" id="year-min" min="2019" max="2025" value="2019">
+                    <input type="range" id="year-max" min="2019" max="2025" value="2025">
+                    <div class="range-values">
+                        <span id="year-min-val">2019</span> - <span id="year-max-val">2025</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtro Province -->
+            <div class="filter-section">
+                <label class="form-label">Province</label>
+                <div class="province-options" id="province-options">
+                    <!-- Dinamically populated -->
+                </div>
+            </div>
+
+            <!-- Filtro Status -->
+            <div class="filter-section">
+                <label class="form-label">Status</label>
+                <div class="status-toggle">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="active-only" checked>
+                        <span class="toggle-slider"></span>
+                        Solo Attive
+                    </label>
+                </div>
+            </div>
+
+            <!-- Filtri Economici -->
+            <div class="filter-section">
+                <label class="form-label">Capitale Sociale (€)</label>
+                <div class="range-slider">
+                    <input type="range" id="capital-min" min="0" max="200000" value="0" step="1000">
+                    <input type="range" id="capital-max" min="0" max="200000" value="200000" step="1000">
+                    <div class="range-values">
+                        €<span id="capital-min-val">0</span> - €<span id="capital-max-val">200k</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <label class="form-label">Valore Produzione (€)</label>
+                <div class="range-slider">
+                    <input type="range" id="production-min" min="0" max="1000000" value="0" step="10000">
+                    <input type="range" id="production-max" min="0" max="1000000" value="1000000" step="10000">
+                    <div class="range-values">
+                        €<span id="production-min-val">0</span> - €<span id="production-max-val">1M</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <label class="form-label">Numero Dipendenti</label>
+                <div class="range-slider">
+                    <input type="range" id="employees-min" min="0" max="50" value="0">
+                    <input type="range" id="employees-max" min="0" max="50" value="50">
+                    <div class="range-values">
+                        <span id="employees-min-val">0</span> - <span id="employees-max-val">50</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Mappa e KPI -->
+            <div class="top-section">
+                <div class="map-container">
+                    <h3>Distribuzione Geografica</h3>
+                    <div id="map" class="map"></div>
+                </div>
+                <div class="kpi-section">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon">📊</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="filtered-total">0</div>
+                                <div class="kpi-label">Startup Filtrate</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">💰</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="total-capital">€0</div>
+                                <div class="kpi-label">Capitale Totale</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">🏭</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="avg-production">€0</div>
+                                <div class="kpi-label">Produzione Media</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">👥</div>
+                            <div class="kpi-content">
+                                <div class="kpi-value" id="total-jobs">0</div>
+                                <div class="kpi-label">Posti di Lavoro</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grafici -->
+            <div class="charts-section">
+                <div class="chart-container">
+                    <h3>Distribuzione per Province</h3>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="province-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Trend per Anno</h3>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="year-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Settori Principali</h3>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="sector-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Capitale vs Produzione</h3>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="scatter-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabella -->
+            <div class="table-section">
+                <div class="table-header">
+                    <h3>Dettaglio Startup</h3>
+                    <div class="table-actions">
+                        <span class="results-count" id="results-count">0 risultati</span>
+                        <button class="btn btn--sm btn--secondary export-csv" id="export-csv">Esporta CSV</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="startup-table" id="startup-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="nome">Nome <span class="sort-arrow">↕️</span></th>
+                                <th data-sort="provincia">Provincia <span class="sort-arrow">↕️</span></th>
+                                <th data-sort="anno_costituzione">Anno <span class="sort-arrow">↕️</span></th>
+                                <th data-sort="settori_tag">Settori <span class="sort-arrow">↕️</span></th>
+                                <th data-sort="capitale_sociale">Capitale <span class="sort-arrow">↕️</span></th>
+                                <th data-sort="valore_produzione">Produzione <span class="sort-arrow">↕️</span></th>
+                                <th data-sort="dipendenti">Dipendenti <span class="sort-arrow">↕️</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="pagination">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Modal per dettagli startup -->
+    <div class="modal hidden" id="startup-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Dettagli Startup</h3>
+                <button class="modal-close" id="modal-close">×</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
