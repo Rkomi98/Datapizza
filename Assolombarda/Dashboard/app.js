@@ -38,21 +38,34 @@ async function initializeApp() {
 
 // Data loading
 async function loadData() {
-    try {
-        const response = await fetch('https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/901e467b5dbb0552e479b311b228bd46/830cd162-dd44-4cf6-b323-e19b8577a4e9/fea0a35a.json');
-        const data = await response.json();
-        
-        // Generate comprehensive sample data since only 2 samples provided
-        startupData = generateSampleData(data);
-        filteredData = [...startupData];
-        
-        console.log('Data loaded:', startupData.length, 'startups');
-    } catch (error) {
-        console.error('Error loading data:', error);
-        // Fallback to minimal sample data
-        startupData = generateFallbackData();
-        filteredData = [...startupData];
+    const sources = [
+        './startup_lombardia_data.json',
+        'startup_lombardia_data.json',
+        'https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/901e467b5dbb0552e479b311b228bd46/830cd162-dd44-4cf6-b323-e19b8577a4e9/fea0a35a.json'
+    ];
+
+    for (const url of sources) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const payload = await response.json();
+            const records = Array.isArray(payload) ? payload : payload.startup_data || payload.data;
+
+            if (Array.isArray(records) && records.length) {
+                startupData = records.length > 50 ? records : generateSampleData(records);
+                filteredData = [...startupData];
+                console.log('Data loaded:', startupData.length, 'startups from', url);
+                return;
+            }
+        } catch (error) {
+            console.warn('Data source failed:', url, error);
+        }
     }
+
+    console.error('All data sources failed, using fallback dataset');
+    startupData = generateFallbackData();
+    filteredData = [...startupData];
 }
 
 function generateSampleData(baseData) {
