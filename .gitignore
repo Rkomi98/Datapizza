@@ -6,3 +6,5 @@ firebase-config-local.js
 
 *xlsx
 *csv
+# Allow CSV files in Assolombarda project
+!Assolombarda/**/*.csv
