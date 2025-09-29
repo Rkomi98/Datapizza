@@ -1,4 +1,4 @@
-{
+const startup_data = {
   "startup_data": [
     {
       "id": "SU00001",
@@ -58974,4 +58974,4 @@
     "Robotica": 325,
     "Software & Consulenza Informatica": 321
   }
-}
+};

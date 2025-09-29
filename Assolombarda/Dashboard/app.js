@@ -17,7 +17,10 @@ async function initializeApp() {
     showLoading(true);
     
     try {
-        await loadData();
+        // await loadData(); // Rimuovo il caricamento dati precedente
+        startupData = startup_data.startup_data; // Uso i dati dallo script
+        filteredData = [...startupData];
+
         initializeFilters();
         
         // Initialize map with better loading feedback
@@ -37,6 +40,7 @@ async function initializeApp() {
 }
 
 // Data loading
+/* Rimuovo la vecchia funzione loadData
 async function loadData() {
     const sources = [
         './startup_lombardia_data.json',
@@ -67,7 +71,7 @@ async function loadData() {
     startupData = generateFallbackData();
     filteredData = [...startupData];
 }
-
+*/
 function generateSampleData(baseData) {
     const provinces = ["Milano", "Bergamo", "Brescia", "Como", "Cremona", "Mantova", "Pavia", "Sondrio", "Varese", "Lecco", "Lodi", "Monza e della Brianza"];
     const sectors = ["Fintech", "Blockchain", "Aerospace", "Automazione Industriale", "Automotive Tech", "Biotecnologie", "Cleantech", "Computer e Prodotti Elettronici", "Cybersecurity", "E-commerce", "Energia Rinnovabile", "Fabbricazione Macchinari", "Intelligenza Artificiale", "IoT", "Marketing Digitale", "Ricerca e Sviluppo", "Robotica", "Salute Digitale", "Servizi di Informazione", "Software & Consulenza Informatica"];
