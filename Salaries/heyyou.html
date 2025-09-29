@@ -295,7 +295,8 @@
         };
 
         // Aggiorna il contenuto della pagina
-        document.getElementById('subtitle').textContent = scoreMessages[score] || "Risultato analisi";
+        const scoreMessage = scoreMessages[score] || "Risultato analisi";
+        document.getElementById('subtitle').textContent = scoreMessage;
         const resultImage = document.getElementById('resultImage');
         resultImage.src = imagePath;
         resultImage.alt = `Score ${score}`;
@@ -311,10 +312,91 @@
 
         // URL e testo da condividere
         const pageUrl = window.location.href;
-        const shareText = `Ho scoperto che il mio stipendio come ${ruolo} a ${localita} ${scoreMessages[score].toLowerCase()}! Scopri anche tu.`;
+        const normalizedScoreMessage = scoreMessages[score]
+            ? scoreMessages[score].toLowerCase()
+            : 'risultato della mia analisi salariale';
+        const shareText = `Ho scoperto che il mio stipendio come ${ruolo} a ${localita} ${normalizedScoreMessage}! Scopri anche tu.`;
 
         // Meta tags per social sharing
         document.querySelector('meta[property="og:image"]').setAttribute('content', new URL(imagePath, window.location.href).href);
+
+        async function ensureImageReady(imgEl) {
+            if (imgEl.complete && imgEl.naturalWidth) {
+                return;
+            }
+
+            await new Promise((resolve, reject) => {
+                imgEl.addEventListener('load', resolve, { once: true });
+                imgEl.addEventListener('error', () => reject(new Error('Immagine non caricata')), { once: true });
+            });
+        }
+
+        async function getImageBlob(imgEl) {
+            await ensureImageReady(imgEl);
+
+            try {
+                const response = await fetch(imgEl.src, { cache: 'no-cache' });
+                if (!response.ok) {
+                    throw new Error('Download non riuscito');
+                }
+                return await response.blob();
+            } catch (error) {
+                return await new Promise((resolve, reject) => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = imgEl.naturalWidth;
+                        canvas.height = imgEl.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(imgEl, 0, 0);
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Impossibile creare il file immagine'));
+                            }
+                        }, 'image/jpeg', 0.92);
+                    } catch (canvasError) {
+                        reject(canvasError);
+                    }
+                });
+            }
+        }
+
+        async function downloadResultImage() {
+            try {
+                const blob = await getImageBlob(resultImage);
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = `risultato-stipendio-score-${score || 'default'}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(objectUrl);
+            } catch (error) {
+                alert('Non riesco a scaricare l\'immagine al momento. Riprova tra qualche istante.');
+            }
+        }
+
+        async function shareImageViaSystem() {
+            try {
+                const blob = await getImageBlob(resultImage);
+                const fileName = `datapizza-score-${score || 'default'}.jpg`;
+                const file = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'Il mio risultato salariale Datapizza',
+                        text: 'Condividi il tuo risultato salariale con Datapizza',
+                        files: [file]
+                    });
+                } else {
+                    window.open(resultImage.src, '_blank');
+                }
+            } catch (error) {
+                window.open(resultImage.src, '_blank');
+            }
+        }
 
         // WhatsApp
         document.getElementById('whatsappBtn').addEventListener('click', function() {
@@ -325,35 +407,22 @@
 
         // Instagram
         document.getElementById('instagramBtn').addEventListener('click', function() {
-            window.open(resultImage.src, '_blank');
+            shareImageViaSystem();
         });
 
         // LinkedIn
         document.getElementById('linkedinBtn').addEventListener('click', function() {
             const url = encodeURIComponent(pageUrl);
-            const text = encodeURIComponent(shareText);
-            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+            const title = encodeURIComponent('Ho confrontato la mia RAL con Datapizza');
+            const summary = encodeURIComponent(shareText);
+            const source = encodeURIComponent('Datapizza Salaries');
+            const shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${summary}&source=${source}`;
+            window.open(shareUrl, '_blank');
         });
 
         // Download
         document.getElementById('downloadBtn').addEventListener('click', function() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = document.getElementById('resultImage');
-            
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            
-            ctx.drawImage(img, 0, 0);
-            
-            canvas.toBlob(function(blob) {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `risultato-stipendio-score-${score || 'default'}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }, 'image/jpeg', 0.92);
+            downloadResultImage();
         });
 
         // Email
