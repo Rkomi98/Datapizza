@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Organizzazioni Lombardia</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>Dashboard Organizzazioni Lombardia</h1>
+            <p class="header-subtitle">Mappa interattiva e tabella delle organizzazioni per l'innovazione e la ricerca</p>
+            
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button id="map-view-btn" class="view-toggle-btn view-toggle-btn--active">
+                    Vista Mappa
+                </button>
+                <button id="table-view-btn" class="view-toggle-btn">
+                    Vista Tabella
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="dashboard-layout">
+                <!-- Sidebar with filters -->
+                <aside class="sidebar">
+                    <div class="filter-section">
+                        <h3>Filtri</h3>
+                        
+                        <div class="form-group">
+                            <label for="tipologia-filter" class="form-label">Tipologia</label>
+                            <select id="tipologia-filter" class="form-control">
+                                <option value="">Tutte le tipologie</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="comune-filter" class="form-label">Comune</label>
+                            <select id="comune-filter" class="form-control">
+                                <option value="">Tutti i comuni</option>
+                            </select>
+                        </div>
+
+                        <!-- Search Box (visible only in table view) -->
+                        <div id="search-section" class="form-group search-section hidden">
+                            <label for="table-search" class="form-label">Cerca</label>
+                            <input type="text" id="table-search" class="form-control" placeholder="Cerca organizzazioni...">
+                            <button id="clear-search" class="btn btn--secondary btn--sm clear-search-btn">Cancella</button>
+                        </div>
+
+                        <button id="reset-filters" class="btn btn--secondary btn--full-width">
+                            Reimposta filtri
+                        </button>
+                    </div>
+
+                    <!-- Export Section (visible only in table view) -->
+                    <div id="export-section" class="export-section hidden">
+                        <h4>Esporta Dati</h4>
+                        <button id="export-csv" class="btn btn--primary btn--full-width">
+                            Esporta CSV
+                        </button>
+                    </div>
+
+                    <!-- Statistics Panel -->
+                    <div class="stats-section">
+                        <h4>Statistiche</h4>
+                        <div class="stat-item">
+                            <span class="stat-label">Totale organizzazioni:</span>
+                            <span id="total-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Visibili:</span>
+                            <span id="visible-count" class="stat-value">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="legend-section">
+                        <h4>Legenda</h4>
+                        <div id="legend-container" class="legend-items">
+                            <!-- Legend items will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Content Area -->
+                <div class="content-section">
+                    <!-- Map View -->
+                    <div id="map-view" class="view-container">
+                        <!-- Loading Overlay -->
+                        <div id="loading-overlay" class="loading-overlay">
+                            <div class="loading-content">
+                                <div class="loading-spinner"></div>
+                                <h3>Geocodifica indirizzi in corso...</h3>
+                                <p>Attendere mentre convertiamo gli indirizzi in coordinate geografiche.</p>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div id="progress-fill" class="progress-fill"></div>
+                                    </div>
+                                    <span id="progress-text" class="progress-text">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Map Container -->
+                        <div id="map" class="map-container"></div>
+
+                        <!-- Map Controls -->
+                        <div class="map-controls">
+                            <button id="fit-bounds" class="btn btn--primary btn--sm">
+                                Centra mappa
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table View -->
+                    <div id="table-view" class="view-container hidden">
+                        <div class="table-header">
+                            <div class="table-info">
+                                <span id="table-results-count">0 risultati</span>
+                            </div>
+                            <div class="table-pagination-controls">
+                                <select id="rows-per-page" class="form-control rows-per-page-select">
+                                    <option value="25">25 per pagina</option>
+                                    <option value="50">50 per pagina</option>
+                                    <option value="100">100 per pagina</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table id="organizations-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-column="soggetto">
+                                            Nome Organizzazione
+                                            <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable" data-column="tipologia">
+                                            Tipologia
+                                            <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable" data-column="indirizzo_pulito">
+                                            Indirizzo
+                                            <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable" data-column="comune">
+                                            Comune
+                                            <span class="sort-indicator"></span>
+                                        </th>
+                                        <th>Sito Web</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body">
+                                    <!-- Table rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="table-footer">
+                            <div class="pagination">
+                                <button id="prev-page" class="btn btn--secondary btn--sm">« Precedente</button>
+                                <span id="page-info" class="page-info">Pagina 1 di 1</span>
+                                <button id="next-page" class="btn btn--secondary btn--sm">Successiva »</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Errore</h3>
+                <button id="close-error-modal" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="error-message">Si è verificato un errore durante il caricamento dei dati.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="retry-button" class="btn btn--primary">Riprova</button>
+                <button class="btn btn--secondary" onclick="document.getElementById('error-modal').classList.add('hidden')">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="soggetti_data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
