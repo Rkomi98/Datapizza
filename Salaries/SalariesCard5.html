@@ -1,48 +1,39 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+  <!-- SalariesCard5 -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Risultato Salariale</title>
   <meta property="og:title" content="Risultato Salariale" />
   <meta property="og:description" content="Scopri se la tua RAL è in linea col mercato." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="images/1.jpg" />
+  <meta property="og:image" content="images/5.jpg" />
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display:flex; align-items:center; justify-content:center; min-height:100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 20px;
-    }
-    .container { background:#fff; border-radius:20px; padding:32px; max-width:700px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.2); }
+    body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); padding:20px; }
+    .container { background:#fff; border-radius:20px; padding:32px; max-width:700px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.2); }
     h1 { color:#333; margin-bottom:10px; font-size:2em; }
     .subtitle { color:#666; margin-bottom:22px; font-size:1.05em; }
-    .result-image { width:70%; max-width:240px; height:auto; border-radius:15px; margin-bottom:26px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
+    .result-image { width:70%; max-width:240px; height:auto; border-radius:15px; margin-bottom:26px; box-shadow:0 4px 15px rgba(0,0,0,.1); }
     .share-buttons { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-top:14px; }
     .share-btn { display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%; text-decoration:none; color:#fff; font-weight:600; transition:all .2s ease; cursor:pointer; border:none; font-size:0.95em; padding:0; }
-    .share-btn:hover { transform: translateY(-1px); box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+    .share-btn:hover { transform:translateY(-1px); box-shadow:0 5px 15px rgba(0,0,0,.2); }
     .whatsapp { background:#25D366; }
-    .instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+    .instagram { background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
     .linkedin { background:#0077B5; }
     .download-btn { background:#6c757d; }
     .email { background:#ff8c00; }
     .share-btn svg { width:26px; height:26px; }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    @media (max-width:600px) {
-      .container { padding:24px; }
-      h1 { font-size:1.6em; }
-      .share-btn { width:52px; height:52px; }
-      .result-image { width:85%; max-width:240px; }
-    }
+    @media (max-width:600px) { .container{padding:24px;} h1{font-size:1.6em;} .share-btn{width:52px;height:52px;} .result-image{width:85%; max-width:240px;} }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Il Tuo Risultato</h1>
     <p class="subtitle">Risultato salariale</p>
-    <img src="images/1.jpg" alt="Score 1" class="result-image" id="resultImage" />
+    <img src="images/5.jpg" alt="Score 5" class="result-image" id="resultImage" />
     <div class="share-buttons">
       <button class="share-btn whatsapp" id="whatsappBtn" aria-label="Condividi via WhatsApp">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -77,12 +68,20 @@
     </div>
   </div>
   <script>
-    const score = 1;
+    const score = 5;
     const resultImage = document.getElementById('resultImage');
     const pageUrl = window.location.href;
     const shareText = 'Ho confrontato la mia RAL con Datapizza';
 
-    resultImage.addEventListener('error', () => { resultImage.src = 'images/3.jpg'; });
+    resultImage.addEventListener('error', function handleError() {
+      if (resultImage.dataset.fallbackApplied === 'true') {
+        resultImage.removeEventListener('error', handleError);
+        return;
+      }
+      resultImage.dataset.fallbackApplied = 'true';
+      resultImage.src = 'images/4.jpg';
+      resultImage.addEventListener('error', () => { resultImage.src = 'images/3.jpg'; }, { once: true });
+    }, { once: true });
 
     async function ensureImageReady(imgEl) {
       if (imgEl.complete && imgEl.naturalWidth) return;
