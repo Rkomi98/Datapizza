@@ -150,15 +150,28 @@
     });
 
     document.getElementById('instagramBtn').addEventListener('click', async function() {
-      const ok = await shareImageViaSystem();
-      if (!ok) {
-        // Prova ad aprire direttamente l'app Instagram (Stories)
-        const deepLink = 'instagram://story-camera';
-        window.location.href = deepLink;
-        // Fallback al sito se il deep link non è gestito
-        setTimeout(() => {
+      // Su mobile, prova prima ad aprire direttamente Instagram
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Prova ad aprire direttamente l'app Instagram
+        window.location.href = 'instagram://story-camera';
+        
+        // Dopo un breve delay, se l'app non si apre, prova altre opzioni
+        setTimeout(async () => {
+          // Prova il Web Share API come fallback
+          const shared = await shareImageViaSystem();
+          if (!shared) {
+            // Come ultimo fallback, apri il sito Instagram
+            window.open('https://www.instagram.com/', '_blank');
+          }
+        }, 1500);
+      } else {
+        // Su desktop, prova il Web Share API o apri Instagram web
+        const shared = await shareImageViaSystem();
+        if (!shared) {
           window.open('https://www.instagram.com/', '_blank');
-        }, 700);
+        }
       }
     });
 
