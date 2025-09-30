@@ -15,11 +15,17 @@
     h1 { color:#333; margin-bottom:10px; font-size:2em; }
     .subtitle { color:#666; margin-bottom:22px; font-size:1.05em; }
     .result-image { width:70%; max-width:240px; height:auto; border-radius:15px; margin-bottom:26px; box-shadow:0 4px 15px rgba(0,0,0,.1); }
-    .share-buttons { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
-    .share-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:28px; text-decoration:none; color:#fff; font-weight:600; transition:all .2s ease; cursor:pointer; border:none; font-size:.95em; }
+    .share-buttons { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-top:14px; }
+    .share-btn { display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%; text-decoration:none; color:#fff; font-weight:600; transition:all .2s ease; cursor:pointer; border:none; font-size:0.95em; padding:0; }
     .share-btn:hover { transform:translateY(-1px); box-shadow:0 5px 15px rgba(0,0,0,.2); }
-    .whatsapp { background:#25D366; } .instagram { background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); } .linkedin { background:#0077B5; } .download-btn { background:#6c757d; }
-    @media (max-width:600px) { .container{padding:24px;} h1{font-size:1.6em;} .share-btn{padding:10px 18px; font-size:.9em;} .result-image{width:85%; max-width:240px;} }
+    .whatsapp { background:#25D366; }
+    .instagram { background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+    .linkedin { background:#0077B5; }
+    .download-btn { background:#6c757d; }
+    .email { background:#ff8c00; }
+    .share-btn svg { width:26px; height:26px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media (max-width:600px) { .container{padding:24px;} h1{font-size:1.6em;} .share-btn{width:52px;height:52px;} .result-image{width:85%; max-width:240px;} }
   </style>
 </head>
 <body>
@@ -28,10 +34,36 @@
     <p class="subtitle">Il tuo stipendio è sopra la media di mercato</p>
     <img src="images/5.jpg" alt="Score 5" class="result-image" id="resultImage" />
     <div class="share-buttons">
-      <button class="share-btn whatsapp" id="whatsappBtn">WhatsApp</button>
-      <button class="share-btn instagram" id="instagramBtn">Instagram</button>
-      <button class="share-btn linkedin" id="linkedinBtn">LinkedIn</button>
-      <button class="share-btn download-btn" id="downloadBtn">Scarica</button>
+      <button class="share-btn whatsapp" id="whatsappBtn" aria-label="Condividi via WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        <span class="sr-only">WhatsApp</span>
+      </button>
+      <button class="share-btn instagram" id="instagramBtn" aria-label="Condividi via Instagram">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+        <span class="sr-only">Instagram</span>
+      </button>
+      <button class="share-btn linkedin" id="linkedinBtn" aria-label="Condividi su LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        <span class="sr-only">LinkedIn</span>
+      </button>
+      <button class="share-btn download-btn" id="downloadBtn" aria-label="Scarica il risultato">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        <span class="sr-only">Scarica immagine</span>
+      </button>
+      <button class="share-btn email" id="emailBtn" aria-label="Condividi via email">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l8 5 8-5v10H4z"/>
+        </svg>
+        <span class="sr-only">Email</span>
+      </button>
     </div>
   </div>
   <script>
@@ -39,16 +71,104 @@
     const resultImage = document.getElementById('resultImage');
     const pageUrl = window.location.href;
     const shareText = 'Ho confrontato la mia RAL con Datapizza';
-    // Se l'immagine 5.jpg non esiste ancora, usa 4 o 3 come fallback
-    resultImage.addEventListener('error', () => { resultImage.src = 'images/4.jpg'; resultImage.addEventListener('error', () => { resultImage.src = 'images/3.jpg'; }, { once: true }); }, { once: true });
-    async function ensureImageReady(imgEl){ if(imgEl.complete&&imgEl.naturalWidth)return; await new Promise((res,rej)=>{imgEl.addEventListener('load',res,{once:true}); imgEl.addEventListener('error',()=>rej(new Error('img error')),{once:true});}); }
-    async function getImageBlob(imgEl){ await ensureImageReady(imgEl); try{ const r=await fetch(imgEl.src,{cache:'no-cache'}); if(!r.ok) throw new Error('fetch'); return await r.blob(); }catch(e){ return await new Promise((resolve,reject)=>{ try{ const c=document.createElement('canvas'); c.width=imgEl.naturalWidth; c.height=imgEl.naturalHeight; const ctx=c.getContext('2d'); ctx.drawImage(imgEl,0,0); c.toBlob(b=>b?resolve(b):reject(new Error('blob fail')),'image/jpeg',0.92);}catch(err){reject(err);} }); } }
-    async function downloadResultImage(){ try{ const blob=await getImageBlob(resultImage); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`datapizza-score-${score}.jpg`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);}catch(e){alert('Errore nel download, riprova.');} }
-    async function shareImageViaSystem(){ try{ const blob=await getImageBlob(resultImage); const file=new File([blob],`datapizza-score-${score}.jpg`,{type:'image/jpeg'}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({title:'Risultato Salariale',text:shareText,files:[file]}); } else { window.open(resultImage.src,'_blank'); } }catch(e){ window.open(resultImage.src,'_blank'); } }
-    document.getElementById('whatsappBtn').addEventListener('click',()=>{ const msg=`Vuoi sapere se la tua RAL è in linea col mercato? 💰\nHo appena confrontato il mio stipendio con la media di regione ed esperienza.\nI risultati sono utili per capire il proprio valore.\nFai il check anche tu completando la survey di Datapizza!\nhttps://bit.ly/4nsCV7P`; const text=encodeURIComponent(msg); window.open(`https://wa.me/?text=${text}`,'_blank'); });
-    document.getElementById('instagramBtn').addEventListener('click',()=>{ shareImageViaSystem(); });
-    document.getElementById('linkedinBtn').addEventListener('click',()=>{ const url=encodeURIComponent(pageUrl); const title=encodeURIComponent('Ho confrontato la mia RAL con Datapizza'); const summary=encodeURIComponent(shareText); const source=encodeURIComponent('Datapizza Salaries'); const shareUrl=`https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${summary}&source=${source}`; window.open(shareUrl,'_blank'); });
-    document.getElementById('downloadBtn').addEventListener('click',()=>{ downloadResultImage(); });
+
+    resultImage.addEventListener('error', function handleError() {
+      if (resultImage.dataset.fallbackApplied === 'true') {
+        resultImage.removeEventListener('error', handleError);
+        return;
+      }
+      resultImage.dataset.fallbackApplied = 'true';
+      resultImage.src = 'images/4.jpg';
+      resultImage.addEventListener('error', () => { resultImage.src = 'images/3.jpg'; }, { once: true });
+    }, { once: true });
+
+    async function ensureImageReady(imgEl) {
+      if (imgEl.complete && imgEl.naturalWidth) return;
+      await new Promise((res, rej) => {
+        imgEl.addEventListener('load', res, { once: true });
+        imgEl.addEventListener('error', () => rej(new Error('img error')), { once: true });
+      });
+    }
+
+    async function getImageBlob(imgEl) {
+      await ensureImageReady(imgEl);
+      try {
+        const r = await fetch(imgEl.src, { cache: 'no-cache' });
+        if (!r.ok) throw new Error('fetch fail');
+        return await r.blob();
+      } catch (e) {
+        return await new Promise((resolve, reject) => {
+          try {
+            const c = document.createElement('canvas');
+            c.width = imgEl.naturalWidth; c.height = imgEl.naturalHeight;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(imgEl, 0, 0);
+            c.toBlob(b => b ? resolve(b) : reject(new Error('blob fail')), 'image/jpeg', 0.92);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+    }
+
+    async function downloadResultImage() {
+      try {
+        const blob = await getImageBlob(resultImage);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `datapizza-score-${score}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Errore nel download, riprova.');
+      }
+    }
+
+    async function shareImageViaSystem() {
+      try {
+        const blob = await getImageBlob(resultImage);
+        const file = new File([blob], `datapizza-score-${score}.jpg`, { type: 'image/jpeg' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: 'Risultato Salariale', text: shareText, files: [file] });
+        } else {
+          window.open(resultImage.src, '_blank');
+        }
+      } catch (e) {
+        window.open(resultImage.src, '_blank');
+      }
+    }
+
+    document.getElementById('whatsappBtn').addEventListener('click', () => {
+      const msg = `Vuoi sapere se la tua RAL è in linea col mercato? 💰\nHo appena confrontato il mio stipendio con la media di regione ed esperienza.\nI risultati sono utili per capire il proprio valore.\nFai il check anche tu completando la survey di Datapizza!\nhttps://bit.ly/4nsCV7P`;
+      const text = encodeURIComponent(msg);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    });
+
+    document.getElementById('instagramBtn').addEventListener('click', () => {
+      shareImageViaSystem();
+    });
+
+    document.getElementById('linkedinBtn').addEventListener('click', () => {
+      const url = encodeURIComponent(pageUrl);
+      const title = encodeURIComponent('Ho confrontato la mia RAL con Datapizza');
+      const summary = encodeURIComponent(shareText);
+      const source = encodeURIComponent('Datapizza Salaries');
+      const shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${summary}&source=${source}`;
+      window.open(shareUrl, '_blank');
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      downloadResultImage();
+    });
+
+    document.getElementById('emailBtn').addEventListener('click', () => {
+      const subject = encodeURIComponent('Confronta il tuo stipendio con le medie di mercato: ecco uno strumento utile');
+      const body = encodeURIComponent(`Ciao,\nti giro un tool interessante che ho appena utilizzato: la survey di Datapizza che confronta la tua Retribuzione Annua Lorda (RAL) con le medie di mercato in base a regione e anni di esperienza.\n\nSe vuoi fare un check veloce e provarlo anche tu, trovi il link di seguito: https://bit.ly/4nsCV7P\n\n\nA presto,\n[Tuo Nome]`);
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    });
   </script>
 </body>
 </html>
