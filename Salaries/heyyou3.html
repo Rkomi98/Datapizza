@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Risultato Salariale — Score 3</title>
+  <meta property="og:title" content="Risultato Salariale — Score 3" />
+  <meta property="og:description" content="Il tuo stipendio è in linea con il mercato." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="images/3.jpg" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); padding:20px; }
+    .container { background:#fff; border-radius:20px; padding:32px; max-width:700px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.2); }
+    h1 { color:#333; margin-bottom:10px; font-size:2em; }
+    .subtitle { color:#666; margin-bottom:22px; font-size:1.05em; }
+    .result-image { width:70%; max-width:240px; height:auto; border-radius:15px; margin-bottom:26px; box-shadow:0 4px 15px rgba(0,0,0,.1); }
+    .share-buttons { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+    .share-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:28px; text-decoration:none; color:#fff; font-weight:600; transition:all .2s ease; cursor:pointer; border:none; font-size:.95em; }
+    .share-btn:hover { transform:translateY(-1px); box-shadow:0 5px 15px rgba(0,0,0,.2); }
+    .whatsapp { background:#25D366; } .instagram { background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); } .linkedin { background:#0077B5; } .download-btn { background:#6c757d; }
+    @media (max-width:600px) { .container{padding:24px;} h1{font-size:1.6em;} .share-btn{padding:10px 18px; font-size:.9em;} .result-image{width:85%; max-width:240px;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Il Tuo Risultato</h1>
+    <p class="subtitle">Il tuo stipendio è in linea con il mercato</p>
+    <img src="images/3.jpg" alt="Score 3" class="result-image" id="resultImage" />
+    <div class="share-buttons">
+      <button class="share-btn whatsapp" id="whatsappBtn">WhatsApp</button>
+      <button class="share-btn instagram" id="instagramBtn">Instagram</button>
+      <button class="share-btn linkedin" id="linkedinBtn">LinkedIn</button>
+      <button class="share-btn download-btn" id="downloadBtn">Scarica</button>
+    </div>
+  </div>
+  <script>
+    const score = 3;
+    const resultImage = document.getElementById('resultImage');
+    const pageUrl = window.location.href;
+    const shareText = 'Ho confrontato la mia RAL con Datapizza';
+    resultImage.addEventListener('error', () => { resultImage.src = 'images/3.jpg'; });
+    async function ensureImageReady(imgEl){ if(imgEl.complete&&imgEl.naturalWidth)return; await new Promise((res,rej)=>{imgEl.addEventListener('load',res,{once:true}); imgEl.addEventListener('error',()=>rej(new Error('img error')),{once:true});}); }
+    async function getImageBlob(imgEl){ await ensureImageReady(imgEl); try{ const r=await fetch(imgEl.src,{cache:'no-cache'}); if(!r.ok) throw new Error('fetch'); return await r.blob(); }catch(e){ return await new Promise((resolve,reject)=>{ try{ const c=document.createElement('canvas'); c.width=imgEl.naturalWidth; c.height=imgEl.naturalHeight; const ctx=c.getContext('2d'); ctx.drawImage(imgEl,0,0); c.toBlob(b=>b?resolve(b):reject(new Error('blob fail')),'image/jpeg',0.92);}catch(err){reject(err);} }); } }
+    async function downloadResultImage(){ try{ const blob=await getImageBlob(resultImage); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`datapizza-score-${score}.jpg`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);}catch(e){alert('Errore nel download, riprova.');} }
+    async function shareImageViaSystem(){ try{ const blob=await getImageBlob(resultImage); const file=new File([blob],`datapizza-score-${score}.jpg`,{type:'image/jpeg'}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({title:'Risultato Salariale',text:shareText,files:[file]}); } else { window.open(resultImage.src,'_blank'); } }catch(e){ window.open(resultImage.src,'_blank'); } }
+    document.getElementById('whatsappBtn').addEventListener('click',()=>{ const msg=`Vuoi sapere se la tua RAL è in linea col mercato? 💰\nHo appena confrontato il mio stipendio con la media di regione ed esperienza.\nI risultati sono utili per capire il proprio valore.\nFai il check anche tu completando la survey di Datapizza!\nhttps://bit.ly/4nsCV7P`; const text=encodeURIComponent(msg); window.open(`https://wa.me/?text=${text}`,'_blank'); });
+    document.getElementById('instagramBtn').addEventListener('click',()=>{ shareImageViaSystem(); });
+    document.getElementById('linkedinBtn').addEventListener('click',()=>{ const url=encodeURIComponent(pageUrl); const title=encodeURIComponent('Ho confrontato la mia RAL con Datapizza'); const summary=encodeURIComponent(shareText); const source=encodeURIComponent('Datapizza Salaries'); const shareUrl=`https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${summary}&source=${source}`; window.open(shareUrl,'_blank'); });
+    document.getElementById('downloadBtn').addEventListener('click',()=>{ downloadResultImage(); });
+  </script>
+</body>
+</html>
