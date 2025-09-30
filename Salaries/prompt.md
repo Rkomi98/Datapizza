@@ -8,12 +8,22 @@ Dato **ruolo**, **località** del lavoro, **esperienza** e **RAL dichiarata** (E
 
 ## INPUT
 
-* `ruolo` (string). Se il valore è vuoto o uguale/inizia con "Altro" (es. "Altro", "Altro|"), usa il campo descrittivo aggiuntivo (`Specifica qui la tua posizione` o equivalente) al posto di `ruolo`.
-* `localita` (string)
+* `ruolo` (string). Trim spazi. Se il valore è vuoto o uguale/inizia con "Altro" (es. "Altro", "Altro|"), usa il campo descrittivo aggiuntivo (`Specifica qui la tua posizione` o equivalente) al posto di `ruolo`.
+* `localita` (string) – trim spazi e rimuovi caratteri speciali.
 * `esperienza` (string) → accetta anni (es. "3 anni") **oppure** seniority ("junior", "mid", "middle", "senior", "lead", "principal") o combinazioni (es. "Senior 7y").
 * `stipendio` (number, EUR/anno lordi)
 
 > Se un campo manca o è ambiguo, **procedi comunque** usando fallback prudente, vedi dopo.
+
+---
+
+## GESTIONE CAMPI MANCANTI O AMBIGUI
+
+1. Dopo il trimming, se `ruolo` resta vuoto e non esiste descrizione alternativa ⇒ imposta `ruolo = "ruolo generico tech"` e annota il fallback nel `rationale`.
+2. Se `localita` manca ⇒ usa `"Italia"` come default e lavora con il dataset nazionale/knowledge base; segnala il fallback nel `rationale`.
+3. Se `esperienza` manca ⇒ stima fascia *junior* (32k–42k) salvo indizi opposti nel dataset; spiega l'assunzione nel `rationale`.
+4. Se `stipendio` manca o non è interpretabile ⇒ imposta `method = "fallback"`, `min_eur = max_eur = 0`, `position = "unknown"`, `score = 0`, e cita l'assenza nel `rationale`.
+5. Se i campi sono incoerenti (es. `stipendio` < 8k o > 250k) ⇒ applica heuristics ma segnala l'anomalia.
 
 ---
 
@@ -24,7 +34,8 @@ Nel workspace puoi trovare uno o più riferimenti interni (CSV o docx). Sono la 
 ### Dataset CSV `Data/df_cleaned.csv`
 
 * Colonne chiave:
-  * Ruolo: `Qual è la tua posizione lavorativa?` (fallback: `Posizione Lavorativa (Completa)`). Se il valore è vuoto o contiene "Altro" ⇒ usa `Specifica qui la tua posizione` (o campo analogo) per la label del ruolo.  * Località: `In che città si trova il tuo ufficio?`.
+  * Ruolo: `Qual è la tua posizione lavorativa?` (fallback: `Posizione Lavorativa (Completa)`). Se il valore è vuoto o contiene "Altro" ⇒ usa `Specifica qui la tua posizione` (o campo analogo) per la label del ruolo.
+  * Località: `In che città si trova il tuo ufficio?`.
   * Esperienza: `seniority` (valori tipo "Entry Level (0-1 years)").
   * RAL lordo annuo: `Qual è la tua RAL attuale?`.
 * Normalizza input e dataset in lowercase, rimuovi accenti e spazi extra (es. "data engineer" ≈ "data engineer").
