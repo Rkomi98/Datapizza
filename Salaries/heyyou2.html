@@ -122,7 +122,7 @@
     async function shareImageViaSystem() {
       try {
         const blob = await getImageBlob(resultImage);
-        const file = new File([blob], `datapizza-score-${score}.jpg`, { type: 'image/jpeg' });
+        const file = new File([blob], `datapizza-score-${score}.jpg`, { type: blob.type || 'image/jpeg' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({ title: 'Risultato Salariale', text: shareText, files: [file] });
           return true;
@@ -140,45 +140,31 @@
     });
 
     document.getElementById('instagramBtn').addEventListener('click', async function() {
-      // Su mobile, scarica l'immagine e apri Instagram
+      // 1) Tenta la condivisione nativa con file (consente selezione diretta di Instagram)
+      const shared = await shareImageViaSystem();
+      if (shared) {
+        return;
+      }
+
+      // 2) Fallback: scarica l'immagine e apri Instagram
+      try {
+        await downloadResultImage();
+      } catch (e) {
+        // ignore
+      }
+
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
       if (isMobile) {
-        try {
-          // Scarica automaticamente l'immagine
-          const blob = await getImageBlob(resultImage);
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `datapizza-score-${score}.jpg`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          
-          // Aspetta che il download parta, poi apri Instagram
-          setTimeout(() => {
-            window.location.href = 'instagram://story-camera';
-            // Fallback se l'app non è installata
-            setTimeout(() => {
-              if (document.visibilityState === 'visible') {
-                window.open('https://www.instagram.com/', '_blank');
-              }
-            }, 1000);
-          }, 500);
-        } catch (e) {
-          // Se il download fallisce, prova il Web Share API
-          const shared = await shareImageViaSystem();
-          if (!shared) {
+        alert('Ho scaricato l\'immagine. Apri Instagram e seleziona l\'ultima immagine salvata dalla galleria per pubblicarla nelle Storie.');
+        window.location.href = 'instagram://story-camera';
+        setTimeout(() => {
+          if (document.visibilityState === 'visible') {
             window.open('https://www.instagram.com/', '_blank');
           }
-        }
+        }, 800);
       } else {
-        // Su desktop, prova il Web Share API o apri Instagram web
-        const shared = await shareImageViaSystem();
-        if (!shared) {
-          window.open('https://www.instagram.com/', '_blank');
-        }
+        alert('Ho scaricato l\'immagine. Su desktop caricala manualmente su Instagram.');
+        window.open('https://www.instagram.com/', '_blank');
       }
     });
 
