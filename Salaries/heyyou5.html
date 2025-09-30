@@ -133,12 +133,12 @@
         const file = new File([blob], `datapizza-score-${score}.jpg`, { type: 'image/jpeg' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({ title: 'Risultato Salariale', text: shareText, files: [file] });
-        } else {
-          window.open(resultImage.src, '_blank');
+          return true;
         }
       } catch (e) {
-        window.open(resultImage.src, '_blank');
+        // ignore
       }
+      return false;
     }
 
     document.getElementById('whatsappBtn').addEventListener('click', () => {
@@ -147,8 +147,17 @@
       window.open(`https://wa.me/?text=${text}`, '_blank');
     });
 
-    document.getElementById('instagramBtn').addEventListener('click', () => {
-      shareImageViaSystem();
+    document.getElementById('instagramBtn').addEventListener('click', async function() {
+      const ok = await shareImageViaSystem();
+      if (!ok) {
+        // Prova ad aprire direttamente l'app Instagram (Stories)
+        const deepLink = 'instagram://story-camera';
+        window.location.href = deepLink;
+        // Fallback al sito se il deep link non è gestito
+        setTimeout(() => {
+          window.open('https://www.instagram.com/', '_blank');
+        }, 700);
+      }
     });
 
     document.getElementById('linkedinBtn').addEventListener('click', () => {
