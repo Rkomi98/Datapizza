@@ -1,0 +1,97 @@
+{
+  "workflow_name": "Salaries Analysis & Email",
+  "description": "Analizza stipendio e invia risultato via email",
+  
+  "steps": [
+    {
+      "step_number": 1,
+      "name": "Trigger - Form Submission",
+      "app": "Webhooks by Zapier",
+      "action": "Catch Hook",
+      "notes": "Riceve dati dal form. Campi attesi: email, nome, ruolo, localita, stipendio, anni_esperienza"
+    },
+    
+    {
+      "step_number": 2,
+      "name": "Generate Unique ID",
+      "app": "Code by Zapier",
+      "action": "Run JavaScript",
+      "code": "// Genera ID univoco per tracking\nconst timestamp = Date.now();\nconst random = Math.random().toString(36).substring(2, 11);\nconst unique_id = `${timestamp}_${random}`;\n\noutput = { unique_id };",
+      "output_example": {
+        "unique_id": "1704067200000_a1b2c3d4e"
+      }
+    },
+    
+    {
+      "step_number": 3,
+      "name": "Analyze Salary (AI)",
+      "app": "OpenAI",
+      "action": "Send Prompt",
+      "prompt_template": "Analizza questo stipendio e rispondi SOLO con un JSON valido:\n\nRuolo: {{1.ruolo}}\nLocalità: {{1.localita}}\nStipendio annuo: {{1.stipendio}} EUR\nAnni esperienza: {{1.anni_esperienza}}\n\nRispondi con questo formato JSON:\n{\n  \"score\": 1-5 (1=molto sotto media, 3=in media, 5=molto sopra media),\n  \"rationale\": \"Spiegazione breve e chiara\"\n}\n\nJSON:",
+      "notes": "Usa GPT-4 o altro modello. Output deve essere JSON puro.",
+      "output_example": {
+        "score": 3,
+        "rationale": "Il tuo stipendio è in linea con la media di mercato per la tua esperienza e località."
+      }
+    },
+    
+    {
+      "step_number": 4,
+      "name": "Parse AI Response",
+      "app": "Code by Zapier",
+      "action": "Run JavaScript",
+      "code": "// Pulisci e parsa la risposta AI\nlet text = inputData.ai_response || '';\n\n// Rimuovi markdown se presente\ntext = text.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n\ntry {\n  const parsed = JSON.parse(text);\n  output = {\n    score: Number(parsed.score) || 3,\n    rationale: String(parsed.rationale || 'Analisi non disponibile')\n  };\n} catch (e) {\n  // Fallback\n  output = {\n    score: 3,\n    rationale: 'Analisi in corso, riprova tra qualche minuto.'\n  };\n}",
+      "input_data": {
+        "ai_response": "{{3.text}}"
+      }
+    },
+    
+    {
+      "step_number": 5,
+      "name": "Save to Storage by Zapier",
+      "app": "Storage by Zapier",
+      "action": "Set Value",
+      "config": {
+        "storage_id": "6b68283a-a4a5-4fbe-9fac-726d7c536a37",
+        "key": "dp_result_{{2.unique_id}}",
+        "value": "{\n  \"score\": {{4.score}},\n  \"rationale\": \"{{4.rationale}}\",\n  \"inputs\": {\n    \"ruolo\": \"{{1.ruolo}}\",\n    \"localita\": \"{{1.localita}}\",\n    \"stipendio\": {{1.stipendio}},\n    \"anni_esperienza\": {{1.anni_esperienza}}\n  }\n}"
+      },
+      "notes": "IMPORTANTE: La chiave DEVE iniziare con 'dp_result_' seguito dall'unique_id"
+    },
+    
+    {
+      "step_number": 6,
+      "name": "Send Email with Result Link",
+      "app": "Email by Zapier",
+      "action": "Send Outbound Email",
+      "config": {
+        "to": "{{1.email}}",
+        "subject": "🎯 Il tuo risultato salariale è pronto!",
+        "body": "Ciao {{1.nome}},\n\nGrazie per aver completato la survey Datapizza!\n\nIl tuo risultato è pronto. Clicca sul link qui sotto per visualizzarlo:\n\n👉 https://tuo-dominio.com/viewer.html?tracking={{2.unique_id}}\n\nIl link rimarrà valido per 30 giorni.\n\nSe hai domande o feedback, rispondi a questa email.\n\nUn saluto,\nTeam Datapizza\n\n---\nP.S. Condividi il tool con i tuoi colleghi per aiutarli a valutare la loro RAL!",
+        "from_name": "Datapizza",
+        "reply_to": "support@datapizza.tech"
+      }
+    }
+  ],
+  
+  "testing": {
+    "test_data": {
+      "email": "test@example.com",
+      "nome": "Mario",
+      "ruolo": "Data Analyst",
+      "localita": "Milano",
+      "stipendio": 45000,
+      "anni_esperienza": 3
+    },
+    "expected_key": "dp_result_1704067200000_a1b2c3d4e",
+    "expected_link": "https://tuo-dominio.com/viewer.html?tracking=1704067200000_a1b2c3d4e"
+  },
+  
+  "monitoring": {
+    "alerts": [
+      "Se step 3 (AI) fallisce più di 3 volte in 1h, invia notifica",
+      "Se step 5 (Storage) fallisce, invia notifica urgente"
+    ],
+    "logs": "Abilita logging dettagliato per tutti gli step"
+  }
+}

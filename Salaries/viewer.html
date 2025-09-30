@@ -37,9 +37,9 @@
   </div>
 
   <script>
-    // CONFIG — sostituisci con il tuo secret di Storage by Zapier
-    // Crea una chiave leggibile in sola lettura o accetta il rischio di esporre il secret in client.
-    const ZAPIER_STORE_SECRET = 'REPLACE_WITH_ZAPIER_STORE_SECRET';
+    // ⚠️ CONFIGURAZIONE - Inserisci qui il tuo secret READ-ONLY
+    const ZAPIER_STORE_SECRET = 'IL_TUO_SECRET_READ_ONLY_QUI';
+    
     const STORE_BASE = 'https://store.zapier.com/api/records';
 
     // Mappa score -> pagina statica
@@ -53,7 +53,14 @@
       return 'heyyou3.html';
     }
 
-    // Utilità
+    // Converti email in key URL-safe (stesso metodo usato in Zapier)
+    function emailToKey(email) {
+      return email.toLowerCase()
+        .replace('@', '_at_')
+        .replace(/\./g, '_dot_')
+        .replace(/\+/g, '_plus_');
+    }
+
     function getParam(name) {
       const u = new URL(window.location.href);
       return u.searchParams.get(name);
@@ -75,40 +82,67 @@
     }
 
     (async () => {
-      const tracking = getParam('tracking');
-      if (!tracking) {
-        showError('Parametro tracking mancante. Apri questa pagina solo dal redirect del form.');
+      // Leggi parametri dall'URL
+      const email = getParam('email');
+      const trackingId = getParam('tracking') || getParam('id');
+      
+      let identifier = null;
+      
+      if (email) {
+        identifier = emailToKey(email);
+      } else if (trackingId) {
+        identifier = trackingId;
+      } else {
+        showError('Parametro mancante. Apri questa pagina solo dal redirect del form.');
         return;
       }
 
-      const KEY = `dp_result_${tracking}`; // stessa chiave impostata dal tuo Zap
-      const maxTries = 20; // ~30s se interval=1500ms
+      // Costruisci la key per Storage
+      const KEY = `dp_result_${identifier}`;
+      
+      console.log('🔍 Cerco risultati per:', identifier);
+      console.log('📦 Storage key:', KEY);
+      
+      const maxTries = 20;
       const intervalMs = 1500;
 
       let attempt = 0;
       let found = null;
+      
       while (attempt < maxTries && !found) {
         attempt++;
+        console.log(`⏳ Tentativo ${attempt}/${maxTries}...`);
+        
         try {
           const data = await fetchRecord(KEY);
-          // Storage by Zapier restituisce un oggetto con { KEY: "{\"score\":3,...}" }
           const raw = data[KEY];
+          
           if (raw) {
-            try { found = typeof raw === 'string' ? JSON.parse(raw) : raw; }
-            catch { found = { score: Number(raw) || 3 }; }
+            try { 
+              found = typeof raw === 'string' ? JSON.parse(raw) : raw; 
+              console.log('✅ Risultato trovato:', found);
+            }
+            catch (e) { 
+              found = { score: Number(raw) || 3 }; 
+            }
           }
         } catch (e) {
-          // ignora e riprova
+          console.log(`❌ Tentativo ${attempt} fallito:`, e.message);
         }
+        
         if (!found) await new Promise(r => setTimeout(r, intervalMs));
       }
 
       if (!found) {
         showError('Ancora nessun risultato. Ricarica tra qualche secondo oppure controlla il link che ti invieremo.');
+        console.error('❌ Nessun risultato trovato dopo', maxTries, 'tentativi');
         return;
       }
 
+      // Mostra la pagina corretta
       const target = pageForScore(found.score);
+      console.log('🎯 Carico pagina:', target);
+      
       const frame = document.getElementById('resultFrame');
       frame.src = target;
       frame.style.display = 'block';
@@ -117,4 +151,3 @@
   </script>
 </body>
 </html>
-
