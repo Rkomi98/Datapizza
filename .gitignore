@@ -1,5 +1,8 @@
 # Dependencies
 /node_modules
+/Assolombarda/my-showcase/
+/DatapizzAI/PizzAI/datapizza-ai-main.zip
+/DatapizzAI/PizzAI/datapizza-ai-main/*
  
 # Environment files
 firebase-config-local.js 
