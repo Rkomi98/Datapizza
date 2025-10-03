@@ -62,6 +62,9 @@ env.bak/
 venv.bak/
 PizzAI/.venv/
 PizzaAI/
+# Datapizza AI archive
+PizzAI/datapizza-ai-main.zip
+PizzAI/datapizza-ai-main/
 
 # IDE files
 .idea/
