@@ -50,7 +50,7 @@ La configurazione diretta offre un controllo granulare sui parametri specifici d
 ### OpenAI client diretto
 ```python
 from datapizza.cache import MemoryCache
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 # Configurazione con cache
 cache = MemoryCache()
@@ -75,7 +75,7 @@ Installa il client dedicato con:
 pip install datapizza-ai-clients-anthropic
 ```
 ```python
-from datapizza.clients import AnthropicClient
+from datapizza.clients.anthropic import AnthropicClient
 
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -96,7 +96,7 @@ Installa il client dedicato con:
 pip install datapizza-ai-clients-google
 ```
 ```python
-from datapizza.clients import GoogleClient
+from datapizza.clients.google import GoogleClient
 
 # Configurazione standard (GenAI API)
 google_client = GoogleClient(
@@ -130,7 +130,7 @@ Installa il client dedicato con:
 pip install datapizza-ai-clients-mistral
 ```
 ```python
-from datapizza.clients import MistralClient
+from datapizza.clients.mistral import MistralClient
 
 mistral_client = MistralClient(
     api_key=os.getenv("MISTRAL_API_KEY"),
@@ -151,7 +151,7 @@ Installa il client dedicato con:
 pip install datapizza-ai-clients-azure-openai
 ```
 ```python
-from datapizza.clients import AzureOpenAIClient
+from datapizza.clients.azure_openai import AzureOpenAIClient
 
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),

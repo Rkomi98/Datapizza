@@ -86,7 +86,7 @@ python simple_rag_example.py
 ## Esempio minimo con TextParser
 
 ```python
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 
 # Testo di esempio

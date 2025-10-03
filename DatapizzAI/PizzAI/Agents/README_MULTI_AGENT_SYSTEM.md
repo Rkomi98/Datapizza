@@ -137,7 +137,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 

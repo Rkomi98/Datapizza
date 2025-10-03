@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
@@ -66,7 +66,7 @@ class ProjectSummary(BaseModel):
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",

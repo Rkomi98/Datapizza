@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.type import TextBlock
 
 client = OpenAIClient(
@@ -78,7 +78,7 @@ Implementation details: caching is handled by the `datapizza-ai` library (not by
 import time
 
 from datapizza.cache import MemoryCache
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -121,7 +121,7 @@ Here is a summary example that brings everything together with a simple chatbot.
 ```python
 import os
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 

@@ -19,7 +19,7 @@ Quick examples that show how to use the **Datapizza-AI** framework with multimod
 from dotenv import load_dotenv
 import os
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.type import Media, MediaBlock, TextBlock
 
 load_dotenv('../.env')
@@ -93,7 +93,7 @@ print(response.text)
 ```python
 import os
 
-from datapizza.clients import GoogleClient
+from datapizza.clients.google import GoogleClient
 from datapizza.type import Media, MediaBlock, TextBlock
 
 analysis_client_google = GoogleClient(
@@ -132,7 +132,7 @@ import base64
 from pathlib import Path
 from dotenv import load_dotenv
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock, Media, MediaBlock
 

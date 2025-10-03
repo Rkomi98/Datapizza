@@ -38,7 +38,7 @@ from opentelemetry import trace
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 # Inizializza il sistema di tracciamento
 tracer = ContextTracing()
@@ -58,7 +58,7 @@ Il tracciamento automatico dei client permette di monitorare tutte le interazion
 ### Esempio base con tracciamento
 
 ```python
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 
@@ -223,7 +223,7 @@ Il setup di Zipkin si integra facilmente con `ContextTracing`. L'esportatore vie
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 from datapizza.type import TextBlock
 
@@ -282,7 +282,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 

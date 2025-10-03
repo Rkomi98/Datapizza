@@ -55,7 +55,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -82,7 +82,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from datapizza.agents import Agent
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.tools import tool
 
 client = OpenAIClient(
@@ -124,7 +124,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 

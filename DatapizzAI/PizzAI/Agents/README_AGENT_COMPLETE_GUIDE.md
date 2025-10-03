@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from datapizza.agents import Agent
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.tools import tool
 
 # Client OpenAI

@@ -1,0 +1,294 @@
+Found 36 markdown files to test
+
+Testing: .venv/lib/python3.12/site-packages/debugpy/_vendored/pydevd/pydevd_plugins/extensions/README.md
+  Found 1 code blocks
+  Block 1 (line 11): ✓ success
+
+Testing: .venv/lib/python3.12/site-packages/mistralai/extra/README.md
+  Found 3 code blocks
+  Block 1 (line 12): ✗ error
+  Block 2 (line 19): ✗ error
+  Block 3 (line 41): ✗ error
+
+Testing: .venv/lib/python3.12/site-packages/pymupdf-1.26.4.dist-info/README.md
+  Found 1 code blocks
+  Block 1 (line 24): ✗ error
+
+Testing: .venv/lib/python3.12/site-packages/zmq/backend/cffi/README.md
+  Found 0 code blocks
+
+Testing: Agents/README_AGENT_COMPLETE_GUIDE.md
+  Found 6 code blocks
+  Block 1 (line 18): ✓ success
+  Block 2 (line 59): ✗ error
+  Block 3 (line 63): ✗ error
+  Block 4 (line 67): ✗ error
+  Block 5 (line 80): ✓ success
+  Block 6 (line 207): ✗ error
+
+Testing: Agents/README_AGENT_COMPLETE_GUIDE_EN.md
+  Found 6 code blocks
+  Block 1 (line 18): ✓ success
+  Block 2 (line 72): ✗ error
+  Block 3 (line 76): ✗ error
+  Block 4 (line 80): ✗ error
+  Block 5 (line 93): ✓ success
+  Block 6 (line 219): ✗ error
+
+Testing: Agents/README_MULTI_AGENT_SYSTEM.md
+  Found 14 code blocks
+  Block 1 (line 63): ✓ success
+  Block 2 (line 105): ✓ success
+  Block 3 (line 134): ✗ error
+  Block 4 (line 202): ✗ error
+  Block 5 (line 305): ✗ error
+  Block 6 (line 332): ✗ error
+  Block 7 (line 348): ✗ error
+  Block 8 (line 363): ✗ error
+  Block 9 (line 382): ✗ error
+  Block 10 (line 397): ✗ error
+  Block 11 (line 412): ✗ error
+  Block 12 (line 427): ✗ error
+  Block 13 (line 448): ✓ success
+  Block 14 (line 467): ✗ error
+
+Testing: Agents/README_MULTI_AGENT_SYSTEM_EV.md
+  Found 14 code blocks
+  Block 1 (line 63): ✓ success
+  Block 2 (line 105): ✓ success
+  Block 3 (line 134): ✗ error
+  Block 4 (line 202): ✗ error
+  Block 5 (line 305): ✗ error
+  Block 6 (line 332): ✗ error
+  Block 7 (line 348): ✗ error
+  Block 8 (line 363): ✗ error
+  Block 9 (line 382): ✗ error
+  Block 10 (line 397): ✗ error
+  Block 11 (line 412): ✗ error
+  Block 12 (line 427): ✗ error
+  Block 13 (line 448): ✓ success
+  Block 14 (line 467): ✗ error
+
+Testing: Agents/README_TOOLS.md
+  Found 6 code blocks
+  Block 1 (line 16): ✓ success
+  Block 2 (line 31): ✗ error
+  Block 3 (line 60): ✓ success
+  Block 4 (line 83): ✗ error
+  Block 5 (line 139): ✗ error
+  Block 6 (line 178): ✗ error
+
+Testing: Agents/README_TOOLS_EV.md
+  Found 7 code blocks
+  Block 1 (line 16): ✓ success
+  Block 2 (line 31): ✗ error
+  Block 3 (line 60): ✓ success
+  Block 4 (line 83): ✗ error
+  Block 5 (line 144): ✗ error
+  Block 6 (line 258): ✗ error
+  Block 7 (line 296): ✗ error
+
+Testing: Client/README.md
+  Found 12 code blocks
+  Block 1 (line 38): ✓ success
+  Block 2 (line 51): ✓ success
+  Block 3 (line 77): ✗ error
+  Block 4 (line 98): ✗ error
+  Block 5 (line 132): ✗ error
+  Block 6 (line 153): ✗ error
+  Block 7 (line 183): ✓ success
+  Block 8 (line 203): ✗ error
+  Block 9 (line 223): ✗ error
+  Block 10 (line 238): ✗ error
+  Block 11 (line 253): ✗ error
+  Block 12 (line 279): ✗ error
+
+Testing: Client/README_ADVANCED_MEMORY_SUMMARY.md
+  Found 8 code blocks
+  Block 1 (line 59): ✗ error
+  Block 2 (line 81): ✗ error
+  Block 3 (line 94): ✗ error
+  Block 4 (line 108): ✗ error
+  Block 5 (line 119): ✗ error
+  Block 6 (line 173): ✗ error
+  Block 7 (line 186): ✗ error
+  Block 8 (line 198): ✓ success
+
+Testing: Client/README_ADVANCED_MEMORY_SUMMARY_EV.md
+  Found 8 code blocks
+  Block 1 (line 59): ✗ error
+  Block 2 (line 81): ✗ error
+  Block 3 (line 94): ✗ error
+  Block 4 (line 108): ✗ error
+  Block 5 (line 119): ✗ error
+  Block 6 (line 173): ✗ error
+  Block 7 (line 186): ✗ error
+  Block 8 (line 198): ✓ success
+
+Testing: Client/README_CUSTOM_CLIENT.md
+  Found 2 code blocks
+  Block 1 (line 23): ✗ error
+  Block 2 (line 34): ✗ error
+
+Testing: Client/README_CUSTOM_CLIENT_EV.md
+  Found 3 code blocks
+  Block 1 (line 24): ✗ error
+  Block 2 (line 35): ✗ error
+  Block 3 (line 168): ✗ error
+
+Testing: Client/README_EV.md
+  Found 12 code blocks
+  Block 1 (line 38): ✓ success
+  Block 2 (line 58): ✓ success
+  Block 3 (line 85): ✗ error
+  Block 4 (line 106): ✗ error
+  Block 5 (line 140): ✗ error
+  Block 6 (line 161): ✗ error
+  Block 7 (line 191): ✓ success
+  Block 8 (line 212): ✗ error
+  Block 9 (line 233): ✗ error
+  Block 10 (line 249): ✗ error
+  Block 11 (line 265): ✗ error
+  Block 12 (line 292): ✗ error
+
+Testing: Client/README_MULTIMODALE.md
+  Found 4 code blocks
+  Block 1 (line 18): ✓ success
+  Block 2 (line 54): ✓ success
+  Block 3 (line 91): ✗ error
+  Block 4 (line 125): ✓ success
+
+Testing: Client/README_MULTIMODALE_EV.md
+  Found 4 code blocks
+  Block 1 (line 18): ✓ success
+  Block 2 (line 55): ✓ success
+  Block 3 (line 93): ✗ error
+  Block 4 (line 129): ✓ success
+
+Testing: Client/README_STRUCTURED_RESPONSE.md
+  Found 2 code blocks
+  Block 1 (line 9): ✓ success
+  Block 2 (line 50): ✓ success
+
+Testing: Client/README_STRUCTURED_RESPONSE_EV.md
+  Found 2 code blocks
+  Block 1 (line 9): ✓ success
+  Block 2 (line 50): ✓ success
+
+Testing: Client/README_TEXT_ONLY.md
+  Found 4 code blocks
+  Block 1 (line 25): ✓ success
+  Block 2 (line 55): ✗ error
+  Block 3 (line 77): ✓ success
+  Block 4 (line 121): ⏱ timeout
+
+Testing: Client/README_TEXT_ONLY_EV.md
+  Found 4 code blocks
+  Block 1 (line 24): ✓ success
+  Block 2 (line 54): ✗ error
+  Block 3 (line 77): ✓ success
+  Block 4 (line 121): ⏱ timeout
+
+Testing: Monitoring/README.md
+  Found 0 code blocks
+
+Testing: Monitoring/README_MONITORING_GUIDE.md
+  Found 6 code blocks
+  Block 1 (line 34): ✗ error
+  Block 2 (line 60): ✗ error
+  Block 3 (line 126): ✗ error
+  Block 4 (line 191): ✓ success
+  Block 5 (line 222): ✗ error
+  Block 6 (line 280): ✗ error
+
+Testing: Monitoring/README_MONITORING_GUIDE_EV.md
+  Found 6 code blocks
+  Block 1 (line 34): ✗ error
+  Block 2 (line 60): ✗ error
+  Block 3 (line 125): ✗ error
+  Block 4 (line 190): ✓ success
+  Block 5 (line 221): ✗ error
+  Block 6 (line 288): ✗ error
+
+Testing: Monitoring/README_SIMPLE.md
+  Found 1 code blocks
+  Block 1 (line 100): Skipped (not testable)
+
+Testing: Pipeline/README_PIPELINE_GUIDE.md
+  Found 4 code blocks
+  Block 1 (line 46): ✗ error
+  Block 2 (line 121): ✗ error
+  Block 3 (line 252): ✗ error
+  Block 4 (line 449): ✗ error
+
+Testing: Pipeline/README_PIPELINE_GUIDE_EV.md
+  Found 6 code blocks
+  Block 1 (line 47): ✗ error
+  Block 2 (line 121): ✗ error
+  Block 3 (line 258): ✗ error
+  Block 4 (line 435): ✗ error
+  Block 5 (line 464): ✗ error
+  Block 6 (line 498): ✗ error
+
+Testing: Pipeline/README_VOICEBOT_FUNCTIONAL_PIPELINE.md
+  Found 0 code blocks
+
+Testing: Pipeline/README_VOICEBOT_FUNCTIONAL_PIPELINE_EV.md
+  Found 0 code blocks
+
+Testing: RAG/AZURE_SERVICES_GUIDE.md
+  Found 2 code blocks
+  Block 1 (line 64): ✗ error
+  Block 2 (line 79): ✗ error
+
+Testing: RAG/README.md
+  Found 3 code blocks
+  Block 1 (line 88): ✗ error
+  Block 2 (line 119): ✗ error
+  Block 3 (line 145): ✗ error
+
+Testing: RAG/README_RAG_COMPLETE_GUIDE.md
+  Found 14 code blocks
+  Block 1 (line 70): Skipped (not testable)
+  Block 2 (line 83): ✗ error
+  Block 3 (line 110): ✗ error
+  Block 4 (line 136): ✗ error
+  Block 5 (line 161): ✗ error
+  Block 6 (line 179): ✗ error
+  Block 7 (line 194): ✗ error
+  Block 8 (line 220): ✗ error
+  Block 9 (line 241): ✓ success
+  Block 10 (line 254): ✗ error
+  Block 11 (line 269): ✗ error
+  Block 12 (line 300): ✗ error
+  Block 13 (line 321): ✗ error
+  Block 14 (line 358): ✗ error
+
+Testing: RAG/README_RAG_COMPLETE_GUIDE_EV.md
+  Found 14 code blocks
+  Block 1 (line 66): Skipped (not testable)
+  Block 2 (line 79): ✗ error
+  Block 3 (line 106): ✗ error
+  Block 4 (line 134): ✗ error
+  Block 5 (line 159): ✗ error
+  Block 6 (line 177): ✗ error
+  Block 7 (line 192): ✗ error
+  Block 8 (line 218): ✗ error
+  Block 9 (line 240): ✓ success
+  Block 10 (line 253): ✗ error
+  Block 11 (line 268): ✗ error
+  Block 12 (line 294): ✗ error
+  Block 13 (line 315): ✗ error
+  Block 14 (line 352): ✗ error
+
+Testing: README.md
+  Found 4 code blocks
+  Block 1 (line 48): ✗ error
+  Block 2 (line 52): ✓ success
+  Block 3 (line 78): ✓ success
+  Block 4 (line 121): ✓ success
+
+Testing: README_Setup.md
+  Found 0 code blocks
+
+✓ Report salvato in: /home/mcalcaterra/Documenti/GitHub/Datapizza/DatapizzAI/Correction.MD

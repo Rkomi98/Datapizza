@@ -34,7 +34,7 @@ import os
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"), 
     model="gpt-5",
@@ -86,7 +86,7 @@ import os
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE
 client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
@@ -147,7 +147,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import GoogleClient
+from datapizza.clients.google import GoogleClient
 from datapizza.memory import Memory
 from datapizza.tools import tool
 from datapizza.type import ROLE, TextBlock
@@ -261,7 +261,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import GoogleClient
+from datapizza.clients.google import GoogleClient
 
 client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),

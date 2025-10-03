@@ -38,7 +38,7 @@ from opentelemetry import trace
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 # Initialize the tracing system
 tracer = ContextTracing()
@@ -58,7 +58,7 @@ Automatic client tracing allows you to monitor all interactions with the chosen 
 ### Basic Tracing Example
 
 ```python
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 
@@ -224,7 +224,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from datapizza.cache import MemoryCache
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 from datapizza.type import TextBlock
 
@@ -291,7 +291,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from datapizza.cache import MemoryCache
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 

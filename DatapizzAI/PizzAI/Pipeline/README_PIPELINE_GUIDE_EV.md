@@ -50,7 +50,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 class FileReader(PipelineComponent):
     def _run(self, file_path: str, **kwargs) -> str:

@@ -123,7 +123,7 @@ from advanced_memory_summary import AdvancedMemoryManager, SummaryConfig, Summar
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),

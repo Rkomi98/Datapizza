@@ -137,7 +137,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 # LLM client configuration
 client = OpenAIClient(
@@ -292,7 +292,7 @@ print(rewritten_query)
 After rewriting, reuse the embedding client from the ingestion step and query the vector store.
 
 ```python
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 
 client = OpenAIClient(

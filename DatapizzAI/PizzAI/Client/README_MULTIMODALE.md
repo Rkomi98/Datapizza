@@ -19,7 +19,7 @@ Esempi rapidi per usare il framework **Datapizza-AI** con input/output multimedi
 from dotenv import load_dotenv
 import os
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.type import TextBlock, Media, MediaBlock
 
 load_dotenv('../.env')
@@ -91,7 +91,7 @@ print(response.text)
 ```python
 from pathlib import Path
 
-from datapizza.clients import GoogleClient
+from datapizza.clients.google import GoogleClient
 from datapizza.type import TextBlock, Media, MediaBlock
 
 
@@ -128,7 +128,7 @@ import base64
 from pathlib import Path
 from dotenv import load_dotenv
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock, Media, MediaBlock
 

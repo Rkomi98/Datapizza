@@ -138,7 +138,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 # Configurazione client LLM
 client = OpenAIClient(
@@ -267,7 +267,7 @@ Una volta popolato il vector store, la pipeline di retrieval può interrogare la
 Un rewriter consente di trasformare richieste vaghe o colloquiali in query mirate al retrieval. È utile quando serve aggiungere sinonimi, normalizzare termini, espandere l'ambito o orchestrare tool esterni prima della ricerca.
 
 ```python
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 
 client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
@@ -298,7 +298,7 @@ print(rewritten_query)
 Dopo la riscrittura, genera l'embedding con lo stesso client usato in ingestion e interroga il vector store.
 
 ```python
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 
 client = OpenAIClient(

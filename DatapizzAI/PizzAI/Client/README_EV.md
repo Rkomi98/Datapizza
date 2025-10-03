@@ -57,7 +57,7 @@ pip install datapizza-ai-clients-openai
 ```
 ```python
 from datapizza.cache import MemoryCache
-from datapizza.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
 
 
 # Configuration with cache
@@ -83,7 +83,7 @@ Install the dedicated client with:
 pip install datapizza-ai-clients-anthropic
 ```
 ```python
-from datapizza.clients import AnthropicClient
+from datapizza.clients.anthropic import AnthropicClient
 
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -104,7 +104,7 @@ Install the dedicated client with:
 pip install datapizza-ai-clients-google
 ```
 ```python
-from datapizza.clients import GoogleClient
+from datapizza.clients.google import GoogleClient
 
 # Standard configuration (GenAI API)
 google_client = GoogleClient(
@@ -138,7 +138,7 @@ Install the dedicated client with:
 pip install datapizza-ai-clients-mistral
 ```
 ```python
-from datapizza.clients import MistralClient
+from datapizza.clients.mistral import MistralClient
 
 mistral_client = MistralClient(
     api_key=os.getenv("MISTRAL_API_KEY"),
@@ -159,7 +159,7 @@ Install the dedicated client with:
 pip install datapizza-ai-clients-azure-openai
 ```
 ```python
-from datapizza.clients import AzureOpenAIClient, OpenAIClient
+from datapizza.clients.azure_openai import AzureOpenAIClient, OpenAIClient
 
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
