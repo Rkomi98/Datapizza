@@ -1,6 +1,6 @@
-# DatapizzAI pipeline guide
+# Datapizza-AI pipeline guide
 
-This guide provides practical examples for using the three pipeline types available in DatapizzAI:
+This guide provides practical examples for using the three pipeline types available in Datapizza-AI:
 
 - **IngestionPipeline**: for processing and ingesting documents into vector stores
 - **DagPipeline**: for creating dependency graphs between components  
@@ -47,13 +47,10 @@ The IngestionPipeline is designed to process documents and ingest them into vect
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.pipeline import IngestionPipeline
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import NodeEmbedder
-from datapizzai.clients import OpenAIClient
-from datapizzai.core.models import PipelineComponent
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 
 class FileReader(PipelineComponent):
     def _run(self, file_path: str, **kwargs) -> str:
@@ -122,8 +119,6 @@ The DagPipeline allows creating dependency graphs (DAG - Directed Acyclic Graph)
 ### Practical example
 
 ```python
-from datapizzai.pipeline import DagPipeline
-from datapizzai.core.models import PipelineComponent
 
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
@@ -261,8 +256,6 @@ The FunctionalPipeline offers a functional approach to pipeline construction wit
 ### Practical example
 
 ```python
-from datapizzai.pipeline import FunctionalPipeline, Dependency
-from datapizzai.core.models import PipelineComponent
 
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
@@ -440,7 +433,6 @@ See `functional_pipeline_example.yaml` for the complete configuration file with 
 To use the YAML configuration from Python:
 
 ```python
-from datapizzai.pipeline import FunctionalPipeline
 
 pipeline = FunctionalPipeline.from_yaml("functional_pipeline_example.yaml")
 
@@ -472,10 +464,9 @@ Loading and using DagPipeline from YAML configuration:
 ```python
 import os
 import sys
-from datapizzai.pipeline import DagPipeline
 
 # Setup path to find mymodules (required for notebooks)
-examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/DatapizzAI/PizzAI/Pipeline/examples"
+examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/Datapizza-AI/PizzAI/Pipeline/examples"
 sys.path.insert(0, examples_dir)
 
 # Create DagPipeline instance and load YAML configuration
@@ -507,10 +498,9 @@ Loading and using FunctionalPipeline from YAML configuration:
 ```python
 import os
 import sys
-from datapizzai.pipeline import FunctionalPipeline
 
 # Setup path to find mymodules (required for notebooks)
-examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/DatapizzAI/PizzAI/Pipeline/examples"
+examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/Datapizza-AI/PizzAI/Pipeline/examples"
 sys.path.insert(0, examples_dir)
 
 # Load functional pipeline from YAML file

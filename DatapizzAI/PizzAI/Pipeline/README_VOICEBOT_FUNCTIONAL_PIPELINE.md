@@ -1,6 +1,6 @@
 # Voicebot con FunctionalPipeline
 
-Questo README presenta una versione snella ma completa del voicebot basato su `FunctionalPipeline` (datapizzai). È focalizzato su un flusso pronto all’uso e mette in evidenza, con esempi concreti, le funzionalità del framework.
+Questo README presenta una versione snella ma completa del voicebot basato su `FunctionalPipeline` (datapizza-ai). È focalizzato su un flusso pronto all’uso e mette in evidenza, con esempi concreti, le funzionalità del framework.
 
 ## Perché è utile
 
@@ -45,19 +45,19 @@ flowchart LR
 ## Quickstart
 
 - Requisiti Python
-  - `pip install datapizzai sounddevice soundfile python-dotenv pyyaml`
+  - `pip install datapizza-ai sounddevice soundfile python-dotenv pyyaml`
   - Linux: `sudo apt-get install -y portaudio19-dev` (per `sounddevice`)
 - Credenziali
   - Crea `.env` nella root con: `GOOGLE_API_KEY=la_tua_api_key`
 
 Esegui la versione semplice e funzionante:
 ```bash
-python Pipeline/voicebot_with_datapizzai.py \
+python Pipeline/voicebot_with_datapizza-ai.py \
   --config Pipeline/voicebot_functional_pipeline.yaml
 ```
 
 File di riferimento:
-- Codice principale: `Pipeline/voicebot_with_datapizzai.py:56`
+- Codice principale: `Pipeline/voicebot_with_datapizza-ai.py:56`
 - Componenti: `Pipeline/components.py:16` `Pipeline/components.py:35` `Pipeline/components.py:129` `Pipeline/components.py:166` `Pipeline/components.py:194` `Pipeline/components.py:249`
 - Config: `Pipeline/voicebot_functional_pipeline.yaml:1`
 
@@ -74,15 +74,15 @@ Output: percorso del report MD (es. `Pipeline/voicebot_report.md`) e dizionario 
 ## Le funzionalità del framework (con esempi reali)
 
 - run: esegue un nodo e salva il risultato nel contesto
-  - Esempio: `run(name="record", node=RecordAudio(), kwargs={...})` in `Pipeline/voicebot_with_datapizzai.py:81`
+  - Esempio: `run(name="record", node=RecordAudio(), kwargs={...})` in `Pipeline/voicebot_with_datapizza-ai.py:81`
 - then: concatena un nodo, con `dependencies` e `target_key` per dire quale output usare
-  - Esempio: `then(name="analyze", ...)` con `target_key="audio_path"` in `Pipeline/voicebot_with_datapizzai.py:86`
+  - Esempio: `then(name="analyze", ...)` con `target_key="audio_path"` in `Pipeline/voicebot_with_datapizza-ai.py:86`
 - foreach: itera su una lista prodotta da un nodo precedente e applica un componente
-  - Esempio: normalizzazione bullets in `Pipeline/voicebot_with_datapizzai.py:64`
+  - Esempio: normalizzazione bullets in `Pipeline/voicebot_with_datapizza-ai.py:64`
 - branch: biforca l’esecuzione su condizione (lambda sul contesto) verso sottopipeline
-  - Esempio: controllo sentiment in `Pipeline/voicebot_with_datapizzai.py:97`
+  - Esempio: controllo sentiment in `Pipeline/voicebot_with_datapizza-ai.py:97`
 - Sub‑pipeline: componi blocchi riutilizzabili (notifica / normalizza+report)
-  - Esempio: definizione di `notify` e `normalize_and_report` in `Pipeline/voicebot_with_datapizzai.py:61` e `Pipeline/voicebot_with_datapizzai.py:64`
+  - Esempio: definizione di `notify` e `normalize_and_report` in `Pipeline/voicebot_with_datapizza-ai.py:61` e `Pipeline/voicebot_with_datapizza-ai.py:64`
 - Componenti riusabili: ogni step è un `PipelineComponent` (sincrono/asincrono)
   - `RecordAudio` salva `{"audio_path": path}` `Pipeline/components.py:16`
   - `GeminiAudioAnalyzer` costruisce `report_markdown` robusto `Pipeline/components.py:35`
@@ -94,7 +94,7 @@ Output: percorso del report MD (es. `Pipeline/voicebot_report.md`) e dizionario 
 ## Esecuzione e parametri
 
 - Comando tipico
-  - `python Pipeline/voicebot_with_datapizzai.py --config Pipeline/voicebot_functional_pipeline.yaml`
+  - `python Pipeline/voicebot_with_datapizza-ai.py --config Pipeline/voicebot_functional_pipeline.yaml`
 - Override rapidi (CLI → YAML → default)
   - `--sec 30` durata registrazione
   - `--sr 16000` sample rate

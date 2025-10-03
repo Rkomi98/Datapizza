@@ -27,7 +27,7 @@ A prerequisite for local development is a running Qdrant server:
 docker run -p 6333:6333 qdrant/qdrant
 ```
 
-A datapizzai‑based RAG system is composed of the following main components:
+A datapizza-ai‑based RAG system is composed of the following main components:
 
 ```mermaid
 graph TD
@@ -64,17 +64,6 @@ docker run -p 6333:6333 qdrant/qdrant
 Python dependencies (imports used in this guide):
 
 ```python
-from datapizzai.modules.parsers import AzureParser
-from datapizzai.modules.splitters import NodeSplitter
-from datapizzai.modules.captioners import LLMCaptioner
-from datapizzai.modules.metatagger import KeywordMetatagger
-from datapizzai.modules.treebuilder import LLMTreeBuilder
-from datapizzai.modules.rerankers import CohereReranker
-from datapizzai.modules.rewriters import ToolRewriter
-from datapizzai.modules.prompt import ChatPromptTemplate
-from datapizzai.embedders import ClientEmbedder, NodeEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.clients import OpenAIClient
 ```
 
 ## Ingestion Pipeline
@@ -88,7 +77,6 @@ Parsers convert texts and documents into hierarchical node structures.
 `TextParser` is the simplest parser for plain text, perfect to get started:
 
 ```python
-from datapizzai.modules.parsers.text_parser import TextParser, parse_text
 
 # Method 1: Using the class
 parser = TextParser()
@@ -144,12 +132,12 @@ Output: returns a `Node` with a hierarchical structure (document → pages → p
 Use the Tree Builder when you start from raw text and did NOT use a parser (section 2). It creates or restructures a node hierarchy from the text, so downstream pipeline components (captioner, splitter, metatagger, embedder) can work at their best. It is optional because, if you already used a parser (e.g., `TextParser` or `AzureParser`), you already have a node structure.
 
 ```python
-from datapizzai.clients import OpenAIClient
-from datapizzai.modules.treebuilder import LLMTreeBuilder
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 
 # LLM client configuration
 client = OpenAIClient(
@@ -202,7 +190,6 @@ chunks = splitter(document_node)
 The metatagger extracts keywords and attaches them to chunk metadata to improve retrieval and categorization.
 
 ```python
-from datapizzai.modules.metatagger import KeywordMetatagger
 
 metatagger = KeywordMetatagger(
     client=client,                 # LLM client for extraction
@@ -254,7 +241,6 @@ Minimal Qdrant setup, if you haven’t already started it:
 # 1. Setup Qdrant
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
-from datapizzai.vectorstores import QdrantVectorstore
 
 client = QdrantClient(host="localhost", port=6333)
 client.create_collection(
@@ -280,12 +266,11 @@ Once the vector store is populated, the retrieval pipeline can query the collect
 Rewriters help turn vague or colloquial questions into retrieval-ready queries. They are useful for expanding terminology, resolving ambiguity, or orchestrating external tools before searching the vector store.
 
 ```python
-from datapizzai.modules.rewriters import ToolRewriter
 
 rewriter = ToolRewriter(
     client=client,
     system_prompt=(
-        "You are a query rewriter for a DatapizzAI RAG pipeline. "
+        "You are a query rewriter for a Datapizza-AI RAG pipeline. "
         "Take messy user questions, capture the main intent, and craft a search-ready "
         "query that includes helpful keywords (e.g., parser, splitter, vector store). "
         "Invoke tools only when they can add useful context for retrieval."
@@ -307,7 +292,8 @@ print(rewritten_query)
 After rewriting, reuse the embedding client from the ingestion step and query the vector store.
 
 ```python
-from datapizzai.clients import OpenAIClient
+from datapizza.clients import OpenAIClient
+
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -329,7 +315,6 @@ The reranker reorders retrieved results by relevance.
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.embedders import ClientEmbedder
 
 load_dotenv()
 
@@ -345,7 +330,7 @@ query = "data visualization applications"
 query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
 query_embedding = await query_embedder.a_run(query)
 
-# Use DatapizzAI vector store
+# Use Datapizza-AI vector store
 retrieved_chunks = vectorstore.search(
     query_vector=query_embedding,
     collection_name="documents",
@@ -365,8 +350,6 @@ Keep in mind that Cohere expects a valid `model` (for example, `rerank-english-v
 Templates structure the input for the generative model.
 
 ```python
-from datapizzai.modules.prompt import ChatPromptTemplate
-from datapizzai.type import Chunk
 
 # Create RAG prompt template
 template = ChatPromptTemplate(

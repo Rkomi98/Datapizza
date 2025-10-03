@@ -1,6 +1,6 @@
-# Multi‑Tool Framework - DatapizzAI
+# Multi‑Tool Framework - Datapizza-AI
 
-Guida per creare e usare strumenti (tools) con DatapizzAI. 
+Guida per creare e usare strumenti (tools) con Datapizza-AI. 
 
 ## Indice
 
@@ -14,7 +14,8 @@ Guida per creare e usare strumenti (tools) con DatapizzAI.
 ## Struttura base di un tool
 
 ```python
-from datapizzai.tools import tool
+from datapizza.tools import tool
+
 
 @tool
 def timer_tool(duration: str) -> str:
@@ -28,11 +29,12 @@ def timer_tool(duration: str) -> str:
 Il modo più semplice per usare un tool è passarlo direttamente al metodo `invoke`. Il modello deciderà se e come usarlo in base al prompt.
 
 ```python
-from datapizzai.clients import OpenAIClient
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"), 
     model="gpt-5",
@@ -56,7 +58,8 @@ for f_call in response.function_calls or []:
 Esempio con due strumenti: una calcolatrice e una ricerca informazioni molto semplice.
 
 ```python
-from datapizzai.tools import tool
+from datapizza.tools import tool
+
 
 @tool
 def calcolatrice(expr: str) -> str:
@@ -78,13 +81,14 @@ def cerca_informazioni(query: str) -> str:
 Che poi si integrano così:
 
 ```python
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import FunctionCallResultBlock, ROLE
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE
 client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 tools = [calcolatrice, cerca_informazioni]
@@ -130,15 +134,15 @@ print(response.text)
 ```
 
 ## Esempio completo con Google Search
-In `datapizzai` è implementato il tool di ricerca `Google_search_tool`, che funziona solo con `GoogleClient`.
+In `datapizza-ai` è implementato il tool di ricerca `Google_search_tool`, che funziona solo con `GoogleClient`.
 
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import GoogleClient
-from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
+
+from datapizza.clients import GoogleClient
 
 client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),

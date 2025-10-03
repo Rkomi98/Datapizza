@@ -1,5 +1,5 @@
 """
-Pipeline module for voicebot with datapizzai FunctionalPipeline.
+Pipeline module for voicebot with datapizza FunctionalPipeline.
 
 This module contains components and utilities for building voice analysis pipelines.
 """

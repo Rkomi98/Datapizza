@@ -5,9 +5,9 @@ import os
 
 from dotenv import load_dotenv
 
-from datapizzai.agents import Agent
-from datapizzai.clients import ClientFactory
-from datapizzai.tools import tool
+from datapizza.agents import Agent
+from datapizza.clients import ClientFactory
+from datapizza.tools import tool
 
 
 load_dotenv()
@@ -115,7 +115,7 @@ def main() -> None:
     )
 
     question = (
-        "L'utente vuole un quadro sui risultati dell'ultimo trimestre di DatapizzAI: "
+        "L'utente vuole un quadro sui risultati dell'ultimo trimestre di DatapizzaAI: "
         "recupera i numeri principali, calcola il profitto e il margine e poi scrivi "
         "un riassunto esecutivo."
     )

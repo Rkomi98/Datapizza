@@ -1,6 +1,6 @@
-# Guida alla configurazione dei client DatapizzAI
+# Guida alla configurazione dei client Datapizza-AI
 
-Questa guida ti aiuterà a configurare tutti i tipi di client disponibili nella libreria DatapizzAI per interagire con diversi provider di modelli LLM.
+Questa guida ti aiuterà a configurare tutti i tipi di client disponibili nella libreria Datapizza-AI per interagire con diversi provider di modelli LLM.
 Per due esempi completi di adapter personalizzati consulta anche la guida dedicata [`README_CUSTOM_CLIENT.md`](README_CUSTOM_CLIENT.md).
 
 ## Indice
@@ -17,7 +17,7 @@ Questo passaggio prepara l'ambiente, installando le dipendenze e configurando le
 
 ### Installazione delle dipendenze
 ```bash
-pip install python-dotenv
+pip install datapizza-ai python-dotenv
 ```
 
 ### Configurazione delle variabili d'ambiente
@@ -34,23 +34,12 @@ AZURE_OPENAI_DEPLOYMENT=your-deployment-name
 ```
 
 ### Setup base del codice
-Questo blocco di codice definisce l'inizializzazione minima, caricando le variabili d'ambiente e importando i client necessari per tutti gli esempi.
+Questo blocco di codice definisce l'inizializzazione minima, caricando le variabili d'ambiente.
 ```python
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# Importazioni necessarie
-from datapizzai.clients import (
-    ClientFactory, 
-    OpenAIClient,
-    AnthropicClient, 
-    GoogleClient,
-    MistralClient,
-    AzureOpenAIClient
-)
-from datapizzai.clients.factory import Provider
 ```
 ---
 
@@ -60,7 +49,8 @@ La configurazione diretta offre un controllo granulare sui parametri specifici d
 
 ### OpenAI client diretto
 ```python
-from datapizzai.cache import MemoryCache
+from datapizza.cache import MemoryCache
+from datapizza.clients import OpenAIClient
 
 # Configurazione con cache
 cache = MemoryCache()
@@ -79,7 +69,14 @@ print(f"Risposta: {response.text}")
 ```
 
 ### Anthropic client diretto
+Installa il client dedicato con:
+
+```bash
+pip install datapizza-ai-clients-anthropic
+```
 ```python
+from datapizza.clients import AnthropicClient
+
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
     model="claude-sonnet-4-20250514",
@@ -93,7 +90,14 @@ print(f"Risposta: {response.text}")
 ```
 
 ### Google client diretto
+Installa il client dedicato con:
+
+```bash
+pip install datapizza-ai-clients-google
+```
 ```python
+from datapizza.clients import GoogleClient
+
 # Configurazione standard (GenAI API)
 google_client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
@@ -120,7 +124,14 @@ print(f"Risposta: {response.text}")
 ```
 
 ### Mistral client diretto
+Installa il client dedicato con:
+
+```bash
+pip install datapizza-ai-clients-mistral
+```
 ```python
+from datapizza.clients import MistralClient
+
 mistral_client = MistralClient(
     api_key=os.getenv("MISTRAL_API_KEY"),
     model="mistral-large-latest",
@@ -134,7 +145,14 @@ print(f"Risposta: {response.text}")
 ```
 
 ### Azure OpenAI client diretto
+Installa il client dedicato con:
+
+```bash
+pip install datapizza-ai-clients-azure-openai
+```
 ```python
+from datapizza.clients import AzureOpenAIClient
+
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     model="gpt-4o",
@@ -157,7 +175,15 @@ print(f"Risposta: {response.text}")
 Il `ClientFactory` astrae i dettagli specifici del provider, permettendo di creare rapidamente un client coerente e riducendo il rischio di errori.
 
 ### OpenAI client
+Installa il client dedicato con:
+
+```bash
+pip install datapizza-ai-clients-openai
+```
 ```python
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+
 # Configurazione base
 openai_client = ClientFactory.create(
     provider=Provider.OPENAI,  # o semplicemente "openai"
@@ -169,7 +195,15 @@ openai_client = ClientFactory.create(
 ```
 
 ### Anthropic client (Claude)
+Installa il client dedicato con:
+
+```bash
+pip install datapizza-ai-clients-anthropic
+```
 ```python
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+
 # Configurazione base
 anthropic_client = ClientFactory.create(
     provider=Provider.ANTHROPIC,  # o "anthropic"
@@ -181,7 +215,15 @@ anthropic_client = ClientFactory.create(
 ```
 
 ### Google client (Gemini)
+Installa il client dedicato con:
+
+```bash
+pip install datapizza-ai-clients-google
+```
 ```python
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+
 # Configurazione base
 google_client = ClientFactory.create(
     provider=Provider.GOOGLE,  # o "google"
@@ -194,6 +236,9 @@ google_client = ClientFactory.create(
 
 ### Mistral client
 ```python
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+
 # Configurazione base
 mistral_client = ClientFactory.create(
     provider=Provider.MISTRAL,  # o "mistral"
@@ -206,6 +251,9 @@ mistral_client = ClientFactory.create(
 
 ### Azure OpenAI client
 ```python
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+
 # Configurazione base
 azure_client = ClientFactory.create(
     provider=Provider.AZURE_OPENAI,  # o "azure_openai"
@@ -231,9 +279,9 @@ Questo metodo segue un percorso unico per tutti i provider non nativi: definisci
 ```python
 from typing import Optional, Dict, Any
 
-from datapizzai.clients import ClientResponse
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
 
 
 class CustomProviderClient:
@@ -274,7 +322,7 @@ class CustomProviderClient:
 
 Reimpiega la classe base passando le credenziali del provider e mappando la risposta dell'SDK sul `ClientResponse`. Installa le librerie e imposta le API Keys necessarie.
 
-In questo addendum analalizziamo nello specifico un'implementazione già pronta che estende lo schema visto sopra applicato ad un cliento specifico ([IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md#esempio-a--provider-esterno-ibm-watsonx)).
+In questo addendum analizziamo nello specifico un'implementazione già pronta che estende lo schema visto sopra applicato ad un cliento specifico ([IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT.md#esempio-a--provider-esterno-ibm-watsonx)).
 
 
 ### Passo 3: Collega un modello locale (es. Ollama/Gemma)
@@ -285,4 +333,4 @@ Tra gli esempi specifici è presente una guida ad hoc per configurare [un client
 
 ---
 
-Questa guida copre tutti gli aspetti della configurazione dei client. Per funzionalità avanzate, consulta la documentazione completa di DatapizzAI.
+Questa guida copre tutti gli aspetti della configurazione dei client. Per funzionalità avanzate, consulta la documentazione completa di Datapizza-AI.

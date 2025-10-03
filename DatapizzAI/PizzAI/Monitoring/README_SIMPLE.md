@@ -1,6 +1,6 @@
 # Monitoring semplice per chatbot
 
-Configurazione ultra-semplice per monitorare un chatbot DatapizzAI con Grafana, Prometheus e Zipkin.
+Configurazione ultra-semplice per monitorare un chatbot Datapizza-AI con Grafana, Prometheus e Zipkin.
 
 ## Avvio rapido (3 minuti)
 
@@ -98,10 +98,6 @@ export OPENAI_API_KEY='sk-...'
 ### Importazioni corrette
 Se hai errori di importazione, usa:
 ```python
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory  
-from datapizzai.type import TextBlock, ROLE
-from datapizzai.tracing import ContextTracing
 ```
 
 ### Test rapido

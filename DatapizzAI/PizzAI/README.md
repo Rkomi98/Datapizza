@@ -1,11 +1,11 @@
 <h1 align="center">
-  <img width="1549" height="539" alt="DatapizzAI Banner" src="https://github.com/user-attachments/assets/a5782efb-9aed-4fb8-b2cd-03c542a811ba" />
+  <img width="1549" height="539" alt="Datapizza-AI Banner" src="https://github.com/user-attachments/assets/a5782efb-9aed-4fb8-b2cd-03c542a811ba" />
 </h1>
 
 <p>
   <a href="https://www.python.org/downloads/release/python-3120/"><img alt="Python" src="https://img.shields.io/badge/Python-3.12+-blue?style=for-the-badge&logo=python&logoColor=white"/></a>
-  <a href="https://github.com/Datapizza/DatapizzAI/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/></a>
-  <a href="https://pypi.org/project/datapizzai/"><img alt="Version" src="https://img.shields.io/badge/Version-3.0.8+-black?style=for-the-badge"/></a>
+  <a href="https://github.com/Datapizza/Datapizza-AI/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge"/></a>
+  <a href="https://pypi.org/project/datapizza-ai/"><img alt="Version" src="https://img.shields.io/badge/Version-3.0.8+-black?style=for-the-badge"/></a>
   <a href="https://discord.gg/your-invite-link"><img alt="Discord" src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/></a>
 </p>
 
@@ -29,18 +29,18 @@
 
 ## Quick start
 
-Build AI applications in three simple steps: install `datapizzai`, configure your API key, and create an `OpenAIClient`.
+Build AI applications in three simple steps: install `datapizza-ai`, configure your API key, and create an `OpenAIClient`.
 
 Install with `uv pip`:
 
 ```bash
-uv pip install -U datapizzai
+uv pip install -U datapizza-ai
 ```
 
 Install with `pip`:
 
 ```bash
-pip install -U datapizzai
+pip install -U datapizza-ai
 ```
 
 Create a `.env` file with your API keys:
@@ -52,9 +52,10 @@ OPENAI_API_KEY=sk-your-key-here
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -77,11 +78,12 @@ Create autonomous agents that reason, plan, and act using tools.
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.agents import Agent
-from datapizzai.clients import OpenAIClient
-from datapizzai.tools import tool
 
 load_dotenv()
+
+from datapizza.agents import Agent
+from datapizza.clients import OpenAIClient
+from datapizza.tools import tool
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -106,7 +108,7 @@ print(result)
 
 ### Multi-agent system
 
-DatapizzAI enables building teams of specialized agents that work together. A coordinator agent can delegate specific tasks to expert agents - for example, one agent fetches data, another analyzes it, and a third writes the final report. Each agent has its own expertise and tools, while the coordinator orchestrates the workflow and combines their outputs into comprehensive results.
+Datapizza-AI enables building teams of specialized agents that work together. A coordinator agent can delegate specific tasks to expert agents - for example, one agent fetches data, another analyzes it, and a third writes the final report. Each agent has its own expertise and tools, while the coordinator orchestrates the workflow and combines their outputs into comprehensive results.
 
 ![Screencast_20250913_155132](https://github.com/user-attachments/assets/4dc42f21-c045-4c44-b0d8-117a6725410f)
 
@@ -119,11 +121,12 @@ Build conversational AI that remembers context across interactions.
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
 
 class SimpleChatbot:
     def __init__(self):

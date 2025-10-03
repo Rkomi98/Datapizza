@@ -1,9 +1,9 @@
-# DatapizzAI text-only
+# Datapizza-AI text-only
 
-This guide walks you step by step through building a text-only chatbot with DatapizzAI. Each step explains not only what to do, but also why you should do it.
+This guide walks you step by step through building a text-only chatbot with Datapizza-AI. Each step explains not only what to do, but also why you should do it.
 
 - Goal: build a robust, high-performing conversational chatbot
-- Stack: DatapizzAI (text-only mode)
+- Stack: Datapizza-AI (text-only mode)
 - Result: a command-line chatbot with memory, error handling, metrics, and optional caching
 
 ## Table of Contents
@@ -16,13 +16,19 @@ This guide walks you step by step through building a text-only chatbot with Data
 ## 1. Client configuration
 To talk to a model you need a client configured with provider, API key, temperature, and model name.
 
+```bash
+pip install datapizza-ai
+pip install datapizza-ai-clients-openai
+```
+
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
-from datapizzai.type import TextBlock
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
+from datapizza.type import TextBlock
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -38,7 +44,7 @@ print(client.invoke(TextBlock(content="Hi, nice to meet you")).text)
 - provider: choose the LLM vendor
 
 ## 2. Core concepts: Memory, TextBlock, ROLE
-To build conversations, DatapizzAI uses:
+To build conversations, Datapizza-AI uses:
 - `Memory`: stores the history of turns (user/assistant)
 - `TextBlock`: represents the blocks of text exchanged in each turn
 - `ROLE`: identifies the speaker (`ROLE.USER` or `ROLE.ASSISTANT`)
@@ -46,8 +52,9 @@ To build conversations, DatapizzAI uses:
 These objects let the model remember context. Always pass strings to `TextBlock(content=...)`; use `response.text` to store the model's reply.
 
 ```python
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
+
 
 memory = Memory()
 
@@ -65,11 +72,13 @@ Caching reduces cost and latency for repeated requests.
 
 How it works: if you send two identical requests to the same client with caching enabled, the second one is served from the cache (cache hit). In this case the provider is not called and the response returns immediately.
 
-Implementation details: caching is handled by the `datapizzai` library (not by the provider). The cache key is computed from a hash of the request content (prompt, parameters, and memory if present). You can use `MemoryCache` (in-process) or `RedisCache` for distributed environments.
+Implementation details: caching is handled by the `datapizza-ai` library (not by the provider). The cache key is computed from a hash of the request content (prompt, parameters, and memory if present). You can use `MemoryCache` (in-process) or `RedisCache` for distributed environments.
 
 ```python
-from datapizzai.cache import MemoryCache
 import time
+
+from datapizza.cache import MemoryCache
+from datapizza.clients import OpenAIClient
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -96,7 +105,7 @@ print(f"⏱️ time (second): {t3 - t2:.3f}s")
 #⏱️ time (second): 0.000s
 
 # Alternative: use Redis as a shared cache
-from datapizzai.cache import RedisCache
+from datapizza.cache import RedisCache
 redis_cache = RedisCache(host="localhost", port=6379, db=0)
 client_redis = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -111,9 +120,10 @@ Here is a summary example that brings everything together with a simple chatbot.
 
 ```python
 import os
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
 
 class Chatbot:
     def __init__(self, client):

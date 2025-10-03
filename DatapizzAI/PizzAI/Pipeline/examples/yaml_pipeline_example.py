@@ -20,7 +20,7 @@ from pathlib import Path
 # Aggiungi la directory corrente al path per importare mymodules
 sys.path.append(str(Path(__file__).parent))
 
-from datapizzai.pipeline import FunctionalPipeline
+from datapizza.pipeline import FunctionalPipeline
 
 
 def main():

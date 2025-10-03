@@ -1,6 +1,6 @@
-# Guida alle pipeline DatapizzAI
+# Guida alle pipeline Datapizza-AI
 
-Questa guida fornisce esempi pratici per utilizzare le tre tipologie di pipeline disponibili in DatapizzAI:
+Questa guida fornisce esempi pratici per utilizzare le tre tipologie di pipeline disponibili in Datapizza-AI:
 
 - **IngestionPipeline**: per processare e ingerire documenti in vector stores
 - **DagPipeline**: per creare grafi di dipendenze tra componenti  
@@ -46,13 +46,10 @@ L'IngestionPipeline è progettata per processare documenti e ingerirli in vector
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.pipeline import IngestionPipeline
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import NodeEmbedder
-from datapizzai.clients import OpenAIClient
-from datapizzai.core.models import PipelineComponent
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 
 class FileReader(PipelineComponent):
     def _run(self, file_path: str, **kwargs) -> str:
@@ -122,8 +119,6 @@ La DagPipeline permette di creare grafi di dipendenze (DAG - Directed Acyclic Gr
 ### Esempio pratico
 
 ```python
-from datapizzai.pipeline import DagPipeline
-from datapizzai.core.models import PipelineComponent
 
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
@@ -255,8 +250,6 @@ La FunctionalPipeline offre un approccio funzionale alla costruzione di pipeline
 ### Esempio pratico
 
 ```python
-from datapizzai.pipeline import FunctionalPipeline, Dependency
-from datapizzai.core.models import PipelineComponent
 
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
@@ -454,7 +447,6 @@ Vedi `functional_pipeline_example.yaml` per il file di configurazione completo c
 Per utilizzare la configurazione YAML da Python:
 
 ```python
-from datapizzai.pipeline import FunctionalPipeline
 
 pipeline = FunctionalPipeline.from_yaml("functional_pipeline_example.yaml")
 

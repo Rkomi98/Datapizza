@@ -1,9 +1,9 @@
-"""Custom client example that wraps the Ollama HTTP API for DatapizzAI.
+"""Custom client example that wraps the Ollama HTTP API for DatapizzaAI.
 
 First install Ollama (`curl -fsSL https://ollama.com/install.sh | sh`), pull a
 model (`ollama pull gemma3n:e2b`), and start the daemon (`ollama serve`).
 Running locally lets you iterate quickly while keeping the familiar `invoke`
-contract from DatapizzAI clients. This adapter targets the `/api/chat` endpoint.
+contract from DatapizzaAI clients. This adapter targets the `/api/chat` endpoint.
 """
 
 from __future__ import annotations
@@ -11,20 +11,20 @@ from __future__ import annotations
 import requests
 from typing import Optional
 
-from datapizzai.clients import ClientResponse
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
 
 
 class OllamaClient:
-    """Simple Ollama adapter exposing the DatapizzAI client interface."""
+    """Simple Ollama adapter exposing the DatapizzaAI client interface."""
 
     def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434") -> None:
         self.model = model
         self.base_url = base_url.rstrip("/")
 
     def _build_messages(self, input_text: str | None, memory: Optional[Memory]) -> list[dict[str, str]]:
-        """Convert DatapizzAI memory into Ollama chat messages."""
+        """Convert DatapizzaAI memory into Ollama chat messages."""
         messages: list[dict[str, str]] = []
         if memory is not None:
             for turn in memory.memory:
@@ -42,7 +42,7 @@ class OllamaClient:
         return int(len(text.split()) * 1.3)
 
     def invoke(self, input_text: str | None = None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Invoke Ollama's chat endpoint and return a DatapizzAI response."""
+        """Invoke Ollama's chat endpoint and return a DatapizzaAI response."""
         messages = self._build_messages(input_text, memory)
         payload = {
             "model": self.model,

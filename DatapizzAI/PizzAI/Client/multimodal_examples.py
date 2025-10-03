@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Script di esempio per l'uso della libreria datapizzai - Modalità MULTIMODALE  
+Script di esempio per l'uso della libreria datapizza - Modalità MULTIMODALE  
 ==========================================================================
 
-Questo script dimostra come utilizzare datapizzai per contenuti multimodali:
+Questo script dimostra come utilizzare datapizza per contenuti multimodali:
 1. Analisi immagini con OpenAI (gpt-4o) e Google (gemini-2.5-flash)
 2. Generazione immagini con GPT-5 + DALL-E 3
 3. Modalità conversazionale con memoria multimodale
@@ -29,12 +29,12 @@ from dotenv import load_dotenv
 # Carica le variabili d'ambiente dal file .env nella directory parent
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# Importazioni datapizzai
-from datapizzai.clients import ClientFactory
-from datapizzai.clients.factory import Provider
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, MediaBlock, Media, ROLE
-from datapizzai.cache import MemoryCache
+# Importazioni datapizza
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, MediaBlock, Media, ROLE
+from datapizza.cache import MemoryCache
 
 
 def print_section(title: str):
@@ -651,7 +651,7 @@ def demo_file_management():
 
 def show_main_menu():
     """Mostra il menu principale"""
-    print_section("DATAPIZZAI - Analisi e generazione immagini")
+    print_section("DATAPIZZA - Analisi e generazione immagini")
     
     # Mostra informazioni sui file disponibili
     local_images = find_local_images()

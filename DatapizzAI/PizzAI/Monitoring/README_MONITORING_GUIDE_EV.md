@@ -1,8 +1,8 @@
-# Datapizzai Monitoring Guide
+# Datapizza-AI Monitoring Guide
 
 ## Overview
 
-This guide demonstrates how to implement a comprehensive monitoring system using the `datapizzai` library. Monitoring allows you to track performance, token usage, and the behavior of AI clients in real-time.
+This guide demonstrates how to implement a comprehensive monitoring system using the `datapizza-ai` library. Monitoring allows you to track performance, token usage, and the behavior of AI clients in real-time.
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ This guide demonstrates how to implement a comprehensive monitoring system using
 
 ## 1. Basic Setup
 
-To get started with monitoring in `datapizzai`, you need to configure the built-in OpenTelemetry tracing system.
+To get started with monitoring in `datapizza-ai`, you need to configure the built-in OpenTelemetry tracing system.
 
 ### Dependency Installation
 
@@ -35,10 +35,10 @@ It may seem trivial at this point, but as always, we'll start by configuring the
 import os
 from dotenv import load_dotenv
 from opentelemetry import trace
-from datapizzai.clients import OpenAIClient
-from datapizzai.tracing import ContextTracing
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 
 # Initialize the tracing system
 tracer = ContextTracing()
@@ -58,10 +58,10 @@ Automatic client tracing allows you to monitor all interactions with the chosen 
 ### Basic Tracing Example
 
 ```python
-from datapizzai.tracing import ContextTracing
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
+
 
 # Initialize components
 tracer = ContextTracing()
@@ -123,7 +123,6 @@ For more granular control, you can create manual spans to trace specific operati
 Let's see an example of how to define various types of spans and what their output looks like.
 
 ```python
-from datapizzai.tracing.tracing import generation_span, agent_span, tool_span
 
 def manual_spans_example():
     """Example of manual span creation"""
@@ -148,6 +147,8 @@ def manual_spans_example():
             
             # Simulate data processing
             import time
+
+from datapizza.type import TextBlock
             time.sleep(0.5)
             
             processed_data = {"status": "completed", "records": 100}
@@ -184,7 +185,7 @@ result = manual_spans_example()
 To integrate monitoring with external systems, you can configure custom functions.
 
 ### 4.1. Resource Creation
-To do this, you don't need to use the `datapizzai` library; the standard method you've likely seen before is sufficient.
+To do this, you don't need to use the `datapizza-ai` library; the standard method you've likely seen before is sufficient.
 
 ```python
 from opentelemetry import trace
@@ -192,7 +193,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
 
 def setup_monitoring_resource():
-    """Configures the OpenTelemetry resource (compatible with datapizzai)"""
+    """Configures the OpenTelemetry resource (compatible with datapizza-ai)"""
     
     # Gets the existing tracer provider or creates a new one
     tracer_provider = trace.get_tracer_provider()
@@ -201,7 +202,7 @@ def setup_monitoring_resource():
     from opentelemetry.trace import ProxyTracerProvider
     if isinstance(tracer_provider, ProxyTracerProvider):
         resource = Resource.create({
-            SERVICE_NAME: "datapizzai-app",
+            SERVICE_NAME: "datapizza-ai-app",
             SERVICE_VERSION: "1.0.0",
             "environment": "production",
             "team": "ai-team"
@@ -221,13 +222,19 @@ The Zipkin setup integrates easily with `ContextTracing`. The exporter is added 
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+from datapizza.cache import MemoryCache
+
+from datapizza.clients import OpenAIClient
+
+from datapizza.type import TextBlock
+
 def setup_zipkin_exporter():
-    """Configures the Zipkin exporter (compatible with datapizzai)"""
+    """Configures the Zipkin exporter (compatible with datapizza-ai)"""
     
     # IMPORTANT: Initialize ContextTracing BEFORE configuring exporters
     context_tracer = ContextTracing()
     
-    # Get the tracer provider configured by datapizzai
+    # Get the tracer provider configured by datapizza-ai
     tracer_provider = trace.get_tracer_provider()
     
     # Configure the Zipkin exporter
@@ -280,10 +287,13 @@ def zipkin_example():
 
 ```python
 import os
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
 from dotenv import load_dotenv
 load_dotenv()
+
+from datapizza.cache import MemoryCache
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
 
 # Or, if you prefer inline code, here is the simplified version:
 import time
@@ -294,10 +304,6 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.trace import ProxyTracerProvider
 from prometheus_client import Counter, Histogram, start_http_server
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-from datapizzai.tracing import ContextTracing
 
 _ZIPKIN_ATTACHED = False  # Avoids duplication in notebooks
 
@@ -554,7 +560,7 @@ The following metrics are available and can be viewed on Grafana:
 
 ## Conclusions
 
-In this guide, we've seen how to use monitoring with the `datapizzai` library. Specifically, we've covered:
+In this guide, we've seen how to use monitoring with the `datapizza-ai` library. Specifically, we've covered:
 
 - **Automatic tracing** of all model interactions
 - **Custom spans** for specific operations

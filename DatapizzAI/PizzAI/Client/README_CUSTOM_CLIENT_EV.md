@@ -1,6 +1,6 @@
-# DatapizzAI Custom Clients
+# Datapizza-AI Custom Clients
 
-This guide shows how to design two complete adapters so DatapizzAI can talk to providers that are not supported out of the box or to local models. Because every client already exposes the same `invoke` interface, creating and using a custom client stays straightforward.
+This guide shows how to design two complete adapters so Datapizza-AI can talk to providers that are not supported out of the box or to local models. Because every client already exposes the same `invoke` interface, creating and using a custom client stays straightforward.
 
 ## Core principles
 - **Common interface**: each adapter must expose `invoke(input_text, memory=None)` and return a `ClientResponse`.
@@ -8,7 +8,7 @@ This guide shows how to design two complete adapters so DatapizzAI can talk to p
 - **Observability**: when the provider does not expose token statistics, provide reasonable estimates or helpful logs.
 
 ## Example A — External provider (IBM WatsonX)
-This example explains how to configure a client that is not bundled with DatapizzAI. We will walk through the setup step by step.
+This example explains how to configure a client that is not bundled with Datapizza-AI. We will walk through the setup step by step.
 
 ### Detailed procedure
 1. **Install the SDK**: `pip install ibm-watsonx-ai` (inside your virtual environment).
@@ -39,9 +39,6 @@ from ibm_watsonx_ai import Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 from ibm_watsonx_ai import APIClient
 
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-from datapizzai.clients import ClientResponse
 
 
 class IBMWatsonXClient:
@@ -103,7 +100,7 @@ class IBMWatsonXClient:
         return "\n\n".join(prompt_parts)
 
     def invoke(self, input_text: str = None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Call the IBM WatsonX model and return a DatapizzAI-compatible response."""
+        """Call the IBM WatsonX model and return a Datapizza-AI-compatible response."""
         try:
             prompt = self._build_prompt(input_text, memory)
 
@@ -144,6 +141,10 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv()
 
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
+
     watsonx_client = IBMWatsonXClient(
         model_id="ibm/granite-3-2-8b-instruct",
         temperature=0.7
@@ -169,9 +170,10 @@ import requests
 from typing import Optional, Union, List
 from pydantic import BaseModel
 
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-from datapizzai.clients import ClientResponse
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
+
 
 
 class OllamaClient:
@@ -197,7 +199,7 @@ class OllamaClient:
         return int(len(text.split()) * 1.3)  # Approximate conversion factor
 
     def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Call the Ollama model and return a DatapizzAI-compatible response."""
+        """Call the Ollama model and return a Datapizza-AI-compatible response."""
         messages = self._build_messages(input, memory)
         payload = {
             "model": self.model,

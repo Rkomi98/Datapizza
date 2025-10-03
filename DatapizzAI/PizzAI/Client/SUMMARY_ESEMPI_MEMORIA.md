@@ -1,6 +1,6 @@
 # Riepilogo esempi per la gestione del summary della memoria
 
-Ho analizzato la libreria `datapizzai` nell'ambiente virtuale e creato esempi più adatti e completi per la gestione del summary della memoria.
+Ho analizzato la libreria `datapizza-ai` nell'ambiente virtuale e creato esempi più adatti e completi per la gestione del summary della memoria.
 
 ## Esempi creati
 
@@ -63,7 +63,7 @@ Ho analizzato la libreria `datapizzai` nell'ambiente virtuale e creato esempi pi
 ### Per didattica/prototipi
 ```python
 # Usa l'esempio base del README
-from datapizzai.memory import Memory
+from datapizza.memory import Memory
 # ... codice semplice
 ```
 
@@ -136,4 +136,4 @@ Le demo simulano conversazioni realistiche mostrando il trigger automatico del s
 
 ---
 
-**Conclusione**: gli esempi creati coprono tutto lo spettro da uso didattico a produzione enterprise, sfruttando al meglio le funzionalità della libreria `datapizzai` per una gestione intelligente e performante della memoria conversazionale.
+**Conclusione**: gli esempi creati coprono tutto lo spettro da uso didattico a produzione enterprise, sfruttando al meglio le funzionalità della libreria `datapizza-ai` per una gestione intelligente e performante della memoria conversazionale.

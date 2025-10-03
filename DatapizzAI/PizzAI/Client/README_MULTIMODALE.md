@@ -1,6 +1,6 @@
-# Esempi Multimodali - DatapizzAI
+# Esempi Multimodali - Datapizza-AI
 
-Esempi rapidi per usare il framework **DatapizzAI** con input/output multimediali (immagini + testo).
+Esempi rapidi per usare il framework **Datapizza-AI** con input/output multimediali (immagini + testo).
 
 ## Indice
 
@@ -16,10 +16,11 @@ Esempi rapidi per usare il framework **DatapizzAI** con input/output multimedial
 **Cosa fa**: Il `MediaBlock` incapsula l'immagine (URL, base64 o file) e la combina con il testo per creare input multimodale. L'AI analizza sia il prompt testuale che il contenuto visivo.
 
 ```python
-from datapizzai.clients import OpenAIClient
-from datapizzai.type import TextBlock, MediaBlock, Media
 from dotenv import load_dotenv
 import os
+
+from datapizza.clients import OpenAIClient
+from datapizza.type import TextBlock, Media, MediaBlock
 
 load_dotenv('../.env')
 client = OpenAIClient(
@@ -53,7 +54,8 @@ print(response.text)
 ```python
 import base64
 from pathlib import Path
-from datapizzai.type import Media, MediaBlock, TextBlock
+
+from datapizza.type import TextBlock, Media, MediaBlock
 
 def load_image_as_base64(path: str) -> str:
     """Converte file immagine in stringa base64 per trasmissione sicura"""
@@ -88,9 +90,10 @@ print(response.text)
 
 ```python
 from pathlib import Path
-from datapizzai.type import Media, MediaBlock, TextBlock
 
-from datapizzai.clients import GoogleClient
+from datapizza.clients import GoogleClient
+from datapizza.type import TextBlock, Media, MediaBlock
+
 
 analysis_client_google = GoogleClient(
     model="gemini-2.5-flash",
@@ -125,9 +128,10 @@ import base64
 from pathlib import Path
 from dotenv import load_dotenv
 
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import ROLE, TextBlock, Media, MediaBlock
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock, Media, MediaBlock
+
 
 load_dotenv('../.env')
 

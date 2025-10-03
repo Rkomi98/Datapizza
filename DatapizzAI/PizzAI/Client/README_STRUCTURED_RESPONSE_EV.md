@@ -1,6 +1,6 @@
 # Guide: Structured responses (JSON and structured_response)
 
-This guide shows two practical ways to get structured outputs with DatapizzAI:
+This guide shows two practical ways to get structured outputs with Datapizza-AI:
 - Classic prompting for raw JSON + client-side parsing
 - Typed output via `structured_response` with Pydantic models
 
@@ -9,9 +9,10 @@ This guide shows two practical ways to get structured outputs with DatapizzAI:
 ```python
 import os, json
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
@@ -51,7 +52,6 @@ import os
 from typing import List
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
 
 # Pydantic data models
 class Task(BaseModel):
@@ -65,6 +65,8 @@ class ProjectSummary(BaseModel):
     tasks: List[Task]
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",

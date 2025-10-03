@@ -3,7 +3,7 @@ Moduli di caricamento dati per esempi YAML.
 """
 
 from typing import Any, Dict, List
-from datapizzai.core.models import PipelineComponent
+from datapizza.core.models import PipelineComponent
 
 
 class DocumentLoader(PipelineComponent):
@@ -23,7 +23,7 @@ class DocumentLoader(PipelineComponent):
             documents = [
                 {"id": 1, "title": "YAML Example", "content": "Questo documento viene caricato da configurazione YAML"},
                 {"id": 2, "title": "Pipeline Demo", "content": "Dimostrazione di FunctionalPipeline con YAML"},
-                {"id": 3, "title": "Datapizzai Test", "content": "Test della libreria datapizzai con moduli esterni"}
+                {"id": 3, "title": "DatapizzaAi Test", "content": "Test della libreria datapizza con moduli esterni"}
             ]
         
         return {

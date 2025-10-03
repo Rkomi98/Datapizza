@@ -3,7 +3,7 @@ Moduli di processamento dati per esempi YAML.
 """
 
 from typing import Any, Dict, List
-from datapizzai.core.models import PipelineComponent
+from datapizza.core.models import PipelineComponent
 
 
 class TextProcessor(PipelineComponent):

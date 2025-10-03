@@ -18,9 +18,9 @@ import os
 from typing import Dict, Any
 from dotenv import load_dotenv
 
-from datapizzai.clients import ClientFactory
-from datapizzai.agents import Agent
-from datapizzai.tools import tool
+from datapizza.clients import ClientFactory
+from datapizza.agents import Agent
+from datapizza.tools import tool
 
 load_dotenv()
 

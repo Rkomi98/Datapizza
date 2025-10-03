@@ -1,8 +1,8 @@
-# Guida completa: creare agenti AI con datapizzai
+# Guida completa: creare agenti AI con datapizza-ai
 
 ## Panoramica
 
-Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libreria `datapizzai` (>= 3.0.8). L'obiettivo è una comprensione chiara del funzionamento degli agenti e della loro interazione in sistemi complessi, con esempi minimali e pratici.
+Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libreria `datapizza-ai` (>= 3.0.8). L'obiettivo è una comprensione chiara del funzionamento degli agenti e della loro interazione in sistemi complessi, con esempi minimali e pratici.
 
 ## Indice
 
@@ -18,12 +18,12 @@ Un agente è un'entità autonoma che utilizza un LLM per ragionare, usare strume
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
-from datapizzai.tools import tool
-from datapizzai.tools.google import google_search_tool
-from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents import Agent, ClientManager
 
 load_dotenv()
+
+from datapizza.agents import Agent
+from datapizza.clients import OpenAIClient
+from datapizza.tools import tool
 
 # Client OpenAI
 openai_client = OpenAIClient(
@@ -79,7 +79,7 @@ Per orchestrare analisi complesse possiamo usare un "agente di agenti". Il coord
 
 ```python
 """
-Sistema "Agente di Agenti" per Analisi Strategica con DatapizzAI
+Sistema "Agente di Agenti" per Analisi Strategica con Datapizza-AI
 ================================================================
 Un agente coordinatore (`StrategicPlanner`) orchestra due agenti
 specializzati (`AnalystAgent`, `RiskAgent`) usandoli come tools
@@ -89,12 +89,13 @@ import os
 import re
 from dotenv import load_dotenv
 
-from datapizzai.agents import Agent
-from datapizzai.clients import ClientFactory
-from datapizzai.tools import tool
 
 # --- 1. Configurazione e Client Condiviso ---
 load_dotenv()
+
+from datapizza.agents import Agent
+from datapizza.clients import ClientFactory
+from datapizza.tools import tool
 shared_client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -204,7 +205,8 @@ if __name__ == "__main__":
 Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.
 
 ```python
-from datapizzai.agents import Agent
+from datapizza.agents import Agent
+
 
 agent = Agent(
     client=client,

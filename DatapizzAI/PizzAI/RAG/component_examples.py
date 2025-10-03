@@ -1,5 +1,5 @@
 """
-Esempi specifici per ogni componente RAG di datapizzai
+Esempi specifici per ogni componente RAG di datapizza
 
 Questo file contiene esempi focalizzati per ogni singolo componente,
 utili per testing e comprensione delle funzionalità individuali.
@@ -9,17 +9,17 @@ import asyncio
 import json
 from pathlib import Path
 
-from datapizzai.clients import OpenAIClient
-from datapizzai.embedders import ClientEmbedder, NodeEmbedder
-from datapizzai.modules.captioners import LLMCaptioner  
-from datapizzai.modules.metatagger import KeywordMetatagger
-from datapizzai.modules.parsers import AzureParser
-from datapizzai.modules.prompt import ChatPromptTemplate
-from datapizzai.modules.rerankers import CohereReranker
-from datapizzai.modules.splitters import TextSplitter, RecursiveSplitter
-from datapizzai.modules.treebuilder import LLMTreeBuilder
-from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.type.type import Chunk
+from datapizza.clients import OpenAIClient
+from datapizza.embedders import ClientEmbedder, NodeEmbedder
+from datapizza.modules.captioners import LLMCaptioner  
+from datapizza.modules.metatagger import KeywordMetatagger
+from datapizza.modules.parsers import AzureParser
+from datapizza.modules.prompt import ChatPromptTemplate
+from datapizza.modules.rerankers import CohereReranker
+from datapizza.modules.splitters import TextSplitter, RecursiveSplitter
+from datapizza.modules.treebuilder import LLMTreeBuilder
+from datapizza.vectorstores import QdrantVectorstore
+from datapizza.type.type import Chunk
 
 
 def load_config() -> dict:
@@ -427,7 +427,7 @@ def example_metatagger():
 
 async def main():
     """Esegue tutti gli esempi"""
-    print("🚀 Esempi componenti RAG datapizzai\n")
+    print("🚀 Esempi componenti RAG datapizza\n")
     
     # Esempi sincroni
     example_azure_parser()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Esempio migliorato per la gestione del summary della memoria con DatapizzAI.
+Esempio migliorato per la gestione del summary della memoria con DatapizzaAI.
 
 Questo esempio migliora quello base del README aggiungendo:
 - Configurazione flessibile 
@@ -21,10 +21,10 @@ from typing import Optional, List, Dict, Any
 from pathlib import Path
 
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-from datapizzai.cache import MemoryCache
+from datapizza.clients import ClientFactory
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, ROLE
+from datapizza.cache import MemoryCache
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -315,7 +315,7 @@ RIASSUNTO:"""
             if 'memory' in data:
                 self.memory.clear()
                 for turn_data in data['memory']:
-                    from datapizzai.type import Block
+                    from datapizza.type import Block
                     blocks = [Block.from_dict(block_data) for block_data in turn_data['blocks']]
                     self.memory.add_turn(blocks, ROLE(turn_data['role']))
             

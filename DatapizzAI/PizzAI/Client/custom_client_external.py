@@ -1,7 +1,7 @@
-"""Custom client example integrating IBM WatsonX with DatapizzAI.
+"""Custom client example integrating IBM WatsonX with DatapizzaAI.
 
 This module shows how to wrap an external provider that is not bundled with
-DatapizzAI and expose the same `invoke` interface used by native clients.
+DatapizzaAI and expose the same `invoke` interface used by native clients.
 Configure the following environment variables before running the example:
 `IBM_WATSONX_API_KEY`, `IBM_WATSONX_URL`, and `IBM_WATSONX_PROJECT_ID`.
 The adapter uses IBM WatsonX, but the pattern works for any REST provider.
@@ -15,13 +15,13 @@ from typing import Optional
 from ibm_watsonx_ai import APIClient, Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 
-from datapizzai.clients import ClientResponse
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
 
 
 class IBMWatsonXClient:
-    """Adapter that makes IBM WatsonX behave like a DatapizzAI client."""
+    """Adapter that makes IBM WatsonX behave like a DatapizzaAI client."""
 
     def __init__(self, model_id: str = "ibm/granite-3-2-8b-instruct", temperature: float = 0.7) -> None:
         self.model_id = model_id
@@ -78,7 +78,7 @@ class IBMWatsonXClient:
         return "\n\n".join(prompt_parts)
 
     def invoke(self, input_text: str | None = None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Call IBM WatsonX and return a DatapizzAI-compatible response object."""
+        """Call IBM WatsonX and return a DatapizzaAI-compatible response object."""
         prompt = self._build_prompt(input_text, memory)
 
         try:

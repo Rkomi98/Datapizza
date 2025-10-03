@@ -1,8 +1,8 @@
-# Guida al monitoraggio con datapizzai
+# Guida al monitoraggio con datapizza-ai
 
 ## Panoramica
 
-Questa guida illustra come implementare un sistema di monitoraggio completo utilizzando la libreria `datapizzai`. Il monitoraggio permette di tracciare le prestazioni, i token utilizzati e il comportamento dei client AI in tempo reale.
+Questa guida illustra come implementare un sistema di monitoraggio completo utilizzando la libreria `datapizza-ai`. Il monitoraggio permette di tracciare le prestazioni, i token utilizzati e il comportamento dei client AI in tempo reale.
 
 ## Indice
 
@@ -14,7 +14,7 @@ Questa guida illustra come implementare un sistema di monitoraggio completo util
 
 ## 1. Configurazione di base
 
-Per iniziare con il monitoraggio in datapizzai, è necessario configurare il sistema di tracciamento OpenTelemetry integrato.
+Per iniziare con il monitoraggio in datapizza-ai, è necessario configurare il sistema di tracciamento OpenTelemetry integrato.
 
 ### Installazione delle dipendenze
 
@@ -35,11 +35,10 @@ Arrivati a questo punto può sembrare banale, ma come sembre iniziamo dalla conf
 import os
 from dotenv import load_dotenv
 from opentelemetry import trace
-from datapizzai.clients import OpenAIClient
-from datapizzai.tracing import ContextTracing
-from datapizzai.cache import MemoryCache
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 
 # Inizializza il sistema di tracciamento
 tracer = ContextTracing()
@@ -59,11 +58,10 @@ Il tracciamento automatico dei client permette di monitorare tutte le interazion
 ### Esempio base con tracciamento
 
 ```python
-from datapizzai.tracing import ContextTracing
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-from datapizzai.cache import MemoryCache
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
+
 
 # Inizializza i componenti
 tracer = ContextTracing()
@@ -126,7 +124,6 @@ Per un controllo più granulare, è possibile creare span manuali per tracciare 
 Vediamo ora con un esempio come definire varie tipologie di span e qual è il loro output.
 
 ```python
-from datapizzai.tracing.tracing import generation_span, agent_span, tool_span
 
 def esempio_span_manuali():
     """Esempio di creazione manuale di span"""
@@ -151,6 +148,8 @@ def esempio_span_manuali():
             
             # Simula l'elaborazione dei dati
             import time
+
+from datapizza.type import TextBlock
             time.sleep(0.5)
             
             processed_data = {"stato": "completato", "record": 100}
@@ -187,7 +186,7 @@ result = esempio_span_manuali()
 Per integrare il monitoraggio con sistemi esterni, è possibile configurare delle funzioni personalizzate.
 
 ### 4.1. Creazione della risorsa
-Per fare questo non serve usare la libreria datapizzai, ma basta il modo standard che probabilmente hai già visto in passato.
+Per fare questo non serve usare la libreria datapizza-ai, ma basta il modo standard che probabilmente hai già visto in passato.
 
 ```python
 from opentelemetry import trace
@@ -195,7 +194,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME, SERVICE_VERSION
 
 def setup_risorsa_monitoraggio():
-    """Configura la risorsa OpenTelemetry (compatibile con datapizzai)"""
+    """Configura la risorsa OpenTelemetry (compatibile con datapizza-ai)"""
     
     # Ottiene il tracer provider esistente o ne crea uno nuovo
     tracer_provider = trace.get_tracer_provider()
@@ -204,7 +203,7 @@ def setup_risorsa_monitoraggio():
     from opentelemetry.trace import ProxyTracerProvider
     if isinstance(tracer_provider, ProxyTracerProvider):
         resource = Resource.create({
-            SERVICE_NAME: "datapizzai-app",
+            SERVICE_NAME: "datapizza-ai-app",
             SERVICE_VERSION: "1.0.0",
             "ambiente": "produzione",
             "team": "ai-team"
@@ -224,13 +223,17 @@ Il setup di Zipkin si integra facilmente con `ContextTracing`. L'esportatore vie
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+from datapizza.clients import OpenAIClient
+
+from datapizza.type import TextBlock
+
 def setup_esportatore_zipkin():
-    """Configura l'esportatore Zipkin (compatibile con datapizzai)"""
+    """Configura l'esportatore Zipkin (compatibile con datapizza-ai)"""
     
     # IMPORTANTE: Inizializza ContextTracing PRIMA di configurare gli esportatori
     context_tracer = ContextTracing()
     
-    # Ottiene il tracer provider configurato da datapizzai
+    # Ottiene il tracer provider configurato da datapizza-ai
     tracer_provider = trace.get_tracer_provider()
     
     # Configura l'esportatore Zipkin
@@ -276,10 +279,12 @@ def esempio_zipkin():
 
 ```python
 import os
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
 from dotenv import load_dotenv
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
 
 # Oppure, se preferisci il codice inline, ecco la versione semplificata:
 import time
@@ -290,10 +295,6 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.trace import ProxyTracerProvider
 from prometheus_client import Counter, Histogram, start_http_server
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-from datapizzai.tracing import ContextTracing
 
 _ZIPKIN_ATTACHED = False  # evita duplicazioni in notebook
 
@@ -543,7 +544,7 @@ Sono disponibili le seguenti metriche, visualizzabili su Grafana
 
 ## Conclusioni
 
-In questa guida abbiamo visto come usare il monitoraggio con la libreria datapizzai. Più in dettaglio abbiamo visto:
+In questa guida abbiamo visto come usare il monitoraggio con la libreria datapizza-ai. Più in dettaglio abbiamo visto:
 
 - **Tracciamento automatico** di tutte le interazioni con i modelli
 - **Span personalizzati** per operazioni specifiche  

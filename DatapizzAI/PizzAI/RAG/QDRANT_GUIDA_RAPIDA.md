@@ -1,4 +1,4 @@
-# Guida rapida Qdrant per DatapizzAI
+# Guida rapida Qdrant per Datapizza-AI
 
 Il tuo errore `Collection 'documents' doesn't exist!` indica che devi **creare prima la collezione** prima di aggiungere dati.
 
@@ -26,7 +26,7 @@ client.create_collection(
 ### 2. POI usa il vectorstore normalmente
 
 ```python
-from datapizzai.vectorstores import QdrantVectorstore
+from datapizza-ai.vectorstores import QdrantVectorstore
 
 vectorstore = QdrantVectorstore(
     host="localhost", 
@@ -79,9 +79,9 @@ Questo script:
 
 ```python
 #!/usr/bin/env python3
-"""Template rapido per Qdrant + DatapizzAI"""
+"""Template rapido per Qdrant + Datapizza-AI"""
 
-from datapizzai.vectorstores import QdrantVectorstore
+from datapizza-ai.vectorstores import QdrantVectorstore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 

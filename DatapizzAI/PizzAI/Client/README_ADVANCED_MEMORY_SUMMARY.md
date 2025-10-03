@@ -1,6 +1,6 @@
 # Gestione avanzata del summary della memoria
 
-Esempio avanzato per la gestione intelligente del summary della memoria con DatapizzAI. Questo esempio estende significativamente le funzionalità base mostrando tecniche professionali per applicazioni di produzione.
+Esempio avanzato per la gestione intelligente del summary della memoria con Datapizza-AI. Questo esempio estende significativamente le funzionalità base mostrando tecniche professionali per applicazioni di produzione.
 
 ## Indice
 
@@ -119,11 +119,11 @@ config = SummaryConfig(
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
-from datapizzai.cache import MemoryCache
 from advanced_memory_summary import AdvancedMemoryManager, SummaryConfig, SummaryStrategy
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),

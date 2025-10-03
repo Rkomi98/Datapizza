@@ -1,6 +1,6 @@
-# Client personalizzati DatapizzAI
+# Client personalizzati Datapizza-AI
 
-Questa guida descrive come progettare due adapter completi che permettono di utilizzare DatapizzAI con provider non supportati nativamente o con modelli locali. Come vedremo, è abbastanza intuitivo sia creare che chiamare il client grazie all'interfaccia `invoke`, quindi un modo d'uso già presente nella libreria.
+Questa guida descrive come progettare due adapter completi che permettono di utilizzare Datapizza-AI con provider non supportati nativamente o con modelli locali. Come vedremo, è abbastanza intuitivo sia creare che chiamare il client grazie all'interfaccia `invoke`, quindi un modo d'uso già presente nella libreria.
 
 ## Principi di base
 - **Interfaccia comune**: ogni adapter deve esporre il metodo `invoke(input_text, memory=None)` e restituire un `ClientResponse`.
@@ -38,9 +38,6 @@ from ibm_watsonx_ai import Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 from ibm_watsonx_ai import APIClient
 
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-from datapizzai.clients import ClientResponse
 
 
 class IBMWatsonXClient:
@@ -142,6 +139,10 @@ class IBMWatsonXClient:
 if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv()
+
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
     
     # Crea il client IBM WatsonX
     watsonx_client = IBMWatsonXClient(
@@ -169,9 +170,9 @@ import requests
 from typing import Optional, Union, List
 from pydantic import BaseModel
 
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-from datapizzai.clients import ClientResponse
+from datapizza.type import TextBlock
+from datapizza.memory import Memory
+from datapizza.clients import ClientResponse
 
 
 class OllamaClient:
@@ -197,7 +198,7 @@ class OllamaClient:
         return int(len(text.split()) * 1.3)  # Fattore di conversione approssimativo
 
     def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Invoca il modello Ollama e restituisce una risposta compatibile con DatapizzAI."""
+        """Invoca il modello Ollama e restituisce una risposta compatibile con Datapizza-AI."""
         messages = self._build_messages(input, memory)
         payload = {
             "model": self.model, 
@@ -235,7 +236,7 @@ class OllamaClient:
                 stop_reason="error"
             )
         except Exception as e:
-            return ClientResponse(
+            return dp.clients.ClientResponse(
                 content=[TextBlock(content=f"Errore Ollama: {str(e)}")],
                 prompt_tokens_used=0,
                 completion_tokens_used=0,

@@ -1,8 +1,8 @@
-# Complete Guide: Building AI Agents with datapizzai
+# Complete Guide: Building AI Agents with datapizza-ai
 
 ## Overview
 
-This guide demonstrates how to build and orchestrate AI agents using the `datapizzai` library (>= 3.0.8). You'll gain a thorough, hands-on understanding of how agents operate and collaborate in complex systems through concise, practical examples.
+This guide demonstrates how to build and orchestrate AI agents using the `datapizza-ai` library (>= 3.0.8). You'll gain a thorough, hands-on understanding of how agents operate and collaborate in complex systems through concise, practical examples.
 
 ## Table of contents
 
@@ -18,12 +18,12 @@ An agent is an autonomous entity that leverages an LLM to reason, operate tools,
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
-from datapizzai.tools import tool
-from datapizzai.tools.google import google_search_tool
-from datapizzai.agents import Agent  # alternatively: from datapizzai.agents import Agent, ClientManager
 
 load_dotenv()
+
+from datapizza.agents import Agent
+from datapizza.clients import OpenAIClient
+from datapizza.tools import tool
 
 # OpenAI client
 openai_client = OpenAIClient(
@@ -95,12 +95,13 @@ import os
 import re
 from dotenv import load_dotenv
 
-from datapizzai.agents import Agent
-from datapizzai.clients import ClientFactory
-from datapizzai.tools import tool
 
 # --- 1. Shared Client Setup ---
 load_dotenv()
+
+from datapizza.agents import Agent
+from datapizza.clients import ClientFactory
+from datapizza.tools import tool
 shared_client = ClientFactory.create(
     provider="openai",
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -216,7 +217,8 @@ if __name__ == "__main__":
 Setting `planning_interval=N` forces the agent to reassess its strategy every N steps. This is particularly valuable for complex, multi-phase tasks.
 
 ```python
-from datapizzai.agents import Agent
+from datapizza.agents import Agent
+
 
 agent = Agent(
     client=client,

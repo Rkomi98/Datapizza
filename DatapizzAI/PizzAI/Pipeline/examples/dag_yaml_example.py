@@ -10,7 +10,7 @@ from pathlib import Path
 # Aggiungi path per mymodules
 sys.path.append(".")
 
-from datapizzai.pipeline import DagPipeline
+from datapizza.pipeline import DagPipeline
 
 def main():
     print("🔄 Caricando DagPipeline da configurazione YAML...")

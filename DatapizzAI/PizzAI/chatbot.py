@@ -1,6 +1,6 @@
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+from datapizza.clients import ClientFactory
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, ROLE
 import os
 from dotenv import load_dotenv
 load_dotenv()

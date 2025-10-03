@@ -1,6 +1,6 @@
-# DatapizzAI Client Configuration Guide
+# Datapizza-AI Client Configuration Guide
 
-This guide walks you through configuring every client available in the DatapizzAI library so you can work with different LLM providers.
+This guide walks you through configuring every client available in the Datapizza-AI library so you can work with different LLM providers.
 For two fully worked custom adapter examples, check the dedicated guide [`README_CUSTOM_CLIENT_EV.md`](README_CUSTOM_CLIENT_EV.md).
 
 ## Table of contents
@@ -17,7 +17,7 @@ Prepare your environment by installing the required dependencies and configuring
 
 ### Install dependencies
 ```bash
-pip install python-dotenv
+pip install datapizza-ai python-dotenv
 ```
 
 ### Set environment variables
@@ -42,15 +42,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Required imports
-from datapizzai.clients import (
-    ClientFactory,
-    OpenAIClient,
-    AnthropicClient,
-    GoogleClient,
-    MistralClient,
-    AzureOpenAIClient
-)
-from datapizzai.clients.factory import Provider
 ```
 ---
 
@@ -59,8 +50,15 @@ from datapizzai.clients.factory import Provider
 Direct configuration gives you fine-grained control over provider-specific parameters such as caching options or custom endpoints.
 
 ### Direct OpenAI client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-openai
+```
 ```python
-from datapizzai.cache import MemoryCache
+from datapizza.cache import MemoryCache
+from datapizza.clients import OpenAIClient
+
 
 # Configuration with cache
 cache = MemoryCache()
@@ -79,7 +77,14 @@ print(f"Response: {response.text}")
 ```
 
 ### Direct Anthropic client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-anthropic
+```
 ```python
+from datapizza.clients import AnthropicClient
+
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
     model="claude-sonnet-4-20250514",
@@ -93,7 +98,14 @@ print(f"Response: {response.text}")
 ```
 
 ### Direct Google client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-google
+```
 ```python
+from datapizza.clients import GoogleClient
+
 # Standard configuration (GenAI API)
 google_client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
@@ -120,7 +132,14 @@ print(f"Response: {response.text}")
 ```
 
 ### Direct Mistral client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-mistral
+```
 ```python
+from datapizza.clients import MistralClient
+
 mistral_client = MistralClient(
     api_key=os.getenv("MISTRAL_API_KEY"),
     model="mistral-large-latest",
@@ -134,7 +153,14 @@ print(f"Response: {response.text}")
 ```
 
 ### Direct Azure OpenAI client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-azure-openai
+```
 ```python
+from datapizza.clients import AzureOpenAIClient, OpenAIClient
+
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     model="gpt-4o",
@@ -157,7 +183,16 @@ print(f"Response: {response.text}")
 `ClientFactory` abstracts provider-specific details, letting you spin up a consistent client quickly while reducing the chance of mistakes.
 
 ### OpenAI client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-openai
+```
 ```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
 # Basic configuration
 openai_client = ClientFactory.create(
     provider=Provider.OPENAI,  # or simply "openai"
@@ -169,7 +204,16 @@ openai_client = ClientFactory.create(
 ```
 
 ### Anthropic client (Claude)
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-anthropic
+```
 ```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
 # Basic configuration
 anthropic_client = ClientFactory.create(
     provider=Provider.ANTHROPIC,  # or "anthropic"
@@ -181,7 +225,16 @@ anthropic_client = ClientFactory.create(
 ```
 
 ### Google client (Gemini)
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-google
+```
 ```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
 # Basic configuration
 google_client = ClientFactory.create(
     provider=Provider.GOOGLE,  # or "google"
@@ -194,6 +247,10 @@ google_client = ClientFactory.create(
 
 ### Mistral client
 ```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
 # Basic configuration
 mistral_client = ClientFactory.create(
     provider=Provider.MISTRAL,  # or "mistral"
@@ -206,6 +263,10 @@ mistral_client = ClientFactory.create(
 
 ### Azure OpenAI client
 ```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
 # Basic configuration
 azure_client = ClientFactory.create(
     provider=Provider.AZURE_OPENAI,  # or "azure_openai"
@@ -224,16 +285,17 @@ azure_client = ClientFactory.create(
 
 ## Method 3: Custom clients (external provider or local model)
 
-Need a provider that is not bundled or a model that runs locally? Define a base adapter first, then specialize it for the remote API or local runtime you want to use. The interface remains `invoke(input_text, memory=None)` just like the other clients. You can explore the full walkthrough in the [deep-dive section](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md). Let's go step by step.
+Need a provider that is not bundled or a model that runs locally? Define a base adapter first, then specialize it for the remote API or local runtime you want to use. The interface remains `invoke(input_text, memory=None)` just like the other clients. You can explore the full walkthrough in the [deep-dive section](https://github.com/Rkomi98/Datapizza/blob/LastChanges/Datapizza-AI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md). Let's go step by step.
 
 ### Step 1: Define the base adapter structure
 
 ```python
 from typing import Optional, Dict, Any
 
-from datapizzai.clients import ClientResponse
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
+
 
 
 class CustomProviderClient:
@@ -274,14 +336,14 @@ class CustomProviderClient:
 
 Reuse the base class, supply the provider credentials, and map the SDK response back into a `ClientResponse`. Install the necessary libraries and set up the API keys before connecting everything.
 
-The addendum includes a ready-to-use implementation tuned for [IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-a--external-provider-ibm-watsonx).
+The addendum includes a ready-to-use implementation tuned for [IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/Datapizza-AI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-a--external-provider-ibm-watsonx).
 
 ### Step 3: Wire up a local model (e.g., Ollama/Gemma)
 
 If you're relying on a local model, start the service first, then download and launch the model you intend to use.
 
-Among the detailed examples you'll find a dedicated guide for [a local client setup](https://github.com/Rkomi98/Datapizza/blob/LastChanges/DatapizzAI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-b--local-model-ollama).
+Among the detailed examples you'll find a dedicated guide for [a local client setup](https://github.com/Rkomi98/Datapizza/blob/LastChanges/Datapizza-AI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-b--local-model-ollama).
 
 ---
 
-This guide covers every aspect of client configuration. For advanced features, refer to the full DatapizzAI documentation.
+This guide covers every aspect of client configuration. For advanced features, refer to the full Datapizza-AI documentation.

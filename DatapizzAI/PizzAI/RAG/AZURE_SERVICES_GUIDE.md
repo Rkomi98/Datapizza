@@ -14,7 +14,7 @@ Questa guida chiarisce le differenze tra i vari servizi Azure necessari per un s
 - **Scopo**: Parsing avanzato di PDF, estrazione layout, tabelle, immagini
 - **Endpoint formato**: `https://your-doc-intel-resource.cognitiveservices.azure.com/`  
 - **Uso nel RAG**: Parsing strutturato di documenti complessi
-- **Note**: È il servizio che richiede `AzureParser` in datapizzai
+- **Note**: È il servizio che richiede `AzureParser` in datapizza-ai
 
 ### 3. Servizi opzionali
 - **Azure Storage**: Per salvare documenti/cache
@@ -63,7 +63,7 @@ Se vuoi parsing avanzato (layout, tabelle, OCR), devi:
 3. **Modificare codice**:
    ```python
    # Invece di SimpleParser
-   from datapizzai.modules.parsers import AzureParser
+   from datapizza-ai.modules.parsers import AzureParser
    
    parser = AzureParser(
        api_key=os.getenv('AZURE_DOCUMENT_INTELLIGENCE_KEY'),  # Non AZURE_OPENAI_KEY!
@@ -77,7 +77,7 @@ Se vuoi parsing avanzato (layout, tabelle, OCR), devi:
 Se preferisci OpenAI diretto invece di Azure:
 
 ```python
-from datapizzai.clients import OpenAIClient
+from datapizza-ai.clients import OpenAIClient
 
 client = OpenAIClient(
     api_key=os.getenv('OPENAI_API_KEY'),  # Direttamente da OpenAI

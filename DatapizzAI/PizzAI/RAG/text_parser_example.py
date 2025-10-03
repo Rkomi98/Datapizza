@@ -6,11 +6,11 @@ risolvendo l'errore TypeError che hai riscontrato.
 """
 
 import asyncio
-from datapizzai.clients import OpenAIClient
-from datapizzai.modules.parsers.text_parser import TextParser, parse_text
-from datapizzai.modules.treebuilder import LLMTreeBuilder
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import NodeEmbedder
+from datapizza.clients import OpenAIClient
+from datapizza.modules.parsers.text_parser import TextParser, parse_text
+from datapizza.modules.treebuilder import LLMTreeBuilder
+from datapizza.modules.splitters import TextSplitter
+from datapizza.embedders import NodeEmbedder
 
 
 def extract_text_from_node(node):

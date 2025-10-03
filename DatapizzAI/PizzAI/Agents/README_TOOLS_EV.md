@@ -1,6 +1,6 @@
-# Multi‑Tool Framework - DatapizzAI
+# Multi‑Tool Framework - Datapizza-AI
 
-Guide for creating and using tools with DatapizzAI. 
+Guide for creating and using tools with Datapizza-AI. 
 
 ## Table of Contents
 
@@ -14,7 +14,8 @@ Guide for creating and using tools with DatapizzAI.
 ## Tool basic structure
 
 ```python
-from datapizzai.tools import tool
+from datapizza.tools import tool
+
 
 @tool
 def timer_tool(duration: str) -> str:
@@ -28,11 +29,12 @@ def timer_tool(duration: str) -> str:
 The simplest way to use a tool is to pass it directly to the `invoke` method. The model will then decide if and how to use it based on the prompt.
 
 ```python
-from datapizzai.clients import OpenAIClient
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"), 
     model="gpt-5",
@@ -56,7 +58,8 @@ for f_call in response.function_calls or []:
 Example with two tools: a calculator and an information search.
 
 ```python
-from datapizzai.tools import tool
+from datapizza.tools import tool
+
 
 @tool
 def calculator(expr: str) -> str:
@@ -78,13 +81,14 @@ def search_info(query: str) -> str:
 ### Execution
 
 ```python
-from datapizzai.clients import OpenAIClient
-from datapizzai.memory import Memory
-from datapizzai.type import FunctionCallResultBlock, ROLE
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+from datapizza.clients import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE
 client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 tools = [calculator, search_info]
@@ -140,13 +144,13 @@ For a more realistic experience, let's combine the concepts we've seen so far in
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import GoogleClient
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE, FunctionCallResultBlock
-from datapizzai.tools import tool
-from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
+
+from datapizza.clients import GoogleClient
+from datapizza.memory import Memory
+from datapizza.tools import tool
+from datapizza.type import ROLE, TextBlock
 
 # Simple calculator
 @tool
@@ -254,10 +258,10 @@ while True:
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import GoogleClient
-from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
+
+from datapizza.clients import GoogleClient
 
 client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),

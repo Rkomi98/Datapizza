@@ -69,7 +69,7 @@ source .venv/bin/activate
 
 **Installa i pacchetti (esempio):**
 ```bash
-uv pip install datapizzai
+uv pip install datapizza-ai
 ```
 
 Questo comando leggerà il file `pyproject.toml` per trovare l'indirizzo del repository privato e scaricherà il pacchetto.

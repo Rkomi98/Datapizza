@@ -12,12 +12,12 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from datapizzai.pipeline import IngestionPipeline
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import NodeEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.clients import OpenAIClient
-from datapizzai.core.models import PipelineComponent
+from datapizza.pipeline import IngestionPipeline
+from datapizza.modules.splitters import TextSplitter
+from datapizza.embedders import NodeEmbedder
+from datapizza.vectorstores import QdrantVectorstore
+from datapizza.clients import OpenAIClient
+from datapizza.core.models import PipelineComponent
 
 # Carica variabili d'ambiente
 load_dotenv()

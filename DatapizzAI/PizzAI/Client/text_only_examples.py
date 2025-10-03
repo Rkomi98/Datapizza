@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Script di esempio per l'uso della libreria datapizzai - Modalità TEXT-ONLY
+Script di esempio per l'uso della libreria datapizza - Modalità TEXT-ONLY
 ========================================================================
 
-Questo script dimostra come utilizzare datapizzai per gestire prompt testuali:
+Questo script dimostra come utilizzare datapizza per gestire prompt testuali:
 1. Modalità "one shot" - singola query → risposta
 2. Modalità "conversational" - sessione multi-turno con memoria
 
@@ -18,12 +18,12 @@ from dotenv import load_dotenv
 # Carica le variabili d'ambiente dal file .env nella directory parent
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# Importazioni datapizzai
-from datapizzai.clients import ClientFactory
-from datapizzai.clients.factory import Provider
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-from datapizzai.cache import MemoryCache
+# Importazioni datapizza
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, ROLE
+from datapizza.cache import MemoryCache
 
 
 def print_section(title: str):
@@ -40,7 +40,7 @@ def print_subsection(title: str):
 
 def create_client(provider_name: str = "openai", use_cache: bool = False):
     """
-    Crea e restituisce un client datapizzai configurato
+    Crea e restituisce un client datapizza configurato
     
     Args:
         provider_name: Nome del provider ("openai", "anthropic", "google", "mistral")
@@ -733,7 +733,7 @@ def demo_complex_chatbot_creation():
 
 def show_menu():
     """Mostra il menu delle demo disponibili"""
-    print_section("DEMO DATAPIZZAI - Modalità TEXT-ONLY")
+    print_section("DEMO DATAPIZZA - Modalità TEXT-ONLY")
     
     print("""
 Seleziona la demo da eseguire:

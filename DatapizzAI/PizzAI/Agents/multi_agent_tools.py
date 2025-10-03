@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Multi Tool Framework - DatapizzAI
+Multi Tool Framework - DatapizzaAI
 =================================
 
-Questo script dimostra come creare e utilizzare client multi-tool con il framework datapizzai.
+Questo script dimostra come creare e utilizzare client multi-tool con il framework datapizza.
 I client possono utilizzare diversi strumenti per completare task complessi.
 
 Autore: Mirko Calcaterra
@@ -18,11 +18,11 @@ from dotenv import load_dotenv
 # Carica le variabili d'ambiente dal file .env nella directory parent
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# Importazioni datapizzai
-from datapizzai.clients import ClientFactory
-from datapizzai.tools import tool
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+# Importazioni datapizza
+from datapizza.clients import ClientFactory
+from datapizza.tools import tool
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, ROLE
 
 
 def print_section(title: str):
@@ -541,7 +541,7 @@ def show_available_tools():
 
 def show_main_menu():
     """Mostra il menu principale"""
-    print_section("MULTI TOOL FRAMEWORK - DatapizzAI")
+    print_section("MULTI TOOL FRAMEWORK - DatapizzaAI")
     
     print("""
 Demo disponibili:

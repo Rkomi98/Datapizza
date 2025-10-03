@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Multi Agent System - DatapizzAI
+Multi Agent System - DatapizzaAI
 ===============================
 
 Sistema multi-agente dove diversi agenti specializzati collaborano per completare task complessi.
@@ -19,11 +19,11 @@ from dotenv import load_dotenv
 # Carica le variabili d'ambiente dal file .env nella directory parent
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# Importazioni datapizzai
-from datapizzai.clients import ClientFactory
-from datapizzai.tools import tool
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+# Importazioni datapizza
+from datapizza.clients import ClientFactory
+from datapizza.tools import tool
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, ROLE
 
 
 @dataclass
@@ -622,7 +622,7 @@ def print_section(title: str):
 
 def show_main_menu():
     """Mostra il menu principale"""
-    print_section("SISTEMA MULTI-AGENTE - DatapizzAI")
+    print_section("SISTEMA MULTI-AGENTE - DatapizzaAI")
     
     print("""
 Demo disponibili:

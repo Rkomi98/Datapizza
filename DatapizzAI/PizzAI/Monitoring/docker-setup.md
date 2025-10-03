@@ -1,4 +1,4 @@
-# Setup Docker per monitoring datapizzai
+# Setup Docker per monitoring datapizza-ai
 
 ## Quick start
 
@@ -198,16 +198,16 @@ from opentelemetry import trace
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from datapizzai.clients import ClientFactory
-from datapizzai.tracing import ContextTracing
-from datapizzai.type import TextBlock
+from datapizza.clients import ClientFactory
+from datapizza.tracing import ContextTracing
+from datapizza.type import TextBlock
 
 load_dotenv()
 
 def test_monitoring_stack():
     """Testa l'intero stack di monitoring"""
     
-    # Inizializza datapizzai tracing
+    # Inizializza datapizza-ai tracing
     context_tracer = ContextTracing()
     tracer_provider = trace.get_tracer_provider()
     
@@ -223,7 +223,7 @@ def test_monitoring_stack():
     
     print("✅ Monitoring stack configurato")
     
-    # Test con datapizzai
+    # Test con datapizza-ai
     client = ClientFactory.create("openai", os.getenv("OPENAI_API_KEY"), "gpt-4o")
     
     with context_tracer.trace("monitoring_stack_test") as trace:
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 ## Troubleshooting
 
 ### Errore "Overriding of current TracerProvider is not allowed"
-- **Causa**: datapizzai ha già inizializzato OpenTelemetry
+- **Causa**: datapizza-ai ha già inizializzato OpenTelemetry
 - **Soluzione**: Inizializza `ContextTracing()` PRIMA di configurare gli esportatori
 
 ### Zipkin non riceve trace
