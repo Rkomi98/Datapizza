@@ -167,7 +167,7 @@ Build complete Retrieval-Augmented Generation systems in minutes. The following 
 
 Build complex processing workflows with modular components. The following is only an example to implement a sentiment analysis with `datapizza-ai`. We invite you to Pipeline folder for more accurate examples.
 
-![pipeline](https://github.com/user-attachments/assets/a5a99722-f696-469a-bd91-838b7b0276c0)
+![functional-pipeline-flow](https://github.com/user-attachments/assets/580ef655-fa80-4174-8939-60bb4846ae3a)
 
 
 
