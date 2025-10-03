@@ -407,6 +407,8 @@
         const tabs = [];
         let scripts = [];
         let activeTab = null;
+        const isFileProtocol = window.location.protocol === 'file:';
+        let directoryInput = null;
 
         function setLoadingState(message) {
             const contentArea = document.getElementById('contentArea');
@@ -419,6 +421,11 @@
         }
 
         function showError(message) {
+            if (isFileProtocol) {
+                showLocalFolderPrompt(message);
+                return;
+            }
+
             const contentArea = document.getElementById('contentArea');
             contentArea.innerHTML = `
                 <div class="empty-state">
@@ -434,6 +441,93 @@
             const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
             const cleaned = nameWithoutExt.replace(/[-_]+/g, ' ');
             return cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
+        }
+
+        function ensureDirectoryInput() {
+            if (directoryInput) {
+                return directoryInput;
+            }
+
+            directoryInput = document.createElement('input');
+            directoryInput.type = 'file';
+            directoryInput.accept = '.md,.markdown';
+            directoryInput.multiple = true;
+            directoryInput.style.display = 'none';
+            directoryInput.setAttribute('webkitdirectory', '');
+            directoryInput.setAttribute('directory', '');
+            directoryInput.addEventListener('change', handleDirectorySelection);
+            document.body.appendChild(directoryInput);
+            return directoryInput;
+        }
+
+        function requestLocalScripts() {
+            const input = ensureDirectoryInput();
+            input.value = '';
+            input.click();
+        }
+
+        async function handleDirectorySelection(event) {
+            const files = Array.from(event.target.files || []);
+            if (!files.length) {
+                setLoadingState('Nessun file selezionato');
+                return;
+            }
+
+            await loadScriptsFromFileList(files);
+        }
+
+        async function loadScriptsFromFileList(files) {
+            const markdownFiles = files.filter((file) => file.name.match(/\.(md|markdown)$/i));
+
+            if (markdownFiles.length === 0) {
+                showLocalFolderPrompt('Nessun file Markdown trovato nella cartella selezionata.');
+                return;
+            }
+
+            setLoadingState('Caricamento degli script locali...');
+
+            try {
+                const loadedScripts = await Promise.all(
+                    markdownFiles.map(async (file) => {
+                        const content = await file.text();
+                        const relativePath = file.webkitRelativePath || file.name;
+                        return {
+                            filename: relativePath,
+                            title: formatTabTitle(file.name),
+                            content
+                        };
+                    })
+                );
+
+                loadedScripts.sort((a, b) => a.filename.localeCompare(b.filename, undefined, { numeric: true, sensitivity: 'base' }));
+
+                scripts = loadedScripts;
+                initializeTabs();
+
+                if (scripts.length > 0) {
+                    selectTab(0);
+                    updateTimestamp();
+                }
+            } catch (error) {
+                console.error(error);
+                showLocalFolderPrompt('Impossibile leggere i file selezionati. Riprova.');
+            }
+        }
+
+        function showLocalFolderPrompt(message) {
+            const tabsContainer = document.getElementById('tabsContainer');
+            tabsContainer.innerHTML = '';
+
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📂</div>
+                    <h2>Carica gli script locali</h2>
+                    <p>${message}</p>
+                    <p style="margin-top: 15px;">Se preferisci l'automazione completa, servi questa pagina con un server locale.</p>
+                    <button class="upload-button" onclick="requestLocalScripts()">Seleziona cartella Scripts</button>
+                </div>
+            `;
         }
 
         async function loadScriptsFromFolder() {
@@ -499,12 +593,14 @@
             tabs.length = 0;
 
             scripts.forEach((script, index) => {
+                const truncatedTitle = script.title.length > 24 ? `${script.title.slice(0, 21)}…` : script.title;
                 const tab = document.createElement('div');
                 tab.className = 'tab';
                 tab.id = `tab-${index + 1}`;
+                tab.title = script.title;
                 tab.innerHTML = `
                     <span class="tab-number">${String(index + 1).padStart(2, '0')}</span>
-                    <span class="tab-title">${script.title}</span>
+                    <span class="tab-title">${truncatedTitle}</span>
                 `;
                 tab.onclick = () => selectTab(index);
                 tabsContainer.appendChild(tab);
@@ -556,7 +652,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadScriptsFromFolder();
+            if (isFileProtocol) {
+                showLocalFolderPrompt('Questa pagina è aperta da file:// e non può leggere automaticamente la cartella Scripts.');
+            } else {
+                loadScriptsFromFolder();
+            }
         });
 
         document.addEventListener('keydown', (event) => {
