@@ -23,10 +23,7 @@
   - [Multi-agent system](#multi-agent-system)
 - [Chatbot with memory](#chatbot-with-memory)
 - [RAG system](#rag-system)
-  - [Document ingestion](#document-ingestion)
-  - [Advanced retrieval](#advanced-retrieval)
 - [Pipeline](#pipeline)
-  - [Sentiment analysis pipeline](#sentiment-analysis-pipeline)
 
 ---
 
