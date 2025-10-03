@@ -1,0 +1,314 @@
+<svg viewBox="0 0 900 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="dataLoaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e1f5fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0288d1;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="classifierGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3e5f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8e24aa;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="conditionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff3e0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff9800;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="notificationGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffebee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e91e63;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="standardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f1f8e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#689f38;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="sendNotifGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffcdd2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d32f2f;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="processGenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c8e6c9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4caf50;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="buildReportGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dcedc8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8bc34a;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="800" fill="#0a0e27">
+    <animate attributeName="fill" values="#0a0e27;#1a1e37;#0a0e27" dur="6s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Grid pattern -->
+  <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="40" height="40" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.1"/>
+  </pattern>
+  <rect width="900" height="800" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22" font-weight="bold" fill="#fff">
+    Functional Pipeline Flow
+    <animate attributeName="fill" values="#fff;#4facfe;#f093fb;#fff" dur="4s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- DataLoader -->
+  <g id="dataLoader">
+    <rect x="370" y="80" width="160" height="50" rx="10" fill="url(#dataLoaderGrad)" filter="url(#shadow)"/>
+    <text x="450" y="110" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      DataLoader
+    </text>
+  </g>
+
+  <!-- Classifier -->
+  <g id="classifier">
+    <rect x="370" y="180" width="160" height="50" rx="10" fill="url(#classifierGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="450" y="210" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      Classifier
+    </text>
+  </g>
+
+  <!-- Condition (Diamond shape) -->
+  <g id="condition">
+    <path d="M 450 280 L 500 320 L 450 360 L 400 320 Z" fill="url(#conditionGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </path>
+    <text x="450" y="325" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="white">
+      Condition
+    </text>
+  </g>
+
+  <!-- NotificationPipeline -->
+  <g id="notificationPipeline">
+    <rect x="150" y="420" width="180" height="50" rx="10" fill="url(#notificationGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="240" y="450" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      NotificationPipeline
+    </text>
+  </g>
+
+  <!-- StandardProcessing -->
+  <g id="standardProcessing">
+    <rect x="570" y="420" width="180" height="50" rx="10" fill="url(#standardGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="660" y="450" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      StandardProcessing
+    </text>
+  </g>
+
+  <!-- SendNotification -->
+  <g id="sendNotification">
+    <rect x="150" y="550" width="180" height="50" rx="10" fill="url(#sendNotifGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="2s" repeatCount="indefinite"/>
+    </rect>
+    <text x="240" y="580" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      SendNotification
+    </text>
+  </g>
+
+  <!-- ProcessGeneral -->
+  <g id="processGeneral">
+    <rect x="570" y="520" width="180" height="50" rx="10" fill="url(#processGenGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="2.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="660" y="550" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      ProcessGeneral
+    </text>
+  </g>
+
+  <!-- BuildReport -->
+  <g id="buildReport">
+    <rect x="570" y="620" width="180" height="50" rx="10" fill="url(#buildReportGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="3s" repeatCount="indefinite"/>
+    </rect>
+    <text x="660" y="650" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      BuildReport
+    </text>
+  </g>
+
+  <!-- Animated connections -->
+  
+  <!-- DataLoader to Classifier -->
+  <line x1="450" y1="130" x2="450" y2="180" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <circle r="5" fill="#0288d1" filter="url(#glow)">
+    <animateMotion dur="0.8s" repeatCount="indefinite">
+      <mpath href="#path1"/>
+    </animateMotion>
+  </circle>
+  <path id="path1" d="M450,130 L450,180" fill="none"/>
+
+  <!-- Classifier to Condition -->
+  <line x1="450" y1="230" x2="450" y2="280" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <circle r="5" fill="#8e24aa" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="0.5s" repeatCount="indefinite">
+      <mpath href="#path2"/>
+    </animateMotion>
+  </circle>
+  <path id="path2" d="M450,230 L450,280" fill="none"/>
+
+  <!-- Condition to NotificationPipeline (True path) -->
+  <line x1="420" y1="340" x2="280" y2="420" stroke="#e91e63" stroke-width="3" opacity="0.3"/>
+  <text x="340" y="380" text-anchor="middle" font-family="Arial" font-size="12" fill="#e91e63" font-weight="bold">
+    True
+  </text>
+  <circle r="5" fill="#ff9800" filter="url(#glow)">
+    <animateMotion dur="1s" begin="1s" repeatCount="indefinite">
+      <mpath href="#path3"/>
+    </animateMotion>
+  </circle>
+  <path id="path3" d="M420,340 L280,420" fill="none"/>
+
+  <!-- Condition to StandardProcessing (False path) -->
+  <line x1="480" y1="340" x2="620" y2="420" stroke="#689f38" stroke-width="3" opacity="0.3"/>
+  <text x="560" y="380" text-anchor="middle" font-family="Arial" font-size="12" fill="#689f38" font-weight="bold">
+    False
+  </text>
+  <circle r="5" fill="#ff9800" filter="url(#glow)">
+    <animateMotion dur="1s" begin="1s" repeatCount="indefinite">
+      <mpath href="#path4"/>
+    </animateMotion>
+  </circle>
+  <path id="path4" d="M480,340 L620,420" fill="none"/>
+
+  <!-- NotificationPipeline to SendNotification -->
+  <line x1="240" y1="470" x2="240" y2="550" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="280" y="510" font-family="Arial" font-size="11" fill="#d32f2f" font-style="italic" font-weight="bold">
+    notification
+  </text>
+  <circle r="5" fill="#e91e63" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="1.5s" repeatCount="indefinite">
+      <mpath href="#path5"/>
+    </animateMotion>
+  </circle>
+  <path id="path5" d="M240,470 L240,550" fill="none"/>
+
+  <!-- StandardProcessing to ProcessGeneral -->
+  <line x1="660" y1="470" x2="660" y2="520" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="720" y="495" font-family="Arial" font-size="11" fill="#4caf50" font-style="italic" font-weight="bold">
+    classified_documents
+  </text>
+  <circle r="5" fill="#689f38" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="1.5s" repeatCount="indefinite">
+      <mpath href="#path6"/>
+    </animateMotion>
+  </circle>
+  <path id="path6" d="M660,470 L660,520" fill="none"/>
+
+  <!-- ProcessGeneral to BuildReport -->
+  <line x1="660" y1="570" x2="660" y2="620" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="720" y="595" font-family="Arial" font-size="11" fill="#8bc34a" font-style="italic" font-weight="bold">
+    processed_docs
+  </text>
+  <circle r="5" fill="#4caf50" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="2.5s" repeatCount="indefinite">
+      <mpath href="#path7"/>
+    </animateMotion>
+  </circle>
+  <path id="path7" d="M660,570 L660,620" fill="none"/>
+
+  <!-- Status indicators (pulsing rings) -->
+  <g id="status-indicators">
+    <circle cx="450" cy="105" r="90" fill="none" stroke="#0288d1" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="90;100;90" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="450" cy="205" r="90" fill="none" stroke="#8e24aa" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="90;100;90" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <circle cx="450" cy="320" r="70" fill="none" stroke="#ff9800" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="70;80;70" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Floating particles -->
+  <g id="particles">
+    <circle r="2" fill="#fff" opacity="0.3">
+      <animateMotion dur="15s" repeatCount="indefinite">
+        <mpath href="#particlePath"/>
+      </animateMotion>
+    </circle>
+    <circle r="1.5" fill="#4facfe" opacity="0.5">
+      <animateMotion dur="12s" repeatCount="indefinite">
+        <mpath href="#particlePath2"/>
+      </animateMotion>
+    </circle>
+  </g>
+
+  <!-- Hidden paths for particles -->
+  <path id="particlePath" d="M100,80 Q450,50 800,80 Q450,700 100,80" fill="none"/>
+  <path id="particlePath2" d="M800,700 Q450,750 100,700 Q450,100 800,700" fill="none"/>
+
+  <!-- Decision branches visual -->
+  <g id="branches" opacity="0.6">
+    <text x="200" y="400" text-anchor="middle" font-family="Arial" font-size="12" fill="#e91e63" font-style="italic">
+      urgent documents
+    </text>
+    <text x="700" y="400" text-anchor="middle" font-family="Arial" font-size="12" fill="#689f38" font-style="italic">
+      normal documents
+    </text>
+  </g>
+
+  <!-- Extended Legend for better visibility -->
+  <g id="legend" opacity="0.9">
+    <rect x="30" y="720" width="15" height="15" fill="#0288d1"/>
+    <text x="50" y="732" font-family="Arial" font-size="12" fill="#aaa">Data Flow</text>
+    
+    <rect x="140" y="720" width="15" height="15" fill="#8e24aa"/>
+    <text x="160" y="732" font-family="Arial" font-size="12" fill="#aaa">Classification</text>
+    
+    <rect x="270" y="720" width="15" height="15" fill="#ff9800"/>
+    <text x="290" y="732" font-family="Arial" font-size="12" fill="#aaa">Conditional Branching</text>
+    
+    <rect x="430" y="720" width="15" height="15" fill="#e91e63"/>
+    <text x="450" y="732" font-family="Arial" font-size="12" fill="#aaa">Urgent Notification Path</text>
+    
+    <rect x="30" y="750" width="15" height="15" fill="#689f38"/>
+    <text x="50" y="762" font-family="Arial" font-size="12" fill="#aaa">Standard Processing Path</text>
+    
+    <rect x="220" y="750" width="15" height="15" fill="#4caf50"/>
+    <text x="240" y="762" font-family="Arial" font-size="12" fill="#aaa">Document Processing</text>
+    
+    <rect x="400" y="750" width="15" height="15" fill="#8bc34a"/>
+    <text x="420" y="762" font-family="Arial" font-size="12" fill="#aaa">Report Generation</text>
+  </g>
+
+  <!-- Flow direction indicators -->
+  <g id="flow-indicators">
+    <polygon points="445,155 455,160 445,165" fill="#fff" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="445,255 455,260 445,265" fill="#fff" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" begin="0.5s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+</svg>

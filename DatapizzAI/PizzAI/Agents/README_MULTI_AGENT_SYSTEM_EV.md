@@ -1,4 +1,4 @@
-# Multi Agent System - DatapizzAI
+# Multi Agent System - Datapizza-AI
 
 Multi-agent system where different specialized agents collaborate to complete complex tasks. Each agent has specific competencies and can communicate with other agents through a messaging system.
 
@@ -33,6 +33,8 @@ Each agent has:
 
 ## System architecture
 
+![Multi-agent system diagram](./multi-agent-svg-animation.svg)
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │                    MultiAgentSystem                        │
@@ -59,7 +61,7 @@ Each agent has:
 ### Step 1: Specialized tool definition
 
 ```python
-from datapizzai.tools import Tool
+from datapizza.tools import Tool
 
 @Tool
 def advanced_calculate(expression: str, calculation_type: str = "base") -> str:
@@ -132,10 +134,12 @@ class MessageBus:
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
 
 load_dotenv()
+
+from datapizza.clients.openai import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
 
 class SpecializedAgent:
     def __init__(self, name: str, specialization: str, tools: List, 
@@ -147,8 +151,8 @@ class SpecializedAgent:
         self.memory = Memory()
         
         # Specialized OpenAI client
-        self.client = ClientFactory.create(
-            provider="openai",
+        
+        self.client = OpenAIClient(
             api_key=os.getenv("OPENAI_API_KEY"),
             model="gpt-4o",
             system_prompt=system_prompt

@@ -1,62 +1,37 @@
-# Guida completa: creare agenti AI con datapizzai
+# Guida completa: creare agenti AI con datapizza-ai
 
 ## Panoramica
 
-Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libreria `datapizzai` (>= 3.0.8). L'obiettivo è una comprensione chiara del funzionamento degli agenti e della loro interazione in sistemi complessi, con esempi minimali e pratici.
+Questa guida illustra come costruire e orchestrare agenti AI utilizzando la libreria `datapizza-ai` (>= 3.0.8). L'obiettivo è una comprensione chiara del funzionamento degli agenti e della loro interazione in sistemi complessi, con esempi minimali e pratici.
 
 ## Indice
 
 - [1. Creare un agente](#1-creare-un-agente)
 - [2. Eseguire un agente](#2-eseguire-un-agente)
-- [3. Sistema multi‑agente](#3-sistema-multi-agente)
+- [3. Sistema multi‑agente](#3-sistema-multiagente)
 - [4. Planning interval](#4-planning-interval)
 
 ## 1. Creare un agente
 
-Un agente è un'entità autonoma che utilizza un modello linguistico (LLM) per ragionare e usare strumenti (`tools`) per risolvere problemi.
-
-```mermaid
-graph TD;
-    subgraph Single Agent Architecture;
-        A["User Query"] --> B{"Agent (Brain)"};
-        B --> C["LLM Client (Reasoning)"];
-        B --> D["Tools (Actions)"];
-        B --> E["Memory (Context)"];
-        C --> B;
-        D --> B;
-        E --> B;
-        B --> F["Final Response"];
-    end;
-```
-
-La sua creazione richiede la configurazione di diversi parametri che ne definiscono il comportamento.
+Un agente è un'entità autonoma che utilizza un LLM per ragionare, usare strumenti (`tools`) e risolvere problemi. La sua creazione richiede la configurazione di diversi parametri che ne definiscono il comportamento.
 
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import OpenAIClient
-from datapizzai.cache import MemoryCache
-from datapizzai.tools import tool
-from datapizzai.agents import Agent  # in alternativa: from datapizzai.agents import Agent, ClientManager
 
 load_dotenv()
 
-# Cache in-process
-cache = MemoryCache()
+from datapizza.agents import Agent
+from datapizza.clients.openai import OpenAIClient
+from datapizza.tools import tool
 
-# Client OpenAI con cache
+# Client OpenAI
 openai_client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
-    temperature=0.3,
-    cache=cache,
+    system_prompt="Sei un assistente AI utile.",
+    temperature=0.7,
 )
-
-# Test veloce del client (la seconda chiamata è un cache hit)
-r1 = openai_client.invoke("Ciao!")
-print("Risposta 1:", r1.text)
-r2 = openai_client.invoke("Ciao!")
-print("Risposta 2 (cache hit):", r2.text)
 
 # Tool
 @tool
@@ -99,45 +74,139 @@ Una volta configurato, l'agente può essere eseguito in diverse modalità:
 
 ## 3. Sistema multi‑agente
 
-Per problemi complessi, è efficace combinare più agenti specializzati. Un agente "coordinatore" riceve la richiesta, la scompone e delega i sotto-compiti agli agenti più adatti.
-
-Questo si ottiene tramite il parametro `can_call`.
-
-```mermaid
-graph TD
-    subgraph Multi-Agent System
-        A["Complex User Query"] --> B{"Coordinator Agent"}
-        B -- Plan --> P((Plan))
-        B -- Task 1 --> C["text_analysis_tool"]:::tool
-        B -- Task 2 --> D["calculator_tool"]:::tool
-        C -- Result --> B
-        D -- Result --> B
-        B -- Synthesize --> E["Final Response"]
-    end
-
-classDef tool fill:#E6F7FF,stroke:#1890FF,color:#003A8C
-classDef agent fill:#FFF7E6,stroke:#FA8C16,color:#613400
-class B agent
-```
+Per orchestrare analisi complesse possiamo usare un "agente di agenti". Il coordinatore `StrategicPlanner` usa due specialisti come strumenti: `AnalystAgent` e `RiskAgent`. Il primo estrae KPI numerici con un'unica chiamata al tool `extract_kpi`, il secondo individua rischi operativi tramite `identify_risks`. Entrambi sono incapsulati in tool riutilizzabili che il planner invoca in sequenza per consegnare un report con **Sintesi KPI**, **Aree di Rischio** e una **Raccomandazione** finale.
+![Diagramma sistema multi-agente](./multi-agent-svg-animation.svg)
 
 ```python
-analyst_agent = Agent(name="Analyst_Agent", tools=[text_analysis_tool])
-calculator_agent = Agent(name="Calculator_Agent", tools=[calculator_tool])
+"""
+Sistema "Agente di Agenti" per Analisi Strategica con Datapizza-AI
+================================================================
+Un agente coordinatore (`StrategicPlanner`) orchestra due agenti
+specializzati (`AnalystAgent`, `RiskAgent`) usandoli come tools
+per produrre un'analisi di business completa.
+"""
+import os
+import re
+from dotenv import load_dotenv
 
-coordinator = Agent(name="Coordinator_Agent", can_call=[analyst_agent, calculator_agent])
-response = coordinator.run("Analizza il testo 'AI is powerful' e calcola 1024 / 256")
+
+# --- 1. Configurazione e Client Condiviso ---
+load_dotenv()
+
+from datapizza.agents import Agent
+from datapizza.clients import ClientFactory
+from datapizza.tools import tool
+shared_client = ClientFactory.create(
+    provider="openai",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o-mini",
+    temperature=0.0,
+)
+
+# --- 2. Tool e Agenti Specializzati ---
+
+@tool
+def extract_kpi(context: str) -> str:
+    """Estrae KPI e metriche quantitative dal testo."""
+    patterns = {
+        'Fatturato': r'(?:revenue|fatturato)[:\s]*([€$]?\d+[\d,.]*[MBK]?)',
+        'Crescita': r'(\d+[\d,.]*%)\s*(?:growth|yoy)',
+    }
+    metrics = [f"{n}: {m.group(1)}" for n, p in patterns.items() if (m := re.search(p, context, re.IGNORECASE))]
+    return " | ".join(metrics) if metrics else "Nessun KPI numerico rilevato."
+
+@tool
+def identify_risks(context: str) -> str:
+    """Identifica rischi basandosi su parole chiave nel testo."""
+    risk_map = {'Compliance': ['gdpr', 'normativa'], 'Budget': ['budget', 'costo']}
+    risks = [name for name, keywords in risk_map.items() if any(k in context.lower() for k in keywords)]
+    return " | ".join(risks) if risks else "Nessun rischio operativo evidente."
+
+# Creazione degli Agenti Specializzati con PROMPT ANTI-LOOP
+analyst_agent = Agent(
+    name="AnalystAgent",
+    client=shared_client,
+    # CORREZIONE: Prompt che enfatizza l'azione singola e terminale.
+    system_prompt=(
+         "Chiama ESATTAMENTE UNA VOLTA il tool `extract_kpi(context=<<TESTO>>)`.\n"
+          "Subito dopo, emetti un UNICO messaggio di testo con ESATTAMENTE il contenuto restituito dal tool.\n"
+          "È VIETATO richiamare altri tool dopo il primo.\n"
+          "Formato d'uscita:\n"
+          "{{RISULTATO_TOOL}}\n"
+    ),
+    tools=[extract_kpi],
+    terminate_on_text=True, max_steps=3, # max_steps=2 è sufficiente: 1 per pensare, 1 per rispondere.
+)
+
+risk_agent = Agent(
+    name="RiskAgent",
+    client=shared_client,
+    # CORREZIONE: Prompt che enfatizza l'azione singola e terminale.
+    system_prompt=(
+        "Chiama ESATTAMENTE UNA VOLTA il tool `identify_risks(context=<<TESTO>>)`.\n"
+        "Subito dopo EMETTI un UNICO messaggio di testo che contiene ESATTAMENTE "
+        "l'output del tool. Poi FERMATI. È VIETATO richiamare altri tool."
+    ),
+    tools=[identify_risks],
+    terminate_on_text=True, max_steps=3,
+)
+
+# --- 3. Tool che Incapsulano gli Agenti Specializzati ---
+@tool
+def run_kpi_analysis(query: str) -> str:
+    """Delega l'analisi dei KPI all'agente specializzato (AnalystAgent)."""
+    print(f"  -> Delegating to AnalystAgent...")
+    result = analyst_agent.run(query)
+    return result or "Analisi KPI non completata."
+
+@tool
+def run_risk_assessment(query: str) -> str:
+    """Delega la valutazione dei rischi all'agente specializzato (RiskAgent)."""
+    print(f"  -> Delegating to RiskAgent...")
+    result = risk_agent.run(query)
+    return result or "Valutazione rischi non completata."
+
+# --- 4. Agente Coordinatore ("Agente di Agenti") ---
+strategic_planner_agent = Agent(
+    name="StrategicPlanner",
+    client=shared_client,
+    system_prompt=(
+        "Sei un consulente strategico. Orchestra un'analisi di business seguendo questi passi:\n"
+        "1. Invoca `run_kpi_analysis` sulla richiesta originale per ottenere le metriche.\n"
+        "2. Invoca `run_risk_assessment` sulla richiesta originale per identificare i rischi.\n"
+        "3. Sintetizza i risultati in un report finale con **Sintesi KPI**, **Aree di Rischio**, e una **Raccomandazione** strategica di una riga."
+    ),
+    tools=[run_kpi_analysis, run_risk_assessment],
+    terminate_on_text=True,
+    max_steps=5,
+)
+
+# --- 5. Esecuzione della Demo ---
+if __name__ == "__main__":
+    scenarios = [
+        "Prodotto fintech con crescita 30% YoY, fatturato 2M€ e necessità di compliance GDPR.",
+        "Adozione AI per supporto: costo 500K€, ROI 180%, deadline 6 mesi.",
+    ]
+
+    for scenario in scenarios:
+        print(f"{'-'*60}\n▶️  Query per lo Strategic Planner: \"{scenario}\"")
+        final_report = strategic_planner_agent.run(scenario)
+        print(f"\n✅ Report Finale Generato:\n{final_report or 'Impossibile generare il report finale.'}\n")
 ```
 
-- `can_call` (`List[Agent]`): Rende gli agenti nella lista disponibili come "strumenti" per il coordinatore, che può quindi invocarli passandogli un compito specifico.
+### Note di orchestrazione
 
-```
+- I prompt degli agenti specializzati forzano una singola invocazione del rispettivo tool per evitare loop.
+- `run_kpi_analysis` e `run_risk_assessment` trasformano gli agenti in strumenti componibili che il planner può richiamare come funzioni.
+- Un valore basso di `max_steps` limita il numero di turni e contiene costi e tempi di esecuzione.
 
 ## 4. Planning interval
 
 Con `planning_interval=N` l’agente rivede il piano ogni N passi. È utile per task lunghi/ramificati.
 
 ```python
-from datapizzai.agents import Agent
+from datapizza.agents import Agent
+
 
 agent = Agent(
     client=client,
@@ -162,7 +231,3 @@ flowchart LR
     S6 --> P2[Revisione Piano]
     P2 --> E[End]
 ```
-
-## Informazioni aggiuntive
-
-- Il file `agent_complete.py` contiene implementazioni complete e scenari avanzati.

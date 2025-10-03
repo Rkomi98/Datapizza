@@ -5,22 +5,20 @@ Questa guida illustra come implementare un sistema di Retrieval-Augmented Genera
 ## Indice
 
 - [Panoramica del flusso RAG](#panoramica-del-flusso-rag)
-- [1. Setup iniziale](#1-setup-iniziale) ⚠️ **Richiede Qdrant server attivo**
-- [2. Parsing dei documenti](#2-parsing-dei-documenti)
-  - [TextParser (raccomandato per iniziare)](#textparser-raccomandato-per-iniziare)
-  - [AzureParser (per PDF complessi)](#azureparser-per-pdf-complessi)
-- [3. Tree builder (facoltativo)](#3-tree-builder-facoltativo)
-- [4. Captioning delle immagini e tabelle](#4-captioning-delle-immagini-e-tabelle)
-- [5. Splitting del testo](#5-splitting-del-testo)
-- [6. Metatagger](#6-metatagger)
-- [7. Embedding generation](#7-embedding-generation)
-  - [NodeEmbedder](#nodeembedder)
-  - [ClientEmbedder (per le query)](#clientembedder-per-le-query)
-- [8. Vector store](#8-vector-store)
-- [9. Rewriter (facoltativo)](#9-rewriter-facoltativo)
-- [10. Reranking](#10-reranking)
-- [11. Prompt templates (facoltativo)](#11-prompt-templates-facoltativo)
-- [12. Esempio completo end-to-end](#12-esempio-completo-end-to-end)
+- [Setup iniziale](#setup-iniziale) ⚠️ **Richiede Qdrant server attivo**
+- [Pipeline di ingestion](#pipeline-di-ingestion)
+  - [Parsing dei documenti](#parsing-dei-documenti)
+  - [Tree builder (opzionale)](#tree-builder-opzionale)
+  - [Captioning di immagini e tabelle](#captioning-di-immagini-e-tabelle)
+  - [Splitting del testo](#splitting-del-testo)
+  - [Metatagger](#metatagger)
+  - [Generazione degli embedding](#generazione-degli-embedding)
+  - [Persistenza nel vector store](#persistenza-nel-vector-store)
+- [Pipeline di retrieval](#pipeline-di-retrieval)
+  - [Riscrittura della query (facoltativa)](#riscrittura-della-query-facoltativa)
+  - [Embedding della query e ricerca](#embedding-della-query-e-ricerca)
+  - [Reranking](#reranking)
+- [Prompt template (facoltativo)](#prompt-template-facoltativo)
 
 ## Panoramica del flusso RAG
 
@@ -29,7 +27,7 @@ Questa guida illustra come implementare un sistema di Retrieval-Augmented Genera
 docker run -p 6333:6333 qdrant/qdrant
 ```
 
-Il sistema RAG con datapizzai è composto dai seguenti componenti principali:
+Il sistema RAG con datapizza-ai è composto dai seguenti componenti principali:
 
 ```mermaid
 graph TD
@@ -53,7 +51,7 @@ graph TD
     J -.->|"recupera documenti<br/>rilevanti"| N
 ```
 
-## 1. Setup iniziale
+## Setup iniziale
 
 ### Prerequisiti di sistema
 
@@ -67,32 +65,22 @@ docker run -p 6333:6333 qdrant/qdrant
 
 ### Dipendenze Python
 
-Prima di iniziare, assicurarsi di avere installato datapizzai e le dipendenze necessarie:
+Prima di iniziare, assicurarsi di avere installato datapizza-ai e le dipendenze necessarie:
 
 ```python
-from datapizzai.modules.parsers import AzureParser
-from datapizzai.modules.splitters import NodeSplitter
-from datapizzai.modules.captioners import LLMCaptioner
-from datapizzai.modules.metatagger import KeywordMetatagger
-from datapizzai.modules.treebuilder import LLMTreeBuilder
-from datapizzai.modules.rerankers import CohereReranker
-from datapizzai.modules.rewriters import ToolRewriter
-from datapizzai.modules.prompt import ChatPromptTemplate
-from datapizzai.embedders import ClientEmbedder, NodeEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.clients import OpenAIClient
 ```
 
-## 2. Parsing dei documenti
+## Pipeline di ingestion
+
+### Parsing dei documenti
 
 I parser convertono testi e documenti in strutture gerarchiche di nodi.
 
-### TextParser (raccomandato per iniziare)
+#### TextParser (raccomandato per iniziare)
 
 Il `TextParser` è il parser più semplice per testi puri, perfetto per iniziare:
 
 ```python
-from datapizzai.modules.parsers.text_parser import TextParser, parse_text
 
 # Metodo 1: Usando la classe
 parser = TextParser()
@@ -115,12 +103,11 @@ document_node = parse_text(text)
 
 **Output:** oggetto `Node` con struttura `DOCUMENT` → `PARAGRAPH` → `SENTENCE`.
 
-### AzureParser (per PDF complessi)
+#### AzureParser (per PDF complessi)
 
 Per documenti PDF con layout complessi, tabelle e immagini:
 
 ```python
-from datapizzai.modules.parsers import AzureParser
 import os
 from dotenv import load_dotenv
 
@@ -142,16 +129,16 @@ document_node = parser("document.pdf")
 - OCR di documenti scansionati
 - Analisi immagini integrate
 
-## 3. Tree builder (facoltativo)
+### Tree builder (opzionale)
 
 Il tree builder serve quando parti da testo libero e NON hai usato un parser (sezione 2): crea o ristruttura una gerarchia di nodi a partire dal testo, così da sfruttare al meglio i componenti successivi della pipeline (captioner, splitter, metatagger, embedder). È facoltativo perché, se hai già usato un parser (es. `TextParser` o `AzureParser`), disponi già di una struttura a nodi.
 
 ```python
-from datapizzai.clients import OpenAIClient
-from datapizzai.modules.treebuilder import LLMTreeBuilder
 import os
 from dotenv import load_dotenv
 load_dotenv()
+
+from datapizza.clients.openai import OpenAIClient
 
 # Configurazione client LLM
 client = OpenAIClient(
@@ -166,13 +153,8 @@ document_node = tree_builder.build_tree(text)
 print(document_node)
 ```
 
-**Parametri:**
-- `client`: client LLM (OpenAI, Google, ecc)
-
-**Metodi principali:**
-- `build_tree(text)`: refactor di un testo usando il client scelto.
-- `invoke(file_path)`: legge un file e lo sistema (questo per un file accessibile tramite path)
-## 4. Captioning delle immagini e tabelle
+Il componente accetta un client LLM (`client`) e mette a disposizione due metodi principali: `build_tree(text)` per ristrutturare direttamente testo libero e `invoke(file_path)` per lavorare su file disponibili su disco.
+### Captioning di immagini e tabelle
 
 Il captioner genera descrizioni testuali per elementi multimediali.
 
@@ -188,15 +170,9 @@ captioner = LLMCaptioner(
 captioned_node = captioner(document_node)
 ```
 
-**Parametri:**
-- `client`: client LLM per generare le caption
-- `max_workers`: numero massimo di worker paralleli
-- `system_prompt_figure`: prompt per descrivere le immagini
-- `system_prompt_table`: prompt per descrivere le tabelle
+Il captioner usa il client LLM fornito (`client`) e permette di parallelizzare l'elaborazione tramite `max_workers`. I prompt `system_prompt_figure` e `system_prompt_table` personalizzano lo stile delle descrizioni, mentre il componente individua automaticamente i nodi `FIGURE` e `TABLE` e ne produce la versione testuale.
 
-**Funzionalità:** il captioner identifica automaticamente nodi di tipo `FIGURE` e `TABLE` e genera descrizioni testuali.
-
-## 5. Splitting dei nodi
+### Splitting del testo
 
 Dato che stiamo lavorando con nodi, usa il NodeSplitter: divide i nodi in sotto‑nodi/chunk adatti all'embedding.
 
@@ -209,18 +185,13 @@ splitter = NodeSplitter(
 chunks = splitter(document_node)
 ```
 
-**Parametri:**
-- `max_char`: lunghezza massima di ciascun chunk in caratteri
-- `overlap`: numero di caratteri di sovrapposizione tra chunk consecutivi
+`max_char` definisce la lunghezza massima di ciascun chunk, mentre `overlap` controlla la porzione condivisa fra chunk consecutivi. Il risultato è una lista di oggetti `Chunk` con ID e metadati già pronti per gli step successivi.
 
-**Output:** lista di oggetti `Chunk` con ID univoci e metadati.
-
-## 6. Metatagger
+### Metatagger
 
 Il metatagger estrae parole chiave e le aggiunge ai metadati dei chunk per migliorare retrieval e categorizzazione.
 
 ```python
-from datapizzai.modules.metatagger import KeywordMetatagger
 
 metatagger = KeywordMetatagger(
     client=client,                 # Client LLM per l'estrazione
@@ -238,24 +209,13 @@ metatagger = KeywordMetatagger(
 tagged_chunks = metatagger(chunks)
 ```
 
-**Parametri:**
-- `client (Client)`: client LLM per l'estrazione delle keyword
-- `max_workers (int)`: thread concorrenti (default: 3)
-- `system_prompt (str, opzionale)`: istruzioni per l'estrazione
-- `user_prompt (str, opzionale)`: contesto utente aggiuntivo
-- `keyword_name (str)`: nome del campo metadata per le keyword (default: `"keywords"`)
+Il componente sfrutta un client LLM (`client`) e può essere parallelizzato con `max_workers`. I prompt `system_prompt` e `user_prompt` guidano l'estrazione, mentre `keyword_name` definisce il campo metadata che raccoglie le keyword. L'elaborazione mantiene invariati contenuto e ID dei chunk e supporta output validati tramite modelli Pydantic.
 
-**Funzionalità:**
-- Elaborazione concorrente dei chunk
-- Estrazione strutturata con modelli Pydantic
-- Prompt e nome campo metadata personalizzabili
-- Preserva contenuto e ID originali dei chunk
-
-## 7. Embedding generation
+### Generazione degli embedding
 
 Gli embedder aggiungono i vettori ai chunks.
 
-### NodeEmbedder
+#### NodeEmbedder
 
 ```python
 # Configurazione dell'embedder
@@ -270,14 +230,10 @@ embedder = NodeEmbedder(
 embedded_chunks = embedder(tagged_chunks)
 ```
 
-**Parametri:**
-- `client`: client per generare embedding
-- `model_name`: nome del modello di embedding
-- `embedding_name`: nome identificativo per l'embedding
-- `batch_size`: numero di chunk da processare per batch
+Il `NodeEmbedder` utilizza il client configurato (`client`) con il modello specificato (`model_name`). Facoltativamente puoi dare un alias (`embedding_name`) e regolare il throughput tramite `batch_size`.
 
 
-## 8. Vector store
+### Persistenza nel vector store
 
 Il vector store memorizza i chunks con i loro vettori per un retrieval efficiente. In questa guida manteniamo la sezione essenziale per non duplicare la documentazione dei moduli.
 
@@ -286,7 +242,6 @@ Esempio minimo con Qdrant, se non l'hai ancora attivato fai così:
 # 1. Setup Qdrant
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
-from datapizzai.vectorstores import QdrantVectorstore
 
 client = QdrantClient(host="localhost", port=6333)
 client.create_collection(
@@ -299,47 +254,37 @@ E poi per gestire i chunks su Qdrant fai:
 ```python
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
 vectorstore.add(embedded_chunks, collection_name="documents")
-client = OpenAIClient(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="text-embedding-3-small")
-# Crea un embedding per la query con lo stesso client
-query_vector = client.embed("Data visualization")
-
-results = vectorstore.search(
-    query_vector=query_vector,
-    collection_name="documents",
-)
 ```
 
-## 9. Rewriter (facoltativo)
+```
 
-I rewriter sono componenti di pipeline che trasformano e migliorano le query dell'utente usando modelli linguistici e tool. Aiutano a ottimizzare le query per ottenere risultati di ricerca e retrieval migliori, riformulando, espandendo o ristrutturando l'input.
+Una volta popolato il vector store, la pipeline di retrieval può interrogare la collezione per rispondere alle richieste utente.
 
-Quando usarli:
-- Reframing della domanda per maggior copertura informativa
-- Espansione con sinonimi/termini tecnici o entità correlate
-- Normalizzazione e disambiguazione della query (es. acronimi)
-- Preparazione di query compatibili con tool e motori di ricerca
+## Pipeline di retrieval
 
-Caratteristiche comuni:
-- Input: stringa della query (opzionalmente con memoria/contesto)
-- Output: stringa riscritta o struttura con campi specifici
-- Modalità: sincrona (`run`) o asincrona (`a_run`)
+### Riscrittura della query (facoltativa)
 
-Esempio: ToolRewriter
+Un rewriter consente di trasformare richieste vaghe o colloquiali in query mirate al retrieval. È utile quando serve aggiungere sinonimi, normalizzare termini, espandere l'ambito o orchestrare tool esterni prima della ricerca.
 
 ```python
-from datapizzai.modules.rewriters import ToolRewriter
-from datapizzai.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
+
 
 client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 rewriter = ToolRewriter(
     client=client,
-    system_prompt="Scegli e usa i tool solo se migliorano il recupero dei documenti.",
+    system_prompt=(
+        "Agisci come rewriter per una pipeline RAG sulla documentazione Datapizza-AI. "
+        "Ricevi domande confuse, estrai l'intento principale e produci una query "
+        "adatta alla ricerca nel vector store, aggiungendo se utile parole chiave "
+        "rilevanti (es. parser, splitter, vector store). Usa i tool solo quando "
+        "possono recuperare contesto aggiuntivo utile alla risposta."
+    ),
 )
 
-original_query = "Ciao, come stai? Sai per caso come funziona il machine learning?"
+original_query = "Ehi, quella roba della pizza AI spacca i PDF da sola o è magia?"
+
 # Uso asincrono (consigliato)
 # rewritten_query = await rewriter.a_run(original_query)
 
@@ -348,15 +293,34 @@ rewritten_query = rewriter.run(original_query, memory=None)
 print(rewritten_query)
 ```
 
-## 10. Reranking -- da sistemare quando avrò accesso a Azure
+### Embedding della query e ricerca
+
+Dopo la riscrittura, genera l'embedding con lo stesso client usato in ingestion e interroga il vector store.
+
+```python
+from datapizza.clients.openai import OpenAIClient
+
+
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="text-embedding-3-small",
+)
+
+query_vector = client.embed(rewritten_query)
+
+results = vectorstore.search(
+    query_vector=query_vector,
+    collection_name="documents",
+)
+```
+
+### Reranking -- da sistemare quando avrò accesso a Azure
 
 Il reranker riordina i risultati del retrieval per relevanza.
 
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.embedders import ClientEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
 
 load_dotenv()
 
@@ -372,35 +336,26 @@ query = "data visualization applications"
 query_embedder = ClientEmbedder(client=client, model_name="text-embedding-3-small")
 query_embedding = await query_embedder.a_run(query)
 
-# Usa DatapizzAI vectorstore
+# Usa Datapizza-AI vectorstore
 retrieved_chunks = vectorstore.search(
     query_vector=query_embedding,  # alcune versioni usano `query_vector`
     collection_name="documents", 
 )
 
 # Reranking
-final_chunks = reranker.a_run({
+final_chunks = await reranker.a_run({
     "query": query,
     "documents": retrieved_chunks
 })
 ```
 
-**Parametri:**
-- `api_key`: chiave API Cohere
-- `endpoint`: endpoint del servizio
-- `top_n`: numero massimo di documenti da restituire
-- `threshold`: soglia minima di rilevanza
+Il componente richiede credenziali Cohere (`api_key`, `endpoint`) e ti permette di definire `top_n` e, se esposto dalla versione del modulo, eventuali soglie di punteggio. Ricorda che Cohere necessita di un `model` valido (es. `rerank-english-v3.0`): se il wrapper non offre questo parametro valuta `TogetherReranker` con `model` esplicito o il client Cohere SDK. L'integrazione è pensata per deployment Azure.
 
-Suggerimenti e troubleshooting:
-- Cohere richiede un `model` valido (es. `rerank-english-v3.0`). La versione attuale di `CohereReranker` può non esporre il parametro modello: in tal caso usa `TogetherReranker` con `model` esplicito oppure il client Cohere SDK diretto. Il modulo Cohere è pensato per essere usato con account Azure.
-
-## 11. Prompt templates (facoltativo)
+### Prompt template (facoltativo)
 
 I template strutturano l'input per il modello di generazione.
 
 ```python
-from datapizzai.modules.prompt import ChatPromptTemplate
-from datapizzai.type import Chunk
 # Create RAG prompt template
 template = ChatPromptTemplate(
     user_prompt_template="Question: {{ user_prompt }}\nPlease answer based on the provided context.",

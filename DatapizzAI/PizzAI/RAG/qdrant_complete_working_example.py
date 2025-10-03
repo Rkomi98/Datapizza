@@ -33,8 +33,8 @@ def create_vectorstore_with_collection():
     print("🔧 Creazione QdrantVectorstore...")
     
     # Importa le classi necessarie
-    from datapizzai.vectorstores import QdrantVectorstore, VectorConfig, Distance
-    from datapizzai.type import EmbeddingFormat
+    from datapizza.vectorstores import QdrantVectorstore, VectorConfig, Distance
+    from datapizza.type import EmbeddingFormat
     
     # 1. Crea il vectorstore (SENZA api_key per locale)
     vectorstore = QdrantVectorstore(
@@ -90,7 +90,7 @@ def create_sample_embedded_chunks():
     """
     print("📄 Creazione chunk di esempio...")
     
-    from datapizzai.type import Chunk, DenseEmbedding
+    from datapizza.type import Chunk, DenseEmbedding
     
     # Crea chunk con embeddings simulati
     # In un caso reale, useresti un embedder vero come NodeEmbedder o ClientEmbedder
@@ -100,7 +100,7 @@ def create_sample_embedded_chunks():
     embedded_chunks = [
         Chunk(
             id=doc_ids[0],  # UUID valido
-            text="DatapizzAI è una libreria Python per costruire applicazioni AI avanzate",
+            text="DatapizzaAI è una libreria Python per costruire applicazioni AI avanzate",
             embeddings=[DenseEmbedding(
                 name="dense",  # Nome deve corrispondere alla config del vettore
                 vector=np.random.rand(384).tolist()  # Embedding simulato
@@ -172,7 +172,7 @@ def demo_complete_workflow():
         results = vectorstore.search(
             query_vector=query_vector,  # Era query_embedding nel tuo codice originale
             collection_name=collection_name,
-            k=3  # Parametro corretto nella libreria datapizzai
+            k=3  # Parametro corretto nella libreria datapizza
         )
         
         print(f"✅ Ricerca completata! Trovati {len(results)} risultati:\n")
@@ -228,8 +228,8 @@ def your_fixed_original_code():
     print("🔧 IL TUO CODICE ORIGINALE CORRETTO:")
     print("="*60)
     
-    from datapizzai.vectorstores import QdrantVectorstore, VectorConfig, Distance
-    from datapizzai.type import EmbeddingFormat
+    from datapizza.vectorstores import QdrantVectorstore, VectorConfig, Distance
+    from datapizza.type import EmbeddingFormat
     import os
 
     # Crea vectorstore SENZA api_key per locale

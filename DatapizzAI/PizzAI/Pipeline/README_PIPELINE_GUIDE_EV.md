@@ -1,6 +1,6 @@
-# DatapizzAI pipeline guide
+# Datapizza-AI pipeline guide
 
-This guide provides practical examples for using the three pipeline types available in DatapizzAI:
+This guide provides practical examples for using the three pipeline types available in Datapizza-AI:
 
 - **IngestionPipeline**: for processing and ingesting documents into vector stores
 - **DagPipeline**: for creating dependency graphs between components  
@@ -13,28 +13,21 @@ This guide provides practical examples for using the three pipeline types availa
   - [Main components](#main-components)
   - [Practical example](#practical-example)
   - [Flow diagram](#flow-diagram)
-  - [Complete script](#complete-script)
 - [2. Dag pipeline](#2-dag-pipeline)
   - [Description](#description-1)
   - [Main features](#main-features)
   - [Practical example](#practical-example-1)
   - [Flow diagram](#flow-diagram-1)
-  - [Complete script](#complete-script-1)
 - [3. Functional pipeline](#3-functional-pipeline)
   - [Description](#description-2)
   - [Advanced features](#advanced-features)
   - [Practical example](#practical-example-2)
   - [Flow diagram](#flow-diagram-2)
-  - [Complete script](#complete-script-2)
+  - [YAML configuration example](#yaml-configuration-example)
+  - [Usage from Python](#usage-from-python)
 - [YAML configuration](#yaml-configuration)
   - [Example for DagPipeline](#example-for-dagpipeline)
-  - [Example for FunctionalPipeline](#example-for-functionalpipeline)
 - [Pipeline comparison](#pipeline-comparison)
-- [Best practices](#best-practices)
-  - [Pipeline selection](#pipeline-selection)
-  - [Error handling](#error-handling)
-  - [Performance](#performance)
-- [Complete examples](#complete-examples)
 
 ## 1. Ingestion pipeline
 
@@ -54,15 +47,11 @@ The IngestionPipeline is designed to process documents and ingest them into vect
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.pipeline import IngestionPipeline
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import NodeEmbedder
-from datapizzai.clients import OpenAIClient
-from datapizzai.core.models import PipelineComponent
 
 load_dotenv()
 
-# Custom component to read text files
+from datapizza.clients.openai import OpenAIClient
+
 class FileReader(PipelineComponent):
     def _run(self, file_path: str, **kwargs) -> str:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -72,39 +61,34 @@ class FileReader(PipelineComponent):
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
 
-# 1. Configure client for embeddings  
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"), 
-    model="text-embedding-3-small"  # Model for embeddings
+    model="text-embedding-3-small"
 )
 
-# 2. Define pipeline components in execution order
 components = [
-    FileReader(),          # Reads file content
+    FileReader(),
     TextSplitter(
-        max_char=200,      # Maximum chunk size in characters
-        overlap=50         # Overlap between consecutive chunks
+        max_char=200,
+        overlap=50
     ),
     NodeEmbedder(
-        client=client,                    # Client to generate embeddings
-        model_name="text-embedding-3-small"  # Embedding model name
+        client=client,
+        model_name="text-embedding-3-small"
     )
 ]
 
-# 3. Create pipeline without vector store (returns processed chunks)
 pipeline = IngestionPipeline(
-    modules=components,    # List of components to execute
-    vector_store=None,     # None = doesn't save automatically
-    collection_name=None   # Collection name in vector store (not used if vector_store=None)
+    modules=components,
+    vector_store=None,
+    collection_name=None
 )
 
-# 4. Execute processing with optional metadata
 chunks = pipeline.run(
-    file_path="document.txt",           # Path to document to process
-    metadata={"source": "example"}     # Additional metadata to attach to chunks (OPTIONAL)
+    file_path="document.txt",
+    metadata={"source": "example"}
 )
 
-# Result is a list of Chunk objects with text, embeddings and metadata
 print(f"Generated {len(chunks)} chunks from document")
 ```
 
@@ -116,17 +100,8 @@ print(f"Generated {len(chunks)} chunks from document")
 
 ### Flow diagram
 
-```mermaid
-graph TD
-    A[Document] -->|file path| B[TextParser]
-    B -->|raw text| C[RecursiveSplitter]
-    C -->|text chunks| D[ClientEmbedder]
-    D -->|chunks + embeddings| E[Vector Store]
-```
+![Ingestion Pipeline Flow](ingestion-pipeline-flow.svg)
 
-### Complete script
-
-See `examples/ingestion_example.py` for a complete working example.
 
 ## 2. Dag pipeline
 
@@ -144,10 +119,7 @@ The DagPipeline allows creating dependency graphs (DAG - Directed Acyclic Graph)
 ### Practical example
 
 ```python
-from datapizzai.pipeline import DagPipeline
-from datapizzai.core.models import PipelineComponent
 
-# 1. Define all graph components
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
         return {"reviews": ["Excellent product!", "I don't like it", "Average"]}
@@ -209,18 +181,14 @@ DETAILS:
     async def _a_run(self, sentiment_results, statistics, metadata, **kwargs):
         return self._run(sentiment_results=sentiment_results, statistics=statistics, metadata=metadata, **kwargs)
 
-# 2. Create DAG pipeline
 pipeline = DagPipeline()
 
-# 3. Register nodes
 pipeline.add_module("data_loader", DataLoader())
 pipeline.add_module("sentiment_analyzer", SentimentAnalyzer())
 pipeline.add_module("statistics_calculator", StatisticsCalculator())
 pipeline.add_module("metadata_extractor", MetadataExtractor())
 pipeline.add_module("report_generator", ReportGenerator())
 
-# 4. Define connections (as in the diagram)
-# DataLoader -> SentimentAnalyzer
 pipeline.connect(
     source_node="data_loader",
     target_node="sentiment_analyzer",
@@ -228,7 +196,6 @@ pipeline.connect(
     target_key="reviews"
 )
 
-# SentimentAnalyzer -> StatisticsCalculator
 pipeline.connect(
     source_node="sentiment_analyzer",
     target_node="statistics_calculator",
@@ -236,7 +203,6 @@ pipeline.connect(
     target_key="sentiment_results"
 )
 
-# DataLoader -> MetadataExtractor
 pipeline.connect(
     source_node="data_loader",
     target_node="metadata_extractor",
@@ -244,7 +210,6 @@ pipeline.connect(
     target_key="reviews"
 )
 
-# Converge into ReportGenerator
 pipeline.connect(
     source_node="sentiment_analyzer",
     target_node="report_generator",
@@ -266,32 +231,14 @@ pipeline.connect(
     target_key="metadata"
 )
 
-# 5. Execute pipeline
 results = pipeline.run({})
 print(results["report_generator"]["final_report"])
 ```
 
 ### Flow diagram
 
-```mermaid
-graph TD
-    A[DataLoader] -->|reviews| B[SentimentAnalyzer]
-    B -->|sentiment_results| C[StatisticsCalculator]
-    A -->|reviews| D[MetadataExtractor]
-    B -->|sentiment_results| E[ReportGenerator]
-    C -->|statistics| E
-    D -->|metadata| E
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style D fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-    style E fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
-```
+![DAG Pipeline Flow](dag-pipeline-flow.svg)
 
-### Complete script
-
-See `examples/dag_example.py` for a sentiment analysis example with dependency graph.
 
 ## 3. Functional pipeline
 
@@ -309,10 +256,7 @@ The FunctionalPipeline offers a functional approach to pipeline construction wit
 ### Practical example
 
 ```python
-from datapizzai.pipeline import FunctionalPipeline, Dependency
-from datapizzai.core.models import PipelineComponent
 
-# 1. Define all required components
 class DataLoader(PipelineComponent):
     def _run(self, **kwargs):
         documents = [
@@ -326,13 +270,11 @@ class DataLoader(PipelineComponent):
 
 class Classifier(PipelineComponent):
     def _run(self, documents, **kwargs):
-        # Accepts either dict {"documents": [...]} or a list of dicts
         if isinstance(documents, dict) and "documents" in documents:
             documents = documents["documents"]
         elif documents is None:
             documents = []
         
-        # Classify by urgency
         urgent_docs = [d for d in documents if isinstance(d, dict) and d.get("priority") == "urgent"]
         has_urgent = len(urgent_docs) > 0
         
@@ -394,13 +336,11 @@ DETAILS:
     async def _a_run(self, classified_documents, **kwargs):
         return self._run(classified_documents=classified_documents, **kwargs)
 
-# 2. Notification sub-pipeline (urgent documents)
 notification_pipeline = FunctionalPipeline().run(
     name="send_notification",
     node=NotificationSender()
 )
 
-# 3. Standard processing sub-pipeline (normal documents)
 standard_processing_pipeline = (
     FunctionalPipeline()
     .foreach(
@@ -416,7 +356,6 @@ standard_processing_pipeline = (
     )
 )
 
-# 4. Main pipeline with conditional branching
 pipeline = (
     FunctionalPipeline()
     .run(name="load_data", node=DataLoader())
@@ -429,32 +368,12 @@ pipeline = (
     )
 )
 
-# Execute
 results = pipeline.execute()
 ```
 
 ### Flow diagram
 
-```mermaid
-graph TD
-    A[DataLoader] --> B[Classifier]
-    B --> C{Condition}
-    C -->|True| D[NotificationPipeline]
-    C -->|False| E[StandardProcessing]
-    
-    D --> F[SendNotification]
-    E --> G[ProcessGeneral]
-    G --> H[BuildReport]
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#ffebee
-    style E fill:#f1f8e9
-    style F fill:#ffebee
-    style G fill:#f1f8e9
-    style H fill:#e8f5e8
-```
+![Functional Pipeline Flow](functional-pipeline-flow.svg)
 
 ### Data flow notes
 
@@ -462,76 +381,77 @@ graph TD
 - **Input handling**: components should handle both dictionaries and lists as input to be flexible
 - **Context access**: use `lambda ctx: ctx.get("node_name", {}).get("key")` to access data in branching
 
-### Complete script
 
-See `examples/functional_example.py` for a complete example with branching and foreach.
+### YAML configuration example
 
-### Complete YAML example
+Example YAML configuration for the functional pipeline with conditional branching:
 
-Loading FunctionalPipeline from external YAML configuration:
+```yaml
+name: "document_processing_pipeline"
+description: "Functional pipeline with conditional branching"
+
+steps:
+  - name: "load_data"
+    component: "DataLoader" 
+  - name: "classify"
+    component: "Classifier"
+    depends_on: "load_data"
+    input_key: "documents"
+  - name: "notification_branch"
+    type: "conditional_branch"
+    condition: "has_urgent_documents"
+    depends_on: "classify"
+    if_true:
+      - name: "send_notification"
+        component: "NotificationSender"
+    if_false:
+      - name: "process_documents"
+        component: "DocumentProcessor"
+        type: "foreach"
+      - name: "generate_report"  
+        component: "ReportGenerator"
+
+components:
+  DataLoader:
+    class: "pipeline_components.DataLoader"
+    output_keys: ["documents"]
+  Classifier:
+    class: "pipeline_components.Classifier"
+    output_keys: ["classified_documents", "has_urgent"]
+  NotificationSender:
+    class: "pipeline_components.NotificationSender"
+  DocumentProcessor:
+    class: "pipeline_components.DocumentProcessor"
+  ReportGenerator:
+    class: "pipeline_components.ReportGenerator"
+```
+
+See `functional_pipeline_example.yaml` for the complete configuration file with all parameters and sample data.
+
+### Usage from Python
+
+To use the YAML configuration from Python:
 
 ```python
-import os
-import sys
-from pathlib import Path
-from datapizzai.pipeline import FunctionalPipeline
 
-# Load pipeline from YAML file
-pipeline = FunctionalPipeline.from_yaml("functional_pipeline_config.yaml")
+pipeline = FunctionalPipeline.from_yaml("functional_pipeline_example.yaml")
 
-# Execute pipeline
 results = pipeline.execute()
 
-# Show results
-if "build_report" in results:
-    print(results["build_report"]["final_report"])
-
-print("Pipeline executed via YAML configuration!")
+if "send_notification" in results:
+    print("URGENT BRANCH EXECUTED:")
+    print(results["send_notification"]["message"])
+else:
+    print("STANDARD BRANCH EXECUTED:")
+    print(results["generate_report"]["final_report"])
 ```
-
-**Execution**:
-```bash
-cd examples
-python3 yaml_pipeline_example.py
-```
-
-The `functional_pipeline_config.yaml` file defines a complete pipeline with 4 external modules (`DocumentLoader`, `TextProcessor`, `DataValidator`, `ReportBuilder`) and their dependencies.
 
 This example demonstrates:
-- Loading external modules from custom packages (`mymodules/`)
+- Loading external modules from custom packages
 - Parameter configuration for each module via YAML
 - Dependency definition between nodes with `target_key`
 - Multi-step pipeline completely configured externally
-- Python script that loads and executes the configuration
 
-#### YAML flow diagram
-
-```mermaid
-graph TD
-    A[📄 YAML Config] --> B[FunctionalPipeline.from_yaml]
-    B --> C[Load Modules]
-    C --> D[DocumentLoader]
-    C --> E[TextProcessor] 
-    C --> F[DataValidator]
-    C --> G[ReportBuilder]
-    
-    H[Pipeline Execution] --> I[load_data]
-    I -->|documents| J[process]
-    J -->|processed_documents| K[validate]
-    K -->|validation_results| L[build_report]
-    
-    D --> I
-    E --> J
-    F --> K
-    G --> L
-    
-    L --> M[📊 Final Report]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-```
 
 ## YAML configuration
 
@@ -544,10 +464,9 @@ Loading and using DagPipeline from YAML configuration:
 ```python
 import os
 import sys
-from datapizzai.pipeline import DagPipeline
 
 # Setup path to find mymodules (required for notebooks)
-examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/DatapizzAI/PizzAI/Pipeline/examples"
+examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/Datapizza-AI/PizzAI/Pipeline/examples"
 sys.path.insert(0, examples_dir)
 
 # Create DagPipeline instance and load YAML configuration
@@ -571,28 +490,6 @@ cd Pipeline/examples
 python3 dag_yaml_example.py
 ```
 
-#### DagPipeline YAML flow diagram
-
-```mermaid
-graph TD
-    A[📄 dag_config.yaml] --> B[DagPipeline.from_yaml]
-    B --> C[Load Modules]
-    C --> D[DocumentLoader]
-    C --> E[TextProcessor]
-    
-    F[Pipeline Execution] --> G[data_loader]
-    G -->|documents| H[processor]
-    
-    D --> G
-    E --> H
-    
-    H --> I[📊 Processed Results]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style F fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style I fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-```
 
 ### Example for FunctionalPipeline
 
@@ -601,10 +498,9 @@ Loading and using FunctionalPipeline from YAML configuration:
 ```python
 import os
 import sys
-from datapizzai.pipeline import FunctionalPipeline
 
 # Setup path to find mymodules (required for notebooks)
-examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/DatapizzAI/PizzAI/Pipeline/examples"
+examples_dir = "/home/mcalcaterra/Documenti/GitHub/Datapizza/Datapizza-AI/PizzAI/Pipeline/examples"
 sys.path.insert(0, examples_dir)
 
 # Load functional pipeline from YAML file
@@ -624,34 +520,6 @@ print(f"Executed modules: {list(results.keys())}")
 
 The YAML file defines external modules (`DocumentLoader`, `TextProcessor`, `DataValidator`, `ReportBuilder`) and dependencies between steps with `target_key`.
 
-#### FunctionalPipeline YAML flow diagram
-
-```mermaid
-graph TD
-    A[📄 functional_pipeline_config.yaml] --> B[FunctionalPipeline.from_yaml]
-    B --> C[Load Modules]
-    C --> D[DocumentLoader]
-    C --> E[TextProcessor] 
-    C --> F[DataValidator]
-    C --> G[ReportBuilder]
-    
-    H[Pipeline Execution] --> I[load_data]
-    I -->|documents| J[process]
-    J -->|processed_documents| K[validate]
-    K -->|validation_results| L[build_report]
-    
-    D --> I
-    E --> J
-    F --> K
-    G --> L
-    
-    L --> M[📊 Final Report]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style M fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
-```
 
 ## Pipeline comparison
 
@@ -664,71 +532,4 @@ graph TD
 | **Parallelism** | Sequential | Automatic | Controlled |
 | **Vector store** | Integrated | Manual | Manual |
 
-## Best practices
 
-### Pipeline selection
-
-- **IngestionPipeline**: for RAG, knowledge bases, document processing
-- **DagPipeline**: for workflows with complex dependencies, multi-step analysis  
-- **FunctionalPipeline**: for complex business logic, conditional routing
-
-### Error handling
-
-```python
-# Always handle exceptions in components
-class SafeProcessor(PipelineComponent):
-    def _run(self, **kwargs):
-        try:
-            return self.process_data(kwargs)
-        except Exception as e:
-            return {"error": str(e), "success": False}
-    async def _a_run(self, **kwargs):
-        return self._run(**kwargs)
-```
-
-### Performance
-
-- Use async components when possible
-- Minimize dependencies in DagPipeline
-- Cache intermediate results for complex pipelines
-
-## Complete examples
-
-Complete and functional example scripts are available in:
-
-- `examples/ingestion_example.py` - IngestionPipeline with FileReader and TextSplitter
-- `examples/dag_example.py` - DagPipeline with complex 5-node graph
-- `examples/dag_yaml_example.py` - DagPipeline loaded from YAML with external modules
-- `examples/functional_example.py` - FunctionalPipeline with conditional branching
-- `examples/yaml_pipeline_example.py` - FunctionalPipeline loaded from YAML with external modules
-
-### Support files
-
-- `examples/dag_config.yaml` - External YAML configuration for `dag_yaml_example.py`
-- `examples/functional_pipeline_config.yaml` - External YAML configuration for `yaml_pipeline_example.py`
-- `examples/mymodules/` - Custom modules loaded via YAML:
-  - `loaders.py` - DocumentLoader and CSVLoader
-  - `processors.py` - TextProcessor, DataValidator, ReportBuilder
-
-Each script includes sample data and can be run directly. The YAML example demonstrates how to separate configuration from Python code.
-
-### Quick test of all examples
-
-```bash
-cd Pipeline/examples
-
-# Test IngestionPipeline (requires API key)
-python3 ingestion_example.py
-
-# Test DagPipeline (requires API key for SentimentAnalyzer)
-python3 dag_example.py
-
-# Test DagPipeline with YAML (self-contained, no API key required)
-python3 dag_yaml_example.py
-
-# Test FunctionalPipeline (requires API key)
-python3 functional_example.py
-
-# Test FunctionalPipeline with YAML (self-contained, no API key required)
-python3 yaml_pipeline_example.py
-```

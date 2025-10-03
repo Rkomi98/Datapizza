@@ -1,0 +1,317 @@
+<svg viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="userGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="plannerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="analystGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="riskGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="toolGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="toolGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff9a56;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff6a88;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="finalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#30cfd0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#330867;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="700" fill="url(#bgGrad)">
+    <animate attributeName="fill" values="#0a0e27;#1a1e37;#0a0e27" dur="6s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Grid pattern -->
+  <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="40" height="40" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.1"/>
+  </pattern>
+  <rect width="800" height="700" fill="url(#grid)"/>
+
+  <!-- Animated particles in background -->
+  <g id="particles">
+    <circle r="2" fill="#fff" opacity="0.3">
+      <animateMotion dur="20s" repeatCount="indefinite">
+        <mpath href="#particlePath1"/>
+      </animateMotion>
+    </circle>
+    <circle r="1.5" fill="#4facfe" opacity="0.5">
+      <animateMotion dur="15s" repeatCount="indefinite">
+        <mpath href="#particlePath2"/>
+      </animateMotion>
+    </circle>
+    <circle r="1" fill="#f093fb" opacity="0.4">
+      <animateMotion dur="25s" repeatCount="indefinite">
+        <mpath href="#particlePath3"/>
+      </animateMotion>
+    </circle>
+  </g>
+
+  <!-- Hidden paths for particles -->
+  <path id="particlePath1" d="M100,100 Q400,200 700,100 Q400,300 100,100" fill="none"/>
+  <path id="particlePath2" d="M700,600 Q400,500 100,600 Q400,400 700,600" fill="none"/>
+  <path id="particlePath3" d="M50,350 Q400,150 750,350 Q400,550 50,350" fill="none"/>
+
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">
+    Agent-of-Agents Strategic Analysis System
+    <animate attributeName="fill" values="#fff;#4facfe;#f093fb;#fff" dur="4s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- User Query -->
+  <g id="user">
+    <rect x="300" y="80" width="200" height="50" rx="10" fill="url(#userGrad)" filter="url(#shadow)"/>
+    <text x="400" y="110" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      Business Query
+    </text>
+  </g>
+
+  <!-- Strategic Planner (Coordinator) -->
+  <g id="planner">
+    <path d="M 400 170 L 480 220 L 400 270 L 320 220 Z" fill="url(#plannerGrad)" filter="url(#shadow)"/>
+    <text x="400" y="225" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      StrategicPlanner
+    </text>
+    <text x="400" y="240" text-anchor="middle" font-family="Arial" font-size="10" fill="white" opacity="0.8">
+      (Coordinator)
+    </text>
+  </g>
+
+  <!-- Tool Wrappers -->
+  <g id="tool1">
+    <rect x="140" y="310" width="160" height="45" rx="8" fill="url(#toolGrad1)" filter="url(#shadow)" opacity="0.9">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="220" y="337" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="white">
+      run_kpi_analysis()
+    </text>
+  </g>
+
+  <g id="tool2">
+    <rect x="500" y="310" width="160" height="45" rx="8" fill="url(#toolGrad2)" filter="url(#shadow)" opacity="0.9">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </rect>
+    <text x="580" y="337" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold" fill="white">
+      run_risk_assessment()
+    </text>
+  </g>
+
+  <!-- Specialized Agents -->
+  <g id="analyst">
+    <rect x="140" y="395" width="160" height="60" rx="10" fill="url(#analystGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="220" y="420" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="white">
+      AnalystAgent
+    </text>
+    <text x="220" y="440" text-anchor="middle" font-family="Arial" font-size="10" fill="white" opacity="0.8">
+      tool: extract_kpi()
+    </text>
+  </g>
+
+  <g id="risk">
+    <rect x="500" y="395" width="160" height="60" rx="10" fill="url(#riskGrad)" filter="url(#shadow)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" begin="2s" repeatCount="indefinite"/>
+    </rect>
+    <text x="580" y="420" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="white">
+      RiskAgent
+    </text>
+    <text x="580" y="440" text-anchor="middle" font-family="Arial" font-size="10" fill="white" opacity="0.8">
+      tool: identify_risks()
+    </text>
+  </g>
+
+  <!-- Final Report -->
+  <g id="final">
+    <rect x="300" y="530" width="200" height="60" rx="10" fill="url(#finalGrad)" filter="url(#shadow)"/>
+    <text x="400" y="555" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="white">
+      Strategic Report
+    </text>
+    <text x="400" y="575" text-anchor="middle" font-family="Arial" font-size="10" fill="white" opacity="0.8">
+      KPI + Risks + Recommendations
+    </text>
+  </g>
+
+  <!-- Animated connections -->
+  
+  <!-- User to Strategic Planner -->
+  <line x1="400" y1="130" x2="400" y2="170" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <circle r="5" fill="#667eea" filter="url(#glow)">
+    <animateMotion dur="0.8s" repeatCount="indefinite">
+      <mpath href="#path1"/>
+    </animateMotion>
+  </circle>
+  <path id="path1" d="M400,130 L400,170" fill="none"/>
+
+  <!-- Planner to run_kpi_analysis -->
+  <line x1="350" y1="245" x2="260" y2="310" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="280" y="275" font-family="Arial" font-size="10" fill="#43e97b" font-style="italic" opacity="0">
+    1. Invoke KPI analysis
+    <animate attributeName="opacity" values="0;1;1;0" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+  </text>
+  <circle r="5" fill="#f093fb" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="0.5s" repeatCount="indefinite">
+      <mpath href="#path2"/>
+    </animateMotion>
+  </circle>
+  <path id="path2" d="M350,245 L260,310" fill="none"/>
+
+  <!-- run_kpi_analysis to AnalystAgent -->
+  <line x1="220" y1="355" x2="220" y2="395" stroke="#43e97b" stroke-width="2" opacity="0.3"/>
+  <circle r="4" fill="#43e97b" filter="url(#glow)">
+    <animateMotion dur="0.5s" begin="1s" repeatCount="indefinite">
+      <mpath href="#path3"/>
+    </animateMotion>
+  </circle>
+  <path id="path3" d="M220,355 L220,395" fill="none"/>
+
+  <!-- AnalystAgent back to run_kpi_analysis -->
+  <line x1="220" y1="455" x2="220" y2="355" stroke="#00f2fe" stroke-width="2" stroke-dasharray="5,5" opacity="0.3"/>
+  <circle r="3" fill="#00f2fe" filter="url(#glow)">
+    <animateMotion dur="0.5s" begin="1.5s" repeatCount="indefinite">
+      <mpath href="#path4"/>
+    </animateMotion>
+  </circle>
+  <path id="path4" d="M220,455 L220,355" fill="none"/>
+
+  <!-- run_kpi_analysis back to Planner -->
+  <line x1="260" y1="310" x2="350" y2="245" stroke="#43e97b" stroke-width="2" stroke-dasharray="5,5" opacity="0.3"/>
+  <circle r="4" fill="#43e97b" filter="url(#glow)">
+    <animateMotion dur="0.5s" begin="2s" repeatCount="indefinite">
+      <mpath href="#path5"/>
+    </animateMotion>
+  </circle>
+  <path id="path5" d="M260,310 L350,245" fill="none"/>
+
+  <!-- Planner to run_risk_assessment -->
+  <line x1="450" y1="245" x2="540" y2="310" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="460" y="275" font-family="Arial" font-size="10" fill="#ff9a56" font-style="italic" opacity="0">
+    2. Invoke risk assessment
+    <animate attributeName="opacity" values="0;1;1;0" dur="3s" begin="2.5s" repeatCount="indefinite"/>
+  </text>
+  <circle r="5" fill="#f093fb" filter="url(#glow)">
+    <animateMotion dur="0.8s" begin="2.5s" repeatCount="indefinite">
+      <mpath href="#path6"/>
+    </animateMotion>
+  </circle>
+  <path id="path6" d="M450,245 L540,310" fill="none"/>
+
+  <!-- run_risk_assessment to RiskAgent -->
+  <line x1="580" y1="355" x2="580" y2="395" stroke="#ff9a56" stroke-width="2" opacity="0.3"/>
+  <circle r="4" fill="#ff9a56" filter="url(#glow)">
+    <animateMotion dur="0.5s" begin="3s" repeatCount="indefinite">
+      <mpath href="#path7"/>
+    </animateMotion>
+  </circle>
+  <path id="path7" d="M580,355 L580,395" fill="none"/>
+
+  <!-- RiskAgent back to run_risk_assessment -->
+  <line x1="580" y1="455" x2="580" y2="355" stroke="#fee140" stroke-width="2" stroke-dasharray="5,5" opacity="0.3"/>
+  <circle r="3" fill="#fee140" filter="url(#glow)">
+    <animateMotion dur="0.5s" begin="3.5s" repeatCount="indefinite">
+      <mpath href="#path8"/>
+    </animateMotion>
+  </circle>
+  <path id="path8" d="M580,455 L580,355" fill="none"/>
+
+  <!-- run_risk_assessment back to Planner -->
+  <line x1="540" y1="310" x2="450" y2="245" stroke="#ff9a56" stroke-width="2" stroke-dasharray="5,5" opacity="0.3"/>
+  <circle r="4" fill="#ff9a56" filter="url(#glow)">
+    <animateMotion dur="0.5s" begin="4s" repeatCount="indefinite">
+      <mpath href="#path9"/>
+    </animateMotion>
+  </circle>
+  <path id="path9" d="M540,310 L450,245" fill="none"/>
+
+  <!-- Planner to Final Report -->
+  <line x1="400" y1="270" x2="400" y2="530" stroke="#fff" stroke-width="3" opacity="0.3"/>
+  <text x="400" y="400" text-anchor="middle" font-family="Arial" font-size="10" fill="#30cfd0" font-style="italic" opacity="0">
+    3. Synthesize report
+    <animate attributeName="opacity" values="0;1;1;0" dur="3s" begin="4.5s" repeatCount="indefinite"/>
+  </text>
+  <circle r="5" fill="#30cfd0" filter="url(#glow)">
+    <animateMotion dur="1s" begin="4.5s" repeatCount="indefinite">
+      <mpath href="#path10"/>
+    </animateMotion>
+  </circle>
+  <path id="path10" d="M400,270 L400,530" fill="none"/>
+
+  <!-- Status indicators (pulsing rings) -->
+  <g id="status-indicators">
+    <!-- Processing for StrategicPlanner -->
+    <circle cx="400" cy="220" r="65" fill="none" stroke="#f093fb" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="65;75;65" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Processing for AnalystAgent -->
+    <circle cx="220" cy="425" r="85" fill="none" stroke="#4facfe" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="85;95;85" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Processing for RiskAgent -->
+    <circle cx="580" cy="425" r="85" fill="none" stroke="#fa709a" stroke-width="2" opacity="0">
+      <animate attributeName="r" values="85;95;85" dur="2s" begin="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.5;0" dur="2s" begin="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Architecture labels -->
+  <g font-family="Arial" font-size="9" fill="#888">
+    <text x="400" y="160" text-anchor="middle" font-style="italic">Orchestrator</text>
+    <text x="220" y="300" text-anchor="middle" font-style="italic">Tool Wrapper</text>
+    <text x="580" y="300" text-anchor="middle" font-style="italic">Tool Wrapper</text>
+    <text x="220" y="385" text-anchor="middle" font-style="italic">Specialized Agent</text>
+    <text x="580" y="385" text-anchor="middle" font-style="italic">Specialized Agent</text>
+  </g>
+
+  <!-- Legend -->
+  <g id="legend" opacity="0.8">
+    <rect x="20" y="640" width="15" height="15" fill="#f093fb"/>
+    <text x="40" y="652" font-family="Arial" font-size="11" fill="#aaa">Orchestration</text>
+    
+    <rect x="150" y="640" width="15" height="15" fill="#43e97b"/>
+    <text x="170" y="652" font-family="Arial" font-size="11" fill="#aaa">KPI Analysis</text>
+    
+    <rect x="280" y="640" width="15" height="15" fill="#ff9a56"/>
+    <text x="300" y="652" font-family="Arial" font-size="11" fill="#aaa">Risk Assessment</text>
+    
+    <rect x="430" y="640" width="15" height="15" fill="#30cfd0"/>
+    <text x="450" y="652" font-family="Arial" font-size="11" fill="#aaa">Final Synthesis</text>
+  </g>
+</svg>

@@ -1,6 +1,6 @@
-# Monitoring con datapizzai
+# Monitoring con datapizza-ai
 
-Questa cartella contiene guide ed esempi completi per implementare il monitoring con la libreria datapizzai.
+Questa cartella contiene guide ed esempi completi per implementare il monitoring con la libreria datapizza-ai.
 
 ## File disponibili
 
@@ -21,7 +21,7 @@ Questa cartella contiene guide ed esempi completi per implementare il monitoring
 ### 1. Installazione dipendenze
 
 ```bash
-pip install datapizzai opentelemetry-api opentelemetry-sdk
+pip install datapizza-ai opentelemetry-api opentelemetry-sdk
 pip install opentelemetry-exporter-zipkin opentelemetry-exporter-otlp
 pip install psutil python-dotenv requests
 ```
@@ -57,7 +57,7 @@ python monitoring_fixed_example.py
 
 L'esempio pratico dimostra:
 
-- ✅ Tracing automatico dei client datapizzai
+- ✅ Tracing automatico dei client datapizza-ai
 - ✅ Creazione manuale di span personalizzati
 - ✅ Attributi personalizzati negli span
 - ✅ Monitoring delle performance
@@ -87,7 +87,7 @@ Per monitoring avanzato con Grafana:
 
 ```mermaid
 graph TD
-    A[Applicazione datapizzai] --> B[ContextTracing]
+    A[Applicazione datapizza-ai] --> B[ContextTracing]
     B --> C[Span automatici]
     B --> D[Span manuali]
     C --> E[Token tracking]

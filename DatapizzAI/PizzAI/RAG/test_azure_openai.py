@@ -31,7 +31,7 @@ def test_azure_openai():
     
     # Test connessione
     try:
-        from datapizzai.clients import OpenAIClient
+        from datapizza.clients import OpenAIClient
         
         print(f"\n🔌 Test connessione...")
         client = OpenAIClient(
@@ -65,8 +65,8 @@ def test_embedding():
     print(f"\n🔢 Test embedding...")
     
     try:
-        from datapizzai.clients import OpenAIClient
-        from datapizzai.embedders import ClientEmbedder
+        from datapizza.clients import OpenAIClient
+        from datapizza.embedders import ClientEmbedder
         
         client = OpenAIClient(
             api_key=os.getenv('AZURE_OPENAI_API_KEY'),

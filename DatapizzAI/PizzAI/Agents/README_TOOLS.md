@@ -1,6 +1,6 @@
-# Multi‑Tool Framework - DatapizzAI
+# Multi‑Tool Framework - Datapizza-AI
 
-Guida concisa per creare e usare strumenti (tools) con DatapizzAI. I tools consentono al modello di compiere azioni (esecuzione di funzioni Python) durante il ragionamento.
+Guida per creare e usare strumenti (tools) con Datapizza-AI. 
 
 ## Indice
 
@@ -8,12 +8,14 @@ Guida concisa per creare e usare strumenti (tools) con DatapizzAI. I tools conse
 2. [Esecuzione minimale con invoke](#esecuzione-minimale-con-invoke)
 3. [Client multi‑tool](#client-multi-tool)
 4. [Conversazione con memoria](#conversazione-con-memoria)
-5. [Best practices](#best-practices)
-6. [Guida passo‑passo: tool custom](#guida-passo-passo-tool-custom)
+5. [Esempio con Google Search](#esempio-completo-con-google-search)
+6. [Perché intervenire manualmente sui tool](#perche-intervenire-manualmente-sui-tool)
+
 ## Struttura base di un tool
 
 ```python
-from datapizzai.tools import tool
+from datapizza.tools import tool
+
 
 @tool
 def timer_tool(duration: str) -> str:
@@ -24,18 +26,20 @@ def timer_tool(duration: str) -> str:
 
 ## Esecuzione minimale con invoke
 
+Il modo più semplice per usare un tool è passarlo direttamente al metodo `invoke`. Il modello deciderà se e come usarlo in base al prompt.
+
 ```python
-from datapizzai.clients import ClientFactory
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = ClientFactory.create(
-    provider="openai", 
+
+from datapizza.clients.openai import OpenAIClient
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"), 
     model="gpt-5",
     temperature=1
-    )
+)
 
 response = client.invoke(
     "Set a timer for 5 minutes",
@@ -43,19 +47,19 @@ response = client.invoke(
     tool_choice="auto"
 )
 
-print(response.text)  # Qualsiasi risposta testuale
+print(response.text)
 for f_call in response.function_calls or []:
-    # Esegui il tool locale con gli argomenti suggeriti
     result = timer_tool(**(f_call.arguments or {}))
     print("tool result:", result)
 ```
 
 ## Client multi‑tool
 
-Esempio con due strumenti: una calcolatrice e una ricerca informazioni.
+Esempio con due strumenti: una calcolatrice e una ricerca informazioni molto semplice.
 
 ```python
-from datapizzai.tools import tool
+from datapizza.tools import tool
+
 
 @tool
 def calcolatrice(expr: str) -> str:
@@ -74,18 +78,18 @@ def cerca_informazioni(query: str) -> str:
     return f"(risultati sintetici per: {query})"
 ```
 
-### Esecuzione
+Che poi si integrano così:
 
 ```python
-# Client e Memory  
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import FunctionCallResultBlock, ROLE
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+
+from datapizza.clients.openai import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE
+client = OpenAIClient(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
 
 tools = [calcolatrice, cerca_informazioni]
 memory = Memory()
@@ -96,13 +100,8 @@ response = client.invoke(
     tool_choice="auto",
     memory=memory
 )
-
-# Esecuzione iterativa dei function call
 while hasattr(response, "function_calls") and response.function_calls:
-    # Aggiungi la risposta dell'assistant alla memoria
     memory.add_turn(response.content, ROLE.ASSISTANT)
-    
-    # Crea i risultati dei tool e aggiungili uno per volta alla memoria
     for f_call in response.function_calls:
         tool_name = f_call.name
         args = f_call.arguments or {}
@@ -134,125 +133,76 @@ while hasattr(response, "function_calls") and response.function_calls:
 print(response.text)
 ```
 
-## Conversazione con memoria
-
-Ora uniamo tutto in un ciclo conversazionale minimal e verosimile.
-
-```python
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
-
-def create_conversational_client():
-    memory = Memory()
-    client = ClientFactory.create(
-        provider="openai",
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o",
-    )
-    return client, memory
-
-# 3. Configura conversazione multi-turno
-client, memory = create_conversational_client()
-tools = [calcolatrice, cerca_informazioni]
-
-def chat_turn(user_input, memory, client, tools):
-    """Gestisce un singolo turno di conversazione con tools"""
-    print(f"👤 Utente: {user_input}")
-    
-    # Aggiungi input utente alla memoria
-    memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
-    
-    # Prima chiamata al modello
-    response = client.invoke(
-        input="",  # Input vuoto perché usiamo la memory
-        memory=memory,
-        tools=tools,
-        tool_choice="auto"
-    )
-    
-    # Gestione iterativa dei function calls
-    while hasattr(response, "function_calls") and response.function_calls:
-        print("🔧 Esecuzione tool calls...")
-        
-        # Aggiungi la risposta dell'assistant alla memoria
-        memory.add_turn(response.content, ROLE.ASSISTANT)
-        
-        # Esegui ogni function call
-        for f_call in response.function_calls:
-            print(f"   📞 {f_call.name}({f_call.arguments})")
-            
-            # Esegui il tool (il tuo codice esistente va bene)
-            result = {
-                "calcolatrice": calcolatrice,
-                "cerca_informazioni": cerca_informazioni,
-            }.get(f_call.name, lambda **_: f"Tool sconosciuto: {f_call.name}")(**(f_call.arguments or {}))
-            
-            print(f"   ✅ {result}")
-            
-            # Crea il blocco risultato
-            tool_result_block = FunctionCallResultBlock(
-                id=f_call.id, 
-                tool=f_call.tool, 
-                result=result
-            )
-            memory.add_turn([tool_result_block], ROLE.TOOL)
-        response = client.invoke(
-            input="",
-            memory=memory,
-            tools=tools,
-            tool_choice="auto"
-        )
-    
-    # Aggiungi la risposta finale alla memoria
-    if response.text:
-        memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
-        print(f"🤖 Assistant: {response.text}")
-
-# 4. Esempio di conversazione multi-turno
-conversation = [
-    "Ciao! Sono Mirko, sto lavorando su un progetto AI",
-    "Cerca informazioni sui framework Python per AI",
-    "Calcola il costo se spendo 500€ al mese per 2 anni",
-    "Ricordi il mio nome e cosa sto facendo?"
-]
-
-for user_input in conversation:
-    chat_turn(user_input, memory, client, tools)
-    print()  # Spazio tra turni
-
-# 5. Statistiche conversazione
-print(f"📊 Turni totali: {len(memory.memory)}")
-print(f"💬 Blocchi totali: {len(list(memory.iter_blocks()))}")
-```
-
-<!-- Sezione esempi ripetitivi rimossa per evitare ridondanza -->
-
-
-## Best practices
-
-### Design dei tool
-- **Nome descrittivo**: Usa nomi chiari e specifici
-- **Descrizione dettagliata**: Spiega esattamente cosa fa il tool
-- **Schema input chiaro**: Definisci precisamente il formato di input
-- **Gestione errori**: Gestisci sempre le eccezioni e restituisci ToolResult appropriati
-
-### Esempio completo con Google Search
+## Esempio completo con Google Search
+In `datapizza-ai` è implementato il tool di ricerca `Google_search_tool`, che funziona solo con `GoogleClient`.
 
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.tools.google import google_search_tool
 
 load_dotenv()
 
-client = ClientFactory.create(
-    provider="google",
+from datapizza.clients.google import GoogleClient
+
+client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
 )
 
 response = client.invoke("Quando iniziano le olimpiadi invernali?", tools=[google_search_tool])
 
 print(response.text)
 ```
+
+
+## Perché intervenire manualmente sui tool
+
+I tool mantengono l'umano nel loop: ogni volta che il modello propone una `function_call` puoi decidere se eseguirla, modificarla o bloccarla.
+
+### Quando conviene intervenire
+- **Operazioni irreversibili o sensibili**: cancellazioni, scritture su filesystem, transazioni
+- **Parametri incerti**: il modello potrebbe allucinare percorsi, ID o query; serve validazione
+- **Vincoli esterni**: rate limiting, permessi per utente/ruolo, policy aziendali
+- **Costi e performance**: chiamate costose (es. API a pagamento) da eseguire solo se davvero necessarie
+- **Esperienza utente**: vuoi confermare o riformulare l'azione prima di procedere
+
+Per task idempotenti e a basso rischio (es. piccole trasformazioni di stringhe) puoi invece lasciare l'esecuzione completamente automatica.
+
+### Flusso di gestione consigliato
+1. Ispeziona `response.function_calls` e identifica lo strumento richiesto
+2. Valida che i parametri siano completi, coerenti e autorizzati
+3. Esegui il tool o nega l'operazione motivandolo al modello
+4. Restituisci il risultato (o l'errore) al modello tramite `FunctionCallResultBlock`
+
+### Esempio di gating personalizzato
+```python
+# Funzioni helper definite da te
+tools_map = {
+    "web_search": web_search,
+    "file_delete": file_delete,
+}
+
+for f_call in response.function_calls or []:
+    tool_name = f_call.name
+    args = f_call.arguments or {}
+
+    if tool_name == "file_delete":
+        result = "Operazione bloccata: richiede approvazione esplicita"
+    elif not params_are_valid(args):
+        result = "Parametri non validi o incompleti"
+    else:
+        result_obj = tools_map[tool_name](**args)
+        result = result_obj.text if hasattr(result_obj, "text") else str(result_obj)
+
+    tool_result = FunctionCallResultBlock(
+        id=f_call.id,
+        tool=f_call.tool,
+        result=result,
+    )
+    memory.add_turn([tool_result], ROLE.TOOL)
+```
+Quindi, in conclusione, quando e perché conviene usarlo?
+- **Governance**: puoi applicare policy diverse in base a chi sta usando l'assistente
+- **Osservabilità**: log controllato su quando e perché un tool viene autorizzato o negato
+- **Recupero rapido**: fornisci al modello messaggi mirati per riprovare con parametri corretti
+- **Tutela dei sistemi**: eviti effetti collaterali su risorse critiche o dati sensibili

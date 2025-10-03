@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Guida completa al Client di DatapizzAI
+Guida completa al Client di DatapizzaAI
 =====================================
 
 Questo file contiene esempi dettagliati su come configurare e utilizzare
-tutti i tipi di client disponibili nella libreria datapizzai, con esempi
+tutti i tipi di client disponibili nella libreria datapizza, con esempi
 pratici per ogni funzionalità avanzata.
 
 Autore: Mirko Calcaterra
@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 # Carica le variabili d'ambiente dal file .env nella directory parent
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# Importazioni principali della libreria datapizzai
-from datapizzai.clients import (
+# Importazioni principali della libreria datapizza
+from datapizza.clients import (
     ClientFactory, 
     OpenAIClient,
     AnthropicClient, 
@@ -28,11 +28,11 @@ from datapizzai.clients import (
     MistralClient,
     AzureOpenAIClient
 )
-from datapizzai.clients.factory import Provider
-from datapizzai.cache import Cache, MemoryCache, RedisCache
-from datapizzai.memory import Memory
-from datapizzai.tools import Tool
-from datapizzai.type import TextBlock, MediaBlock, Media, ROLE
+from datapizza.clients.factory import Provider
+from datapizza.cache import Cache, MemoryCache, RedisCache
+from datapizza.memory import Memory
+from datapizza.tools import Tool
+from datapizza.type import TextBlock, MediaBlock, Media, ROLE
 
 # ==============================================================================
 # 1. CONFIGURAZIONE BASE DEI CLIENT
@@ -799,7 +799,7 @@ def esempio_media():
 def esempio_configurazioni_avanzate():
     """
     Configurazioni avanzate, gestione degli errori, e best practices
-    per l'utilizzo in produzione della libreria datapizzai.
+    per l'utilizzo in produzione della libreria datapizza.
     """
     print("\n=== ESEMPIO: Configurazioni avanzate ===")
     
@@ -896,15 +896,15 @@ def esempio_configurazioni_avanzate():
     print("\n3. Monitoring e logging:")
     
     def setup_logging():
-        """Configura logging per datapizzai"""
+        """Configura logging per datapizza"""
         import logging
         
-        # Logger per datapizzai
-        logger = logging.getLogger("datapizzai")
+        # Logger per datapizza
+        logger = logging.getLogger("datapizza")
         logger.setLevel(logging.INFO)
         
         # Handler per file
-        file_handler = logging.FileHandler("datapizzai.log")
+        file_handler = logging.FileHandler("datapizza.log")
         file_handler.setLevel(logging.INFO)
         
         # Handler per console
@@ -1149,7 +1149,7 @@ def main():
     Funzione principale che esegue tutti gli esempi.
     Commenta/decommenta le sezioni che vuoi testare.
     """
-    print("🚀 GUIDA COMPLETA AL CLIENT DI DATAPIZZAI")
+    print("🚀 GUIDA COMPLETA AL CLIENT DI DATAPIZZA")
     print("=" * 50)
     
     # Esegui tutti gli esempi
@@ -1184,7 +1184,7 @@ def main():
     print("# MISTRAL_API_KEY=your-mistral-api-key-here  # opzionale")
     
     print("\n📚 DOCUMENTAZIONE:")
-    print("- Consulta la documentazione ufficiale di datapizzai")
+    print("- Consulta la documentazione ufficiale di datapizza")
     print("- Controlla gli esempi nella cartella snippets/")
     print("- Usa il logging per debug in caso di problemi")
     '''

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Test corretto per l'uso dei tools con datapizzai
+Test corretto per l'uso dei tools con datapizza
 Questo esempio mostra come usare correttamente la Memory per gestire i tool results
 """
 
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import FunctionCallResultBlock, ROLE
-from datapizzai.tools.tools import tool
+from datapizza.clients import ClientFactory
+from datapizza.memory import Memory
+from datapizza.type import FunctionCallResultBlock, ROLE
+from datapizza.tools.tools import tool
 
 # Carica le variabili d'ambiente
 load_dotenv()
@@ -48,7 +48,7 @@ def cerca_informazioni(argomento: str) -> str:
     info_database = {
         "python type hints": "I Python type hints sono annotazioni che indicano il tipo di dati previsto per variabili, parametri di funzioni e valori di ritorno. Introdotti in Python 3.5 con PEP 484, migliorano la leggibilità del codice e supportano il controllo statico dei tipi.",
         "machine learning": "Il machine learning è un sottoinsieme dell'intelligenza artificiale che permette ai computer di apprendere e migliorare automaticamente attraverso l'esperienza senza essere esplicitamente programmati.",
-        "datapizzai": "DatapizzaAI è una libreria Python per l'integrazione con vari modelli di intelligenza artificiale, fornendo un'interfaccia unificata per diversi provider come OpenAI, Anthropic, Google, ecc."
+        "datapizza": "DatapizzaAI è una libreria Python per l'integrazione con vari modelli di intelligenza artificiale, fornendo un'interfaccia unificata per diversi provider come OpenAI, Anthropic, Google, ecc."
     }
     
     # Cerca informazioni (case-insensitive)

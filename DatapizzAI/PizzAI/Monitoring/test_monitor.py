@@ -11,9 +11,9 @@ import time
 sys.path.append('.')
 
 from simple_chatbot_monitor import SimpleChatbotMonitor
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+from datapizza.clients import ClientFactory
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, ROLE
 
 def test_monitor():
     """Test del monitor senza API key reale"""
@@ -33,7 +33,7 @@ def test_monitor():
     
     try:
         # Prova con mock client se disponibile
-        from datapizzai.clients import MockClient
+        from datapizza.clients import MockClient
         client = MockClient()
         print("✅ Mock client creato")
         

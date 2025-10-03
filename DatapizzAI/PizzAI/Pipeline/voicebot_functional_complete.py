@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Voicebot con FunctionalPipeline completo (datapizzai):
+Voicebot con FunctionalPipeline completo (datapizza):
 Audio → Gemini 2.5 Flash (trascrizione+riassunto+sentiment) → branch notifica → report
 
 Questo esempio dimostra l'uso completo di FunctionalPipeline con:
@@ -13,7 +13,7 @@ Questo esempio dimostra l'uso completo di FunctionalPipeline con:
 Requisiti:
 - .env con GOOGLE_API_KEY
 - pip install sounddevice soundfile python-dotenv pyyaml
-- libreria datapizzai disponibile nell'ambiente
+- libreria datapizza disponibile nell'ambiente
 
 Uso tipico:
   python Pipeline/voicebot_functional_complete.py --config Pipeline/voicebot_functional_pipeline.yaml
@@ -26,9 +26,9 @@ from typing import Any, Dict, Optional
 import yaml
 from dotenv import load_dotenv
 
-# datapizzai pipeline
-from datapizzai.pipeline import Dependency, FunctionalPipeline
-from datapizzai.core.models import PipelineComponent
+# datapizza pipeline
+from datapizza.pipeline import Dependency, FunctionalPipeline
+from datapizza.core.models import PipelineComponent
 
 # componenti locali aggiornati  
 from components import (
@@ -161,7 +161,7 @@ def build_pipeline_from_yaml(yaml_path: str, **override_params) -> FunctionalPip
     """
     Costruisce la pipeline da file YAML (implementazione semplificata).
     
-    Nota: datapizzai supporta FunctionalPipeline.from_yaml() ma per questo esempio
+    Nota: datapizza supporta FunctionalPipeline.from_yaml() ma per questo esempio
     implementiamo una versione semplificata che usa la struttura YAML proposta.
     """
     config = load_yaml_config(yaml_path)

@@ -4,7 +4,7 @@ services:
   # Zipkin per tracing semplice
   zipkin:
     image: openzipkin/zipkin:latest
-    container_name: datapizzai-zipkin
+    container_name: datapizza-zipkin
     ports:
       - "9411:9411"
     environment:
@@ -14,7 +14,7 @@ services:
   # Grafana per visualizzazione avanzata
   grafana:
     image: grafana/grafana:latest
-    container_name: datapizzai-grafana
+    container_name: datapizza-grafana
     ports:
       - "3000:3000"
     environment:
@@ -31,7 +31,7 @@ services:
   # Tempo per backend tracing
   tempo:
     image: grafana/tempo:latest
-    container_name: datapizzai-tempo
+    container_name: datapizza-tempo
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./tempo.yaml:/etc/tempo.yaml:ro
@@ -50,4 +50,4 @@ volumes:
 
 networks:
   default:
-    name: datapizzai-monitoring
+    name: datapizza-monitoring

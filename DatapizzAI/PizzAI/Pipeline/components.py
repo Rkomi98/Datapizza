@@ -8,9 +8,9 @@ from typing import Any, Dict, List, Optional
 import sounddevice as sd
 import soundfile as sf
 
-from datapizzai.clients import ClientFactory
-from datapizzai.core.models import PipelineComponent
-from datapizzai.type import Media, MediaBlock, TextBlock
+from datapizza.clients import ClientFactory
+from datapizza.core.models import PipelineComponent
+from datapizza.type import Media, MediaBlock, TextBlock
 
 
 class RecordAudio(PipelineComponent):

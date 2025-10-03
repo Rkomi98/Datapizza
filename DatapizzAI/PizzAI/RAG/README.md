@@ -1,6 +1,6 @@
-# RAG con datapizzai - Quick start
+# RAG con datapizza-ai - Quick start
 
-Implementazione rapida di un sistema RAG utilizzando la libreria datapizzai.
+Implementazione rapida di un sistema RAG utilizzando la libreria datapizza-ai.
 
 ## File disponibili
 
@@ -30,7 +30,7 @@ Se ottieni errore `ResourceNotFoundError (404)` con `AzureParser`, è perché st
 ### 1. Prerequisiti
 
 ```bash
-pip install datapizzai
+pip install datapizza-ai
 # Installare anche le dipendenze per i servizi utilizzati (OpenAI, Azure, Cohere, Qdrant)
 ```
 
@@ -86,11 +86,8 @@ python simple_rag_example.py
 ## Esempio minimo con TextParser
 
 ```python
-from datapizzai.modules.parsers.text_parser import parse_text
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.embedders import NodeEmbedder
-from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.clients import OpenAIClient
+from datapizza.clients.openai import OpenAIClient
+
 
 # Testo di esempio
 text = """Il machine learning è una branca dell'intelligenza artificiale.

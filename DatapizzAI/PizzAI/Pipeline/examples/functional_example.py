@@ -12,9 +12,9 @@ import os
 from typing import Any, Dict, List
 
 from dotenv import load_dotenv
-from datapizzai.pipeline import FunctionalPipeline, Dependency
-from datapizzai.core.models import PipelineComponent
-from datapizzai.clients import OpenAIClient
+from datapizza.pipeline import FunctionalPipeline, Dependency
+from datapizza.core.models import PipelineComponent
+from datapizza.clients import OpenAIClient
 
 # Carica variabili d'ambiente
 load_dotenv()

@@ -1,24 +1,24 @@
 """
-Esempio pratico di implementazione RAG con datapizzai
+Esempio pratico di implementazione RAG con datapizza
 
 Questo script mostra come implementare un sistema RAG completo
-utilizzando tutti i componenti della libreria datapizzai.
+utilizzando tutti i componenti della libreria datapizza.
 """
 
 import asyncio
 import logging
 from pathlib import Path
 
-from datapizzai.clients import OpenAIClient
-from datapizzai.embedders import ClientEmbedder, NodeEmbedder
-from datapizzai.modules.captioners import LLMCaptioner
-from datapizzai.modules.metatagger import KeywordMetatagger
-from datapizzai.modules.parsers import AzureParser
-from datapizzai.modules.prompt import ChatPromptTemplate
-from datapizzai.modules.rerankers import CohereReranker
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.modules.treebuilder import LLMTreeBuilder
-from datapizzai.vectorstores import QdrantVectorstore
+from datapizza.clients import OpenAIClient
+from datapizza.embedders import ClientEmbedder, NodeEmbedder
+from datapizza.modules.captioners import LLMCaptioner
+from datapizza.modules.metatagger import KeywordMetatagger
+from datapizza.modules.parsers import AzureParser
+from datapizza.modules.prompt import ChatPromptTemplate
+from datapizza.modules.rerankers import CohereReranker
+from datapizza.modules.splitters import TextSplitter
+from datapizza.modules.treebuilder import LLMTreeBuilder
+from datapizza.vectorstores import QdrantVectorstore
 
 # Configurazione logging
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class RAGSystem:
-    """Sistema RAG completo con datapizzai"""
+    """Sistema RAG completo con datapizza"""
     
     def __init__(self, config: dict):
         """

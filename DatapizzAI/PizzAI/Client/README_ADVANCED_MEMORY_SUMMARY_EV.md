@@ -1,6 +1,6 @@
 # Advanced memory summary management
 
-Advanced example for intelligent conversation memory summary management with DatapizzAI. This example significantly extends the basic functionality by showing professional techniques for production applications.
+Advanced example for intelligent conversation memory summary management with Datapizza-AI. This example significantly extends the basic functionality by showing professional techniques for production applications.
 
 ## Table of contents
 
@@ -119,15 +119,13 @@ config = SummaryConfig(
 ```python
 import os
 from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.cache import MemoryCache
 from advanced_memory_summary import AdvancedMemoryManager, SummaryConfig, SummaryStrategy
 
 load_dotenv()
 
-# Client with cache
-client = ClientFactory.create(
-    provider="openai",
+from datapizza.clients.openai import OpenAIClient
+
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
     temperature=0.7,

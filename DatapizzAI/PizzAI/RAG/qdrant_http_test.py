@@ -7,8 +7,8 @@ CORREZIONI APPLICATE:
 """
 
 import numpy as np
-from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.type import Chunk, DenseEmbedding
+from datapizza.vectorstores import QdrantVectorstore
+from datapizza.type import Chunk, DenseEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 

@@ -1,6 +1,6 @@
-# Multimodal Examples - DatapizzAI
+# Multimodal Examples - Datapizza-AI
 
-Quick examples for using the **DatapizzAI** framework with multimedia input/output (images + text).
+Quick examples that show how to use the **Datapizza-AI** framework with multimodal input/output (images + text).
 
 ## Table of Contents
 
@@ -11,36 +11,34 @@ Quick examples for using the **DatapizzAI** framework with multimedia input/outp
 
 ## 1. Image analysis from URL
 
-**When to use**: Analysis of public images, quick tests, demos without local files
+**When to use**: Public image analysis, quick tests, demos without local files
 
-**What it does**: The `MediaBlock` encapsulates the image (URL, base64 or file) and combines it with text to create multimodal input. The AI analyzes both the textual prompt and visual content.
+**What it does**: The `MediaBlock` wraps the image (URL, base64, or file) and combines it with text so you can create multimodal input. The AI processes both the textual prompt and the visual content.
 
 ```python
-from datapizzai.clients import ClientFactory
-from datapizzai.type import TextBlock, MediaBlock, Media
 from dotenv import load_dotenv
 import os
 
+from datapizza.clients.openai import OpenAIClient
+from datapizza.type import Media, MediaBlock, TextBlock
+
 load_dotenv('../.env')
-client = ClientFactory.create(
-    provider="openai",
+client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o"
 )
 
-# Analyze image from URL
 media = Media(
-    extension="jpg",        # Extension without dot for correct MIME type
+    extension="jpg",        # Extension without dot for the correct MIME type
     media_type="image",     # Media type (image, audio, video)
     source_type="url",      # Source: url, base64, or file
     source="https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/internal_resources/1155.jpeg?w=1767&h=350&fit=clip&crop=faces%2Cfocalpoint",
-    detail="high"           # Detail level (low|high|auto, if supported)
+    detail="high"
 )
 
-# Combine text and image for multimodal input
 response = client.invoke([
     TextBlock(content="Describe this image in detail"),
-    MediaBlock(media=media)  # Wrapper that contains the image
+    MediaBlock(media=media)
 ])
 
 print(response.text)
@@ -50,38 +48,35 @@ print(response.text)
 
 ## 2. Local image analysis
 
-**When to use**: Analysis of personal photos, private documents, non-public images
+**When to use**: Personal photos, private documents, images that are not publicly accessible
 
-**What it does**: Converts the local image to base64 for secure transmission via API. The `MediaBlock` handles encoding and transmission of the file.
+**What it does**: Converts the local image to base64 for safe transfer over the API. The `MediaBlock` takes care of encoding and sending the file.
 
 ```python
 import base64
 from pathlib import Path
-from datapizzai.type import Media, MediaBlock, TextBlock
+
+from datapizza.type import Media, MediaBlock, TextBlock
 
 def load_image_as_base64(path: str) -> str:
-    """Converts image file to base64 string for secure transmission"""
+    """Convert an image file into a base64 string for safe transport"""
     return base64.b64encode(Path(path).read_bytes()).decode("utf-8")
 
-# Load local image and convert to base64
 image_b64 = load_image_as_base64("Example.png")
 
-# Create Media object with image metadata
 media = Media(
-    extension="jpg",        # File extension for MIME type
+    extension="jpg",        # File extension used for the MIME type
     media_type="image",     # Content type
     source_type="base64",   # Transmission format
-    source=image_b64,       # Encoded image data
-    detail="high"           # Analysis quality (high for details)
+    source=image_b64,        # Encoded image data
+    detail="high"
 )
 
-# Specific prompt for technical analysis
-prompt = "Analyze this image and give me a technical description."
+prompt = "Analyse this image and give me a technical description."
 
-# Invoke AI with multimodal input (text + image)
 response = client.invoke([
     TextBlock(content=prompt),
-    MediaBlock(media=media)  # Wrapper for the image
+    MediaBlock(media=media)
 ])
 
 print(response.text)
@@ -91,36 +86,35 @@ print(response.text)
 
 ## 3. Local audio analysis
 
-**When to use**: Transcription of recordings, analysis of audio content, voice conversations.
+**When to use**: Transcribing recordings, analysing audio content, voice conversations
 
-**What it does**: Sends a direct path to a local audio file for analysis. The AI can transcribe, analyze, or respond to the audio content. This method is efficient as it avoids loading the entire file into memory as base64.
+**What it does**: Sends a local audio file for analysis. The `MediaBlock` manages file transmission, and the AI can transcribe, analyse, or respond to the audio content.
 
 ```python
 import os
-from pathlib import Path
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.type import Media, MediaBlock, TextBlock
 
-# It is recommended to create a dedicated client for audio analysis
-load_dotenv()
-analysis_client_google = ClientFactory.create(
-    provider="google",
-    model="gemini-1.5-flash",
+from datapizza.clients.google import GoogleClient
+from datapizza.type import Media, MediaBlock, TextBlock
+
+analysis_client_google = GoogleClient(
+    model="gemini-2.5-flash",
     api_key=os.getenv("GOOGLE_API_KEY"),
-    system_prompt="You are an AI assistant specialized in audio analysis. Please respond in English.",
+    system_prompt="You are an AI assistant specialised in audio analysis. Please, answer in English.",
     temperature=0.5
 )
 
 media = Media(
     extension="wav",
     media_type="audio",
-    source_type="path",      # Use 'path' for direct file access
-    source="TI0TpOD_.wav"     # <— path to the file
+    source_type="path",
+    source="TI0TpOD_.wav"
 )
 
-prompt = "Transcribe this audio and summarize its main content."
-response = analysis_client_google.invoke([TextBlock(content=prompt), MediaBlock(media=media)])
+prompt = "Transcribe this audio and summarise the main content."
+response = analysis_client_google.invoke([
+    TextBlock(content=prompt),
+    MediaBlock(media=media)
+])
 print(response.text)
 ```
 
@@ -130,7 +124,7 @@ print(response.text)
 
 **When to use**: Progressive image analysis, visual tutoring, iterative development of creative projects
 
-**What it does**: Maintains visual and textual context between conversation turns. The AI remembers the analyzed image and can refer to it in subsequent turns without the user resending it.
+**What it does**: Keeps the visual and textual context across conversation turns. The AI remembers the analysed image and can reference it in later messages without the user sending it again.
 
 ```python
 import os
@@ -138,9 +132,10 @@ import base64
 from pathlib import Path
 from dotenv import load_dotenv
 
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import ROLE, TextBlock, Media, MediaBlock
+from datapizza.clients.openai import OpenAIClient
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock, Media, MediaBlock
+
 
 load_dotenv('../.env')
 
@@ -158,18 +153,15 @@ def create_mediablock_from_file(file_path: str) -> MediaBlock:
     )
     return MediaBlock(media=media)
 
-client = ClientFactory.create(provider="openai", api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o"
+)
 memory = Memory()
-
-# First turn: user sends image with request
 image_block = create_mediablock_from_file("Example.png")
-memory.add_turn([TextBlock("Analyze this photo, what do you see?"), image_block], ROLE.USER)
-resp = client.invoke("Analyze this photo, what do you see?", memory=memory)
-memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)  # Add assistant response to memory
-
-# Second turn: follow-up that builds on the previous image
+memory.add_turn([TextBlock("Analyse this photo, what do you see?"), image_block], ROLE.USER)
+resp = client.invoke("Analyse this photo, what do you see?", memory=memory)
+memory.add_turn([TextBlock(resp.text)], ROLE.ASSISTANT)
 resp = client.invoke("What improvements would you recommend?", memory=memory)
-print(resp.text)
-
 print(resp.text)
 ```

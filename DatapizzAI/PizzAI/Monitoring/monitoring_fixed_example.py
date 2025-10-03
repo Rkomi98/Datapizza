@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Esempio di monitoring datapizzai - VERSIONE CORRETTA
+Esempio di monitoring datapizza - VERSIONE CORRETTA
 ==================================================
 
 Questo esempio risolve il problema "Overriding of current TracerProvider is not allowed"
-e mostra come integrare correttamente datapizzai con esportatori esterni.
+e mostra come integrare correttamente datapizza con esportatori esterni.
 
 PRIMA DI ESEGUIRE:
 1. Avvia i servizi Docker:
@@ -22,22 +22,22 @@ import os
 import time
 from dotenv import load_dotenv
 
-# Import OpenTelemetry PRIMA di datapizzai (importante!)
+# Import OpenTelemetry PRIMA di datapizza (importante!)
 from opentelemetry import trace
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-# Import datapizzai DOPO OpenTelemetry
-from datapizzai.clients import ClientFactory
-from datapizzai.tracing import ContextTracing
-from datapizzai.type import TextBlock, ROLE
+# Import datapizza DOPO OpenTelemetry
+from datapizza.clients import ClientFactory
+from datapizza.tracing import ContextTracing
+from datapizza.type import TextBlock, ROLE
 
 load_dotenv()
 
 
-class DatapizzaiMonitoringManager:
-    """Manager per configurare monitoring con datapizzai senza conflitti"""
+class DatapizzaAiMonitoringManager:
+    """Manager per configurare monitoring con datapizza senza conflitti"""
     
     def __init__(self):
         self.context_tracer = None
@@ -46,17 +46,17 @@ class DatapizzaiMonitoringManager:
     
     def setup_monitoring(self, enable_zipkin=True, enable_otlp=True):
         """
-        Configura il monitoring in modo compatibile con datapizzai
+        Configura il monitoring in modo compatibile con datapizza
         
         IMPORTANTE: L'ordine delle operazioni è critico!
         """
-        print("🔧 Configurazione monitoring datapizzai...")
+        print("🔧 Configurazione monitoring datapizza...")
         
         # STEP 1: Inizializza ContextTracing (questo configura il TracerProvider)
         print("  1. Inizializzazione ContextTracing...")
         self.context_tracer = ContextTracing()
         
-        # STEP 2: Ottieni il TracerProvider configurato da datapizzai
+        # STEP 2: Ottieni il TracerProvider configurato da datapizza
         print("  2. Recupero TracerProvider...")
         self.tracer_provider = trace.get_tracer_provider()
         
@@ -109,7 +109,7 @@ def test_basic_monitoring():
     print("\n🧪 Test 1: Monitoring base")
     
     # Setup monitoring
-    manager = DatapizzaiMonitoringManager()
+    manager = DatapizzaAiMonitoringManager()
     tracer = manager.setup_monitoring()
     
     # Setup client
@@ -138,7 +138,7 @@ def test_conversation_monitoring():
     print("\n🧪 Test 2: Monitoring conversazione")
     
     # Setup
-    manager = DatapizzaiMonitoringManager()
+    manager = DatapizzaAiMonitoringManager()
     tracer = manager.setup_monitoring()
     
     api_key = os.getenv("OPENAI_API_KEY")
@@ -147,7 +147,7 @@ def test_conversation_monitoring():
     else:
         client = ClientFactory.create("openai", api_key, "gpt-4o")
     
-    from datapizzai.memory import Memory
+    from datapizza.memory import Memory
     memory = Memory()
     
     # Simulazione conversazione
@@ -182,7 +182,7 @@ def test_manual_spans():
     print("\n🧪 Test 3: Span manuali")
     
     # Setup
-    manager = DatapizzaiMonitoringManager()
+    manager = DatapizzaAiMonitoringManager()
     tracer = manager.setup_monitoring()
     
     # Ottieni tracer OpenTelemetry per span manuali
@@ -259,7 +259,7 @@ def create_mock_client():
 
 def main():
     """Funzione principale con tutti i test"""
-    print("🚀 DATAPIZZAI MONITORING - Test Completo")
+    print("🚀 DATAPIZZA MONITORING - Test Completo")
     print("=" * 50)
     
     # Verifica prerequisiti

@@ -1,4 +1,4 @@
-from datapizzai.agents import Agent
+from datapizza.agents import Agent
 
 agent = Agent()
 

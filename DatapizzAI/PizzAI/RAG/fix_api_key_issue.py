@@ -109,7 +109,7 @@ def test_openai_connection(api_key):
     print("-" * 30)
     
     try:
-        from datapizzai.clients import OpenAIClient
+        from datapizza.clients import OpenAIClient
         
         client = OpenAIClient(
             api_key=os.getenv("OPENAI_API_KEY"),
@@ -156,7 +156,7 @@ def test_azure_openai_connection(api_key, endpoint):
         return False
     
     try:
-        from datapizzai.clients import OpenAIClient
+        from datapizza.clients import OpenAIClient
         
         client = OpenAIClient(
             api_key=api_key,
@@ -189,7 +189,7 @@ def create_env_template():
     print(f"\n📝 Creazione template .env")
     print("-" * 30)
     
-    template = """# Configurazione RAG datapizzai
+    template = """# Configurazione RAG datapizza
 # Scegli UNA delle opzioni per il client LLM
 
 # === OPZIONE 1: OpenAI diretto (raccomandato per iniziare) ===

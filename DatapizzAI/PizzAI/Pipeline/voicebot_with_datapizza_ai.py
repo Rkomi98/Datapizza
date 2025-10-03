@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Voicebot con FunctionalPipeline (datapizzai):
+Voicebot con FunctionalPipeline (datapizza):
 Audio → Gemini 2.5 Flash (trascrizione+riassunto+sentiment) → branch notifica → report
 
 Requisiti:
 - .env con GOOGLE_API_KEY
 - pip install sounddevice soundfile python-dotenv pyyaml
-- libreria datapizzai disponibile nell'ambiente
+- libreria datapizza disponibile nell'ambiente
 
 Uso tipico:
-  python Pipeline/voicebot_with_datapizzai.py --config Pipeline/voicebot_pipeline.yaml
+  python Pipeline/voicebot_with_datapizza.py --config Pipeline/voicebot_pipeline.yaml
 
 Note:
 - Questo script costruisce una FunctionalPipeline con branch e foreach.
@@ -24,8 +24,8 @@ from typing import Any, Dict, Optional
 import yaml
 from dotenv import load_dotenv
 
-# datapizzai pipeline
-from datapizzai.pipeline import Dependency, FunctionalPipeline
+# datapizza pipeline
+from datapizza.pipeline import Dependency, FunctionalPipeline
 
 # componenti locali
 from Pipeline.components import (

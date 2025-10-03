@@ -7,10 +7,10 @@ fornisce alternative più affidabili per la ristrutturazione del testo.
 
 import asyncio
 import logging
-from datapizzai.clients import OpenAIClient
-from datapizzai.modules.parsers.text_parser import parse_text
-from datapizzai.modules.treebuilder import LLMTreeBuilder
-from datapizzai.modules.splitters import TextSplitter
+from datapizza.clients import OpenAIClient
+from datapizza.modules.parsers.text_parser import parse_text
+from datapizza.modules.treebuilder import LLMTreeBuilder
+from datapizza.modules.splitters import TextSplitter
 
 # Configura logging per vedere i dettagli
 logging.basicConfig(level=logging.INFO)

@@ -1,29 +1,27 @@
-# DatapizzAI Client Configuration Guide
+# Datapizza-AI Client Configuration Guide
 
-This guide will help you set up all kind of clients available in the DatapizzAI library to interact with different LLM model providers.
+This guide walks you through configuring every client available in the Datapizza-AI library so you can work with different LLM providers.
+For two fully worked custom adapter examples, check the dedicated guide [`README_CUSTOM_CLIENT_EV.md`](README_CUSTOM_CLIENT_EV.md).
 
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
 - [Basic code setup](#basic-code-setup)
-- [Method 1: Using ClientFactory (recommended)](#method-1-using-clientfactory-recommended)
-- [Method 2: Direct client configuration](#method-2-direct-client-configuration)
-- [Method 3: Custom provider via API (e.g., IBM WatsonX)](#method-3-custom-provider-via-api-eg-ibm-watsonx)
-- [Method 4: Local model (Ollama/Gemma)](#method-4-local-model-ollamagemma)
-- [Complete usage example](#complete-usage-example)
-- [Next steps](#next-steps)
+- [Method 1: Direct client configuration](#method-1-direct-client-configuration)
+- [Method 2: Using the ClientFactory (recommended)](#method-2-using-the-clientfactory-recommended)
+- [Method 3: Custom clients (external provider or local model)](#method-3-custom-clients-external-provider-or-local-model)
 
 ## Prerequisites
 
-This step prepares your environment by installing dependencies and configuring API keys to prevent runtime errors.
+Prepare your environment by installing the required dependencies and configuring API keys to avoid runtime errors.
 
-### Installing dependencies
+### Install dependencies
 ```bash
-pip install python-dotenv
+pip install datapizza-ai python-dotenv
 ```
 
-### Environment variables configuration
-Create a `.env` file in your project root with at least one API key:
+### Set environment variables
+Create a `.env` file in the root of your project with at least one API key:
 
 ```bash
 OPENAI_API_KEY=sk-your-openai-api-key-here
@@ -36,7 +34,7 @@ AZURE_OPENAI_DEPLOYMENT=your-deployment-name
 ```
 
 ### Basic code setup
-This code block handles the minimal initialization—loading environment variables and importing the required clients—used in all examples.
+This code block provides the minimal initialization shared by all examples: it loads environment variables and imports the required clients.
 ```python
 import os
 from dotenv import load_dotenv
@@ -44,104 +42,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Required imports
-from datapizzai.clients import (
-    ClientFactory, 
-    OpenAIClient,
-    AnthropicClient, 
-    GoogleClient,
-    MistralClient,
-    AzureOpenAIClient
-)
-from datapizzai.clients.factory import Provider
 ```
-
 ---
 
-## Method 1: Using ClientFactory (recommended)
+## Method 1: Direct client configuration
 
-The `ClientFactory` abstracts away provider-specific details, allowing you to create a consistent client quickly while reducing configuration mistakes.
+Direct configuration gives you fine-grained control over provider-specific parameters such as caching options or custom endpoints.
 
-### OpenAI client
-```python
-# Basic configuration
-openai_client = ClientFactory.create(
-    provider=Provider.OPENAI,  # or simply "openai"
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o",
-    system_prompt="You are a helpful AI assistant.",
-    temperature=0.7
-)
+### Direct OpenAI client
+Install the dedicated client with:
 
- 
+```bash
+pip install datapizza-ai-clients-openai
 ```
-
-### Anthropic client (Claude)
 ```python
-# Basic configuration
-anthropic_client = ClientFactory.create(
-    provider=Provider.ANTHROPIC,  # or "anthropic"
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-sonnet-4-20250514",
-    system_prompt="You are Claude, an Anthropic AI assistant.",
-    temperature=0.5
-)
+from datapizza.cache import MemoryCache
+from datapizza.clients.openai import OpenAIClient
 
- 
-```
-
-### Google client (Gemini)
-```python
-# Basic configuration
-google_client = ClientFactory.create(
-    provider=Provider.GOOGLE,  # or "google"
-    api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.5-flash",
-    system_prompt="You are Gemini, Google's AI assistant.",
-    temperature=0.6
-)
-
- 
-```
-
-### Mistral client
-```python
-# Basic configuration
-mistral_client = ClientFactory.create(
-    provider=Provider.MISTRAL,  # or "mistral"
-    api_key=os.getenv("MISTRAL_API_KEY"),
-    model="mistral-small-latest",
-    system_prompt="You are an AI assistant based on Mistral.",
-    temperature=0.7
-)
-
- 
-```
-
-### Azure OpenAI client
-```python
-# Basic configuration
-azure_client = ClientFactory.create(
-    provider=Provider.AZURE_OPENAI,  # or "azure_openai"
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    model="gpt-4o",
-    system_prompt="You are a professional business assistant.",
-    temperature=0.5,
-    # Azure-specific parameters
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
-    api_version="2024-02-15-preview"
-)
-```
-
----
-
-## Method 2: Direct client configuration
-
-Direct configuration offers fine-grained control over provider-specific parameters, such as caching options or custom endpoints.
-
-### Advanced OpenAI client
-```python
-from datapizzai.cache import MemoryCache
 
 # Configuration with cache
 cache = MemoryCache()
@@ -159,8 +76,15 @@ response = openai_client.invoke("Hello! How are you?")
 print(f"Response: {response.text}")
 ```
 
-### Advanced Anthropic client
+### Direct Anthropic client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-anthropic
+```
 ```python
+from datapizza.clients.anthropic import AnthropicClient
+
 anthropic_client = AnthropicClient(
     api_key=os.getenv("ANTHROPIC_API_KEY"),
     model="claude-sonnet-4-20250514",
@@ -173,8 +97,15 @@ response = anthropic_client.invoke("Write a short poem about technology")
 print(f"Response: {response.text}")
 ```
 
-### Advanced Google client
+### Direct Google client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-google
+```
 ```python
+from datapizza.clients.google import GoogleClient
+
 # Standard configuration (GenAI API)
 google_client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
@@ -185,13 +116,13 @@ google_client = GoogleClient(
 
 # Vertex AI configuration (enterprise deployment)
 google_vertex_client = GoogleClient(
-    model="gemini-1.5-pro",
+    model="gemini-2.5-pro",
     system_prompt="You are a business assistant.",
     temperature=0.5,
     # Vertex AI parameters
-    project_id="your-gcp-project-id",
+    project_id=os.getenv("VERTEX_PROJECT_ID"),
     location="us-central1",
-    credentials_path="/path/to/service-account.json",
+    credentials_path="service-account.json",
     use_vertexai=True
 )
 
@@ -200,8 +131,15 @@ response = google_client.invoke("Explain the Pythagorean theorem")
 print(f"Response: {response.text}")
 ```
 
-### Advanced Mistral client
+### Direct Mistral client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-mistral
+```
 ```python
+from datapizza.clients.mistral import MistralClient
+
 mistral_client = MistralClient(
     api_key=os.getenv("MISTRAL_API_KEY"),
     model="mistral-large-latest",
@@ -210,16 +148,23 @@ mistral_client = MistralClient(
 )
 
 # Test the client
-response = mistral_client.invoke("Translate 'Hello world' to Italian and French")
+response = mistral_client.invoke("Translate 'Hello world' into Italian and French")
 print(f"Response: {response.text}")
 ```
 
-### Advanced Azure OpenAI client
+### Direct Azure OpenAI client
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-azure-openai
+```
 ```python
+from datapizza.clients.azure_openai import AzureOpenAIClient, OpenAIClient
+
 azure_client = AzureOpenAIClient(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     model="gpt-4o",
-    system_prompt="You are a business assistant for Microsoft Azure.",
+    system_prompt="You are a Microsoft Azure business assistant.",
     temperature=0.5,
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
     azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
@@ -227,335 +172,178 @@ azure_client = AzureOpenAIClient(
 )
 
 # Test the client
-response = azure_client.invoke("Explain Azure AI services")
+response = azure_client.invoke("Explain Azure AI services to me")
 print(f"Response: {response.text}")
 ```
 
 ---
 
-## Method 3: Custom provider via API (e.g., IBM WatsonX)
+## Method 2: Using the ClientFactory (recommended)
 
-To integrate custom providers like IBM Watson, you can create an adapter that respects the standard `invoke(input, memory)` interface.
+`ClientFactory` abstracts provider-specific details, letting you spin up a consistent client quickly while reducing the chance of mistakes.
 
-### IBM WatsonX configuration
+### OpenAI client
+Install the dedicated client with:
 
-Prerequisites:
 ```bash
-pip install ibm-watsonx-ai
+pip install datapizza-ai-clients-openai
+```
+```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
+# Basic configuration
+openai_client = ClientFactory.create(
+    provider=Provider.OPENAI,  # or simply "openai"
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="You are a helpful AI assistant.",
+    temperature=0.7
+)
 ```
 
-Environment variables:
+### Anthropic client (Claude)
+Install the dedicated client with:
+
 ```bash
-IBM_WATSONX_API_KEY=your-ibm-watsonx-api-key
-IBM_WATSONX_PROJECT_ID=your-project-id
-IBM_WATSONX_URL=https://us-south.ml.cloud.ibm.com
+pip install datapizza-ai-clients-anthropic
+```
+```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
+# Basic configuration
+anthropic_client = ClientFactory.create(
+    provider=Provider.ANTHROPIC,  # or "anthropic"
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    model="claude-sonnet-4-20250514",
+    system_prompt="You are Claude, an Anthropic AI assistant.",
+    temperature=0.5
+)
 ```
 
-Adapter implementation:
+### Google client (Gemini)
+Install the dedicated client with:
+
+```bash
+pip install datapizza-ai-clients-google
+```
+```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
+# Basic configuration
+google_client = ClientFactory.create(
+    provider=Provider.GOOGLE,  # or "google"
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-2.5-flash",
+    system_prompt="You are Gemini, Google's AI assistant.",
+    temperature=0.6
+)
+```
+
+### Mistral client
+```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
+# Basic configuration
+mistral_client = ClientFactory.create(
+    provider=Provider.MISTRAL,  # or "mistral"
+    api_key=os.getenv("MISTRAL_API_KEY"),
+    model="mistral-small-latest",
+    system_prompt="You are an AI assistant based on Mistral.",
+    temperature=0.7
+)
+```
+
+### Azure OpenAI client
+```python
+from datapizza.clients import ClientFactory
+
+from datapizza.clients.factory import Provider
+
+# Basic configuration
+azure_client = ClientFactory.create(
+    provider=Provider.AZURE_OPENAI,  # or "azure_openai"
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    model="gpt-4o",
+    system_prompt="You are a professional business assistant.",
+    temperature=0.5,
+    # Azure-specific parameters
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+    api_version="2024-02-15-preview"
+)
+```
+
+---
+
+## Method 3: Custom clients (external provider or local model)
+
+Need a provider that is not bundled or a model that runs locally? Define a base adapter first, then specialize it for the remote API or local runtime you want to use. The interface remains `invoke(input_text, memory=None)` just like the other clients. You can explore the full walkthrough in the [deep-dive section](https://github.com/Rkomi98/Datapizza/blob/LastChanges/Datapizza-AI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md). Let's go step by step.
+
+### Step 1: Define the base adapter structure
 
 ```python
-import os
-from typing import Optional, List, Dict, Any
-from ibm_watsonx_ai import Credentials
-from ibm_watsonx_ai.foundation_models import ModelInference
-from ibm_watsonx_ai import APIClient
+from typing import Optional, Dict, Any
 
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-
-# Use the same response structure as DatapizzAI clients
-# (assuming ClientResponse is available from the library)
-try:
-    from datapizzai.clients.base import ClientResponse
-except ImportError:
-    # Fallback if not available
-    from pydantic import BaseModel
-    class ClientResponse(BaseModel):
-        text: str
-        prompt_tokens_used: int = 0
-        completion_tokens_used: int = 0
-        stop_reason: str = "stop"
+from datapizza.clients import ClientResponse
+from datapizza.memory import Memory
+from datapizza.type import TextBlock
 
 
-class IBMWatsonXClient:
-    def __init__(self, model_id: str = "ibm/granite-3-2-8b-instruct", temperature: float = 0.7):
-        self.model_id = model_id
-        self.temperature = temperature
-        
-        # IBM WatsonX credentials configuration
-        self.credentials = Credentials(
-            url=os.getenv("IBM_WATSONX_URL", "https://us-south.ml.cloud.ibm.com"),
-            api_key=os.getenv("IBM_WATSONX_API_KEY")
-        )
-        
-        # Initialize API client
-        self.client = APIClient(self.credentials)
-        self.project_id = os.getenv("IBM_WATSONX_PROJECT_ID")
-        
-        # Set default project
-        if self.project_id:
-            self.client.set.default_project(self.project_id)
-        
-        # Initialize the model
-        self.model = self._initialize_model()
-    
-    def _initialize_model(self):
-        """Initialize IBM WatsonX model once to optimize performance."""
-        model_params = {
-            "max_new_tokens": 1000,
-            "temperature": self.temperature,
-            "stop_sequences": ["Human:", "Assistant:"]
-        }
-        
-        return ModelInference(
-            model_id=self.model_id,
-            api_client=self.client,
-            params=model_params
-        )
-    
-    def _build_prompt(self, input_text: str = None, memory: Optional[Memory] = None) -> str:
-        """Build prompt including conversation memory."""
-        prompt_parts = []
-        
-        # Add context from memory
-        if memory is not None:
-            for turn in memory.memory:
-                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
-                content = " ".join(getattr(block, "content", "") for block in turn.blocks)
-                if content:
-                    if role.lower() == "user":
-                        prompt_parts.append(f"Human: {content}")
-                    elif role.lower() == "assistant":
-                        prompt_parts.append(f"Assistant: {content}")
-        
-        # Add current input
-        if input_text:
-            prompt_parts.append(f"Human: {input_text}")
-        
-        prompt_parts.append("Assistant:")
-        return "\n\n".join(prompt_parts)
-    
-    def invoke(self, input_text: str = None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Invoke IBM Watson model and return compatible response."""
-        try:
-            prompt = self._build_prompt(input_text, memory)
-            
-            # Call IBM Watson model
-            response = self.model.generate_text(prompt=prompt)
-            
-            # Extract response text
-            if isinstance(response, dict):
-                text = response.get("generated_text", "").strip()
-                # Remove "Assistant:" prefix if present
-                if text.startswith("Assistant:"):
-                    text = text[10:].strip()
-            else:
-                text = str(response).strip()
-            
-            # Approximate token estimation (IBM Watson doesn't always provide detailed metrics)
-            estimated_prompt_tokens = len(prompt.split()) * 1.3  # Rough estimate
-            estimated_completion_tokens = len(text.split()) * 1.3
-            
-            return ClientResponse(
-                content=[TextBlock(content=text)],
-                prompt_tokens_used=int(estimated_prompt_tokens),
-                completion_tokens_used=int(estimated_completion_tokens),
-                stop_reason="stop"
-            )
-            
-        except Exception as e:
-            return ClientResponse(
-                content=[TextBlock(content=f"IBM Watson error: {str(e)}")],
-                prompt_tokens_used=0,
-                completion_tokens_used=0,
-                stop_reason="error"
-            )
 
-
-# Usage example
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv()
-    
-    # Create IBM WatsonX client
-    watsonx_client = IBMWatsonXClient(
-        model_id="ibm/granite-3-2-8b-instruct",
-        temperature=0.7
-    )
-    
-    # Test the client
-    response = watsonx_client.invoke("Hello! Introduce yourself briefly.")
-    print(f"Response: {response.text}")
-    print(f"Tokens used: {response.prompt_tokens_used + response.completion_tokens_used}")
-```
-
-## Method 4: Local model (Ollama/Gemma)
-
-Running locally ensures privacy, predictable costs, and low latency. With [Ollama](https://ollama.com), you can run Gemma (or others) locally and integrate it with the same `invoke` interface.
-
-Prerequisites (Linux/macOS):
-
-```bash
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-
-# Start the service (in a separate terminal)
-ollama serve | cat
-
-# Pull the Gemma model (replace the tag if you use a different variant)
-ollama pull gemma3n:e2b
-```
-
-Quick CLI test:
-
-```bash
-ollama run gemma3n:e2b "Hello! Introduce yourself briefly."
-```
-
-Python adapter for full DatapizzAI compatibility:
-
-```python
-import requests
-from typing import Optional, Union, List
-from pydantic import BaseModel
-
-from datapizzai.type import TextBlock
-from datapizzai.memory import Memory
-from datapizzai.clients import ClientResponse
-
-class OllamaClient:
-    def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434"):
+class CustomProviderClient:
+    def __init__(self, api_key: str, model: str, **default_params: Any) -> None:
+        self.api_key = api_key
         self.model = model
-        self.base_url = base_url.rstrip("/")
+        self.default_params = default_params  # e.g., temperature, top_p, etc.
 
-    def _build_messages(self, input=None, memory: Optional[Memory] = None):
-        """Build messages for Ollama chat API including memory."""
-        msgs = []
+    def _build_payload(self, prompt: str, memory: Optional[Memory] = None) -> Dict[str, Any]:
+        messages = []
         if memory is not None:
             for turn in memory.memory:
                 role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
-                content = " ".join(getattr(b, "content", "") for b in turn.blocks)
+                content = " ".join(
+                    getattr(block, "content", "") for block in turn.blocks if getattr(block, "content", "")
+                )
                 if content:
-                    msgs.append({"role": role, "content": content})
-        if isinstance(input, str) and input:
-            msgs.append({"role": "user", "content": input})
-        return msgs
+                    messages.append({"role": role, "content": content})
+        messages.append({"role": "user", "content": prompt})
+        return {"model": self.model, "messages": messages, **self.default_params}
 
-    def _estimate_tokens(self, text: str) -> int:
-        """Approximate token count estimation based on word count."""
-        return int(len(text.split()) * 1.3)  # Rough conversion factor
+    def _execute_request(self, payload: Dict[str, Any]) -> str:
+        # Place your HTTP/SDK call to the remote provider or local runtime here
+        raise NotImplementedError("Replace with the call to your custom provider")
 
-    def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
-        """Invoke Ollama model and return DatapizzAI-compatible response."""
-        messages = self._build_messages(input, memory)
-        payload = {
-            "model": self.model, 
-            "messages": messages, 
-            "stream": False
-        }
-        
-        try:
-            response = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
-            response.raise_for_status()
-            data = response.json()
-            
-            # Extract response text
-            text = data.get("message", {}).get("content", "").strip()
-            if not text:
-                text = str(data)
-            
-            # Calculate token usage estimates
-            prompt_text = " ".join([msg["content"] for msg in messages])
-            prompt_tokens = self._estimate_tokens(prompt_text)
-            completion_tokens = self._estimate_tokens(text)
-            
-            return ClientResponse(
-                content=[TextBlock(content=text)],
-                prompt_tokens_used=prompt_tokens,
-                completion_tokens_used=completion_tokens,
-                stop_reason="stop"
-            )
-            
-        except requests.RequestException as e:
-            return ClientResponse(
-                content=[TextBlock(content=f"Ollama connection error: {str(e)}")],
-                prompt_tokens_used=0,
-                completion_tokens_used=0,
-                stop_reason="error"
-            )
-        except Exception as e:
-            return ClientResponse(
-                content=[TextBlock(content=f"Ollama error: {str(e)}")],
-                prompt_tokens_used=0,
-                completion_tokens_used=0,
-                stop_reason="error"
-            )
-
-
-if __name__ == "__main__":
-    # Test local client
-    client = OllamaClient()
-    response = client.invoke("Summarize the Pythagorean theorem in one sentence.")
-    
-    print(f"Response: {response.text}")
-    print(f"Prompt tokens: {response.prompt_tokens_used}")
-    print(f"Completion tokens: {response.completion_tokens_used}")
-    print(f"Stop reason: {response.stop_reason}")
+    def invoke(self, input_text: str, memory: Optional[Memory] = None) -> ClientResponse:
+        payload = self._build_payload(input_text, memory)
+        raw_response = self._execute_request(payload).strip()
+        return ClientResponse(
+            content=[TextBlock(content=raw_response)],
+            prompt_tokens_used=0,  # Optional: replace with a real metric
+            completion_tokens_used=0,
+            stop_reason="stop"
+        )
 ```
+
+### Step 2: Wire up an external provider (e.g., IBM WatsonX)
+
+Reuse the base class, supply the provider credentials, and map the SDK response back into a `ClientResponse`. Install the necessary libraries and set up the API keys before connecting everything.
+
+The addendum includes a ready-to-use implementation tuned for [IBM WatsonX](https://github.com/Rkomi98/Datapizza/blob/LastChanges/Datapizza-AI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-a--external-provider-ibm-watsonx).
+
+### Step 3: Wire up a local model (e.g., Ollama/Gemma)
+
+If you're relying on a local model, start the service first, then download and launch the model you intend to use.
+
+Among the detailed examples you'll find a dedicated guide for [a local client setup](https://github.com/Rkomi98/Datapizza/blob/LastChanges/Datapizza-AI/PizzAI/Client/README_CUSTOM_CLIENT_EV.md#example-b--local-model-ollama).
 
 ---
 
-## Complete usage example
-
-This complete script verifies that the setup and configuration for your chosen client work correctly end-to-end.
-
-```python
-#!/usr/bin/env python3
-"""
-Complete DatapizzAI client usage example
-"""
-
-import os
-from dotenv import load_dotenv
-from datapizzai.clients import ClientFactory
-from datapizzai.clients.factory import Provider
-
-# Setup
-load_dotenv()
-
-def main():
-    # Choose your preferred provider
-    client = ClientFactory.create(
-        provider=Provider.OPENAI,  # Change here to test other providers
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model="gpt-4o",
-        system_prompt="You are a helpful and professional AI assistant.",
-        temperature=0.7
-    )
-    
-    # Test the client
-    print("DatapizzAI Client Test")
-    print("-" * 30)
-    
-    response = client.invoke("Hello! Introduce yourself briefly.")
-    print(f"Response: {response.text}")
-    print(f"Tokens used: {response.prompt_tokens_used + response.completion_tokens_used}")
-    print(f"Stop reason: {response.stop_reason}")
-
-if __name__ == "__main__":
-    main()
-```
-
----
-
-## Next steps
-
-Once you have validated the basic configuration, you can explore the library's advanced features.
-
-1. **Memory management** for multi‑turn conversations (e.g., periodic summaries)
-2. **Library‑side cache** (`MemoryCache`, `RedisCache`) to optimize cost/latency
-3. **Tools and function calling** for advanced features
-4. **Structured responses** with Pydantic models
-5. **Streaming** for real-time responses
-
-This guide covers all aspects of client configuration. For advanced features, consult the complete DatapizzAI documentation.
+This guide covers every aspect of client configuration. For advanced features, refer to the full Datapizza-AI documentation.

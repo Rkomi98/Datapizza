@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Monitor semplice per chatbot con Grafana/Prometheus/Zipkin
-Esempio pratico e pronto all'uso per monitorare un chatbot DatapizzAI
-Usa solo le librerie già disponibili in datapizzai
+Esempio pratico e pronto all'uso per monitorare un chatbot DatapizzaAI
+Usa solo le librerie già disponibili in datapizza
 """
 
 import time
@@ -15,13 +15,13 @@ from opentelemetry import trace
 from opentelemetry.trace import ProxyTracerProvider
 
 try:
-    from datapizzai.clients import ClientFactory
-    from datapizzai.memory import Memory
-    from datapizzai.type import TextBlock, ROLE
-    from datapizzai.tracing import ContextTracing
+    from datapizza.clients import ClientFactory
+    from datapizza.memory import Memory
+    from datapizza.type import TextBlock, ROLE
+    from datapizza.tracing import ContextTracing
 except ImportError as e:
-    print(f"⚠️  Errore importazione datapizzai: {e}")
-    print("   Verifica che datapizzai sia installato correttamente")
+    print(f"⚠️  Errore importazione datapizza: {e}")
+    print("   Verifica che datapizza sia installato correttamente")
     exit(1)
 
 # Sentinel globali per esecuzioni ripetute (es. notebook)
@@ -37,10 +37,10 @@ class SimpleChatbotMonitor:
     def __init__(self, service_name="chatbot", prometheus_port=8000, zipkin_url="http://localhost:9411/api/v2/spans"):
         print(f"🔧 Inizializzazione monitor per {service_name}...")
         
-        # === TRACING (usando ContextTracing di datapizzai) ===
+        # === TRACING (usando ContextTracing di datapizza) ===
         try:
             self.context_tracer = ContextTracing()
-            print("✅ ContextTracing di datapizzai configurato")
+            print("✅ ContextTracing di datapizza configurato")
         except Exception as e:
             print(f"⚠️  ContextTracing non disponibile: {e}")
             self.context_tracer = None
@@ -128,7 +128,7 @@ class SimpleChatbotMonitor:
         
         start_time = time.time()
         
-        # Usa ContextTracing di datapizzai se disponibile
+        # Usa ContextTracing di datapizza se disponibile
         if self.context_tracer:
             with self.context_tracer.trace("chat_interaction") as trace_context:
                 return self._execute_chat_with_monitoring(user_message, client, memory, start_time, trace_context)
@@ -210,7 +210,7 @@ def esempio_chatbot_interattivo():
         print("  - Prometheus metriche: http://localhost:8000")
         print("  - Zipkin traces: http://localhost:9411 (se configurato)")
         print("  - Grafana dashboard: http://localhost:3000 (se configurato)")
-        print("  - ContextTracing: integrato in datapizzai")
+        print("  - ContextTracing: integrato in datapizza")
         print("\n💬 Chatbot pronto! Scrivi 'quit' per uscire.\n")
         
         message_count = 0

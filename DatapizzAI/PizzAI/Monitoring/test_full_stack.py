@@ -7,8 +7,8 @@ import os
 import time
 import requests
 from simple_chatbot_monitor import SimpleChatbotMonitor
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
+from datapizza.clients import ClientFactory
+from datapizza.memory import Memory
 
 def test_prometheus_connection():
     """Testa la connessione a Prometheus"""

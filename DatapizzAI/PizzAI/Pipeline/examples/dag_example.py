@@ -13,9 +13,9 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 from dotenv import load_dotenv
-from datapizzai.pipeline import DagPipeline
-from datapizzai.core.models import PipelineComponent
-from datapizzai.clients import OpenAIClient
+from datapizza.pipeline import DagPipeline
+from datapizza.core.models import PipelineComponent
+from datapizza.clients import OpenAIClient
 
 # Carica variabili d'ambiente
 load_dotenv()

@@ -18,11 +18,11 @@ except ImportError:
     HAS_PYPDF2 = False
     print("⚠️  PyPDF2 non installato. Usa: pip install PyPDF2")
 
-from datapizzai.clients import OpenAIClient
-from datapizzai.embedders import ClientEmbedder, NodeEmbedder
-from datapizzai.modules.splitters import TextSplitter
-from datapizzai.vectorstores import QdrantVectorstore
-from datapizzai.type.type import Chunk, Node, NodeType
+from datapizza.clients import OpenAIClient
+from datapizza.embedders import ClientEmbedder, NodeEmbedder
+from datapizza.modules.splitters import TextSplitter
+from datapizza.vectorstores import QdrantVectorstore
+from datapizza.type.type import Chunk, Node, NodeType
 from dotenv import load_dotenv
 
 # Carica variabili ambiente

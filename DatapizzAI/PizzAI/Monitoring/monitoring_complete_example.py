@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Esempio completo di monitoring con datapizzai
+Esempio completo di monitoring con datapizza
 ============================================
 
 Questo esempio dimostra tutte le funzionalità di monitoring disponibili:
@@ -11,7 +11,7 @@ Questo esempio dimostra tutte le funzionalità di monitoring disponibili:
 - Attributi personalizzati
 
 Requisiti:
-- pip install datapizzai opentelemetry-api opentelemetry-sdk
+- pip install datapizza-ai opentelemetry-api opentelemetry-sdk
 - pip install opentelemetry-exporter-zipkin opentelemetry-exporter-otlp
 - pip install psutil python-dotenv
 
@@ -26,12 +26,12 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 from dotenv import load_dotenv
 
-# Datapizzai imports
-from datapizzai.clients import ClientFactory
-from datapizzai.tracing import ContextTracing
-from datapizzai.tracing.tracing import generation_span, tool_span, agent_span
-from datapizzai.memory import Memory
-from datapizzai.type import TextBlock, ROLE
+# DatapizzaAi imports
+from datapizza.clients import ClientFactory
+from datapizza.tracing import ContextTracing
+from datapizza.tracing.tracing import generation_span, tool_span, agent_span
+from datapizza.memory import Memory
+from datapizza.type import TextBlock, ROLE
 
 # OpenTelemetry imports
 from opentelemetry import trace
@@ -79,7 +79,7 @@ class PerformanceMetrics:
 
 
 class MonitoringExampleApp:
-    """Applicazione di esempio per il monitoring con datapizzai"""
+    """Applicazione di esempio per il monitoring con datapizza"""
     
     def __init__(self):
         self.tracer = ContextTracing()
@@ -128,7 +128,7 @@ class MonitoringExampleApp:
         try:
             # Setup risorsa OpenTelemetry
             resource = Resource.create({
-                SERVICE_NAME: "datapizzai-monitoring-example",
+                SERVICE_NAME: "datapizza-monitoring-example",
                 SERVICE_VERSION: "1.0.0",
                 "environment": "development",
                 "example": "monitoring"
@@ -391,7 +391,7 @@ class MonitoringExampleApp:
     
     def run_complete_example(self):
         """Esegue l'esempio completo di monitoring"""
-        print("🚀 Avvio esempio completo di monitoring con datapizzai")
+        print("🚀 Avvio esempio completo di monitoring con datapizza")
         print("=" * 60)
         
         # Esempio 1: Tracing base

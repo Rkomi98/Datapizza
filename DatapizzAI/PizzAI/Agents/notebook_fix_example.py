@@ -3,10 +3,10 @@
 Esempio corretto per il notebook - Sostituisci il tuo codice con questo
 """
 
-from datapizzai.clients import ClientFactory
-from datapizzai.memory import Memory
-from datapizzai.type import FunctionCallResultBlock, ROLE, TextBlock
-from datapizzai.tools.tools import tool
+from datapizza.clients import ClientFactory
+from datapizza.memory import Memory
+from datapizza.type import FunctionCallResultBlock, ROLE, TextBlock
+from datapizza.tools.tools import tool
 from dotenv import load_dotenv
 import os
 

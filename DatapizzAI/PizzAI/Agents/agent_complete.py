@@ -1,11 +1,11 @@
 """
-DATAPIZZAI AGENTS - GUIDA COMPLETA END-TO-END
+DATAPIZZA AGENTS - GUIDA COMPLETA END-TO-END
 ===========================================
 
 Questo file fornisce una guida completa per l'utilizzo di tutti gli agenti 
-e funzionalità disponibili nella libreria datapizzai.
+e funzionalità disponibili nella libreria datapizza.
 
-Autore: DatapizzAI Framework
+Autore: DatapizzaAI Framework
 Versione: 3.0.8
 """
 
@@ -15,15 +15,15 @@ import json
 from datetime import datetime
 from typing import List, Dict, Any
 
-# Import dei moduli principali di datapizzai
-from datapizzai.agents import Agent, ClientManager
-from datapizzai.clients import ClientFactory, MockClient
-from datapizzai.clients.factory import Provider
-from datapizzai.tools import tool, Tool
-from datapizzai.memory import Memory
-from datapizzai.type import ROLE, TextBlock
-from datapizzai.pipeline import IngestionPipeline
-from datapizzai.vectorstores import QdrantVectorstore, Distance
+# Import dei moduli principali di datapizza
+from datapizza.agents import Agent, ClientManager
+from datapizza.clients import ClientFactory, MockClient
+from datapizza.clients.factory import Provider
+from datapizza.tools import tool, Tool
+from datapizza.memory import Memory
+from datapizza.type import ROLE, TextBlock
+from datapizza.pipeline import IngestionPipeline
+from datapizza.vectorstores import QdrantVectorstore, Distance
 
 from dotenv import load_dotenv
 
@@ -31,9 +31,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class DatapizzAIAgentDemo:
+class DatapizzaAIAgentDemo:
     """
-    Classe demo per dimostrare tutte le funzionalità degli agenti DatapizzAI.
+    Classe demo per dimostrare tutte le funzionalità degli agenti DatapizzaAI.
     """
     
     def __init__(self):
@@ -47,7 +47,7 @@ class DatapizzAIAgentDemo:
         1. CONFIGURAZIONE CLIENT
         ========================
         
-        DatapizzAI supporta multiple provider di LLM:
+        DatapizzaAI supporta multiple provider di LLM:
         - OpenAI (GPT-3.5-turbo, GPT-4, GPT-4-turbo, etc.)
         - Google (Gemini Pro, Gemini Pro Vision)  
         - Anthropic (Claude-3, Claude-3.5-sonnet, etc.)
@@ -192,7 +192,7 @@ class DatapizzAIAgentDemo:
             raise ValueError("Client non configurato. Eseguire setup_client() prima.")
             
         system_prompt = """
-        Sei un assistente AI intelligente e versatile chiamato DatapizzAI Agent.
+        Sei un assistente AI intelligente e versatile chiamato DatapizzaAI Agent.
         
         Le tue capacità includono:
         - Analisi e elaborazione di testi
@@ -206,7 +206,7 @@ class DatapizzAIAgentDemo:
         """
         
         self.agent = Agent(
-            name="DatapizzAI_Agent_Basic",
+            name="DatapizzaAI_Agent_Basic",
             client=self.client,
             system_prompt=system_prompt,
             tools=tools or [],
@@ -250,7 +250,7 @@ class DatapizzAIAgentDemo:
         """
         
         self.agent = Agent(
-            name="DatapizzAI_Agent_Advanced",
+            name="DatapizzaAI_Agent_Advanced",
             client=self.client,
             system_prompt=system_prompt,
             tools=tools or [],
@@ -424,7 +424,7 @@ class DatapizzAIAgentDemo:
         Esegue una dimostrazione completa di tutte le funzionalità.
         """
         
-        print("🚀 AVVIO DEMO COMPLETA DATAPIZZAI AGENTS")
+        print("🚀 AVVIO DEMO COMPLETA DATAPIZZA AGENTS")
         print("=" * 60)
         
         # 1. Setup client (OpenAI di default)
@@ -447,7 +447,7 @@ class DatapizzAIAgentDemo:
         test_queries = [
             "Calcola il risultato di 25 * 4 + 100",
             "Che tempo fa a Roma?", 
-            "Analizza questo testo: 'DatapizzAI è un framework potente per la creazione di agenti intelligenti.'",
+            "Analizza questo testo: 'DatapizzaAI è un framework potente per la creazione di agenti intelligenti.'",
         ]
         
         for query in test_queries:
@@ -575,14 +575,14 @@ def quick_start_guide():
     
     Funzione helper per iniziare velocemente.
     """
-    print("🚀 DATAPIZZAI AGENTS - GUIDA RAPIDA")
+    print("🚀 DATAPIZZA AGENTS - GUIDA RAPIDA")
     print("=" * 50)
     print()
     print("1. Imposta variabile d'ambiente:")
     print("   export OPENAI_API_KEY='your-api-key-here'")
     print()
     print("2. Esegui demo completa:")
-    print("   demo = DatapizzAIAgentDemo()")
+    print("   demo = DatapizzaAIAgentDemo()")
     print("   demo.run_comprehensive_demo()")
     print()
     print("3. Per uso asincrono:")
@@ -604,7 +604,7 @@ def example_usage():
     print("-" * 30)
     
     # Setup rapido
-    demo = DatapizzAIAgentDemo()
+    demo = DatapizzaAIAgentDemo()
     
     try:
         # Configurazione
@@ -636,7 +636,7 @@ if __name__ == "__main__":
     
     if choice == "1":
         print("\n🚀 Avvio demo completa...")
-        demo = DatapizzAIAgentDemo()
+        demo = DatapizzaAIAgentDemo()
         demo.run_comprehensive_demo()
         
     elif choice == "2":
