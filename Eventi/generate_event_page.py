@@ -1,9 +1,36 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+Script per generare la pagina HTML dinamica di un evento.
+La pagina carica i dati da analysis.json e li renderizza.
+"""
+
+import json
+from pathlib import Path
+from datetime import datetime
+
+
+def generate_event_page(event_folder: str):
+    """Genera la pagina HTML dinamica per un evento."""
+    
+    event_path = Path(event_folder)
+    analysis_file = event_path / 'analysis.json'
+    
+    if not analysis_file.exists():
+        print(f"❌ File {analysis_file} non trovato!")
+        print("Esegui prima: python analyze_event.py " + event_folder)
+        return False
+    
+    # Carica i dati dell'analisi
+    with open(analysis_file, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    # Template HTML dinamico
+    html_template = """<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AperipizzaAI0925 - Report</title>
+    <title>EVENT_NAME - Report</title>
     <style>
         * {
             margin: 0;
@@ -226,255 +253,7 @@
 
     <script>
         // Dati embedded
-        const eventData = {
-  "event_name": "AperipizzaAI0925",
-  "event_folder": "AperipizzaAI0925",
-  "analysis_date": "2025-10-06T14:49:31.877282",
-  "registration_data": {},
-  "profiling_data": {
-    "total_responses": 73,
-    "age_distribution": {
-      "<25": 6,
-      "25-34": 49,
-      "35-44": 13,
-      "45+": 5
-    },
-    "students_vs_professionals": {
-      "students": 6,
-      "professionals": 67,
-      "students_percentage": 8.2,
-      "professionals_percentage": 91.8
-    },
-    "experience_levels": {
-      "3-5": 13,
-      "5+": 26,
-      "1-3": 20,
-      "<1": 8
-    },
-    "job_categories": {
-      "Data & AI": {
-        "keywords": [
-          "data",
-          "scientist",
-          "analyst",
-          "ml",
-          "machine learning",
-          "ai",
-          "artificial intelligence",
-          "nlp"
-        ],
-        "count": 0,
-        "jobs": [],
-        "percentage": 0.0
-      },
-      "Management & Leadership": {
-        "keywords": [
-          "ceo",
-          "founder",
-          "manager",
-          "head",
-          "director",
-          "lead",
-          "product manager",
-          "pmo"
-        ],
-        "count": 0,
-        "jobs": [],
-        "percentage": 0.0
-      },
-      "Software & Engineering": {
-        "keywords": [
-          "software",
-          "developer",
-          "engineer",
-          "architect",
-          "fullstack",
-          "backend",
-          "frontend"
-        ],
-        "count": 4,
-        "jobs": [
-          "software engineer",
-          "software developer",
-          "software engineer",
-          "software developer"
-        ],
-        "percentage": 66.7
-      },
-      "Marketing & Growth": {
-        "keywords": [
-          "marketing",
-          "growth",
-          "communication",
-          "copywriter",
-          "sales"
-        ],
-        "count": 0,
-        "jobs": [],
-        "percentage": 0.0
-      },
-      "Other": {
-        "keywords": [],
-        "count": 2,
-        "jobs": [
-          "sono aperto a diverse possibilità nel settore",
-          "non ho una idea precisa, dottorato quasi sicuramente "
-        ],
-        "percentage": 33.3
-      }
-    },
-    "companies": {
-      "total_unique": 53,
-      "list": [
-        "ACC Group",
-        "AGE scientific srl",
-        "Abit Agritech e Università degli studi di Genova",
-        "Accenture",
-        "Adenes Italia",
-        "Agos",
-        "Amazon",
-        "Artificialy Sa",
-        "Avvale",
-        "Avvale S.p.A.",
-        "BIOS Management",
-        "Banca Mediolanum",
-        "Besimple",
-        "Bip S.p.A.",
-        "Clover Venture",
-        "DOIT S.r.l.",
-        "DSCOVR",
-        "Data Reply",
-        "Datapizza",
-        "Datapizza (soon)",
-        "Digiway",
-        "Fondazione IRCCS Istituto Nazionale dei Tumori",
-        "Freelance",
-        "Gridspertise",
-        "HP",
-        "HPE",
-        "Hilti",
-        "Iconsulting / Accenture",
-        "Iconsulting SPA",
-        "Italgas",
-        "Libero professionista",
-        "Loro piana",
-        "ML Cube",
-        "ML cube",
-        "Max factory",
-        "NEXiD",
-        "Nttdata",
-        "Politecnica",
-        "Politecnico di Milano",
-        "Prefe srl",
-        "Protom",
-        "Pubblica Amministrazione",
-        "PwC",
-        "Rai Pubblicità",
-        "SGR Compliance",
-        "Saleance",
-        "Stealth Startup",
-        "Target Reply",
-        "Università degli Studi di Milano-Bicocca",
-        "Zurich Insurance",
-        "quod",
-        "sitecore",
-        "vema"
-      ]
-    },
-    "motivations": {
-      "Learning": 13,
-      "Networking": 28,
-      "Opportunità lavorative / Collaborazioni": 12,
-      "Conoscere Datapizza": 11,
-      "Incontrare la community": 9
-    },
-    "future_participation": {},
-    "topics_of_interest": []
-  },
-  "feedback_data": {
-    "total_responses": 30,
-    "overall_rating": {
-      "average": 4.63,
-      "distribution": {
-        "5": 19,
-        "4": 11
-      },
-      "total_responses": 30
-    },
-    "networking_rating": {
-      "average": 4.57,
-      "distribution": {
-        "4": 7,
-        "5": 20,
-        "3": 3
-      },
-      "total_responses": 30
-    },
-    "suggestions": [
-      "Assumermi! E forse più focaccia, molto interessanti i talk",
-      "L'aperitivo di ieri è stato fantastico! Possibilità di parlare con tutti i presenti stupenda (gentilissimi e disponibilissimi i ragazzi di Datapizza <3) , lasciando carta bianca nelle interazioni.",
-      "Essendo i posti limitati, ci starebbe un preannuncio in cui si dice “dropperemo il link di iscrizione il giorno x all’ora x” così i più interessati se lo segnano e si iscrivono, mentre sono di meno gli iscritti fortunati che vedono il link di passaggio",
-      "In mancanza di badge che identificavano le persone, almeno il team DP potrebbe indossare una maglietta univoca, altrimenti la conversazione si indirizza solo verso le persone che si sono presentate sul palco.\nIl tempo della presentazione è stato piacevolmente corto, ma avrebbe meritato più spazio per dare una visione più esaustiva delle vostre potenzialità. Mai aver fretta di arrivare alla fine della presentazione, che non necessariamente deve avere delle slide, son sicuro che quello che volete comunicare può uscire dal cuore e arriverebbe più in profondità. In ogni caso, grazie, è stata una bella serata.",
-      "E' stato tutto al top, grazie ragazzi, siete una fonte di ispirazione",
-      "Strutturare di più la parte di networking",
-      "preparare 2 3 domande da far fare a qualcuno del team per rompere il ghiaccio",
-      "Fornire dei badge ai datapizzers e ai partecipanti con nome, ruolo e azienda così da facilitare l'interazione durante il networking",
-      "Sondaggio argomenti tra un gruppo nel quale scegliere. Sedie disposte in modo da non avere una persona di fronte in modo diretto.",
-      "Non si riusciva molto a parlare, c'era troppa confusione e parlare del proprio lavoro o idee con altri ospiti è stato abbastanza faticoso",
-      "Un’idea per il networking, potrebbe essere quella di creare tavoli tematici per agevolare le persone nel trovare gli interlocutori più appropriati 😊",
-      "Forse aggiungerei dei momenti  di tavolo aperto in cui c'è la possibilità di confrontarsi e conoscere in modo più \"personale\" la community. Ad esempio gioco da tavolo con domande",
-      "Un pochino più pizza 🍕",
-      "Bello ma networking forse un po’ dispersivo, anche a causa dell’organizzazione degli spazi. Si potrebbe fare rinfresco nella sala delle presentazioni che è più spaziosa magari.",
-      "Più pizza 😂",
-      "Continuate così! Alla grande 🚀💪",
-      "Sono Alex, è una prova interna"
-    ],
-    "future_interest": {
-      "Si": 29,
-      "Forse": 1
-    },
-    "gpt_analysis": {
-      "summary": "I partecipanti hanno apprezzato i talk e l'opportunità di networking, ma hanno segnalato la necessità di migliorare l'organizzazione degli spazi e delle interazioni. Inoltre, è emersa la richiesta di un catering più abbondante e di strumenti per facilitare le conversazioni tra i partecipanti.",
-      "categories": {
-        "networking": [
-          "Strutturare di più la parte di networking",
-          "Fornire dei badge ai datapizzers e ai partecipanti con nome, ruolo e azienda così da facilitare l'interazione durante il networking",
-          "Un’idea per il networking, potrebbe essere quella di creare tavoli tematici per agevolare le persone nel trovare gli interlocutori più appropriati 😊",
-          "Forse aggiungerei dei momenti di tavolo aperto in cui c'è la possibilità di confrontarsi e conoscere in modo più 'personale' la community."
-        ],
-        "contenuti": [
-          "Il tempo della presentazione è stato piacevolmente corto, ma avrebbe meritato più spazio per dare una visione più esaustiva delle vostre potenzialità.",
-          "Mai aver fretta di arrivare alla fine della presentazione, che non necessariamente deve avere delle slide."
-        ],
-        "logistica": [
-          "Essendo i posti limitati, ci starebbe un preannuncio in cui si dice 'dropperemo il link di iscrizione il giorno x all’ora x'.",
-          "Bello ma networking forse un po’ dispersivo, anche a causa dell’organizzazione degli spazi.",
-          "Si potrebbe fare rinfresco nella sala delle presentazioni che è più spaziosa magari."
-        ],
-        "catering": [
-          "Un pochino più pizza 🍕",
-          "Più pizza 😂"
-        ]
-      },
-      "key_improvements": [
-        "Migliorare l'organizzazione degli spazi per il networking",
-        "Fornire badge identificativi per facilitare le interazioni",
-        "Aumentare la quantità di cibo e bevande disponibili",
-        "Strutturare meglio le presentazioni per dare più spazio ai relatori",
-        "Creare tavoli tematici per facilitare il networking"
-      ]
-    }
-  },
-  "kpis": {
-    "profiling_responses": 73,
-    "feedback_responses": 30,
-    "feedback_rate": 41.1,
-    "overall_satisfaction": 4.63,
-    "satisfaction_5_stars_percentage": 63.3,
-    "future_participation_rate": 96.7,
-    "unique_companies": 53
-  }
-};
+        const eventData = EVENT_DATA_PLACEHOLDER;
         
         function renderKPIs(kpis) {
             const container = document.getElementById('kpis-container');
@@ -745,3 +524,26 @@
     </script>
 </body>
 </html>
+"""
+    
+    # Sostituisci placeholder
+    html_content = html_template.replace('EVENT_NAME', data['event_name'])
+    html_content = html_content.replace('EVENT_DATA_PLACEHOLDER', json.dumps(data, ensure_ascii=False, indent=2))
+    
+    # Salva
+    output_file = event_path / 'index.html'
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"✅ Pagina evento generata: {output_file}")
+    return True
+
+
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python generate_event_page.py <event_folder>")
+        sys.exit(1)
+    
+    generate_event_page(sys.argv[1])
+

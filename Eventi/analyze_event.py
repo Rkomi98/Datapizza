@@ -46,18 +46,24 @@ class EventAnalyzer:
         
         result = {
             'profiling': None,
-            'feedback': None
+            'feedback': None,
+            'registrations': None
         }
         
         for csv_file in csv_files:
-            # Leggi la prima riga per identificare il tipo
-            with open(csv_file, 'r', encoding='utf-8') as f:
-                header = f.readline().lower()
-                
-                if 'nato/a' in header or 'job title' in header or 'azienda' in header:
-                    result['profiling'] = csv_file
-                elif 'valuteresti' in header or 'feedback' in header or 'suggerimenti' in header:
-                    result['feedback'] = csv_file
+            try:
+                with open(csv_file, 'r', encoding='utf-8') as f:
+                    header = f.readline().lower()
+                    
+                    # Identifica tipo di file in ordine di specificità
+                    if ('registrat' in header or 'iscritt' in header) and 'status' in header:
+                        result['registrations'] = csv_file
+                    elif 'nato/a' in header or 'job title' in header or 'azienda' in header:
+                        result['profiling'] = csv_file
+                    elif 'valuteresti' in header or 'feedback' in header or 'suggerimenti' in header:
+                        result['feedback'] = csv_file
+            except Exception:
+                continue
         
         return result
     
@@ -77,15 +83,58 @@ class EventAnalyzer:
         return []
     
     def extract_number_from_stars(self, stars: str) -> int:
-        """Estrae il numero di stelle da una stringa."""
+        """Estrae il numero di stelle da una stringa, validando che sia tra 1 e 5."""
         if not stars:
             return 0
-        stars_count = stars.count('⭐')
-        if stars_count > 0:
+        
+        stars_str = str(stars)
+        
+        # Conta le stelle emoji (due varianti: ⭐ e ⭐️)
+        stars_count = stars_str.count('⭐')
+        if stars_count > 0 and 1 <= stars_count <= 5:
             return stars_count
-        # Prova a estrarre numeri
-        numbers = re.findall(r'\d+', str(stars))
-        return int(numbers[0]) if numbers else 0
+        
+        # Prova a estrarre numeri dalla stringa
+        numbers = re.findall(r'\d+', stars_str)
+        if numbers:
+            num = int(numbers[0])
+            # Valida che sia un rating sensato (1-5)
+            if 1 <= num <= 5:
+                return num
+        
+        return 0
+    
+    def analyze_registration_data(self, data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analizza i dati di registrazione (iscrizioni)."""
+        if not data:
+            return {}
+        
+        # Trova il campo status
+        status_field = self._find_field(data[0], ['status', 'stato', 'registration'])
+        if not status_field:
+            print("⚠️  Campo 'Status' non trovato nel file di registrazione.")
+            return {}
+        
+        # Analizza gli status
+        statuses = [str(row.get(status_field, '')).lower().strip() for row in data]
+        
+        iscritti_iniziali = len(statuses)
+        disiscritti = sum(1 for s in statuses if 'disiscritt' in s or 'unsubscribe' in s)
+        partecipanti = sum(1 for s in statuses if 'partecipant' in s or 'attended' in s or 'presente' in s)
+        iscritti_finali = iscritti_iniziali - disiscritti
+        
+        # Calcola tassi
+        tasso_presenza = round(partecipanti / iscritti_finali * 100, 1) if iscritti_finali > 0 else 0
+        tasso_no_show = round(100 - tasso_presenza, 1) if iscritti_finali > 0 else 0
+        
+        return {
+            'iscritti_iniziali': iscritti_iniziali,
+            'disiscritti': disiscritti,
+            'iscritti_finali': iscritti_finali,
+            'partecipanti': partecipanti,
+            'tasso_presenza': tasso_presenza,
+            'tasso_no_show': tasso_no_show
+        }
     
     def analyze_profiling_data(self, data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Analizza i dati di profilazione."""
@@ -137,9 +186,10 @@ class EventAnalyzer:
         
         # Analizza job titles e categorizza
         job_field = self._find_field(data[0], ['job title', 'title', 'ruolo', 'lavoro'])
-        jobs = [str(row.get(job_field, '')).lower() for row in data if row.get(job_field)]
+        jobs = [str(row.get(job_field, '')).strip() for row in data if row.get(job_field) and str(row.get(job_field, '')).strip()]
+        jobs_lower = [j.lower() for j in jobs]
         
-        categories = self._categorize_jobs(jobs)
+        categories = self._categorize_jobs(jobs_lower)
         
         # Analizza aziende
         company_field = self._find_field(data[0], ['azienda', 'company', 'lavori'])
@@ -258,9 +308,9 @@ class EventAnalyzer:
         
         total = len(data)
         
-        # Trova campi ratings
-        overall_field = self._find_field(data[0], ['complessivamente', 'overall', 'evento'])
-        networking_field = self._find_field(data[0], ['networking', 'aperitivo'])
+        # Trova campi ratings (usa keywords più specifiche)
+        overall_field = self._find_field(data[0], ['valuteresti complessivamente', 'overall', 'complessivamente'])
+        networking_field = self._find_field(data[0], ['valuteresti networking', 'networking', 'aperitivo'])
         
         # Analizza ratings
         overall_ratings = []
@@ -389,10 +439,21 @@ Rispondi in formato JSON con questa struttura:
             'event_name': self.event_name,
             'event_folder': str(self.event_folder),
             'analysis_date': datetime.now().isoformat(),
+            'registration_data': {},
             'profiling_data': {},
             'feedback_data': {},
             'kpis': {}
         }
+        
+        # Analizza registrazioni
+        if csv_files['registrations']:
+            print(f"✓ Trovato file registrazioni: {csv_files['registrations'].name}")
+            registration_data = self.read_csv_safe(csv_files['registrations'])
+            result['registration_data'] = self.analyze_registration_data(registration_data)
+            if result['registration_data']:
+                print(f"  → {result['registration_data'].get('iscritti_iniziali', 0)} iscrizioni analizzate")
+        else:
+            print("ℹ️  File registrazioni non trovato (opzionale)")
         
         # Analizza profilazione
         if csv_files['profiling']:
@@ -433,14 +494,26 @@ Rispondi in formato JSON con questa struttura:
         
         prof = analysis.get('profiling_data', {})
         feed = analysis.get('feedback_data', {})
+        reg = analysis.get('registration_data', {})
         
-        # KPI partecipazione
+        # KPI da registrazioni (se disponibili)
+        if reg:
+            kpis['iscritti_iniziali'] = reg.get('iscritti_iniziali', 0)
+            kpis['disiscritti'] = reg.get('disiscritti', 0)
+            kpis['iscritti_finali'] = reg.get('iscritti_finali', 0)
+            kpis['partecipanti'] = reg.get('partecipanti', 0)
+            kpis['tasso_presenza'] = reg.get('tasso_presenza', 0)
+            kpis['tasso_no_show'] = reg.get('tasso_no_show', 0)
+        
+        # KPI da profilazione e feedback
         kpis['profiling_responses'] = prof.get('total_responses', 0)
         kpis['feedback_responses'] = feed.get('total_responses', 0)
         
-        if kpis['profiling_responses'] > 0:
+        # Feedback rate: usa partecipanti se disponibili, altrimenti profiling_responses
+        base_for_feedback = kpis.get('partecipanti', 0) or kpis['profiling_responses']
+        if base_for_feedback > 0:
             kpis['feedback_rate'] = round(
-                kpis['feedback_responses'] / kpis['profiling_responses'] * 100, 1
+                kpis['feedback_responses'] / base_for_feedback * 100, 1
             )
         
         # KPI satisfaction

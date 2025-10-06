@@ -9,7 +9,8 @@ Eventi/
 ├── index.html                  # Dashboard principale (generata automaticamente)
 ├── analyze_event.py            # Script per analizzare un singolo evento
 ├── analyze_all_events.py       # Script per analizzare tutti gli eventi
-├── generate_dashboard.py       # Script per generare la dashboard HTML
+├── generate_dashboard.py       # Script per generare la dashboard principale
+├── generate_event_page.py      # Script per generare pagine evento dinamiche
 ├── extract_kpi_from_html.py    # Script per estrarre KPI da HTML esistenti
 ├── events_index.json           # Indice generato automaticamente
 ├── .env                        # Configurazione API keys (non in git)
@@ -20,8 +21,8 @@ Eventi/
 └── AperipizzaAI0925/          # Esempio di cartella evento
     ├── responses.csv           # Dati profilazione partecipanti
     ├── responses(1).csv        # Dati feedback evento
-    ├── index.html              # Report HTML specifico
-    └── analysis.json           # Dati analizzati (generato automaticamente)
+    ├── analysis.json           # Dati analizzati (generato automaticamente)
+    └── index.html              # Report HTML dinamico (generato automaticamente)
 ```
 
 ## Setup iniziale
@@ -81,11 +82,14 @@ python analyze_all_events.py
 Questo comando:
 - Cerca automaticamente tutte le cartelle contenenti CSV
 - Analizza ogni evento trovato
-- Genera l'indice `events_index.json` per la dashboard
-- Crea/aggiorna i file `analysis.json` per ogni evento
-- Genera automaticamente `index.html` con i dati embedded
+- Genera `analysis.json` per ogni evento con tutti i KPI
+- Genera `<evento>/index.html` dinamico che legge da `analysis.json`
+- Genera l'indice `events_index.json` globale
+- Genera la dashboard principale `index.html` con dati embedded
 
-**Nota:** la dashboard viene generata con i dati embedded per evitare problemi CORS quando aperta direttamente dal filesystem.
+**Architettura:**
+- **Dashboard principale (`index.html`)**: dati embedded per evitare CORS
+- **Pagine evento (`<evento>/index.html`)**: dati embedded da `analysis.json`
 
 ### Estrarre KPI da HTML esistente (opzionale)
 
@@ -102,33 +106,47 @@ python extract_kpi_from_html.py AperipizzaAI0925/index.html
 
 Questo comando estrae i KPI visibili nell'HTML e li salva in un file JSON.
 
-### Rigenerare la dashboard manualmente (opzionale)
+### Rigenerare le pagine HTML manualmente (opzionale)
 
-Se hai modificato i dati e vuoi rigenerare solo la dashboard senza rieseguire l'analisi:
+Se hai modificato i dati e vuoi rigenerare solo le pagine HTML senza rieseguire l'analisi:
 
 ```bash
+# Rigenera solo la dashboard principale
 python generate_dashboard.py
+
+# Rigenera solo la pagina di un evento specifico
+python generate_event_page.py AperipizzaAI0925
 ```
 
-### Visualizzare la dashboard
+### Visualizzare i report
 
-Dopo aver eseguito l'analisi, apri `index.html` in un browser:
+Dopo aver eseguito l'analisi:
 
+**Dashboard principale:**
 ```bash
-# Su Linux
-xdg-open index.html
-
-# Su macOS
-open index.html
-
-# Su Windows
-start index.html
+xdg-open index.html  # Linux
+open index.html      # macOS
+start index.html     # Windows
 ```
 
-La dashboard mostrerà:
+Mostra:
 - Statistiche aggregate di tutti gli eventi
 - Card per ogni evento con KPI principali
-- Link ai report dettagliati di ciascun evento
+- Link ai report dettagliati
+
+**Pagina evento specifica:**
+```bash
+xdg-open AperipizzaAI0925/index.html
+```
+
+Mostra:
+- KPI dettagliati dell'evento
+- Profilazione partecipanti completa
+- Feedback e valutazioni
+- Analisi qualitativa GPT
+- Lista aziende partecipanti
+
+**Nota:** Tutte le pagine HTML leggono dati da file JSON (embedded nell'HTML per compatibilità filesystem).
 
 ## Struttura dei file CSV
 
