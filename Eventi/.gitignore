@@ -1,0 +1,32 @@
+# File di configurazione con secrets
+.env
+
+# File generati automaticamente
+events_index.json
+**/analysis.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
