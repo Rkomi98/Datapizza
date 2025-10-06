@@ -2,25 +2,23 @@
 
 ## Introduction (1.5 min)
 
-Hey everyone, welcome back! We've built agents, multi-agent systems, conversational interfaces. Now we're tackling one of the most practical applications of LLMs: Retrieval-Augmented Generation, or RAG.
+Hey everyone, welcome back! So we've built agents, multi-agent systems, conversational interfaces. Now we're tackling one of the most practical applications of LLMs: Retrieval-Augmented Generation, or RAG.
 
 [Visual: Show document being broken into chunks, searched, and used to answer questions]
 
-RAG lets you build systems that answer questions using your own documents—internal wikis, product docs, research papers, whatever. The LLM doesn't just generate from its training data—it retrieves relevant context first.
+RAG lets you build systems that answer questions using your own documents—internal wikis, product docs, research papers, whatever you've got. The LLM doesn't just generate from its training data—it retrieves relevant context from your documents first.
 
-Today we're building a complete RAG pipeline from scratch: parsing documents, creating embeddings, storing them in a vector database, retrieving relevant chunks, and generating answers.
+Today we're building a complete RAG pipeline from scratch: parsing documents, creating embeddings, storing them in a vector database, retrieving relevant chunks, and generating answers. The full stack.
 
-This is a full production pattern. By the end of this video, you'll have a working knowledge base you can query.
+This is a full production pattern that companies actually use. After this, you'll have a working knowledge base you can query with natural language.
 
-Let's build it.
-
-[Transition: "The RAG Pipeline"]
+Alright, here's the RAG pipeline.
 
 ## Content Main (7.5 min)
 
 ### Setting Up the Infrastructure (1 min)
 
-RAG needs a vector database. We're using Qdrant—it's fast, open source, and runs in Docker.
+So RAG needs a vector database. We're using Qdrant—it's fast, open source, and stupidly easy to run in Docker.
 
 [Show terminal]
 
@@ -49,9 +47,9 @@ client = OpenAIClient(
 
 We'll use this client for both embedding and generation.
 
-### Ingestion Pipeline: From Documents to Vectors (3 min)
+### Ingestion Pipeline: From Documents to Vectors (2.5 min)
 
-The ingestion pipeline has several steps. Let me walk through each one.
+The ingestion pipeline has several steps. Let me walk through each one quickly because there's a lot to cover.
 
 **Step 1: Parse the document**
 
@@ -124,9 +122,9 @@ vectorstore.add(embedded_chunks, collection_name="knowledge_base")
 
 Your documents are now searchable by semantic similarity. Time to build retrieval.
 
-### Retrieval Pipeline: From Query to Answer (3.5 min)
+### Retrieval Pipeline: From Query to Answer (3 min)
 
-Now someone asks a question. We need to find relevant chunks and generate an answer.
+Now someone asks a question. We need to find relevant chunks and generate an answer. Here's how that works.
 
 **Step 1: Embed the query**
 
@@ -227,18 +225,16 @@ These are the patterns that make RAG reliable at scale.
 
 ## Conclusion (1 min)
 
-Let's recap the full pipeline: Parse documents into structured nodes. Split into chunks and generate embeddings. Store in a vector database. For queries, embed them, search for relevant chunks, optionally rerank, and generate answers with context.
+Quick recap of the full pipeline: Parse documents into structured nodes. Split into chunks and generate embeddings. Store in a vector database. For queries, embed them, search for relevant chunks, optionally rerank, and generate answers with context.
 
 [Visual: Show complete pipeline with all steps]
 
-RAG is how you make LLMs useful for real business problems. Product support, internal documentation, research assistance—all built on this foundation.
+This is how you make LLMs useful for real business problems. Product support, internal documentation, research assistance—all built on this exact foundation.
 
-In the next and final video, we're covering pipelines for complex workflows and production monitoring so you can actually deploy this stuff.
+Next up is the final video, where we're covering pipelines for complex workflows and production monitoring so you can actually deploy this stuff and not have it break.
 
-Before that, try building your own knowledge base. Ingest some documents, query them, experiment with chunk sizes and reranking. See how retrieval quality affects answer accuracy.
+Before that, try building your own knowledge base. Ingest some documents, query them, experiment with chunk sizes and reranking. See how retrieval quality affects answer accuracy. It's fascinating to tune this.
 
-This is production-grade AI engineering now.
-
-See you in the final video!
+This is production-grade AI engineering. If you're still with me, hit that subscribe button. I'll see you in the final video!
 
 [Note for narrator: This should feel like a culmination—we're building real, deployable systems]

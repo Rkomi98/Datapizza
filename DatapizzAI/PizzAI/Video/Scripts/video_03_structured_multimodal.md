@@ -2,25 +2,23 @@
 
 ## Introduction (1.5 min)
 
-Welcome back! So far we've built a text-based chatbot with memory and caching. That's solid, but real applications need more.
+Hey, welcome back! So far we've built a text-based chatbot with memory and caching. That's solid, but real applications need way more than that.
 
-Sometimes you need structured data—JSON responses you can parse and use programmatically. And sometimes you need to work with more than just text—images, audio, documents.
+Sometimes you need structured data—JSON responses you can actually parse and use programmatically. And sometimes you need to work with more than just text—images, audio, documents, the whole multimodal stack.
 
 [Visual: Show text bubbles transforming into JSON structures and media files]
 
 Today we're covering two major capabilities: getting reliable structured outputs using Pydantic models, and working with multimodal inputs like images and audio.
 
-By the end of this video, you'll be able to extract structured data from LLM responses and build chatbots that can see and hear, not just read.
+After this, you'll be able to extract structured data from LLM responses and build chatbots that can see and hear, not just read text.
 
-Let's dive in.
-
-[Transition: "Two Approaches to Structure"]
+Alright, here are two approaches to getting structured data.
 
 ## Content Main (6.5 min)
 
 ### Getting JSON with Prompt Engineering (1.5 min)
 
-The simplest way to get JSON from an LLM is just to ask for it. But you need to be precise.
+The simplest way to get JSON from an LLM is just to ask for it. But here's the catch, you need to be really precise.
 
 [Show code]
 
@@ -105,7 +103,7 @@ Now let's talk about vision. LLMs can analyze images, and Datapizza-AI makes thi
 
 You have three ways to provide images: URLs, base64-encoded data, or file paths. Let me show you all three.
 
-[Show code]
+[Show code - This is one of the last images ever taken by NASA's InSight Mars lander. Captured on Dec. 11, 2022, it shows InSight's seismometer on the Red Planet's surface.]
 
 ```python
 from datapizza.type import Media, MediaBlock, TextBlock
@@ -115,7 +113,7 @@ media = Media(
     extension="jpg",
     media_type="image",
     source_type="url",
-    source="https://example.com/image.jpg",
+    source="https://images-assets.nasa.gov/image/PIA25680/PIA25680~orig.jpg?w=1024&h=1024&fit=clip&crop=faces%2Cfocalpoint",
     detail="high"
 )
 
@@ -187,14 +185,14 @@ The model remembers the image across turns. You don't have to send it again.
 
 Let's recap: We covered two methods for structured outputs—basic JSON prompting and robust Pydantic models. Use Pydantic whenever you need reliable, typed data.
 
-We explored multimodal capabilities, showing how to work with images using URLs, base64, or file paths. This opens up document analysis, visual Q&A, and multimodal conversations.
+We explored multimodal capabilities, showing how to work with images using URLs, base64, or file paths. This opens up document analysis, visual Q&A, and multimodal conversations—pretty much anything you can imagine.
 
 [Visual: Show structured data and images as building blocks]
 
-In the next video, we're going to work with multiple LLM providers using ClientFactory, and you'll learn how to build custom adapters for providers that aren't supported out of the box.
+Next video, we're working with multiple LLM providers using ClientFactory, and you'll learn how to build custom adapters for providers that aren't supported out of the box. Super useful if you're working with specific models.
 
-Before then, try building something multimodal—maybe a document analyzer or an image-based chatbot. The patterns we covered today are the foundation for more complex applications.
+Before then, try building something multimodal—maybe a document analyzer or an image-based chatbot. Experiment with it. The patterns we covered today are the foundation for way more complex applications.
 
-See you in the next one!
+Drop a like if this was helpful, and I'll see you in the next one!
 
 [Note for narrator: Energy should be building—we're adding capabilities fast]
