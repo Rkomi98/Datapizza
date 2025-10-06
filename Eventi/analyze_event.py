@@ -185,7 +185,7 @@ class EventAnalyzer:
                     experience_levels['5+'] += 1
         
         # Analizza job titles e categorizza
-        job_field = self._find_field(data[0], ['job title', 'title', 'ruolo', 'lavoro'])
+        job_field = self._find_field(data[0], ['qual è il tuo job title', 'job title', 'title', 'ruolo'])
         jobs = [str(row.get(job_field, '')).strip() for row in data if row.get(job_field) and str(row.get(job_field, '')).strip()]
         jobs_lower = [j.lower() for j in jobs]
         
@@ -240,6 +240,11 @@ class EventAnalyzer:
             },
             'experience_levels': dict(experience_levels),
             'job_categories': categories,
+            'job_titles': {
+                'total': len(jobs),
+                'unique': len(set([j.lower() for j in jobs])),
+                'list': sorted(set(jobs), key=str.lower)  # Lista unica ordinata case-insensitive
+            },
             'companies': {
                 'total_unique': len(unique_companies),
                 'list': sorted(unique_companies)

@@ -240,6 +240,11 @@ def generate_event_page(event_folder: str):
                 <div id="gpt-container"></div>
             </div>
             
+            <div class="section" id="job-titles-section" style="display: none;">
+                <h2 class="section-title">Job titles partecipanti</h2>
+                <div id="job-titles-container"></div>
+            </div>
+            
             <div class="section" id="companies-section" style="display: none;">
                 <h2 class="section-title">Aziende partecipanti</h2>
                 <div id="companies-container"></div>
@@ -481,6 +486,22 @@ def generate_event_page(event_folder: str):
             container.innerHTML = html;
         }
         
+        function renderJobTitles(jobTitles) {
+            if (!jobTitles || !jobTitles.list || jobTitles.list.length === 0) return;
+            
+            document.getElementById('job-titles-section').style.display = 'block';
+            const container = document.getElementById('job-titles-container');
+            
+            container.innerHTML = `
+                <div class="info-card">
+                    <div class="info-label">${jobTitles.unique} job titles unici (${jobTitles.total} totali)</div>
+                    <div class="tags-container">
+                        ${jobTitles.list.map(j => `<span class="tag">${j}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
         function renderCompanies(companies) {
             if (!companies || !companies.list || companies.list.length === 0) return;
             
@@ -508,6 +529,10 @@ def generate_event_page(event_folder: str):
             
             if (eventData.feedback_data && eventData.feedback_data.gpt_analysis) {
                 renderGPTAnalysis(eventData.feedback_data.gpt_analysis);
+            }
+            
+            if (eventData.profiling_data && eventData.profiling_data.job_titles) {
+                renderJobTitles(eventData.profiling_data.job_titles);
             }
             
             if (eventData.profiling_data && eventData.profiling_data.companies) {
