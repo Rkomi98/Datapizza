@@ -41,8 +41,12 @@ Think about how powerful this is for real-world applications. For customer suppo
 Let's start with the specialists. First, let's define the tools they'll use.
 
 ```python
+import os
 import re
+from dotenv import load_dotenv
 from datapizza.tools import tool
+
+load_dotenv()
 
 @tool
 def extract_kpi(context: str) -> str:
@@ -71,26 +75,31 @@ def identify_risks(context: str) -> str:
     ]
     return " | ".join(risks) if risks else "No risks identified"
 ```
-
-[Show the tools working on sample text]
-
 Simple pattern matching, but effective. In production, you'd use more sophisticated extraction.
 
 Now the specialist agents:
 
 ```python
 from datapizza.agents import Agent
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
+
+# Create shared client for all agents
+shared_client = ClientFactory.create(
+    provider=Provider.OPENAI,
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    temperature=0.0,
+)
 
 analyst_agent = Agent(
     name="AnalystAgent",
     client=shared_client,
     system_prompt=(
-        "Call extract_kpi EXACTLY ONCE with the provided text. "
-        "Then output ONLY the tool result. "
-        "Do not call any other tools."
+        "You are a KPI extraction specialist. "
+        "Use the extract_kpi tool on the provided text and return the result."
     ),
     tools=[extract_kpi],
-    terminate_on_text=True,
     max_steps=3
 )
 
@@ -98,21 +107,19 @@ risk_agent = Agent(
     name="RiskAgent",
     client=shared_client,
     system_prompt=(
-        "Call identify_risks EXACTLY ONCE with the provided text. "
-        "Then output ONLY the tool result. "
-        "Stop immediately."
+        "You are a risk identification specialist. "
+        "Use the identify_risks tool on the provided text and return the result."
     ),
     tools=[identify_risks],
-    terminate_on_text=True,
     max_steps=3
 )
 ```
 
 [Highlight the system prompts]
 
-Notice the strict constraints: "EXACTLY ONCE," "Do not call any other tools." This prevents the agents from getting too creative and causing unexpected loops.
+Notice how we define clear roles for each specialist: one extracts KPIs, the other identifies risks. The system prompts guide their behavior without being overly restrictive.
 
-The `max_steps=3` parameter is another important safety net. Even if an agent tries to loop, it will hit the limit and stop.
+The `max_steps=3` parameter is a safety net. If an agent tries to loop, it will hit this limit and stop, preventing runaway API costs.
 
 ### Building the Coordinator (3 min)
 
@@ -126,14 +133,18 @@ def run_kpi_analysis(query: str) -> str:
     """Delegates to the KPI analyst."""
     print("  -> Delegating to AnalystAgent...")
     result = analyst_agent.run(query)
-    return result or "Analysis incomplete"
+    if result.text:
+        return result.text
+    return "Analysis incomplete"
 
 @tool
 def run_risk_assessment(query: str) -> str:
     """Delegates to the risk assessor."""
     print("  -> Delegating to RiskAgent...")
     result = risk_agent.run(query)
-    return result or "Assessment incomplete"
+    if result.text:
+        return result.text
+    return "Assessment incomplete"
 ```
 
 [Show this pattern clearly]
@@ -148,14 +159,16 @@ strategic_planner = Agent(
     client=shared_client,
     system_prompt=(
         "You are a strategic consultant. Follow these steps:\n"
-        "1. Call run_kpi_analysis on the request.\n"
-        "2. Call run_risk_assessment on the same request.\n"
-        "3. Merge findings into a report with sections: "
-        "KPI Summary, Risk Areas, Recommendation."
+        "1. Call run_kpi_analysis on the request\n"
+        "2. Call run_risk_assessment on the same request\n"
+        "3. Synthesize findings into a final report with:\n"
+        "   - **KPI Summary**\n"
+        "   - **Risk Areas**\n"
+        "   - **Recommendation** (one actionable sentence)\n"
+        "Make the report concise and actionable."
     ),
     tools=[run_kpi_analysis, run_risk_assessment],
-    terminate_on_text=True,
-    max_steps=5
+    max_steps=8
 )
 ```
 
@@ -168,14 +181,32 @@ scenario = (
 )
 
 report = strategic_planner.run(scenario)
-print(report)
+
+# Extract and print the final text
+if report.text:
+    print(report.text)
+else:
+    print(report)
 ```
 
-[Run and show the full delegation chain]
+[Run and show the full delegation chain, an example output I hope to obtain is]:
+```
+### Final Report
+
+**KPI Summary**
+- **Growth Rate**: The fintech product is experiencing a 30% year-over-year growth.
+- **Revenue**: Current revenue stands at €2M, indicating a strong upward trajectory.
+
+**Risk Areas**
+- **Compliance Risk**: The absence of a GDPR compliance roadmap poses a significant risk.
+
+**Recommendation**
+Develop an immediate GDPR compliance roadmap to align with data protection regulations.
+```
 
 Watch the flow: the planner receives the task, calls the KPI tool (which runs the `AnalystAgent`), gets the result, calls the risk tool (which runs the `RiskAgent`), gets that result, and finally synthesizes everything into a final report.
 
-[Visual: Show call stack diagram]
+[Visual: Agent gif to be shown here]
 
 Three agents, coordinated execution, and a single, unified output. This is multi-agent orchestration in action.
 
@@ -190,7 +221,7 @@ Solution: Always set `max_steps` on every single agent. Always.
 Solution: Be explicit in your system prompts. "Call tool X exactly once" is much better than "use tool X if needed."
 
 **Problem 3: Lost context**
-Solution: Pass the original query to every specialist. Don't make them guess what they're supposed to be analyzing.
+Solution: Be specific in your system message: “Invoke tool X exactly once; do not loop.”
 
 **Problem 4: Uncontrolled tool calls**
 Solution: Use `terminate_on_text=True` for specialist agents that should run once and then return a result.
@@ -203,11 +234,9 @@ These constraints might seem restrictive, but they're what make multi-agent syst
 
 Alright, let's wrap this up. We designed a three-agent system with specialists and a coordinator. We wrapped those agents into tools to enable delegation. And we learned how to prevent common issues like loops to ensure reliable execution.
 
-[Visual: Show the complete system diagram]
-
 This pattern can scale to any level of complexity you need. Five specialists? Ten? Twenty? The coordinator's logic remains the same: delegate, collect, and synthesize.
 
-In the next video, we're building a complete RAG system—retrieval-augmented generation—for answering questions based on your own documents. It's super practical stuff.
+In the next video, we're building a complete RAG system—retrieval-augmented generation—for answering questions based on your own documents. It's a trendy topic and a super practical stuff.
 
 Before that, try extending this system yourself. Add a third specialist—maybe a `FinancialAgent` or a `TechnicalAgent`—and see how the planner adapts automatically. It's pretty amazing when you see it all work together.
 

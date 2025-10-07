@@ -2,10 +2,12 @@ import os
 import re
 from dotenv import load_dotenv
 from datapizza.tools import tool
+from datapizza.agents import Agent
+from datapizza.clients import ClientFactory
+from datapizza.clients.factory import Provider
 
 load_dotenv()
 
-# Tools definition
 @tool
 def extract_kpi(context: str) -> str:
     """Extracts KPIs and metrics from text."""
@@ -33,11 +35,7 @@ def identify_risks(context: str) -> str:
     ]
     return " | ".join(risks) if risks else "No risks identified"
 
-# Specialist agents
-from datapizza.agents import Agent
-from datapizza.clients import ClientFactory
-from datapizza.clients.factory import Provider
-
+# Create shared client for all agents
 shared_client = ClientFactory.create(
     provider=Provider.OPENAI,
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -45,79 +43,44 @@ shared_client = ClientFactory.create(
     temperature=0.0,
 )
 
-analyst_agent = Agent(
-    name="AnalystAgent",
-    client=shared_client,
-    system_prompt=(
-        "You are a KPI extraction specialist. "
-        "Use the extract_kpi tool on the provided text and return the result."
-    ),
-    tools=[extract_kpi],
-    max_steps=3
-)
-
-risk_agent = Agent(
-    name="RiskAgent",
-    client=shared_client,
-    system_prompt=(
-        "You are a risk identification specialist. "
-        "Use the identify_risks tool on the provided text and return the result."
-    ),
-    tools=[identify_risks],
-    max_steps=3
-)
-
-# Tool wrappers for delegation
-@tool
-def run_kpi_analysis(query: str) -> str:
-    """Delegates to the KPI analyst."""
-    print("  -> Delegating to AnalystAgent...")
-    result = analyst_agent.run(query)
-    if hasattr(result, 'text') and result.text:
-        return result.text
-    return "Analysis incomplete"
-
-@tool
-def run_risk_assessment(query: str) -> str:
-    """Delegates to the risk assessor."""
-    print("  -> Delegating to RiskAgent...")
-    result = risk_agent.run(query)
-    if hasattr(result, 'text') and result.text:
-        return result.text
-    return "Assessment incomplete"
-
-# Coordinator agent
+# SIMPLIFIED APPROACH: Use tools directly in the planner
 strategic_planner = Agent(
     name="StrategicPlanner",
     client=shared_client,
     system_prompt=(
         "You are a strategic consultant. Follow these steps:\n"
-        "1. Call run_kpi_analysis on the request\n"
-        "2. Call run_risk_assessment on the same request\n"
+        "1. Call extract_kpi on the request to get KPI metrics\n"
+        "2. Call identify_risks on the same request to get risk areas\n"
         "3. Synthesize findings into a final report with:\n"
         "   - **KPI Summary**\n"
         "   - **Risk Areas**\n"
         "   - **Recommendation** (one actionable sentence)\n"
         "Make the report concise and actionable."
     ),
-    tools=[run_kpi_analysis, run_risk_assessment],
-    max_steps=8
+    tools=[extract_kpi, identify_risks],
+    max_steps=6
 )
 
-# Test execution
 scenario = (
     "Fintech product growing 30% YoY, €2M revenue, "
     "needs GDPR compliance roadmap."
 )
 
-print("=== Test: Multi-Agent System ===")
+print(f"\n{'=' * 70}")
+print(f"Testing Simplified Multi-Tool Agent")
+print('=' * 70)
 print(f"Scenario: {scenario}\n")
 
 report = strategic_planner.run(scenario)
 
+# Extract and print the final text
+print(f"\n{'─' * 70}")
+print("FINAL REPORT:")
+print('─' * 70)
 if hasattr(report, 'text') and report.text:
-    print(f"\nFinal Report:\n{report.text}")
-    print("\n✅ Multi-agent system test successful!")
+    print(report.text)
 else:
-    print(f"\nResult: {report}")
-    print("⚠️ Report generated but without final text")
+    print(report)
+print('─' * 70)
+print("\n✅ Test successful!")
+
