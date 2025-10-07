@@ -115,7 +115,7 @@ from datapizza.clients.factory import Provider
 
 client = ClientFactory.create(
     provider=Provider.OPENAI,
-    api_key=os.getenv("OPENAI_API_KEY"),,
+    api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
     temperature=0.7
 )
@@ -135,7 +135,7 @@ import requests
 from typing import Optional, Union, List
 from pydantic import BaseModel
 
-from datapizza.clients import ClientResponse
+from datapizza.core.clients import ClientResponse
 from datapizza.memory import Memory
 from datapizza.type import TextBlock
 

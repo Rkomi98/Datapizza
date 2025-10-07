@@ -2,19 +2,19 @@
 
 ## Introduction (1.5 min)
 
-Hey everyone, and welcome back. We've covered clients, memory, and tools—all the essential building blocks. Now, we're putting them together to create something much more powerful: autonomous AI agents.
+Hey everyone, and welcome back. We've covered clients, memory, and tools: all the essential building blocks. Now, we're putting them together to create something much more powerful: autonomous AI agents.
 
 [Visual: Show evolution from chatbot to agent]
 
 Here's the key difference: an agent isn't just a chatbot with tools. It's a system that can reason, plan, and take multiple actions to solve complex problems. It operates independently within the boundaries you set for it.
 
-Today, we're building your first agent from scratch. You'll learn how agents "think," how to configure their behavior, and how to control their execution so they don't go rogue on you.
+Today, we're building a simple agent from scratch. You'll learn how agents "think," how to shape their behavior, and  how to keep their execution under control.
 
 By the end of this video, you'll have a working agent that can solve multi-step problems autonomously. It's pretty cool stuff.
 
 Alright, so what is an agent, exactly?
 
-## Content Main (7.5 min)
+## Content Main (6 min)
 
 ### Agent Architecture (2 min)
 
@@ -52,7 +52,7 @@ def get_weather(location: str, when: str) -> str:
 agent = Agent(
     name="WeatherAgent",
     client=client,
-    system_prompt="You are a weather assistant. Use tools when needed.",
+    system_prompt="You are an expert weather assistant. Use tools when needed.",
     tools=[get_weather],
     max_steps=5,
     terminate_on_text=True
@@ -76,9 +76,9 @@ print(response)
 
 [Run and show output]
 
-Watch what happens: the agent reads the task, realizes it needs the weather tool, calls it with the correct parameters, gets the result, and then formulates a final answer.
+Watch what happens: the agent reads the task, realizes it needs the weather tool, calls it with the correct parameters, retrieves the result, and returns the final answer.
 
-[Show the step-by-step execution if possible]
+[Here a cool representation block diagram that changes while I am talking would be really cool :)]
 
 You didn't have to tell it to use the tool. You didn't write any of that logic. The agent figured it out on its own.
 
@@ -109,9 +109,9 @@ def search_database(query: str) -> str:
 agent = Agent(
     name="AnalystAgent",
     client=client,
-    system_prompt="You are a business analyst. Use tools to gather data and perform calculations.",
+    system_prompt="You are a business analyst. Use tools to gather data in a database and perform the sum of revenues in the q1 and q2 with a calculator. Conclude summing up your conclusion.",
     tools=[calculator, search_database],
-    max_steps=10
+    max_steps=5
 )
 
 response = agent.run(
@@ -124,35 +124,7 @@ print(response)
 
 The agent searches the database twice, performs a calculation, and then synthesizes a report. It automatically chains multiple actions together to complete the task.
 
-### Controlling Agent Behavior (3.5 min)
-
-The system prompt is your main control interface. Let me show you how different prompts can lead to completely different behaviors.
-
-[Show comparison]
-
-```python
-# Conservative agent
-conservative = Agent(
-    name="Conservative",
-    client=client,
-    system_prompt="You are cautious. Only use tools when absolutely necessary. Explain your reasoning before acting.",
-    tools=[calculator],
-    max_steps=5
-)
-
-# Aggressive agent
-aggressive = Agent(
-    name="Aggressive",
-    client=client,
-    system_prompt="You are action-oriented. Use tools proactively. Take initiative.",
-    tools=[calculator],
-    max_steps=5
-)
-```
-
-[Show same task with both agents]
-
-They have the same tools and the same task, but their execution patterns are completely different. The system prompt is what shapes their personality and decision-making.
+## Execution modes [2 min]
 
 Now, let's talk about execution modes. You have three main options:
 
@@ -182,11 +154,11 @@ agent = Agent(
     name="SafeAgent",
     client=client,
     tools=tools,
-    max_steps=10  # Safety limit
+    max_steps=5  # Safety limit
 )
 ```
 
-If the agent hits 10 steps, it will stop, regardless of whether the task is complete. This is a critical safety feature that prevents runaway API costs.
+If the agent hits 5 steps, it will stop, regardless of whether the task is complete. This is a critical safety feature that prevents runaway API costs.
 
 Finally, there's `terminate_on_text`. This controls whether the agent stops after generating text or continues to look for more actions to take.
 
@@ -214,12 +186,9 @@ Use `True` for simple, Q&A-style agents. Use `False` when the agent needs to tak
 
 Alright, quick recap. We built autonomous agents that can reason and act to solve problems. We learned how to configure their behavior through system prompts and other parameters. And we explored different execution modes, from synchronous to streaming.
 
-[Visual: Show agent components diagram]
-
-Agents are powerful, but single agents have their limits. In the next video, we're going to build multi-agent systems—teams of specialized agents working together to solve even more complex problems. It's going to be epic.
+Agents are powerful, but single agents have their limits. In the next video, we're going to build multi-agent systems—teams of specialized agents working together to solve even more complex problems.
 
 Before that, I encourage you to experiment with agent behavior. Try different system prompts, add new tools, and play around with `max_steps`. You'll see how small changes can create completely different reasoning patterns. It's fascinating stuff.
 
 If you're enjoying this series, don't forget to subscribe and hit that bell. I'll see you in the next one!
 
-[Note for narrator: This should feel like a major milestone—we've built our first autonomous system]

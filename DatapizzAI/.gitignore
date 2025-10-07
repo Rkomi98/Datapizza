@@ -18,6 +18,7 @@ lib/
 lib64/
 parts/
 sdist/
+test_env/
 var/
 wheels/
 share/python-wheels/

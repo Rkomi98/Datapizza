@@ -32,7 +32,7 @@ memory = Memory()
 message = TextBlock(content="Hi, I'm Mirko")
 
 # Call the model
-response = client.invoke(message.text, memory=memory)
+response = client.invoke(message.content, memory=memory)
 
 # Add user message
 memory.add_turn(
@@ -80,14 +80,14 @@ client = OpenAIClient(
 t0 = time.perf_counter()
 response1 = client.invoke("What is machine learning?")
 t1 = time.perf_counter()
-print("first:", r1.text)
+print("first:", response1.text)
 print(f"⏱️ time (first): {t1 - t0:.3f}s")
 
 # Second identical request hits the cache
 t2 = time.perf_counter()
 response2 = client.invoke("What is machine learning?")
 t3 = time.perf_counter()
-print("second:", r2.text)
+print("second:", response2.text)
 print(f"⏱️ time (second): {t3 - t2:.3f}s")
 ```
 

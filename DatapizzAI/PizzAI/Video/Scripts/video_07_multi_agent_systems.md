@@ -2,11 +2,11 @@
 
 ## Introduction (1.5 min)
 
-Hey everyone, and welcome back. Single agents are powerful, but let's face it—complex problems often require specialized expertise. You wouldn't ask one person to handle finance, compliance, and engineering all at once. You'd build a team, right?
+Hey everyone, and welcome back. Single agents are powerful, but let's face it: complex problems often require specialized expertise. You wouldn't ask one person to handle finance, compliance, and engineering all at once. You'd build a team, right?
 
 That's exactly what we're building today: multi-agent systems where specialized agents collaborate to solve complex problems together.
 
-[Visual: Show organizational chart transforming into agent network]
+[Visual request in post production: Show organizational chart transforming into agent network]
 
 We'll be building a strategic planning system with three distinct agents: an analyst who extracts key metrics, a risk assessor who identifies potential problems, and a planner who coordinates everything and produces the final report.
 
@@ -20,7 +20,7 @@ Alright, let's start with the design.
 
 Before we write a single line of code, let's design the system architecture. We need three specialized agents, and each one has a very specific job.
 
-[Show diagram]
+[Show diagram - Remember to send the svg - Gif on Github]
 
 **AnalystAgent**: Extracts KPIs and other quantitative metrics. It focuses on numbers, revenue figures, and growth rates.
 
