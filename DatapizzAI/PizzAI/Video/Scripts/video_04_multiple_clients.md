@@ -208,15 +208,6 @@ class OllamaClient:
                 completion_tokens_used=0,
                 stop_reason="error"
             )
-
-# Local client smoke test
-client = OllamaClient()
-response = client.invoke("Hi! Summarise the Pythagorean theorem in one sentence.")
-
-print(f"Response: {response.text}")
-print(f"Prompt tokens: {response.prompt_tokens_used}")
-print(f"Completion tokens: {response.completion_tokens_used}")
-print(f"Stop reason: {response.stop_reason}")
 ```
 
 [Walk through the key parts]
@@ -228,16 +219,20 @@ The `ClientResponse` wrapper is key because it provides the same standardized in
 [Show it in use]
 
 ```python
-ollama_client = OllamaClient(model="gemma:2b")
-response = ollama_client.invoke("Explain machine learning simply")
-print(response.text)
+client = OllamaClient()
+response = client.invoke("Hi! Summarise the Pythagorean theorem in one sentence.")
+
+print(f"Response: {response.text}")
+print(f"Prompt tokens: {response.prompt_tokens_used}")
+print(f"Completion tokens: {response.completion_tokens_used}")
+print(f"Stop reason: {response.stop_reason}")
 ```
 
 [Run and show output]
 
 This works just like any other client. You can use it with memory, agents, and the rest of the framework.
 
-[Show a more complex example with IBM WatsonX from the docs]
+[Show a more complex example with IBM WatsonX from the docs - LOOK time recording here, if it took more than 10 minutes skip it]
 
 The same pattern applies to any provider. You adapt their API to the Datapizza-AI interface, and just like that, everything in the framework becomes compatible with it.
 
@@ -245,7 +240,7 @@ This is how you future-proof your applications. A new provider launches? Build a
 
 ## Conclusion (1 min)
 
-Let's do a quick recap. We covered direct client configuration for OpenAI, Anthropic, and Google. We then used `ClientFactory` for cleaner, configuration-driven provider selection. Finally, we built custom adapters, enabling you to integrate any LLM, whether it's a new API or a local model.
+Let's do a quick recap. We covered direct client configuration for OpenAI, Anthropic, and Google. We then used `ClientFactory` for cleaner, configuration-driven provider selection. Finally, we built custom adapters, enabling you to integrate any LLM, whether it's a new API or a local model. There are many other client that already exist, like Mistral and Azure OpenAI. Check the official documentation for more information.
 
 [Visual: Show three approaches side by side]
 
@@ -256,5 +251,3 @@ In the next video, we'll dive into tools and function calling, giving your LLMs 
 Before you move on, try swapping providers in the chatbot you built in Video 2. Use `ClientFactory` to make it configurable, and see for yourself how easy it is to switch between Claude and GPT with zero changes to your logic.
 
 If you're enjoying this series, don't forget to hit that subscribe button. I'll see you in the next one!
-
-[Note for narrator: Emphasize the power of the unified interface—this is what makes production systems maintainable]

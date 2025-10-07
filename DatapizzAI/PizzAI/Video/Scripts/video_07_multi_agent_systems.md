@@ -2,43 +2,43 @@
 
 ## Introduction (1.5 min)
 
-What's up! Welcome back. So single agents are powerful, but here's the thing—complex problems often need specialized expertise. You wouldn't ask one person to handle finance, compliance, and engineering—you'd have a team, right?
+Hey everyone, and welcome back. Single agents are powerful, but let's face it—complex problems often require specialized expertise. You wouldn't ask one person to handle finance, compliance, and engineering all at once. You'd build a team, right?
 
-That's exactly what we're building today: multi-agent systems where specialized agents collaborate to solve problems.
+That's exactly what we're building today: multi-agent systems where specialized agents collaborate to solve complex problems together.
 
 [Visual: Show organizational chart transforming into agent network]
 
-We're building a strategic planning system with three agents: an analyst who extracts metrics, a risk assessor who identifies problems, and a planner who coordinates everything and produces the final report.
+We'll be building a strategic planning system with three distinct agents: an analyst who extracts key metrics, a risk assessor who identifies potential problems, and a planner who coordinates everything and produces the final report.
 
-After this, you'll understand agent orchestration, delegation patterns, and how to prevent common pitfalls like infinite loops. This is production-grade stuff.
+By the end of this video, you'll understand agent orchestration, delegation patterns, and how to prevent common pitfalls like infinite loops. This is production-grade architecture.
 
-Alright, architecture first.
+Alright, let's start with the design.
 
 ## Content Main (6.5 min)
 
 ### Designing the System (2 min)
 
-Before we write any code, let's design the architecture. We need three specialized agents, and each one has a specific job:
+Before we write a single line of code, let's design the system architecture. We need three specialized agents, and each one has a very specific job.
 
 [Show diagram]
 
-**AnalystAgent**: Extracts KPIs and quantitative metrics. It sees numbers, revenue figures, growth rates.
+**AnalystAgent**: Extracts KPIs and other quantitative metrics. It focuses on numbers, revenue figures, and growth rates.
 
-**RiskAgent**: Identifies operational risks by scanning for keywords like "compliance," "budget," "deadline."
+**RiskAgent**: Identifies operational risks by scanning for keywords like "compliance," "budget," and "deadline."
 
-**StrategicPlanner**: The coordinator. It delegates to specialists, waits for their responses, and synthesizes everything into a final report.
+**StrategicPlanner**: The coordinator. It delegates tasks to the specialists, waits for their responses, and then synthesizes everything into a final, comprehensive report.
 
 [Visual: Show data flow between agents]
 
-The planner doesn't do the actual analysis—it orchestrates. This separation of concerns is critical. Each agent has one job, does it well, and returns control to the planner.
+The planner doesn't do the actual analysis itself—it orchestrates the workflow. This separation of concerns is a critical design principle. Each agent has one job, does it well, and then returns control to the planner.
 
-And here's why this is powerful—this pattern scales infinitely. Need legal review? Add a LegalAgent. Need technical assessment? Add an EngineerAgent. The planner's logic stays exactly the same. You just add more specialist tools.
+And here's why this pattern is so powerful: it scales almost infinitely. Need a legal review? Add a `LegalAgent`. Need a technical assessment? Add an `EngineerAgent`. The planner's logic stays exactly the same; you just add more specialist tools to its arsenal.
 
-Think about how powerful this is for real-world applications. Customer support? You could have a TechnicalAgent, a BillingAgent, a PolicyAgent—all coordinated by a main planner that routes questions to the right specialist.
+Think about how powerful this is for real-world applications. For customer support, you could have a `TechnicalAgent`, a `BillingAgent`, and a `PolicyAgent`, all coordinated by a main planner that routes questions to the right specialist.
 
 ### Building Specialist Agents (2 min)
 
-Let's start with the specialists. First, the tools they'll use:
+Let's start with the specialists. First, let's define the tools they'll use.
 
 ```python
 import re
@@ -110,15 +110,15 @@ risk_agent = Agent(
 
 [Highlight the system prompts]
 
-Notice the constraints. "EXACTLY ONCE." "Do not call any other tools." This prevents the agent from getting creative and causing loops.
+Notice the strict constraints: "EXACTLY ONCE," "Do not call any other tools." This prevents the agents from getting too creative and causing unexpected loops.
 
-The `max_steps=3` is a safety net. Even if the agent tries to loop, it hits the limit and stops.
+The `max_steps=3` parameter is another important safety net. Even if an agent tries to loop, it will hit the limit and stop.
 
 ### Building the Coordinator (3 min)
 
-Now the interesting part—the planner that coordinates everything.
+Now for the most interesting part—the planner that coordinates everything.
 
-We wrap each specialist agent as a tool:
+First, we wrap each specialist agent as a tool.
 
 ```python
 @tool
@@ -138,9 +138,9 @@ def run_risk_assessment(query: str) -> str:
 
 [Show this pattern clearly]
 
-This is the key insight: agents become tools. The planner calls these tools, which internally run other agents.
+This is the key insight: agents themselves can become tools. The planner calls these tools, which in turn run the other agents.
 
-Now the planner itself:
+Now, let's build the planner itself.
 
 ```python
 strategic_planner = Agent(
@@ -173,46 +173,46 @@ print(report)
 
 [Run and show the full delegation chain]
 
-Watch the flow: Planner receives task. Calls KPI tool, which runs AnalystAgent. Gets result. Calls risk tool, which runs RiskAgent. Gets result. Synthesizes final report.
+Watch the flow: the planner receives the task, calls the KPI tool (which runs the `AnalystAgent`), gets the result, calls the risk tool (which runs the `RiskAgent`), gets that result, and finally synthesizes everything into a final report.
 
 [Visual: Show call stack diagram]
 
-Three agents, coordinated execution, single output. This is multi-agent orchestration.
+Three agents, coordinated execution, and a single, unified output. This is multi-agent orchestration in action.
 
 ### Preventing Common Pitfalls (1 min)
 
-Multi-agent systems can fail in predictable ways. Here's how to avoid them:
+Multi-agent systems can fail in predictable ways. Here's how to avoid some of the most common issues:
 
 **Problem 1: Infinite loops**
-Solution: Always set max_steps on every agent. Always.
+Solution: Always set `max_steps` on every single agent. Always.
 
 **Problem 2: Ambiguous delegation**
-Solution: Be explicit in system prompts. "Call tool X exactly once" beats "use tool X if needed."
+Solution: Be explicit in your system prompts. "Call tool X exactly once" is much better than "use tool X if needed."
 
 **Problem 3: Lost context**
-Solution: Pass the original query to every specialist. Don't make them guess what to analyze.
+Solution: Pass the original query to every specialist. Don't make them guess what they're supposed to be analyzing.
 
 **Problem 4: Uncontrolled tool calls**
-Solution: Use terminate_on_text=True for specialists who should run once and return.
+Solution: Use `terminate_on_text=True` for specialist agents that should run once and then return a result.
 
 [Show side-by-side comparison of good vs bad configurations]
 
-These constraints might seem restrictive, but they're what make multi-agent systems reliable in production.
+These constraints might seem restrictive, but they're what make multi-agent systems reliable enough for production environments.
 
 ## Conclusion (1.5 min)
 
-Alright, so to wrap this up: We designed a three-agent system with specialists and a coordinator. We wrapped agents as tools to enable delegation. And we learned how to prevent loops and ensure reliable execution.
+Alright, let's wrap this up. We designed a three-agent system with specialists and a coordinator. We wrapped those agents into tools to enable delegation. And we learned how to prevent common issues like loops to ensure reliable execution.
 
 [Visual: Show the complete system diagram]
 
-This pattern scales to any complexity you need. Five specialists? Ten? Twenty? The coordinator logic stays the same—delegate, collect, synthesize.
+This pattern can scale to any level of complexity you need. Five specialists? Ten? Twenty? The coordinator's logic remains the same: delegate, collect, and synthesize.
 
-Next video, we're building a complete RAG system—retrieval-augmented generation for answering questions from your own documents. Super practical stuff.
+In the next video, we're building a complete RAG system—retrieval-augmented generation—for answering questions based on your own documents. It's super practical stuff.
 
-Before that, try extending this system. Add a third specialist—maybe a FinancialAgent or TechnicalAgent. See how the planner adapts automatically. It's pretty amazing when you see it work.
+Before that, try extending this system yourself. Add a third specialist—maybe a `FinancialAgent` or a `TechnicalAgent`—and see how the planner adapts automatically. It's pretty amazing when you see it all work together.
 
-Multi-agent systems are where Datapizza-AI really shines. You're building production-grade AI architectures now, not just toy examples.
+Multi-agent systems are where Datapizza-AI really starts to shine. You're building production-grade AI architectures now, not just simple toy examples.
 
-If you're getting value from this, smash that like button. Drop a comment if you build something cool with this. I'll see you next time!
+If you're getting value from this series, smash that like button and drop a comment if you build something cool with this. I'll see you next time!
 
 [Note for narrator: This should feel like a major architectural lesson—we're building systems now, not just apps]

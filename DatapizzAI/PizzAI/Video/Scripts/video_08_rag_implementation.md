@@ -2,23 +2,23 @@
 
 ## Introduction (1.5 min)
 
-Hey everyone, welcome back! So we've built agents, multi-agent systems, conversational interfaces. Now we're tackling one of the most practical applications of LLMs: Retrieval-Augmented Generation, or RAG.
+Hey everyone, and welcome back. We've built agents, multi-agent systems, and conversational interfaces. Now, we're tackling one of the most practical and powerful applications of LLMs: Retrieval-Augmented Generation, or RAG.
 
 [Visual: Show document being broken into chunks, searched, and used to answer questions]
 
-RAG lets you build systems that answer questions using your own documents—internal wikis, product docs, research papers, whatever you've got. The LLM doesn't just generate from its training data—it retrieves relevant context from your documents first.
+RAG allows you to build systems that can answer questions using your own private documents—internal wikis, product documentation, research papers, you name it. The LLM doesn't just generate text from its training data; it retrieves relevant context from your documents first.
 
-Today we're building a complete RAG pipeline from scratch: parsing documents, creating embeddings, storing them in a vector database, retrieving relevant chunks, and generating answers. The full stack.
+Today, we're building a complete RAG pipeline from scratch. We'll parse documents, create embeddings, store them in a vector database, retrieve the most relevant chunks, and generate grounded answers. We're covering the full stack.
 
-This is a full production pattern that companies actually use. After this, you'll have a working knowledge base you can query with natural language.
+This is a production-ready pattern that companies are using right now. By the end of this video, you'll have a working knowledge base that you can query using natural language.
 
-Alright, here's the RAG pipeline.
+Alright, let's dive into the RAG pipeline.
 
 ## Content Main (7.5 min)
 
 ### Setting Up the Infrastructure (1 min)
 
-So RAG needs a vector database. We're using Qdrant—it's fast, open source, and stupidly easy to run in Docker.
+A RAG system needs a vector database. We'll be using Qdrant—it's fast, open-source, and incredibly easy to run with Docker.
 
 [Show terminal]
 
@@ -26,11 +26,11 @@ So RAG needs a vector database. We're using Qdrant—it's fast, open source, and
 docker run -p 6333:6333 qdrant/qdrant
 ```
 
-That's it. Qdrant is now running at localhost:6333. You can see the dashboard at that address.
+That's it. Qdrant is now up and running at `localhost:6333`, and you can see the dashboard at that address.
 
 [Show browser with Qdrant dashboard]
 
-Now let's set up our imports and client:
+Now, let's set up our imports and the main client.
 
 ```python
 import os
@@ -120,11 +120,11 @@ vectorstore.add(embedded_chunks, collection_name="knowledge_base")
 
 [Show Qdrant dashboard with stored vectors]
 
-Your documents are now searchable by semantic similarity. Time to build retrieval.
+Your documents are now searchable by semantic similarity. It's time to build the retrieval pipeline.
 
 ### Retrieval Pipeline: From Query to Answer (3 min)
 
-Now someone asks a question. We need to find relevant chunks and generate an answer. Here's how that works.
+Now, when a user asks a question, we need to find the relevant chunks from our knowledge base and use them to generate an answer. Here's how that works.
 
 **Step 1: Embed the query**
 
@@ -133,7 +133,7 @@ query = "How does machine learning work?"
 query_vector = client.embed(query)
 ```
 
-Same embedding model, same vector space. The query is now comparable to our stored chunks.
+Same embedding model, same vector space. The query is now directly comparable to our stored chunks.
 
 **Step 2: Search for relevant chunks**
 
@@ -147,7 +147,7 @@ results = vectorstore.search(
 
 [Show the retrieved chunks]
 
-Vector search found the most semantically similar chunks. This is semantic search—it understands meaning, not just keywords.
+Vector search finds the most semantically similar chunks to the user's query. This is the power of semantic search—it understands meaning, not just keywords.
 
 **Step 3: Rerank for precision**
 
@@ -167,7 +167,7 @@ final_chunks = await reranker.a_run({
 
 [Explain reranking]
 
-Reranking uses a more expensive model to reorder results by actual relevance. It's optional but improves accuracy, especially for complex queries.
+Reranking uses a more sophisticated (and expensive) model to reorder the initial results by their actual relevance to the query. It's an optional step, but it can significantly improve accuracy, especially for complex or nuanced questions.
 
 **Step 4: Generate the answer**
 
@@ -191,15 +191,15 @@ print(response.text)
 
 [Show the full answer]
 
-The model sees the retrieved context and generates an answer based on it. It's grounded in your documents, not just general knowledge.
+The model sees the retrieved context and generates an answer that is grounded in your documents, not just its own general knowledge.
 
 [Visual: Show complete RAG flow diagram]
 
 ### Making It Production-Ready (1 min)
 
-This works, but production RAG needs more sophistication. Here are the patterns:
+This works, but a production-ready RAG system needs a bit more sophistication. Here are a few key patterns:
 
-**Query rewriting**: Transform vague questions into better search queries before retrieval.
+**Query rewriting**: Transform vague or poorly phrased questions into better search queries before retrieval.
 
 ```python
 from datapizza.rag.rewriter import ToolRewriter
@@ -209,7 +209,7 @@ rewritten = rewriter.run("Uhm, how's that ML thing work?")
 # Output: "Explain how machine learning algorithms work"
 ```
 
-**Metadata filtering**: Search within specific document types, dates, or categories.
+**Metadata filtering**: Search within specific document types, dates, or other categories.
 
 ```python
 results = vectorstore.search(
@@ -219,22 +219,22 @@ results = vectorstore.search(
 )
 ```
 
-**Hybrid search**: Combine vector search with keyword matching for better precision.
+**Hybrid search**: Combine vector search with traditional keyword matching for improved precision.
 
-These are the patterns that make RAG reliable at scale.
+These are the patterns that make RAG systems reliable and scalable in production.
 
 ## Conclusion (1 min)
 
-Quick recap of the full pipeline: Parse documents into structured nodes. Split into chunks and generate embeddings. Store in a vector database. For queries, embed them, search for relevant chunks, optionally rerank, and generate answers with context.
+Let's do a quick recap of the full pipeline. First, we parse documents into structured nodes. Then, we split them into chunks and generate embeddings. We store those embeddings in a vector database. When a user asks a question, we embed it, search for relevant chunks, optionally rerank them, and finally generate an answer using the retrieved context.
 
 [Visual: Show complete pipeline with all steps]
 
-This is how you make LLMs useful for real business problems. Product support, internal documentation, research assistance—all built on this exact foundation.
+This is how you make LLMs genuinely useful for real-world business problems. Product support, internal documentation, and research assistance are all built on this exact foundation.
 
-Next up is the final video, where we're covering pipelines for complex workflows and production monitoring so you can actually deploy this stuff and not have it break.
+Next up is our final video, where we'll cover pipelines for building complex workflows and implementing production monitoring so you can actually deploy this stuff with confidence.
 
-Before that, try building your own knowledge base. Ingest some documents, query them, experiment with chunk sizes and reranking. See how retrieval quality affects answer accuracy. It's fascinating to tune this.
+Before that, I encourage you to build your own knowledge base. Ingest some of your own documents, query them, and experiment with different chunk sizes and reranking strategies. See for yourself how retrieval quality affects the accuracy of the final answer. It's fascinating to tune.
 
-This is production-grade AI engineering. If you're still with me, hit that subscribe button. I'll see you in the final video!
+This is what production-grade AI engineering looks like. If you're still with me, hit that subscribe button, and I'll see you in the final video!
 
 [Note for narrator: This should feel like a culmination—we're building real, deployable systems]

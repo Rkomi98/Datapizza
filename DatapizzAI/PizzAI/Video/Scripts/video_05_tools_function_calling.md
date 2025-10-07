@@ -2,25 +2,25 @@
 
 ## Introduction (1.5 min)
 
-What's up! Welcome back. So up until now, our LLMs could only generate text. They could explain things, answer questions, write code—but they couldn't actually DO anything.
+Hey everyone, and welcome back. Up until now, our LLMs could only generate text. They could explain concepts, answer questions, and even write code—but they couldn't actually *do* anything.
 
-That changes today with tools and function calling.
+That all changes today with tools and function calling.
 
 [Visual: Show chatbot connected to various tools - calculator, search, database]
 
-Function calling lets LLMs take actions. Need to fetch data from an API? Search the web? Run calculations? The model can decide to use tools and execute them autonomously.
+Function calling allows LLMs to take action. Whether you need to fetch data from an API, search the web, or run complex calculations, the model can decide which tools to use and execute them autonomously.
 
-This is how you build agents, not just chatbots. This is how you connect LLMs to the real world and make them actually useful.
+This is how you build agents, not just chatbots. It's how you connect LLMs to the real world and make them truly useful.
 
-After this video, you'll know how to define tools, control when they're used, and build interactive applications that combine reasoning with action.
+By the end of this video, you'll know how to define tools, control when they're used, and build interactive applications that combine reasoning with action.
 
-Alright, so what are tools exactly?
+Alright, so what exactly are tools?
 
 ## Content Main (7.5 min)
 
 ### Defining Your First Tool (2 min)
 
-So here's the cool part—a tool is just a Python function with a decorator. That's literally it. Check this out:
+Here's the cool part—a tool is just a Python function with a decorator. That's it. Check this out:
 
 [Show code]
 
@@ -65,13 +65,13 @@ print(response.text)
 
 [Run and show output]
 
-The model sees the question, realizes it needs calculation, and returns a function call instead of text. We execute the tool and get the result.
+The model sees the question, realizes it needs to perform a calculation, and returns a function call instead of a simple text response. We then execute that function and get the result.
 
-This is the basic pattern: define tool, pass to invoke, check for function calls, execute them.
+This is the basic pattern: define a tool, pass it to `invoke`, check for function calls, and execute them.
 
 ### Multi-Tool Interactions (2.5 min)
 
-Real applications use multiple tools. Let me show you a practical example with a calculator and search function.
+Real-world applications often use multiple tools. Let me show you a practical example with a calculator and a search function.
 
 [Show code]
 
@@ -102,7 +102,7 @@ response = client.invoke(
 
 [Show the interaction]
 
-Here's where it gets interesting. The model might need multiple tool calls to answer one question. You need a loop to handle this:
+Now, here's where it gets interesting. The model might need to make multiple tool calls to answer a single question, so you'll need a loop to handle this.
 
 ```python
 from datapizza.type import FunctionCallResultBlock
@@ -138,15 +138,15 @@ while response.function_calls:
 
 [Walk through this carefully]
 
-This loop handles the full tool execution cycle: the model calls tools, we execute them, add results to memory, and invoke again. The model sees those results and either calls more tools or generates a final text response.
+This loop handles the full tool execution cycle: the model calls the tools, we execute them, add the results to memory, and then invoke the model again. The model sees those results and either calls more tools or generates a final text response.
 
 [Visual: Show flowchart of the tool execution loop]
 
-This is how agents work under the hood. It's a loop of reasoning and action.
+This is how agents work under the hood. It's a continuous loop of reasoning and action.
 
 ### Building a Conversational Tool Interface (3 min)
 
-Now let's combine everything into a practical chatbot with tools.
+Now, let's combine everything into a practical, tool-enabled chatbot.
 
 [Show complete code]
 
@@ -225,24 +225,24 @@ while True:
 
 [Run the chatbot, show conversation]
 
-Try asking: "What's 150 * 83? And what's half of that?"
+Try asking it something like, "What's 150 * 83? And what's half of that?"
 
 [Demonstrate the tool being called multiple times]
 
-The model uses the calculator when needed, but answers conversational questions normally. It knows when to use tools and when to just respond.
+The model uses the calculator when it's needed but answers conversational questions normally. It knows when to use tools and when to just respond with text.
 
-This is the foundation of agentic behavior—combining reasoning with the ability to take actions.
+This is the foundation of agentic behavior—combining reasoning with the ability to take action.
 
 ## Conclusion (1 min)
 
-Alright, quick summary: We defined tools using simple Python functions with the @tool decorator. We handled multi-tool scenarios with execution loops. And we built a conversational chatbot that decides when to use tools autonomously.
+Alright, let's do a quick summary. We defined tools using simple Python functions and the `@tool` decorator. We handled multi-tool scenarios with an execution loop. And we built a conversational chatbot that can decide when to use those tools autonomously.
 
 [Visual: Show the tool execution cycle diagram]
 
-This is crucial for what's coming next. Next video, we're building full AI agents—systems that plan, reason, and use tools to accomplish complex tasks. This is where it gets seriously powerful.
+This is a crucial concept for what's coming next. In the next video, we're building full-fledged AI agents—systems that can plan, reason, and use tools to accomplish complex tasks. This is where it gets seriously powerful.
 
-Before that, try adding your own tools. Maybe a weather API, a database query, or a file system operation. The pattern is the same—define the function, add the decorator, and let the model decide when to use it.
+Before that, try adding your own tools. Maybe a weather API, a database query function, or a file system operation. The pattern is always the same: define the function, add the decorator, and let the model decide when to use it.
 
-If this was helpful, hit that like button. Code's in the description. I'll see you next time when we build our first agent!
+If this was helpful, hit that like button. The code is in the description. I'll see you next time when we build our first agent!
 
 [Note for narrator: Build excitement—tools are the gateway to agents]
