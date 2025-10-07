@@ -18,7 +18,15 @@ Let's dive into the three methods.
 
 ### Direct Client Configuration (2 min)
 
-Each provider has its own client class. Let's take a look at the main ones.
+Each provider has its own client class. Let's take a look at the main ones. First of all you have to install the specific providers, let's start with Antrophic:
+```bash
+pip install datapizza-ai-clients-anthropic
+```
+And we can also install Google provider:
+```bash
+pip install datapizza-ai-clients-google
+```
+Now, let’s see how easy it is to set up each provider.
 
 [Show code for multiple providers]
 
@@ -101,15 +109,17 @@ This is my preferred approach for production. You can make provider selection co
 [Show example of config-driven selection]
 
 ```python
-provider_name = os.getenv("LLM_PROVIDER", "openai")
+from datapizza.clients.factory import Provider
+
+# We consider provider = "OPENAI"
+
 client = ClientFactory.create(
-    provider=provider_name,
-    api_key=os.getenv(f"{provider_name.upper()}_API_KEY"),
-    model=os.getenv("MODEL_NAME"),
+    provider=Provider.OPENAI,
+    api_key=os.getenv("OPENAI_API_KEY"),,
+    model="gpt-4o",
     temperature=0.7
 )
 ```
-
 Now, you can control everything through environment variables, allowing you to deploy the same code with different providers across various environments.
 
 ### Building Custom Adapters (3.5 min)
@@ -121,50 +131,92 @@ Let's walk through the pattern using a local Ollama model as an example.
 [Show code structure]
 
 ```python
-from typing import Optional
+import requests
+from typing import Optional, Union, List
+from pydantic import BaseModel
+
 from datapizza.clients import ClientResponse
 from datapizza.memory import Memory
 from datapizza.type import TextBlock
 
+
+
 class OllamaClient:
-    def __init__(self, model: str = "gemma:2b", base_url: str = "http://localhost:11434"):
+    def __init__(self, model: str = "gemma3n:e2b", base_url: str = "http://localhost:11434"):
         self.model = model
-        self.base_url = base_url
-    
-    def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
-        # Build messages from memory
-        messages = []
-        if memory:
+        self.base_url = base_url.rstrip("/")
+
+    def _build_messages(self, input=None, memory: Optional[Memory] = None):
+        """Build chat messages for the Ollama API including conversation memory."""
+        msgs = []
+        if memory is not None:
             for turn in memory.memory:
-                role = turn.role.value
-                content = " ".join(
-                    getattr(b, "content", "") for b in turn.blocks
-                )
+                role = turn.role.value if hasattr(turn.role, "value") else str(turn.role)
+                content = " ".join(getattr(b, "content", "") for b in turn.blocks)
                 if content:
-                    messages.append({"role": role, "content": content})
-        
-        # Add current input
-        if isinstance(input, str):
-            messages.append({"role": "user", "content": input})
-        
-        # Call Ollama API
-        import requests
-        response = requests.post(
-            f"{self.base_url}/api/chat",
-            json={"model": self.model, "messages": messages, "stream": False}
-        )
-        
-        # Parse response
-        data = response.json()
-        text = data.get("message", {}).get("content", "")
-        
-        # Return ClientResponse
-        return ClientResponse(
-            content=[TextBlock(content=text)],
-            prompt_tokens_used=0,  # Ollama doesn't expose this
-            completion_tokens_used=0,
-            stop_reason="stop"
-        )
+                    msgs.append({"role": role, "content": content})
+        if isinstance(input, str) and input:
+            msgs.append({"role": "user", "content": input})
+        return msgs
+
+    def _estimate_tokens(self, text: str) -> int:
+        """Roughly estimate the number of tokens using word count."""
+        return int(len(text.split()) * 1.3)  # Approximate conversion factor
+
+    def invoke(self, input=None, memory: Optional[Memory] = None) -> ClientResponse:
+        """Call the Ollama model and return a Datapizza-AI-compatible response."""
+        messages = self._build_messages(input, memory)
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "stream": False
+        }
+
+        try:
+            response = requests.post(f"{self.base_url}/api/chat", json=payload, timeout=120)
+            response.raise_for_status()
+            data = response.json()
+
+            # Extract the assistant reply
+            text = data.get("message", {}).get("content", "").strip()
+            if not text:
+                text = str(data)
+
+            # Estimate token usage
+            prompt_text = " ".join([msg["content"] for msg in messages])
+            prompt_tokens = self._estimate_tokens(prompt_text)
+            completion_tokens = self._estimate_tokens(text)
+
+            return ClientResponse(
+                content=[TextBlock(content=text)],
+                prompt_tokens_used=prompt_tokens,
+                completion_tokens_used=completion_tokens,
+                stop_reason="stop"
+            )
+
+        except requests.RequestException as e:
+            return ClientResponse(
+                content=[TextBlock(content=f"Ollama connection error: {str(e)}")],
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
+        except Exception as e:
+            return ClientResponse(
+                content=[TextBlock(content=f"Ollama error: {str(e)}")],
+                prompt_tokens_used=0,
+                completion_tokens_used=0,
+                stop_reason="error"
+            )
+
+# Local client smoke test
+client = OllamaClient()
+response = client.invoke("Hi! Summarise the Pythagorean theorem in one sentence.")
+
+print(f"Response: {response.text}")
+print(f"Prompt tokens: {response.prompt_tokens_used}")
+print(f"Completion tokens: {response.completion_tokens_used}")
+print(f"Stop reason: {response.stop_reason}")
 ```
 
 [Walk through the key parts]
