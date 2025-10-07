@@ -29,15 +29,16 @@ from datapizza.memory import Memory
 from datapizza.type import ROLE, TextBlock
 
 memory = Memory()
+message = TextBlock(content="Hi, I'm Mirko")
+
+# Call the model
+response = client.invoke(message.text, memory=memory)
 
 # Add user message
 memory.add_turn(
-    [TextBlock(content="Hi, I'm Mirko")], 
+    [message], 
     ROLE.USER
 )
-
-# Call the model
-response = client.invoke("Hi, I'm Mirko", memory=memory)
 
 # Store assistant response
 memory.add_turn(
