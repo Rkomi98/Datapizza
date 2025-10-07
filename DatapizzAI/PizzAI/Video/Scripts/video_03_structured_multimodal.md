@@ -2,23 +2,23 @@
 
 ## Introduction (1.5 min)
 
-Hey, welcome back! So far we've built a text-based chatbot with memory and caching. That's solid, but real, modern applications need way more than that.
+Hey everyone, and welcome back. So far, we've built a text-based chatbot with memory and caching. That's a solid foundation, but modern applications require much more than that.
 
-Sometimes you need structured data—JSON responses you can actually parse and use programmatically. And sometimes you need to work with more than just text, such as images, audio, documents, the whole multimodal stack.
+You'll often need structured data, like JSON responses that you can parse and use programmatically. You'll also need to work with more than just text, including images, audio, and documents—the entire multimodal stack.
 
 [Visual: Show text bubbles transforming into JSON structures and media files]
 
-Today we're covering two major capabilities: getting reliable structured outputs using Pydantic models, and working with multimodal inputs like images and audio.
+Today, we're covering two major capabilities: getting reliable structured outputs using Pydantic models and working with multimodal inputs like images and audio.
 
-After this, you'll be able to extract structured data from LLM responses and build chatbots that can see and hear, not just read text.
+By the end of this video, you'll be able to extract structured data from LLM responses and build chatbots that can "see" and "hear," not just read text.
 
-Alright, here are two approaches to getting structured data.
+Alright, let's start by exploring two approaches to getting structured data.
 
 ## Main Content (6.5 min)
 
 ### Getting JSON with Prompt Engineering (1.5 min)
 
-The simplest way to get JSON from an LLM is just to ask for it. But here's the catch, you need to be really accurate.
+The simplest way to get JSON from an LLM is to just ask for it. But there's a catch: you need to be very precise with your instructions.
 
 [Show code]
 
@@ -50,13 +50,13 @@ print("Title:", data["title"])
 
 [Show the output]
 
-This works, but it’s brittle. Structured outputs such as JSON mode or function calling guarantee valid JSON; otherwise implement robust parsing and validation.
+While this can work, it's often brittle. For more reliable results, you should use features like JSON mode or function calling, which guarantee valid JSON. Otherwise, you'll need to implement robust parsing and validation yourself.
 
-That's why there's a better way.
+That's why there's a much better way.
 
 ### Structured Responses with Pydantic (2.5 min)
 
-Instead of hoping for valid JSON, you can enforce it with Pydantic models. The framework validates the structure automatically.
+Instead of just hoping for valid JSON, you can enforce it using Pydantic models. This way, the framework handles the validation for you automatically.
 
 [Show code]
 
@@ -90,19 +90,19 @@ for task in project.tasks:
 
 [Run code, show output]
 
-See the difference? You get a typed Python object with full IDE autocomplete. No manual parsing, no try-except blocks checking for malformed JSON.
+See the difference? You get a typed Python object back, complete with full IDE autocomplete. There's no need for manual parsing or `try-except` blocks to check for malformed JSON.
 
 [Visual: Show IDE autocomplete working on the project object]
 
-The model is constrained to return data matching your schema. If it doesn't, you get a validation error before your code even sees it.
+The model is constrained to return data that matches your schema. If it fails to do so, you'll get a validation error before your code even sees the response.
 
-This is how you build reliable systems. Define your data model, let Pydantic enforce it.
+This is how you build reliable, production-ready systems. You define your data model, and you let Pydantic enforce it.
 
 ### Working with Images (2.5 min)
 
-Now let's talk about vision. LLMs can analyze images, and Datapizza-AI makes this straightforward.
+Now, let's talk about vision. Modern LLMs can analyze images, and Datapizza-AI makes this incredibly straightforward.
 
-You have three ways to provide images: URLs, base64-encoded data, or file paths. Let me show you all three.
+You can provide images in three ways: via URLs, as base64-encoded data, or directly from file paths. Let's take a look at all three.
 
 [Show code - This is one of the last images ever taken by NASA's InSight Mars lander. Captured on Dec. 11, 2022, it shows InSight's seismometer on the Red Planet's surface.]
 
@@ -182,20 +182,20 @@ response = client.invoke(
 
 [Demonstrate the conversation flow]
 
-The model remembers the image across turns. You don't have to send it again.
+The model remembers the image across multiple turns, so you don't have to send it again.
 
 ## Conclusion (1 min)
 
-Let's recap: We covered two methods for structured outputs—basic JSON prompting and robust Pydantic models. Use Pydantic whenever you need reliable, typed data.
+Let's do a quick recap. We covered two methods for getting structured outputs: basic JSON prompting and robust Pydantic models. You should always use Pydantic when you need reliable, typed data.
 
-We explored multimodal capabilities, showing how to work with images using URLs, base64, or file paths. This opens up document analysis, visual Q&A, and multimodal conversations—pretty much anything you can imagine.
+We also explored multimodal capabilities, showing you how to work with images using URLs, base64 encoding, or file paths. This opens the door to document analysis, visual Q&A, and multimodal conversations—pretty much anything you can imagine.
 
 [Visual: Show structured data and images as building blocks]
 
-Next video, we're working with multiple LLM providers using ClientFactory, and you'll learn how to build custom adapters for providers that aren't supported out of the box. Super useful if you're working with specific models.
+In the next video, we'll be working with multiple LLM providers using `ClientFactory`, and you'll learn how to build custom adapters for providers that aren't supported out of the box. This is super useful if you're working with specialized or custom models.
 
-Before then, try building something multimodal—maybe a document analyzer or an image-based chatbot. As always: experiment with it! The patterns we covered today are the foundation for way more complex applications.
+Before then, try building something multimodal yourself—maybe a document analyzer or an image-based chatbot. As always, experiment with it! The patterns we covered today are the foundation for much more complex applications.
 
-Drop a like if this was helpful, and I'll see you in the next one, in which we will se how to manage different clients!
+Drop a like if this was helpful, and I'll see you in the next video, where we'll learn how to manage different clients!
 
 [Note for narrator: Energy should be building—we're adding capabilities fast]
