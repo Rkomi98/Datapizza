@@ -20,7 +20,7 @@ Alright, so what exactly are tools?
 
 ### Defining Your First Tool (2 min)
 
-Here's the cool part—a tool is just a Python function with a decorator. That's it. Check this out:
+Here's the cool part: a tool is just a Python function with a decorator. That's it. Check this out:
 
 [Show code]
 
@@ -39,11 +39,11 @@ def calculator(expression: str) -> str:
         return f"Error: {e}"
 ```
 
-The `@tool` decorator tells Datapizza-AI this function can be called by the model. The docstring is important—it tells the model what the tool does.
+The `@tool` decorator tells Datapizza-AI this function can be called by the model. The docstring is important because it tells the model what the tool does.
 
 [Highlight the docstring]
 
-The model reads that docstring and decides whether to use this tool based on the user's request. Clear documentation means better tool selection.
+The model reads that docstring and decides whether to use this tool based on the user's request. As in real life, clear documentation means better tool selection.
 
 Now let's use it:
 
@@ -140,7 +140,7 @@ while response.function_calls:
 
 This loop handles the full tool execution cycle: the model calls the tools, we execute them, add the results to memory, and then invoke the model again. The model sees those results and either calls more tools or generates a final text response.
 
-[Visual: Show flowchart of the tool execution loop]
+[Visual: Show flowchart of the tool execution loop - TODO IN POST PROD near my face]
 
 This is how agents work under the hood. It's a continuous loop of reasoning and action.
 
@@ -168,7 +168,7 @@ def calculator(expr: str) -> str:
 
 client = GoogleClient(
     api_key=os.getenv("GOOGLE_API_KEY"),
-    model="gemini-2.0-flash"
+    model="gemini-2.5-flash"
 )
 
 tools = [calculator]
@@ -236,8 +236,6 @@ This is the foundation of agentic behavior—combining reasoning with the abilit
 ## Conclusion (1 min)
 
 Alright, let's do a quick summary. We defined tools using simple Python functions and the `@tool` decorator. We handled multi-tool scenarios with an execution loop. And we built a conversational chatbot that can decide when to use those tools autonomously.
-
-[Visual: Show the tool execution cycle diagram]
 
 This is a crucial concept for what's coming next. In the next video, we're building full-fledged AI agents—systems that can plan, reason, and use tools to accomplish complex tasks. This is where it gets seriously powerful.
 
