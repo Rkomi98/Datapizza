@@ -94,11 +94,7 @@ An "agent-of-agents" orchestrator coordinates two specialists: `AnalystAgent` (e
 import os
 import re
 from dotenv import load_dotenv
-
-
-# --- 1. Shared Client Setup ---
 load_dotenv()
-
 from datapizza.agents import Agent
 from datapizza.clients import ClientFactory
 from datapizza.tools import tool
@@ -108,9 +104,6 @@ shared_client = ClientFactory.create(
     model="gpt-4o-mini",
     temperature=0.0,
 )
-
-# --- 2. Specialized Tools and Agents ---
-
 @tool
 def extract_kpi(context: str) -> str:
     """Extracts KPIs and quantitative metrics from raw text."""
@@ -125,14 +118,12 @@ def extract_kpi(context: str) -> str:
     ]
     return " | ".join(metrics) if metrics else "No numeric KPI detected."
 
-
 @tool
 def identify_risks(context: str) -> str:
     """Flags risks by scanning for domain keywords."""
     risk_map = {"Compliance": ["gdpr", "normativa"], "Budget": ["budget", "costo"]}
     risks = [name for name, keywords in risk_map.items() if any(k in context.lower() for k in keywords)]
     return " | ".join(risks) if risks else "No material operational risk identified."
-
 
 analyst_agent = Agent(
     name="AnalystAgent",
@@ -148,7 +139,6 @@ analyst_agent = Agent(
     max_steps=3,
 )
 
-
 risk_agent = Agent(
     name="RiskAgent",
     client=shared_client,
@@ -162,7 +152,6 @@ risk_agent = Agent(
     max_steps=3,
 )
 
-
 @tool
 def run_kpi_analysis(query: str) -> str:
     """Delegates KPI extraction to the specialist agent."""
@@ -170,14 +159,12 @@ def run_kpi_analysis(query: str) -> str:
     result = analyst_agent.run(query)
     return result or "KPI analysis did not complete."
 
-
 @tool
 def run_risk_assessment(query: str) -> str:
     """Delegates risk screening to the specialist agent."""
     print("  -> Delegating to RiskAgent...")
     result = risk_agent.run(query)
     return result or "Risk assessment did not complete."
-
 
 strategic_planner_agent = Agent(
     name="StrategicPlanner",
@@ -192,8 +179,6 @@ strategic_planner_agent = Agent(
     terminate_on_text=True,
     max_steps=5,
 )
-
-
 if __name__ == "__main__":
     scenarios = [
         "Fintech product growing 30% YoY, €2M revenue, needs GDPR compliance roadmap.",
