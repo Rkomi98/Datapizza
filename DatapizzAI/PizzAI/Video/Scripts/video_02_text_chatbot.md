@@ -32,12 +32,12 @@ memory = Memory()
 
 # Add user message
 memory.add_turn(
-    [TextBlock(content="Hi, I'm Sarah")], 
+    [TextBlock(content="Hi, I'm Mirko")], 
     ROLE.USER
 )
 
 # Call the model
-response = client.invoke("Hi, I'm Sarah", memory=memory)
+response = client.invoke("Hi, I'm Mirko", memory=memory)
 
 # Store assistant response
 memory.add_turn(
@@ -50,11 +50,11 @@ memory.add_turn(
 
 See what's happening? We're manually tracking the conversation. User says something, we store it. Model responds, we store that too.
 
-Here's the critical part: always use `response.text` when storing the assistant's reply. Don't pass the response object directly—it's not a string, and Memory expects strings wrapped in TextBlock.
+Here's the critical part: always use `response.text` when storing the assistant's reply. Don't pass the response object directly: it's not a string. Memory expects strings wrapped in TextBlock.
 
 [Highlight the .text property]
 
-This pattern—add user turn, invoke with memory, add assistant turn—is how every chatbot works in Datapizza-AI. Get comfortable with it.
+This pattern—add user turn, invoke with memory, add assistant turn is how every chatbot works in Datapizza-AI. Get comfortable with it.
 
 ### Implementing Caching (2 min)
 
@@ -65,6 +65,8 @@ That's wasteful. Caching fixes it, and it's stupid simple to implement.
 [Show code]
 
 ```python
+import time
+from datapizza.clients.openai import OpenAIClient
 from datapizza.cache import MemoryCache
 
 client = OpenAIClient(
@@ -74,15 +76,23 @@ client = OpenAIClient(
 )
 
 # First request hits the API
+t0 = time.perf_counter()
 response1 = client.invoke("What is machine learning?")
+t1 = time.perf_counter()
+print("first:", r1.text)
+print(f"⏱️ time (first): {t1 - t0:.3f}s")
 
 # Second identical request hits the cache
+t2 = time.perf_counter()
 response2 = client.invoke("What is machine learning?")
+t3 = time.perf_counter()
+print("second:", r2.text)
+print(f"⏱️ time (second): {t3 - t2:.3f}s")
 ```
 
 [Demonstrate timing difference]
 
-The first request might take 2-3 seconds. The second? Instant. Zero API cost.
+The first request might take 2-3 seconds. The second? Instant. We cannot show the difference in cost, but in the second scenario, there is Zero API cost.
 
 The cache key is computed from your prompt and parameters. Same input equals same output. Different input gets a fresh API call.
 
@@ -92,7 +102,7 @@ For production, you'd use `RedisCache` instead of `MemoryCache` so it persists a
 
 ### Building the Complete Chatbot (2.5 min)
 
-Now let's put it all together into something you can actually use.
+Now let's put it all together into something you can actually use. Let's build it line by line.
 
 [Show full code]
 
@@ -169,8 +179,7 @@ This is your chatbot foundation. Everything from here—tools, agents, RAG syste
 
 Next video, we're adding structured outputs so you can get JSON responses reliably, and we'll explore multimodal capabilities—sending images and audio to your models. It gets way more interesting.
 
-Before that though, try extending this chatbot. Add a system prompt, experiment with different temperatures, or swap OpenAI for Claude or Gemini using the same code. That's the power of this unified interface.
+Before that though, try extending this chatbot. Add a system prompt, experiment with different temperatures, or swap OpenAI for Claude or Gemini using the same code (remember you have to install other client). That's the power of this unified interface. Till now we have seen only text chatbots. In next video we will analyze also structured and multimodal content.
 
 If this helped, smash that like button. Drop a comment if you run into issues. I'll see you in the next one!
 
-[Note for narrator: Emphasize that this foundation is crucial—everything builds on it]

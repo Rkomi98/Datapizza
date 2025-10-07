@@ -2,9 +2,9 @@
 
 ## Introduction (2 min)
 
-Hey everyone! Welcome to this complete series on Datapizza-AI, where we're going to build production-ready GenAI applications from scratch.
+Hey everyone! Welcome to this complete series on Datapizza-AI framework. I am Mirko Calcaterra, AI engineer in Datapizza and in this playlist we will show you how to build production-ready AI application from scratch.
 
-If you've been trying to build with LLMs and found yourself wrestling with inconsistent APIs, debugging mysterious errors at 2 AM, or just wondering how to actually ship something that won't break in production, you're in the right place.
+If you've been trying to build with LLMs and found yourself wrestling with inconsistent APIs, debugging mysterious errors, or just wondering how to actually ship something that won't break in production, you're in the right place.
 
 [Visual: Show messy code snippets transforming into clean, organized structure]
 
@@ -46,7 +46,7 @@ Alright, time to actually install this thing. Takes about 30 seconds, no joke. Y
 pip install datapizza-ai
 ```
 
-That's it for the core. If you want a specific provider, install the client:
+That's it for the core. If you want a specific provider, install the client (OpenAI is already present in the library):
 
 ```bash
 pip install datapizza-ai-clients-openai
@@ -113,8 +113,7 @@ Coming up in the next video, we're taking this way further. We'll add conversati
 
 And this is just the beginning. By the end of this series, you'll be building multi-agent systems and production RAG pipelines. So real and complete products.
 
-If you're coding along—and you should be—try modifying that system prompt or asking different questions. Experiment with it. Get comfortable with the basic client pattern because everything we build from here uses this foundation.
+If you're coding along, and you should be, try modifying that system prompt or asking different questions. Experiment with it. Get comfortable with the basic client pattern because everything we build from here uses this foundation.
 
 Code's in the description below, and if you found this useful, hit the like button. I'll catch you in the next video!
 
-[Note for narrator: End with energy, this should feel like the start of something exciting]

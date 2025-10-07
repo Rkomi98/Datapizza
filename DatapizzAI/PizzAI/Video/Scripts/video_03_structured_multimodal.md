@@ -2,9 +2,9 @@
 
 ## Introduction (1.5 min)
 
-Hey, welcome back! So far we've built a text-based chatbot with memory and caching. That's solid, but real applications need way more than that.
+Hey, welcome back! So far we've built a text-based chatbot with memory and caching. That's solid, but real, modern applications need way more than that.
 
-Sometimes you need structured data—JSON responses you can actually parse and use programmatically. And sometimes you need to work with more than just text—images, audio, documents, the whole multimodal stack.
+Sometimes you need structured data—JSON responses you can actually parse and use programmatically. And sometimes you need to work with more than just text, such as images, audio, documents, the whole multimodal stack.
 
 [Visual: Show text bubbles transforming into JSON structures and media files]
 
@@ -14,11 +14,11 @@ After this, you'll be able to extract structured data from LLM responses and bui
 
 Alright, here are two approaches to getting structured data.
 
-## Content Main (6.5 min)
+## Main Content (6.5 min)
 
 ### Getting JSON with Prompt Engineering (1.5 min)
 
-The simplest way to get JSON from an LLM is just to ask for it. But here's the catch, you need to be really precise.
+The simplest way to get JSON from an LLM is just to ask for it. But here's the catch, you need to be really accurate.
 
 [Show code]
 
@@ -45,11 +45,12 @@ Schema:
 
 response = client.invoke(prompt)
 data = json.loads(response.text)
+print("Title:", data["title"]) 
 ```
 
 [Show the output]
 
-This works, but it's fragile. The model might add markdown code blocks, explanatory text, or malformed JSON. You have to parse it carefully.
+This works, but it’s brittle. Structured outputs such as JSON mode or function calling guarantee valid JSON; otherwise implement robust parsing and validation.
 
 That's why there's a better way.
 
@@ -161,6 +162,8 @@ You can even combine this with memory for ongoing visual conversations:
 ```python
 memory = Memory()
 
+image_block = MediaBlock(media=media)  # reuse whichever Media you defined above
+
 # First turn: show image
 memory.add_turn([
     TextBlock(content="Analyze this architecture diagram"),
@@ -191,8 +194,8 @@ We explored multimodal capabilities, showing how to work with images using URLs,
 
 Next video, we're working with multiple LLM providers using ClientFactory, and you'll learn how to build custom adapters for providers that aren't supported out of the box. Super useful if you're working with specific models.
 
-Before then, try building something multimodal—maybe a document analyzer or an image-based chatbot. Experiment with it. The patterns we covered today are the foundation for way more complex applications.
+Before then, try building something multimodal—maybe a document analyzer or an image-based chatbot. As always: experiment with it! The patterns we covered today are the foundation for way more complex applications.
 
-Drop a like if this was helpful, and I'll see you in the next one!
+Drop a like if this was helpful, and I'll see you in the next one, in which we will se how to manage different clients!
 
 [Note for narrator: Energy should be building—we're adding capabilities fast]
