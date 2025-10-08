@@ -25,25 +25,33 @@ Datapizza-AI simplifies this with three key objects: `Memory`, `TextBlock`, and 
 Let me show you how this works in practice:
 
 ```python
+import os
+from dotenv import load_dotenv
 from datapizza.memory import Memory
+from datapizza.clients.openai import OpenAIClient
 from datapizza.type import ROLE, TextBlock
 
 memory = Memory()
-message = TextBlock(content="Hi, I'm Mirko")
+load_dotenv()
 
-# Call the model
-response = client.invoke(message.content, memory=memory)
-
-# Add user message
-memory.add_turn(
-    [message], 
-    ROLE.USER
+client = OpenAIClient(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o-mini",
+    system_prompt="You are a helpful assistant that can answer questions and help with tasks.",
 )
 
-# Store assistant response
+message = TextBlock(content="What is capital of Italy?")
+
+response = client.invoke(message.content, memory=memory)
+print(response.text)
+
+# Add the user message as a turn
+memory.add_turn(message, ROLE.USER)
+
+# Add the assistant response as a turn
 memory.add_turn(
-    [TextBlock(content=response.text)], 
-    ROLE.ASSISTANT
+    TextBlock(content=response.text),
+    ROLE.ASSISTANT,
 )
 ```
 
