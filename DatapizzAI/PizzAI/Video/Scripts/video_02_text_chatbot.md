@@ -53,6 +53,14 @@ memory.add_turn(
     TextBlock(content=response.text),
     ROLE.ASSISTANT,
 )
+message = TextBlock(content="What did I ask you before?")
+memory.add_turn(message, ROLE.USER)
+response = client.invoke(message.content, memory=memory)
+print(response.text)
+memory.add_turn(
+    TextBlock(content=response.text), 
+    ROLE.ASSISTANT
+    )
 ```
 
 [Show code running with output]
