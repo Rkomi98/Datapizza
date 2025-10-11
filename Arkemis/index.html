@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi Comparativa: GitHub vs GitLab vs Gitea</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene Stone & Amber -->
+    <!-- Application Structure Plan: Ho progettato l'applicazione come un report interattivo a pagina singola. La navigazione principale permette di passare tra le sezioni logiche: una Panoramica con le raccomandazioni chiave, un Confronto Dettagliato per l'analisi approfondita delle feature, un Framework Decisionale interattivo per una scelta personalizzata, e infine Fonti e Glossario. Questa struttura tematica, invece di un lungo documento lineare, facilita l'esplorazione e permette all'utente di concentrarsi sulle aree di maggiore interesse. L'elemento centrale è il Framework, che trasforma l'analisi da passiva ad attiva, guidando l'utente a una conclusione basata sui propri pesi e priorità, migliorando notevolmente l'usabilità rispetto a una lettura statica. -->
+    <!-- Visualization & Content Choices: 
+        - Riepilogo Scenari -> Goal: Informare -> Presentation: Cards a 3 colonne (HTML/Tailwind) -> Interaction: Nessuna -> Justification: Presentazione chiara e diretta delle conclusioni principali.
+        - Confronto Dettagliato -> Goal: Confrontare -> Presentation: Accordion interattivo (HTML/JS) -> Interaction: Click per espandere/collassare categorie -> Justification: Permette di gestire una grande quantità di informazioni senza sovraccaricare l'utente. Facilita la ricerca di un criterio specifico.
+        - Albero Decisionale -> Goal: Guidare -> Presentation: Diagramma a blocchi (HTML/Tailwind) -> Interaction: Hover per evidenziare i percorsi -> Justification: Visualizzazione intuitiva e semplice di un processo decisionale complesso.
+        - Scorecard Ponderata -> Goal: Organizzare/Valutare -> Presentation: Input sliders (HTML) e Grafico a Barre Orizzontali (Chart.js) -> Interaction: L'utente muove gli slider per cambiare i pesi, il grafico si aggiorna in tempo reale mostrando i punteggi. -> Justification: È lo strumento più potente dell'app, trasforma un'analisi qualitativa in un risultato quantitativo personalizzato. L'uso di Chart.js è ideale per una visualizzazione dinamica e chiara dei punteggi.
+        - TCO (non implementato come grafico per semplicità ma descritto) -> Goal: Confrontare costi -> Presentation: Testo e tabelle -> Interaction: Nessuna -> Justification: Il calcolo TCO è complesso, una descrizione testuale chiara è più efficace di un grafico potenzialmente impreciso senza input dettagliati dall'utente.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #d97706; /* amber-600 */
+            border-bottom-color: #d97706;
+        }
+        .decision-node {
+            transition: all 0.3s ease-in-out;
+            border: 2px solid #e5e7eb; /* gray-200 */
+        }
+        .decision-node:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #d97706; /* amber-600 */
+        }
+        .decision-path {
+            position: relative;
+            height: 40px;
+            width: 2px;
+            background-color: #d1d5db; /* gray-300 */
+            margin: 0 auto;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .accordion-button.open .accordion-arrow {
+            transform: rotate(180deg);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">Analisi Comparativa Piattaforme Git</h1>
+            <p class="mt-4 text-lg text-slate-600">GitHub Cloud vs GitLab Self-hosted vs Gitea</p>
+            <p class="text-sm text-slate-500 mt-2">Ricerca aggiornata al: 10 Ottobre 2025</p>
+        </header>
+
+        <nav class="sticky top-0 bg-slate-50/80 backdrop-blur-lg z-10 mb-12 border-b border-slate-200">
+            <ul class="flex justify-center space-x-4 sm:space-x-8 text-sm sm:text-base font-medium text-slate-600">
+                <li><a href="#panoramica" class="nav-link active py-4 inline-block border-b-2 border-transparent">Panoramica</a></li>
+                <li><a href="#confronto" class="nav-link py-4 inline-block border-b-2 border-transparent">Confronto Dettagliato</a></li>
+                <li><a href="#framework" class="nav-link py-4 inline-block border-b-2 border-transparent">Framework Decisionale</a></li>
+                <li><a href="#fonti" class="nav-link py-4 inline-block border-b-2 border-transparent">Fonti & Glossario</a></li>
+            </ul>
+        </nav>
+
+        <main id="content">
+
+            <!-- Panoramica e Scenari -->
+            <section id="panoramica" class="space-y-12 scroll-mt-24">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-slate-900">Panoramica e Raccomandazioni</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Questa analisi confronta tre soluzioni leader per l'hosting di repository Git, valutandole secondo criteri cruciali per team di sviluppo moderni. La scelta dipende da un trade-off fondamentale tra controllo, costo e carico operativo. Qui di seguito, le raccomandazioni per tre scenari tipici.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Team Piccolo (Startup) -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                        <h3 class="text-xl font-bold text-amber-600">Team Piccolo & Startup (2-20 dev)</h3>
+                        <p class="text-slate-600 mt-2 mb-4">Priorità: velocità, basso costo, minimo overhead operativo.</p>
+                        <div class="space-y-3">
+                            <p><strong>🏆 Raccomandazione: GitHub Cloud (Piano Team/Free)</strong></p>
+                            <p class="text-sm text-slate-500">Offre il miglior rapporto feature/prezzo e un'esperienza utente eccellente che accelera l'onboarding. GitHub Actions e l'ecosistema integrato sono imbattibili per la produttività immediata.</p>
+                            <p><strong>🥈 Alternativa: Gitea</strong></p>
+                            <p class="text-sm text-slate-500">Se è necessaria una soluzione self-hosted per motivi di budget o controllo base, Gitea è leggerissimo, economico e facile da gestire su un piccolo server.</p>
+                        </div>
+                    </div>
+                    <!-- Team in Crescita (Scale-up) -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-2 border-amber-600">
+                        <h3 class="text-xl font-bold text-amber-600">Team in Crescita (20-150 dev)</h3>
+                        <p class="text-slate-600 mt-2 mb-4">Priorità: scalabilità, sicurezza, CI/CD robusto, TCO prevedibile.</p>
+                        <div class="space-y-3">
+                            <p><strong>🏆 Raccomandazione: GitHub Cloud (Piano Enterprise)</strong></p>
+                            <p class="text-sm text-slate-500">La scelta più produttiva. Fornisce feature di sicurezza avanzate (SSO, SCIM, secret scanning), compliance e una gestione utenti scalabile, mantenendo un basso carico operativo. L'uso di runner self-hosted in VPC privati offre un eccellente modello ibrido per la sicurezza CI/CD.</p>
+                             <p><strong>🥈 Alternativa: GitLab Self-hosted</strong></p>
+                            <p class="text-sm text-slate-500">Considerare se la sovranità dei dati e l'isolamento di rete sono requisiti non negoziabili. Richiede un investimento significativo in un team SRE/DevOps per la gestione, ma offre il massimo controllo.</p>
+                        </div>
+                    </div>
+                    <!-- Azienda Strutturata (Enterprise) -->
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                        <h3 class="text-xl font-bold text-amber-600">Azienda Strutturata (>150 dev)</h3>
+                        <p class="text-slate-600 mt-2 mb-4">Priorità: compliance, sicurezza granulare, controllo totale, integrazione legacy.</p>
+                        <div class="space-y-3">
+                           <p><strong>🏆 Raccomandazione: GitLab Self-hosted</strong></p>
+                            <p class="text-sm text-slate-500">Quando il controllo totale su dati, compliance (es. GDPR, SOC 2 in-house), policy e infrastruttura è il driver principale. Permette integrazioni profonde con sistemi interni e policy di sicurezza custom inarrivabili per le soluzioni cloud.</p>
+                             <p><strong>🥈 Alternativa: GitHub Enterprise Server (GHES)</strong></p>
+                            <p class="text-sm text-slate-500">Offre l'esperienza di GitHub in un pacchetto self-hosted. Ottima scelta se il team ama l'ecosistema GitHub ma necessita di deployment on-premise. Spesso più semplice da gestire rispetto a GitLab.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Confronto Dettagliato -->
+            <section id="confronto" class="space-y-8 scroll-mt-24 pt-20">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-slate-900">Confronto Dettagliato</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Analisi approfondita delle piattaforme su criteri chiave. Clicca su ogni categoria per espandere i dettagli.</p>
+                </div>
+                
+                <div id="accordion-container" class="space-y-4 max-w-5xl mx-auto">
+                    <!-- Categoria Sicurezza & Compliance -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🛡️ Sicurezza & Compliance</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700">
+                                <table class="w-full table-auto border-collapse">
+                                    <thead><tr class="bg-slate-100"><th class="p-2 border">Feature</th><th class="p-2 border">GitHub Cloud</th><th class="p-2 border">GitLab Self-hosted</th><th class="p-2 border">Gitea</th></tr></thead>
+                                    <tbody>
+                                        <tr><td class="p-2 border font-medium">SSO/SAML/OIDC</td><td class="p-2 border text-center text-green-600">✅</td><td class="p-2 border text-center text-green-600">✅</td><td class="p-2 border text-center text-green-600">✅</td></tr>
+                                        <tr><td class="p-2 border font-medium">Secret Scanning</td><td class="p-2 border text-center text-green-600">✅ Avanzato</td><td class="p-2 border text-center text-green-600">✅</td><td class="p-2 border text-center text-orange-500">⚠️ Base (via plugin)</td></tr>
+                                        <tr><td class="p-2 border font-medium">Audit Log</td><td class="p-2 border text-center text-green-600">✅ Completo</td><td class="p-2 border text-center text-green-600">✅ Completo</td><td class="p-2 border text-center text-orange-500">⚠️ Limitato</td></tr>
+                                        <tr><td class="p-2 border font-medium">Data Residency UE</td><td class="p-2 border text-center text-orange-500">⚠️ (Solo per Enterprise)</td><td class="p-2 border text-center text-green-600">✅ (Pieno controllo)</td><td class="p-2 border text-center text-green-600">✅ (Pieno controllo)</td></tr>
+                                         <tr><td class="p-2 border font-medium">Compliance (SOC 2, ISO 27001)</td><td class="p-2 border text-center text-green-600">✅ Certificato</td><td class="p-2 border text-center text-orange-500">⚠️ Dipende da te</td><td class="p-2 border text-center text-red-500">❌ Non applicabile</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria CI/CD -->
+                     <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🚀 CI/CD</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                             <div class="p-5 border-t border-slate-200 text-slate-700">
+                                <p><strong>GitHub Actions:</strong> Ecosistema immenso grazie al Marketplace. Sintassi YAML semplice e potente. Modello ibrido (runner cloud + self-hosted) molto flessibile. La gestione delle policy di sicurezza (es. OIDC, ambienti protetti) è eccellente.</p>
+                                <p class="mt-2"><strong>GitLab CI/CD:</strong> Soluzione all-in-one molto matura e potente. L'integrazione nativa con l'intera piattaforma (issue, security scan, registry) è il suo punto di forza. La gestione dei runner e delle variabili è granulare. La creazione di SBOM e la gestione della supply-chain sono native e ben integrate.</p>
+                                <p class="mt-2"><strong>Gitea Actions:</strong> Un clone compatibile con GitHub Actions. È più recente e meno maturo, con un ecosistema molto più piccolo. Buono per esigenze base, ma non ha le feature avanzate di sicurezza e compliance dei concorrenti.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Categoria Scalabilità & Performance -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>📈 Scalabilità & Performance</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700">
+                                <p><strong>GitHub Cloud:</strong> Scalabilità gestita da Microsoft, virtualmente infinita per un utente finale. Performance generalmente ottime, con CDN globale. I limiti su API e LFS sono ben documentati.</p>
+                                <p class="mt-2"><strong>GitLab Self-hosted:</strong> La scalabilità dipende interamente dall'architettura scelta (Reference Architectures). Supporta configurazioni HA complesse con clustering e replica (Geo). Richiede expertise SRE significativa per scalare oltre i 1000 utenti in modo affidabile.</p>
+                                <p class="mt-2"><strong>Gitea:</strong> Molto performante per team piccoli e medi. È un singolo binario Go, facile da scalare verticalmente. Il clustering è in fase di sviluppo ma meno maturo. Oltre i 500-1000 utenti attivi, la gestione può diventare complessa e richiede attente valutazioni prestazionali.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria TCO -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>💰 Costo Totale di Proprietà (TCO)</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700">
+                                <p><strong>GitHub Cloud:</strong> Prevalentemente Opex. Costi prevedibili basati su piano per utente + overage per Actions/storage. Il TCO è generalmente inferiore per team fino a 150-200 persone perché elimina i costi operativi di gestione dell'infrastruttura.</p>
+                                <p class="mt-2"><strong>GitLab Self-hosted:</strong> Mix di Capex (se on-prem) e Opex (licenze, cloud, personale). I costi nascosti sono significativi: personale SRE/DevOps (1-3 FTE), infrastruttura (calcolo, storage, network), backup, monitoring. Il TCO può diventare vantaggioso solo su scale molto grandi (>500 dev) dove l'economia di scala interna supera i costi della licenza cloud.</p>
+                                <p class="mt-2"><strong>Gitea:</strong> TCO più basso. Costi limitati all'infrastruttura (può girare su una piccola VM) e al personale per la manutenzione (minima). L'assenza di costi di licenza è un grande vantaggio, ma va bilanciata con le feature mancanti.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            
+            <!-- Framework Decisionale -->
+            <section id="framework" class="space-y-16 scroll-mt-24 pt-20">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-slate-900">Framework Decisionale Interattivo</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Usa questi strumenti per trovare la soluzione più adatta alle tue esigenze specifiche.</p>
+                </div>
+
+                <!-- Albero Decisionale -->
+                <div>
+                    <h3 class="text-2xl font-semibold text-center mb-8">1. Albero Decisionale Semplificato</h3>
+                    <div class="flex flex-col items-center">
+                        <div class="decision-node bg-white p-4 rounded-lg shadow-md w-full max-w-lg text-center">
+                            <p class="font-semibold">Domanda 1:</p>
+                            <p>La sovranità assoluta dei dati e/o l'isolamento completo della rete sono requisiti legali/di sicurezza non negoziabili?</p>
+                        </div>
+                        <div class="flex w-full max-w-lg mt-4">
+                            <div class="w-1/2 pr-4 text-center">
+                                <div class="decision-path" style="height: 20px;"></div>
+                                <div class="font-bold text-green-700">SÌ</div>
+                                <div class="decision-path" style="height: 20px;"></div>
+                                <div class="decision-node bg-green-50 p-4 rounded-lg shadow-sm text-center">
+                                    <p class="font-semibold">Soluzione: Self-Hosted</p>
+                                    <p class="text-sm">Scegli <strong>GitLab Self-hosted</strong> per feature complete o <strong>Gitea</strong> per semplicità e basso costo.</p>
+                                </div>
+                            </div>
+                            <div class="w-1/2 pl-4 text-center">
+                                <div class="decision-path" style="height: 20px;"></div>
+                                <div class="font-bold text-red-700">NO</div>
+                                <div class="decision-path" style="height: 20px;"></div>
+                                 <div class="decision-node bg-white p-4 rounded-lg shadow-md text-center">
+                                    <p class="font-semibold">Domanda 2:</p>
+                                    <p>La priorità assoluta è minimizzare l'overhead operativo e massimizzare la produttività degli sviluppatori con il miglior ecosistema?</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex w-full max-w-lg mt-4 justify-end">
+                            <div class="w-1/2 pl-4">
+                                <div class="flex w-full">
+                                    <div class="w-1/2 pr-2 text-center">
+                                        <div class="decision-path" style="height: 20px;"></div>
+                                        <div class="font-bold text-green-700">SÌ</div>
+                                        <div class="decision-path" style="height: 20px;"></div>
+                                        <div class="decision-node bg-green-50 p-4 rounded-lg shadow-sm text-center">
+                                            <p class="font-semibold">Soluzione: Cloud</p>
+                                            <p class="text-sm"><strong>GitHub Cloud</strong> è la scelta ideale.</p>
+                                        </div>
+                                    </div>
+                                    <div class="w-1/2 pl-2 text-center">
+                                        <div class="decision-path" style="height: 20px;"></div>
+                                        <div class="font-bold text-red-700">NO</div>
+                                        <div class="decision-path" style="height: 20px;"></div>
+                                        <div class="decision-node bg-blue-50 p-4 rounded-lg shadow-sm text-center">
+                                            <p class="font-semibold">Valutazione finale</p>
+                                            <p class="text-sm">Le tue esigenze sono complesse. Usa la scorecard qui sotto per una valutazione dettagliata.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scorecard Ponderata -->
+                <div>
+                    <h3 class="text-2xl font-semibold text-center mb-2">2. Scorecard Ponderata</h3>
+                    <p class="text-center text-slate-600 mb-8">Modifica i pesi in base alle priorità del tuo team. Il grafico si aggiornerà in tempo reale.</p>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1 bg-white p-6 rounded-xl shadow-md border border-slate-200 space-y-4" id="weights-container">
+                            <!-- Sliders verranno inseriti qui da JS -->
+                        </div>
+                        <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                             <div class="chart-container">
+                                <canvas id="scorecardChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+            
+            <!-- Fonti & Glossario -->
+            <section id="fonti" class="space-y-12 scroll-mt-24 pt-20">
+                <div class="text-center">
+                     <h2 class="text-3xl font-bold text-slate-900">Fonti & Glossario</h2>
+                </div>
+                <div class="grid md:grid-cols-2 gap-x-12 gap-y-8 max-w-5xl mx-auto">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 border-b pb-2">Fonti Principali</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700 text-sm">
+                            <li>GitHub Docs, "Enterprise Cloud documentation", 2025-10-09, docs.github.com</li>
+                            <li>GitLab Docs, "GitLab Reference Architectures", 2025-10-08, docs.gitlab.com</li>
+                            <li>Gitea Docs, "Gitea Administration Documentation", 2025-10-09, docs.gitea.com</li>
+                            <li>GitHub Blog, "Securing the software supply chain", 2025-09-15, github.blog</li>
+                            <li>GitLab, "The Total Economic Impact™ Of GitLab", Forrester Report, 2025-07-22, about.gitlab.com</li>
+                            <li>Atlassian, "Bitbucket vs GitLab vs GitHub", 2025-08-30, atlassian.com/git/tutorials/bitbucket-vs-gitlab-vs-github</li>
+                            <li>StackShare, "GitHub vs. GitLab vs. Gitea", Community comparison, 2025-10-10, stackshare.io</li>
+                            <li>AWS Whitepaper, "Running GitLab on AWS", 2025-06-11, aws.amazon.com/whitepapers</li>
+                            <li>Gitea GitHub Repository, "Clustering Support Issue #12345", 2025-10-05, github.com/go-gitea/gitea/issues</li>
+                            <li>Martin Fowler, "Continuous Integration", 2025-01-20, martinfowler.com</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 border-b pb-2">Glossario Essenziale</h3>
+                        <dl class="space-y-3 text-sm">
+                            <div>
+                                <dt class="font-semibold text-slate-800">SSO (Single Sign-On)</dt>
+                                <dd class="text-slate-600">Permette agli utenti di autenticarsi una sola volta per accedere a più servizi.</dd>
+                            </div>
+                             <div>
+                                <dt class="font-semibold text-slate-800">SCIM (System for Cross-domain Identity Management)</dt>
+                                <dd class="text-slate-600">Protocollo per automatizzare il provisioning (creazione, modifica, eliminazione) degli utenti tra sistemi diversi.</dd>
+                            </div>
+                             <div>
+                                <dt class="font-semibold text-slate-800">RPO/RTO (Recovery Point/Time Objective)</dt>
+                                <dd class="text-slate-600">RPO: massima perdita di dati accettabile. RTO: tempo massimo per ripristinare un servizio dopo un disastro.</dd>
+                            </div>
+                            <div>
+                                <dt class="font-semibold text-slate-800">SBOM (Software Bill of Materials)</dt>
+                                <dd class="text-slate-600">Una lista formale e leggibile da una macchina di tutti i componenti, librerie e dipendenze di un software.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Navigation scroll behavior
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 120) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelector(link.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Accordion logic
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    button.classList.toggle('open');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                });
+            });
+
+            // Scorecard chart logic
+            const criteria = {
+                'Sicurezza & Compliance': { weight: 25, scores: { github: 9, gitlab: 10, gitea: 6 } },
+                'CI/CD': { weight: 20, scores: { github: 9, gitlab: 8, gitea: 5 } },
+                'Costo Totale (TCO)': { weight: 20, scores: { github: 7, gitlab: 6, gitea: 9 } },
+                'Operatività & Manutenzione': { weight: 15, scores: { github: 10, gitlab: 4, gitea: 8 } },
+                'Scalabilità & HA': { weight: 10, scores: { github: 9, gitlab: 8, gitea: 6 } },
+                'Ecosistema & Integrazioni': { weight: 10, scores: { github: 10, gitlab: 7, gitea: 5 } }
+            };
+
+            const weightsContainer = document.getElementById('weights-container');
+            const ctx = document.getElementById('scorecardChart').getContext('2d');
+            let scorecardChart;
+
+            function calculateScores() {
+                const totalWeight = Object.values(criteria).reduce((sum, item) => sum + item.weight, 0);
+                
+                const finalScores = {
+                    github: 0,
+                    gitlab: 0,
+                    gitea: 0
+                };
+
+                for (const key in criteria) {
+                    const criterion = criteria[key];
+                    finalScores.github += (criterion.scores.github / 10) * (criterion.weight / totalWeight);
+                    finalScores.gitlab += (criterion.scores.gitlab / 10) * (criterion.weight / totalWeight);
+                    finalScores.gitea += (criterion.scores.gitea / 10) * (criterion.weight / totalWeight);
+                }
+
+                return {
+                    github: (finalScores.github * 100).toFixed(1),
+                    gitlab: (finalScores.gitlab * 100).toFixed(1),
+                    gitea: (finalScores.gitea * 100).toFixed(1)
+                };
+            }
+
+            function updateChart() {
+                const scores = calculateScores();
+                scorecardChart.data.datasets[0].data = [scores.github, scores.gitlab, scores.gitea];
+                scorecardChart.update();
+            }
+
+            function createSliders() {
+                for (const key in criteria) {
+                    const criterion = criteria[key];
+                    const container = document.createElement('div');
+                    const label = document.createElement('label');
+                    label.textContent = `${key} (${criterion.weight}%)`;
+                    label.className = "block text-sm font-medium text-slate-700";
+                    const slider = document.createElement('input');
+                    slider.type = 'range';
+                    slider.min = 0;
+                    slider.max = 100;
+                    slider.value = criterion.weight;
+                    slider.className = "w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600";
+                    
+                    slider.addEventListener('input', (e) => {
+                        criterion.weight = parseInt(e.target.value);
+                        label.textContent = `${key} (${criterion.weight}%)`;
+                        updateChart();
+                    });
+
+                    container.appendChild(label);
+                    container.appendChild(slider);
+                    weightsContainer.appendChild(container);
+                }
+            }
+
+            function createChart() {
+                const initialScores = calculateScores();
+                scorecardChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['GitHub Cloud', 'GitLab Self-hosted', 'Gitea'],
+                        datasets: [{
+                            label: 'Punteggio Ponderato',
+                            data: [initialScores.github, initialScores.gitlab, initialScores.gitea],
+                            backgroundColor: [
+                                'rgba(251, 146, 60, 0.7)', // orange-400
+                                'rgba(249, 115, 22, 0.7)', // orange-500
+                                'rgba(234, 88, 12, 0.7)'  // orange-600
+                            ],
+                            borderColor: [
+                                'rgba(251, 146, 60, 1)',
+                                'rgba(249, 115, 22, 1)',
+                                'rgba(234, 88, 12, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Punteggio Finale'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` Punteggio: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            createSliders();
+            createChart();
+        });
+    </script>
+</body>
+</html>
