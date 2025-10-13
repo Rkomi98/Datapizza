@@ -76,15 +76,15 @@ Sono favoriti casi d’uso concreti per **Sales, Customer Support, Product e Rev
 - **14:00–14:10** — Welcome & Housekeeping
 - **14:10–14:20** — Keynote ElevenLabs (vision & capability)
 - **14:20–14:30** — Challenge overview & criteri (4 card + Wild Card)
-- **14:30–14:45** — Annuncio gruppi & seating
-- **14:45–15:30** — Ideation Workshop (sticky notes)
-- **15:30–15:40** — Tech onboarding express
-- **15:40–17:30** — Sprint 1 (checkpoint 16:15)
-- **17:30–18:00** — Break & networking
-- **18:00–19:45** — Sprint 2 (checkpoint 18:45)
-- **19:45–20:00** — Preparazione demo e slides
-- **20:00–20:45** — Demo Live: Top 8
-- **20:45–21:00** — Awards & Closing
+- **14:30–14:35** — Annuncio gruppi & seating
+- **14:35–14:45** — Tech onboarding express (prima dell’ideathon)
+- **14:45–15:00** — Ideathon kickoff (guidato, facoltativo; icebreaker solo tra i team)
+- **15:00–17:30** — Sprint 1 (checkpoint ~16:10)
+- **17:30–19:45** — Sprint 2 (checkpoint 18:45)
+- Nota: **nessuna pausa forzata**; i team si autogestiscono. **Slides/pitch in parallelo** durante gli sprint.
+- **19:45–20:00** — Tech Check Top 8
+- **20:00–20:40** — Demo Live: Top 8 (4’ per team)
+- **20:40–21:00** — Closing (premiazione post‑evento)
 
 ---
 
@@ -93,6 +93,8 @@ Sono favoriti casi d’uso concreti per **Sales, Customer Support, Product e Rev
 - Ogni partecipante deve portare **laptop**, caricabatterie e adattatori.
 - Ammesso l’uso di **strumenti low/no‑code**, automazioni e API ElevenLabs.
 - Vietato l’uso di librerie o contenuti in violazione di licenze o diritti di terzi.
+ - **Supporto tecnico on‑call:** durante l’evento è presente un referente tecnico ElevenLabs per intervenire in caso di problemi.
+ - **Materiali & starter kit:** saranno condivisi almeno **2 giorni prima** per consentire buffer e double‑check.
 
 ---
 
@@ -126,6 +128,7 @@ Sono favoriti casi d’uso concreti per **Sales, Customer Support, Product e Rev
 
 - Premi e menzioni ai progetti più meritevoli (beni, esperienze o visibilità).
 - Decisioni della giuria **insindacabili**.
+ - **Nessun live scoring** o tabellone in tempo reale: la giuria valuta **off‑line** e la **premiazione avviene dopo l’evento** (comunicazione entro 48h).
 
 ---
 
@@ -184,6 +187,7 @@ Con la candidatura, il partecipante dichiara di **aver letto e accettato integra
 
 ### B) Linee guida ideazione
 
+- Le attività sono **linee guida** (non imposte). I team possono **adattare/parallelizzare** in base alle esigenze.
 - **Problem framing** → **Use case** → **Scope MVP** (demo < 3 min)
 - Definire 1 tool call e 1 knowledge base
 - Focus su **sostenibilità e scalabilità**
