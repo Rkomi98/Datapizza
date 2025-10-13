@@ -30,202 +30,189 @@ That's it. Qdrant is now up and running at `localhost:6333`, and you can see the
 
 [Show browser with Qdrant dashboard]
 
-Now, let's set up our imports and the main client.
+Now, let's set up our imports and clients. We need two separate clients: one for embeddings and one for generation.
 
 ```python
 import os
 from dotenv import load_dotenv
 from datapizza.clients.openai import OpenAIClient
+from datapizza.embedders.openai import OpenAIEmbedder
+from datapizza.core.vectorstore import VectorConfig
+from datapizza.vectorstores.qdrant import QdrantVectorstore
 
 load_dotenv()
 
+# Client for text generation
 client = OpenAIClient(
     api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-4o"
+    model="gpt-4o-mini"
+)
+
+# Embedder client for creating vectors
+embedder_client = OpenAIEmbedder(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model_name="text-embedding-3-small"
 )
 ```
 
-We'll use this client for both embedding and generation.
+We'll use separate clients for embedding and generation throughout this pipeline.
 
 ### Ingestion Pipeline: From Documents to Vectors (2.5 min)
 
-The ingestion pipeline has several steps. Let me walk through each one quickly because there's a lot to cover.
+The ingestion pipeline processes documents and stores them in the vector database. Datapizza-AI provides the IngestionPipeline class to handle this workflow automatically.
 
-**Step 1: Parse the document**
+First, let's install the parser we need:
 
-```python
-from datapizza.parsers import TextParser
-
-parser = TextParser()
-text = """
-Machine learning is a branch of artificial intelligence.
-It enables computers to learn from data without being explicitly programmed.
-Modern ML systems use statistical algorithms to identify patterns.
-"""
-
-document_node = parser.parse(text, metadata={"source": "ml_guide"})
+```bash
+pip install datapizza-ai-parsers-docling
 ```
 
-[Show the hierarchical structure]
-
-TextParser creates a tree: document → paragraphs → sentences. This structure helps with accurate chunking.
-
-**Step 2: Split into chunks**
+Now, let's set up the complete pipeline:
 
 ```python
-from datapizza.rag.splitter import NodeSplitter
+from datapizza.pipeline import IngestionPipeline
+from datapizza.modules.parsers.docling import DoclingParser
+from datapizza.modules.splitters import NodeSplitter
+from datapizza.embedders import ChunkEmbedder
 
-splitter = NodeSplitter(max_char=1000)
-chunks = splitter(document_node)
-```
-
-Each chunk is small enough to embed but large enough to contain meaningful context. The splitter preserves metadata and creates unique IDs.
-
-**Step 3: Generate embeddings**
-
-```python
-from datapizza.rag.embedder import NodeEmbedder
-
-embedder = NodeEmbedder(
-    client=client,
-    model_name="text-embedding-3-small",
-    batch_size=100
-)
-
-embedded_chunks = embedder(chunks)
-```
-
-[Show what an embedded chunk looks like]
-
-Each chunk now has a 1536-dimensional vector representing its semantic meaning. Similar content gets similar vectors.
-
-**Step 4: Store in vector database**
-
-```python
-from datapizza.vectorstores.qdrant import QdrantVectorstore
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
-
-# Create collection
-qdrant_client = QdrantClient(host="localhost", port=6333)
-qdrant_client.create_collection(
-    collection_name="knowledge_base",
-    vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
-)
-
-# Store chunks
+# First, create the vector database collection
 vectorstore = QdrantVectorstore(host="localhost", port=6333)
-vectorstore.add(embedded_chunks, collection_name="knowledge_base")
+vectorstore.create_collection(
+    "my_documents",
+    vector_config=[VectorConfig(name="embedding", dimensions=1536)]
+)
+
+# Build the ingestion pipeline
+ingestion_pipeline = IngestionPipeline(
+    modules=[
+        DoclingParser(),  # Parse PDFs and documents
+        NodeSplitter(max_char=1000),  # Split into chunks
+        ChunkEmbedder(client=embedder_client),  # Add embeddings
+    ],
+    vector_store=vectorstore,
+    collection_name="my_documents"
+)
+
+# Run the pipeline
+ingestion_pipeline.run("sample.pdf", metadata={"source": "user_upload"})
 ```
+
+[Show execution]
+
+That's it! The pipeline automatically:
+1. Parses the document with DoclingParser (handles PDFs, DOCX, and more)
+2. Splits it into manageable chunks with NodeSplitter
+3. Generates embeddings with ChunkEmbedder
+4. Stores everything in Qdrant
 
 [Show Qdrant dashboard with stored vectors]
 
-Your documents are now searchable by semantic similarity. It's time to build the retrieval pipeline.
+You can verify the data was stored by searching:
+
+```python
+res = vectorstore.search(
+    query_vector=[0.0] * 1536,
+    collection_name="my_documents",
+    k=2,
+)
+print(res)
+```
+
+Your documents are now searchable by semantic similarity. Let's build the retrieval pipeline.
 
 ### Retrieval Pipeline: From Query to Answer (3 min)
 
-Now, when a user asks a question, we need to find the relevant chunks from our knowledge base and use them to generate an answer. Here's how that works.
+Now, when a user asks a question, we need to find the relevant chunks and generate an answer. We'll use DagPipeline for this—it's perfect for handling complex retrieval workflows with multiple dependencies.
 
-**Step 1: Embed the query**
-
-```python
-query = "How does machine learning work?"
-query_vector = client.embed(query)
-```
-
-Same embedding model, same vector space. The query is now directly comparable to our stored chunks.
-
-**Step 2: Search for relevant chunks**
+Let's build the complete retrieval pipeline:
 
 ```python
-results = vectorstore.search(
-    query_vector=query_vector,
-    collection_name="knowledge_base",
-    limit=5
-)
-```
+from datapizza.pipeline import DagPipeline
+from datapizza.modules.rewriters import ToolRewriter
+from datapizza.modules.prompt import ChatPromptTemplate
 
-[Show the retrieved chunks]
-
-Vector search finds the most semantically similar chunks to the user's query. This is the power of semantic search—it understands meaning, not just keywords.
-
-**Step 3: Rerank for precision**
-
-```python
-from datapizza.rag.reranker import CohereReranker
-
-reranker = CohereReranker(
-    api_key=os.getenv("COHERE_API_KEY"),
-    top_n=3
+# Initialize components
+query_rewriter = ToolRewriter(
+    client=client,
+    system_prompt="Rewrite user queries to improve retrieval accuracy."
 )
 
-final_chunks = await reranker.a_run({
-    "query": query,
-    "documents": results
+# Use the same embedder from ingestion
+retriever = QdrantVectorstore(host="localhost", port=6333)
+
+prompt_template = ChatPromptTemplate(
+    user_prompt_template="User question: {{user_prompt}}",
+    retrieval_prompt_template="Retrieved content:\n{% for chunk in chunks %}{{ chunk.text }}\n{% endfor %}"
+)
+
+# Build the DAG
+dag_pipeline = DagPipeline()
+dag_pipeline.add_module("rewriter", query_rewriter)
+dag_pipeline.add_module("embedder", embedder_client)
+dag_pipeline.add_module("retriever", retriever)
+dag_pipeline.add_module("prompt", prompt_template)
+dag_pipeline.add_module("generator", client)
+
+# Connect the modules
+dag_pipeline.connect("rewriter", "embedder", target_key="text")
+dag_pipeline.connect("embedder", "retriever", target_key="query_vector")
+dag_pipeline.connect("retriever", "prompt", target_key="chunks")
+dag_pipeline.connect("prompt", "generator", target_key="memory")
+
+# Run the pipeline
+query = "tell me something about this document"
+result = dag_pipeline.run({
+    "rewriter": {"user_prompt": query},
+    "prompt": {"user_prompt": query},
+    "retriever": {"collection_name": "my_documents", "k": 3},
+    "generator": {"input": query}
 })
+
+print(f"Generated response: {result['generator']}")
 ```
 
-[Explain reranking]
+[Show execution with flow diagram]
 
-Reranking uses a more sophisticated (and expensive) model to reorder the initial results by their actual relevance to the query. It's an optional step, but it can significantly improve accuracy, especially for complex or nuanced questions.
+Let me break down what's happening here:
 
-**Step 4: Generate the answer**
+1. **Query Rewriting**: The user's query is rewritten for better retrieval
+2. **Embedding**: The rewritten query is converted to a vector
+3. **Retrieval**: We search the vector database for similar chunks
+4. **Prompt Formatting**: Retrieved chunks are formatted into a prompt
+5. **Generation**: The LLM generates an answer using the context
 
-```python
-from datapizza.rag.prompts import ChatPromptTemplate
+[Visual: Show complete RAG flow diagram with all steps]
 
-template = ChatPromptTemplate(
-    user_prompt_template="Question: {{ user_prompt }}\nAnswer based on the context provided.",
-    retrieval_prompt_template="Context:\n{% for chunk in chunks %}- {{ chunk.text }}\n{% endfor %}"
-)
-
-memory = template.format(
-    user_prompt=query,
-    chunks=final_chunks,
-    retrieval_query=query
-)
-
-response = client.invoke("", memory=memory)
-print(response.text)
-```
-
-[Show the full answer]
-
-The model sees the retrieved context and generates an answer that is grounded in your documents, not just its own general knowledge.
-
-[Visual: Show complete RAG flow diagram]
+The DagPipeline automatically handles the data flow between components. Each module processes its input and passes the output to the next one.
 
 ### Making It Production-Ready (1 min)
 
-This works, but a production-ready RAG system needs a bit more sophistication. Here are a few key patterns:
+This works great, but a production-ready RAG system needs a bit more sophistication. Here are a few key patterns we've already seen in action:
 
-**Query rewriting**: Transform vague or poorly phrased questions into better search queries before retrieval.
+**Query rewriting**: We already included this in our DagPipeline—it transforms vague questions into better search queries automatically.
 
-```python
-from datapizza.rag.rewriter import ToolRewriter
-
-rewriter = ToolRewriter(client=client)
-rewritten = rewriter.run("Uhm, how's that ML thing work?")
-# Output: "Explain how machine learning algorithms work"
-```
-
-**Metadata filtering**: Search within specific document types, dates, or other categories.
+**Metadata filtering**: You can filter by document metadata during retrieval:
 
 ```python
-results = vectorstore.search(
-    query_vector=query_vector,
-    collection_name="knowledge_base",
-    filter={"source": "ml_guide"}
-)
+result = dag_pipeline.run({
+    "rewriter": {"user_prompt": query},
+    "prompt": {"user_prompt": query},
+    "retriever": {
+        "collection_name": "my_documents",
+        "k": 3,
+        "filter": {"source": "user_upload"}  # Only search specific sources
+    },
+    "generator": {"input": query}
+})
 ```
 
-**Hybrid search**: Combine vector search with traditional keyword matching for improved precision.
+**Configuration-based pipelines**: You can also define your entire ingestion pipeline using YAML configuration files, making it easy to version control and modify without changing code.
 
 These are the patterns that make RAG systems reliable and scalable in production.
 
 ## Conclusion (1 min)
 
-Let's do a quick recap of the full pipeline. First, we parse documents into structured nodes. Then, we split them into chunks and generate embeddings. We store those embeddings in a vector database. When a user asks a question, we embed it, search for relevant chunks, optionally rerank them, and finally generate an answer using the retrieved context.
+Let's do a quick recap of the full pipeline. We use IngestionPipeline to parse documents, split them into chunks, generate embeddings, and store them in Qdrant. Then we use DagPipeline for retrieval—it handles query rewriting, embedding, vector search, prompt formatting, and answer generation in one cohesive workflow.
 
 [Visual: Show complete pipeline with all steps]
 

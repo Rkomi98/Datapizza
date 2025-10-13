@@ -162,64 +162,89 @@ Alright, now let's talk about observability. Because in a production environment
 Datapizza-AI integrates seamlessly with OpenTelemetry for tracing.
 
 ```python
-from datapizza.monitoring import ContextTracing
+from datapizza.tracing import ContextTracing
 
-tracer = ContextTracing()
-
-with tracer.trace("conversation") as trace:
+with ContextTracing().trace("conversation"):
     memory.add_turn([TextBlock(content=user_input)], ROLE.USER)
     response = client.invoke(user_input, memory=memory)
     memory.add_turn([TextBlock(content=response.text)], ROLE.ASSISTANT)
 ```
 
-[Show trace output]
+[Show trace output with rich console display]
 
-You get automatic tracking of token usage, latency, and API call patterns right out of the box.
+You get automatic tracking of token usage, latency, model usage, and API call patterns right out of the box. The output shows a beautiful summary table with all your metrics.
 
-For metrics, you can easily connect to Prometheus.
-
-```python
-from prometheus_client import Counter, Histogram, start_http_server
-
-request_counter = Counter(
-    "chatbot_requests_total",
-    "Total requests",
-    ["status"]
-)
-
-response_time = Histogram(
-    "chatbot_response_time_seconds",
-    "Response time"
-)
-
-token_usage = Counter(
-    "chatbot_tokens_total",
-    "Token usage",
-    ["type"]
-)
-
-# Start metrics server
-start_http_server(8000)
-
-# Record metrics
-with tracer.trace("request"):
-    start = time.time()
-    try:
-        response = client.invoke(query)
-        request_counter.labels(status="success").inc()
-        token_usage.labels(type="prompt").inc(response.prompt_tokens_used)
-        token_usage.labels(type="completion").inc(response.completion_tokens_used)
-    except Exception as e:
-        request_counter.labels(status="error").inc()
-    finally:
-        response_time.observe(time.time() - start)
+```
+╭─ Trace Summary of conversation ───────────────────────── ╮
+│ Total Spans: 3                                           │
+│ Duration: 2.45s                                          │
+│ ┏━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━┓
+│ ┃ Model       ┃ Prompt Tokens ┃ Completion Tokens ┃ ... ┃
+│ ┡━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━┩
+│ │ gpt-4o-mini │ 31            │ 27                │ ... │
+│ └─────────────┴───────────────┴───────────────────┴─────┘
+╰──────────────────────────────────────────────────────────╯
 ```
 
-[Show Grafana dashboard]
+For more detailed logging, you can enable input/output tracing:
 
-Now you have real-time dashboards showing request rates, error rates, token consumption, and latency percentiles.
+```python
+# Set environment variable
+import os
+os.environ["DATAPIZZA_TRACE_CLIENT_IO"] = "TRUE"
 
-This is what production-grade observability looks like. You can set up alerts, debug issues, and optimize costs, all from your existing monitoring stack.
+# Now traces will include full input/output and memory content
+```
+
+You can also add manual spans for granular control:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
+
+with ContextTracing().trace("rag_pipeline"):
+    with tracer.start_as_current_span("database_query"):
+        data = fetch_from_database()
+    
+    with tracer.start_as_current_span("data_validation"):
+        validate_data(data)
+    
+    with tracer.start_as_current_span("generation"):
+        result = client.invoke(prompt)
+```
+
+**Exporting to External Systems**
+
+You can send traces to Zipkin, Grafana, or any OTLP-compatible backend:
+
+```python
+from opentelemetry import trace
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.semconv.resource import ResourceAttributes
+
+# Set up the trace provider
+resource = Resource.create({
+    ResourceAttributes.SERVICE_NAME: "my_rag_service",
+})
+trace.set_tracer_provider(TracerProvider(resource=resource))
+
+# Add Zipkin exporter
+zipkin_exporter = ZipkinExporter(
+    endpoint="http://localhost:9411/api/v2/spans"
+)
+span_processor = SimpleSpanProcessor(zipkin_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Now all traces go to both console and Zipkin
+```
+
+[Show Zipkin/Grafana dashboard]
+
+This is what production-grade observability looks like. You can debug issues, optimize costs, and monitor performance across your entire stack.
 
 ## Conclusion (1.5 min)
 

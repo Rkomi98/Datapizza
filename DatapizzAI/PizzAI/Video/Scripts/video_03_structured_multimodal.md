@@ -14,7 +14,7 @@ By the end of this video, you'll be able to extract structured data from LLM res
 
 Alright, let's start by exploring two approaches to getting structured data.
 
-## Main Content (6.5 min)
+## Main Content (8 min)
 
 ### Getting JSON with Prompt Engineering (1.5 min)
 
@@ -98,7 +98,7 @@ The model is constrained to return data that matches your schema. If it fails to
 
 This is how you build reliable, production-ready systems. You define your data model, and you let Pydantic enforce it.
 
-### Working with Images (2.5 min)
+### Working with Images (2 min)
 
 Now, let's talk about vision. Modern LLMs can analyze images, and Datapizza-AI makes this incredibly straightforward.
 
@@ -155,6 +155,53 @@ response = client.invoke([
 
 This is powerful for document processing—analyzing charts, extracting table data, reading handwritten notes. The model can see structure that traditional OCR might miss.
 
+### Working with Audio (1.5 min)
+
+But we're not limited to just images. Modern multimodal models can also work with audio—transcription, translation, sentiment analysis, you name it.
+
+[Show code]
+
+```python
+# Audio from URL
+audio_media = Media(
+    extension="mp3",
+    media_type="audio",
+    source_type="url",
+    source="https://example.com/recording.mp3"
+)
+
+response = client.invoke([
+    TextBlock(content="Transcribe this audio and summarize the main points"),
+    MediaBlock(media=audio_media)
+])
+```
+
+[Show transcription output]
+
+You can also load audio from local files using base64 encoding, just like we did with images.
+
+```python
+# Audio from local file
+with open("meeting.wav", "rb") as f:
+    audio_data = base64.b64encode(f.read()).decode()
+
+audio_media = Media(
+    extension="wav",
+    media_type="audio",
+    source_type="base64",
+    source=audio_data
+)
+
+response = client.invoke([
+    TextBlock(content="What is being discussed in this recording?"),
+    MediaBlock(media=audio_media)
+])
+```
+
+[Show analysis]
+
+This opens up voice interfaces, meeting transcription, podcast analysis—any audio-based use case you can imagine. And just like with images, you can combine audio with memory for multi-turn conversations about the content.
+
 [Show a multimodal conversation example]
 
 You can even combine this with memory for ongoing visual conversations:
@@ -188,7 +235,7 @@ The model remembers the image across multiple turns, so you don't have to send i
 
 Let's do a quick recap. We covered two methods for getting structured outputs: basic JSON prompting and robust Pydantic models. You should always use Pydantic when you need reliable, typed data.
 
-We also explored multimodal capabilities, showing you how to work with images using URLs, base64 encoding, or file paths. This opens the door to document analysis, visual Q&A, and multimodal conversations—pretty much anything you can imagine.
+We also explored multimodal capabilities, showing you how to work with both images and audio using URLs, base64 encoding, or file paths. This opens the door to document analysis, visual Q&A, voice interfaces, and multimodal conversations—pretty much anything you can imagine.
 
 [Visual: Show structured data and images as building blocks]
 
