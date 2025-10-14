@@ -81,11 +81,24 @@
             <p class="text-sm text-slate-500 mt-2">Ricerca aggiornata al: 10 Ottobre 2025</p>
         </header>
 
+        <section class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-12 text-left">
+            <h2 class="text-2xl font-semibold text-slate-900 mb-4">Sintesi Rapida</h2>
+            <ul class="list-disc pl-5 space-y-2 text-slate-700 text-sm sm:text-base">
+                <li><strong>GitHub Cloud</strong> (SaaS su Microsoft Azure) adotta fatturazione usage-based con oltre 1.000 integrazioni nel Marketplace, ideale per team distribuiti che sfruttano l’ecosistema.</li>
+                <li><strong>GitLab Self-Hosted</strong> privilegia controllo totale, personalizzazione e conformità enterprise, ma richiede team DevOps dedicati e reference architecture da seguire.</li>
+                <li><strong>Gitea</strong> è software gratuito (MIT) da installare su VPS (~$40/mese): rapido per team piccoli, ma con feature enterprise spesso assenti o da integrare via plugin.</li>
+                <li><strong>CI/CD</strong>: GitHub Actions offre un marketplace vasto ma necessita di governance (allow-list, policy, approvazioni); GitLab CI include nativamente approvazioni, artifact retention, SBOM; Gitea si appoggia a Gitea Actions/Act Runner, non equivalenti al 100% a GitHub Actions.</li>
+                <li><strong>Costi stimati</strong> (assunzioni 2025): GitHub Enterprise Cloud ≈ $21/utente/mese ($252/anno), GitLab Premium ≈ $29/utente/mese ($348/anno) + infrastruttura, Gitea richiede solo hosting.</li>
+                <li><strong>Tempi di setup (stime indicative)</strong>: GitHub Cloud quasi immediato, GitLab self-hosted 2–4 settimane, Gitea 1–2 giorni a seconda di SSO, runner, backup e compliance.</li>
+            </ul>
+        </section>
+
         <nav class="sticky top-0 bg-slate-50/80 backdrop-blur-lg z-10 mb-12 border-b border-slate-200">
             <ul class="flex justify-center space-x-4 sm:space-x-8 text-sm sm:text-base font-medium text-slate-600">
                 <li><a href="#panoramica" class="nav-link active py-4 inline-block border-b-2 border-transparent">Panoramica</a></li>
                 <li><a href="#confronto" class="nav-link py-4 inline-block border-b-2 border-transparent">Confronto Dettagliato</a></li>
                 <li><a href="#framework" class="nav-link py-4 inline-block border-b-2 border-transparent">Framework Decisionale</a></li>
+                <li><a href="#conclusione" class="nav-link py-4 inline-block border-b-2 border-transparent">Conclusione</a></li>
                 <li><a href="#fonti" class="nav-link py-4 inline-block border-b-2 border-transparent">Fonti & Glossario</a></li>
             </ul>
         </nav>
@@ -95,45 +108,53 @@
             <!-- Panoramica e Scenari -->
             <section id="panoramica" class="space-y-12 scroll-mt-24">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold text-slate-900">Panoramica e Raccomandazioni</h2>
-                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Questa analisi confronta tre soluzioni leader per l'hosting di repository Git, valutandole secondo criteri cruciali per team di sviluppo moderni. La scelta dipende da un trade-off fondamentale tra controllo, costo e carico operativo. Qui di seguito, le raccomandazioni per tre scenari tipici.</p>
+                    <h2 class="text-3xl font-bold text-slate-900">Introduzione &amp; Scenari</h2>
+                    <div class="mt-4 max-w-3xl mx-auto text-lg text-slate-600 space-y-4">
+                        <p>La scelta della piattaforma di gestione del codice sorgente e del ciclo DevOps incide direttamente su produttività, sicurezza e capacità di scalare. GitHub Cloud (SaaS), GitLab Self-Hosted e Gitea (self-hosted) rappresentano tre modelli distinti, ognuno con implicazioni tecniche, economiche e organizzative differenti.</p>
+                        <p>Questo report, aggiornato al 10 ottobre 2025, si basa esclusivamente su fonti primarie e confronta le tre soluzioni su criteri verificabili. L'obiettivo è supportare decisioni informate in tre scenari: team piccolo (5–20 sviluppatori), team in crescita (20–150 sviluppatori in 24 mesi) e azienda strutturata (500+ utenti con requisiti enterprise).</p>
+                        <p>Sulle sezioni successive trovi approfondimenti tematici, il framework decisionale e una scorecard ponderata convertibile in canvas visivi e documentazione formale.</p>
+                    </div>
                 </div>
 
                 <div class="grid md:grid-cols-3 gap-8">
                     <!-- Team Piccolo (Startup) -->
                     <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                        <h3 class="text-xl font-bold text-amber-600">Team Piccolo & Startup (2-20 dev)</h3>
-                        <p class="text-slate-600 mt-2 mb-4">Priorità: velocità, basso costo, minimo overhead operativo.</p>
+                        <h3 class="text-xl font-bold text-amber-600">Team Piccolo (5–20 sviluppatori)</h3>
+                        <p class="text-slate-600 mt-2 mb-4">Priorità: costi contenuti, setup rapido, gestione semplice.</p>
                         <div class="space-y-3">
-                            <p><strong>🏆 Raccomandazione: GitHub Cloud (Piano Team/Free)</strong></p>
-                            <p class="text-sm text-slate-500">Offre il miglior rapporto feature/prezzo e un'esperienza utente eccellente che accelera l'onboarding. GitHub Actions e l'ecosistema integrato sono imbattibili per la produttività immediata.</p>
-                            <p><strong>🥈 Alternativa: Gitea</strong></p>
-                            <p class="text-sm text-slate-500">Se è necessaria una soluzione self-hosted per motivi di budget o controllo base, Gitea è leggerissimo, economico e facile da gestire su un piccolo server.</p>
+                            <p><strong>🏆 Raccomandazione: Gitea Self-Hosted</strong></p>
+                            <p class="text-sm text-slate-500">Software open-source leggero con licenza MIT. Richiede una VPS economica (~$40/mese) e offre funzionalità essenziali, pur mancando di certificazioni enterprise.</p>
+                            <p class="text-xs text-slate-400">Setup stimato: 1–2 giorni (dipende da SSO, backup, runner).</p>
+                            <p><strong>💡 Nota operativa</strong></p>
+                            <p class="text-sm text-slate-500">Se serve SaaS immediato con minimo sforzo operativo, GitHub Cloud (Free/Team) resta l'alternativa più rapida da abilitare.</p>
                         </div>
                     </div>
                     <!-- Team in Crescita (Scale-up) -->
                     <div class="bg-white p-6 rounded-xl shadow-lg border-2 border-amber-600">
-                        <h3 class="text-xl font-bold text-amber-600">Team in Crescita (20-150 dev)</h3>
-                        <p class="text-slate-600 mt-2 mb-4">Priorità: scalabilità, sicurezza, CI/CD robusto, TCO prevedibile.</p>
+                        <h3 class="text-xl font-bold text-amber-600">Team in Crescita (20–150 sviluppatori in 24 mesi)</h3>
+                        <p class="text-slate-600 mt-2 mb-4">Priorità: scalabilità controllata, compliance progressiva, automazione CI/CD.</p>
                         <div class="space-y-3">
-                            <p><strong>🏆 Raccomandazione: GitHub Cloud (Piano Enterprise)</strong></p>
-                            <p class="text-sm text-slate-500">La scelta più produttiva. Fornisce feature di sicurezza avanzate (SSO, SCIM, secret scanning), compliance e una gestione utenti scalabile, mantenendo un basso carico operativo. L'uso di runner self-hosted in VPC privati offre un eccellente modello ibrido per la sicurezza CI/CD.</p>
-                             <p><strong>🥈 Alternativa: GitLab Self-hosted</strong></p>
-                            <p class="text-sm text-slate-500">Considerare se la sovranità dei dati e l'isolamento di rete sono requisiti non negoziabili. Richiede un investimento significativo in un team SRE/DevOps per la gestione, ma offre il massimo controllo.</p>
+                            <p><strong>🏆 Raccomandazione: GitLab Self-Hosted su AWS</strong></p>
+                            <p class="text-sm text-slate-500">Licenza Premium ≈ $29/utente/mese (Ultimate ≈ $99). Reference architecture scalabile, runner Kubernetes/Docker Machine, policy di compliance avanzate.</p>
+                            <p class="text-xs text-slate-400">Setup stimato: 2–4 settimane (infrastruttura, SSO, backup, DR).</p>
+                            <p><strong>💡 Nota operativa</strong></p>
+                            <p class="text-sm text-slate-500">Valuta GitHub Cloud Enterprise se il team non può sostenere la gestione dell'infrastruttura e privilegia una soluzione completamente gestita.</p>
                         </div>
                     </div>
                     <!-- Azienda Strutturata (Enterprise) -->
                     <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                        <h3 class="text-xl font-bold text-amber-600">Azienda Strutturata (>150 dev)</h3>
-                        <p class="text-slate-600 mt-2 mb-4">Priorità: compliance, sicurezza granulare, controllo totale, integrazione legacy.</p>
+                        <h3 class="text-xl font-bold text-amber-600">Azienda Strutturata (500+ utenti)</h3>
+                        <p class="text-slate-600 mt-2 mb-4">Priorità: requisiti enterprise, compliance rigorosa, supporto globale.</p>
                         <div class="space-y-3">
-                           <p><strong>🏆 Raccomandazione: GitLab Self-hosted</strong></p>
-                            <p class="text-sm text-slate-500">Quando il controllo totale su dati, compliance (es. GDPR, SOC 2 in-house), policy e infrastruttura è il driver principale. Permette integrazioni profonde con sistemi interni e policy di sicurezza custom inarrivabili per le soluzioni cloud.</p>
-                             <p><strong>🥈 Alternativa: GitHub Enterprise Server (GHES)</strong></p>
-                            <p class="text-sm text-slate-500">Offre l'esperienza di GitHub in un pacchetto self-hosted. Ottima scelta se il team ama l'ecosistema GitHub ma necessita di deployment on-premise. Spesso più semplice da gestire rispetto a GitLab.</p>
+                           <p><strong>🏆 Raccomandazione: GitHub Cloud Enterprise</strong></p>
+                            <p class="text-sm text-slate-500">SaaS gestito da Microsoft Azure con SLA globali, funzioni avanzate di sicurezza (SSO, SCIM, secret scanning) e certificazioni SOC 2 Type II / ISO 27001. Licenza ≈ $21/utente/mese.</p>
+                            <p class="text-xs text-slate-400">Setup stimato: ore/giorni (configurazione policy, integrazione SSO, governance Actions).</p>
+                             <p><strong>💡 Nota operativa</strong></p>
+                            <p class="text-sm text-slate-500">Prendi in considerazione GitLab Dedicated o GitHub Enterprise Server se policy interne impongono residenza dei dati on-prem o isolamento di rete totale.</p>
                         </div>
                     </div>
                 </div>
+                <p class="text-sm text-slate-500 text-center">Possibile approccio ibrido: GitHub Cloud con runner self-hosted in VPC privati, o GitLab Self-Managed con mirror verso GitHub Cloud per collaborazione open-source.</p>
             </section>
 
             <!-- Confronto Dettagliato -->
@@ -144,22 +165,108 @@
                 </div>
                 
                 <div id="accordion-container" class="space-y-4 max-w-5xl mx-auto">
-                    <!-- Categoria Sicurezza & Compliance -->
+                    <!-- Categoria Licensing -->
                     <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
                         <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
-                            <span>🛡️ Sicurezza & Compliance</span>
+                            <span>💼 Licensing &amp; Modelli di Business</span>
                             <span class="accordion-arrow transition-transform duration-300">▼</span>
                         </button>
                         <div class="accordion-content">
-                            <div class="p-5 border-t border-slate-200 text-slate-700">
-                                <table class="w-full table-auto border-collapse">
-                                    <thead><tr class="bg-slate-100"><th class="p-2 border">Feature</th><th class="p-2 border">GitHub Cloud</th><th class="p-2 border">GitLab Self-hosted</th><th class="p-2 border">Gitea</th></tr></thead>
-                                    <tbody>
-                                        <tr><td class="p-2 border font-medium">SSO/SAML/OIDC</td><td class="p-2 border text-center text-green-600">✅</td><td class="p-2 border text-center text-green-600">✅</td><td class="p-2 border text-center text-green-600">✅</td></tr>
-                                        <tr><td class="p-2 border font-medium">Secret Scanning</td><td class="p-2 border text-center text-green-600">✅ Avanzato</td><td class="p-2 border text-center text-green-600">✅</td><td class="p-2 border text-center text-orange-500">⚠️ Base (via plugin)</td></tr>
-                                        <tr><td class="p-2 border font-medium">Audit Log</td><td class="p-2 border text-center text-green-600">✅ Completo</td><td class="p-2 border text-center text-green-600">✅ Completo</td><td class="p-2 border text-center text-orange-500">⚠️ Limitato</td></tr>
-                                        <tr><td class="p-2 border font-medium">Data Residency UE</td><td class="p-2 border text-center text-orange-500">⚠️ (Solo per Enterprise)</td><td class="p-2 border text-center text-green-600">✅ (Pieno controllo)</td><td class="p-2 border text-center text-green-600">✅ (Pieno controllo)</td></tr>
-                                         <tr><td class="p-2 border font-medium">Compliance (SOC 2, ISO 27001)</td><td class="p-2 border text-center text-green-600">✅ Certificato</td><td class="p-2 border text-center text-orange-500">⚠️ Dipende da te</td><td class="p-2 border text-center text-red-500">❌ Non applicabile</td></tr>
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Aspetto</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Modello di licenza</td>
+                                            <td class="p-2 border">Enterprise Cloud con fatturazione mensile per utente attivo. Nessun costo iniziale, pagamento a consumo.</td>
+                                            <td class="p-2 border">Licenza commerciale per GitLab EE; Community Edition open-source (MIT). Richiede gestione della chiave di licenza.</td>
+                                            <td class="p-2 border">Open-source (MIT). Opzione Enterprise a pagamento con supporto dedicato e funzionalità aggiuntive.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Tiers &amp; bundle</td>
+                                            <td class="p-2 border">Free, Pro, Team, Enterprise. Funzioni di sicurezza e governance avanzate disponibili solo in Enterprise.</td>
+                                            <td class="p-2 border">Free (max 5 utenti), Premium ($348/utente/anno), Ultimate ($1.188/utente/anno) con strumenti di compliance.</td>
+                                            <td class="p-2 border">Trial Enterprise 30 giorni. Licenze flessibili basate su numero di utenti e durata. Nessun limite utenti per la versione OSS.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">CI/CD inclusa</td>
+                                            <td class="p-2 border">GitHub Actions con minuti inclusi variabili per piano e fatturazione usage-based su minuti/storage.</td>
+                                            <td class="p-2 border">GitLab CI integrato. Runner da gestire su AWS/on-prem con autoscaling Kubernetes/Docker Machine.</td>
+                                            <td class="p-2 border">Gitea Actions compatibile con workflow GitHub. Runner self-hosted o integrazione con Woodpecker/Act.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Vincoli legali</td>
+                                            <td class="p-2 border">Opzioni di residenza dati (UE, USA, Australia) e variante self-hosted (GitHub Enterprise Server) per controllo totale.</td>
+                                            <td class="p-2 border">Modello open-core. La licenza AGPL della CE impone la pubblicazione delle modifiche se ridistribuite.</td>
+                                            <td class="p-2 border">Licenza MIT permissiva; l'edizione Enterprise introduce SLA e clausole commerciali.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria Sicurezza &amp; Compliance -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🛡️ Sicurezza &amp; Compliance</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Autenticazione</td>
+                                            <td class="p-2 border">SAML 2.0, OIDC, MFA (TOTP/WebAuthn), hardware key, SCIM provisioning.</td>
+                                            <td class="p-2 border">SAML 2.0, OIDC, MFA, SCIM con provisioning automatico.</td>
+                                            <td class="p-2 border">OAuth/SAML/OIDC disponibili ma feature enterprise (SCIM, SSO avanzato) richiedono plugin o reverse proxy.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Autorizzazione &amp; permessi</td>
+                                            <td class="p-2 border">Branch protection avanzata, CODEOWNERS, policy as code e regole di sicurezza.</td>
+                                            <td class="p-2 border">Ruoli granulari, branch protection, compliance frameworks e policy codificate.</td>
+                                            <td class="p-2 border">Permessi granulari base; branch protection e approvazioni avanzate non native senza estensioni.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Audit &amp; tracciabilità</td>
+                                            <td class="p-2 border">Audit log immutabili, retention configurabile, firme GPG, integrazione identità SAML/SCIM.</td>
+                                            <td class="p-2 border">Audit log completi (SOC 2 Type II / ISO 27001), sincronizzazione identity provider.</td>
+                                            <td class="p-2 border">Audit log base; funzionalità avanzate dipendono da componenti esterni.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Protezione dei dati</td>
+                                            <td class="p-2 border">Data residency UE/USA/Australia, BYOK/KMS, secret scanning avanzato.</td>
+                                            <td class="p-2 border">Data residency gestita internamente (AWS/on-prem), BYOK/KMS, secret detection.</td>
+                                            <td class="p-2 border">Data residency configurabile, supporto BYOK, secret scanning tramite plugin.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Vulnerability management</td>
+                                            <td class="p-2 border">GitHub Advisory Database, SBOM, policy di blocco merge basate su severità.</td>
+                                            <td class="p-2 border">Database CVE integrato, SBOM automatici, policy di blocco merge e scansioni avanzate.</td>
+                                            <td class="p-2 border">Database CVE e SBOM con estensioni; policy di blocco merge limitate.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Compliance</td>
+                                            <td class="p-2 border">Certificazioni SOC 2 Type II e ISO 27001; supporto GDPR e residence UE/USA/Australia.</td>
+                                            <td class="p-2 border">SOC 2 Type II e ISO 27001 per GitLab (Cloud/Dedicated); compliance self-managed dipende dall’implementazione.</td>
+                                            <td class="p-2 border">Nessuna certificazione enterprise di piattaforma: dipende dal contesto di hosting e controlli locali.</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -167,31 +274,295 @@
                     </div>
 
                     <!-- Categoria CI/CD -->
-                     <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
                         <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
-                            <span>🚀 CI/CD</span>
+                            <span>🚀 CI/CD: Architettura e Costi</span>
                             <span class="accordion-arrow transition-transform duration-300">▼</span>
                         </button>
                         <div class="accordion-content">
-                             <div class="p-5 border-t border-slate-200 text-slate-700">
-                                <p><strong>GitHub Actions:</strong> Ecosistema immenso grazie al Marketplace. Sintassi YAML semplice e potente. Modello ibrido (runner cloud + self-hosted) molto flessibile. La gestione delle policy di sicurezza (es. OIDC, ambienti protetti) è eccellente.</p>
-                                <p class="mt-2"><strong>GitLab CI/CD:</strong> Soluzione all-in-one molto matura e potente. L'integrazione nativa con l'intera piattaforma (issue, security scan, registry) è il suo punto di forza. La gestione dei runner e delle variabili è granulare. La creazione di SBOM e la gestione della supply-chain sono native e ben integrate.</p>
-                                <p class="mt-2"><strong>Gitea Actions:</strong> Un clone compatibile con GitHub Actions. È più recente e meno maturo, con un ecosistema molto più piccolo. Buono per esigenze base, ma non ha le feature avanzate di sicurezza e compliance dei concorrenti.</p>
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Actions</th>
+                                            <th class="p-2 border font-medium">GitLab CI</th>
+                                            <th class="p-2 border font-medium">Gitea Actions/Runner</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Runner di esecuzione</td>
+                                            <td class="p-2 border">Runner cloud gestiti (Linux/Windows/macOS) più self-hosted in VPC; opzioni GPU/bare metal via partner.</td>
+                                            <td class="p-2 border">Runner self-hosted con autoscaling Kubernetes/Docker Machine; supporto workload isolati.</td>
+                                            <td class="p-2 border">Workflow compatibili con sintassi GitHub Actions tramite Gitea Actions e Act Runner; runner da mantenere manualmente.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Policy &amp; compliance</td>
+                                            <td class="p-2 border">Ambienti protetti, approvazioni, allow-list e policy da governare (cruciali in contesti enterprise).</td>
+                                            <td class="p-2 border">Approvals, policy, artifact retention e SBOM nativi con integrazione DevSecOps.</td>
+                                            <td class="p-2 border">Policy limitate; audit e controlli avanzati richiedono script o componenti esterni.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Performance</td>
+                                            <td class="p-2 border">Startup job 10-30 secondi, caching distribuito, supporto matrici parallele.</td>
+                                            <td class="p-2 border">Performance legate all'infrastruttura; caching distribuito, scaling orizzontale runner.</td>
+                                            <td class="p-2 border">Prestazioni dipendenti dall'hardware; ideale per workload leggeri; scaling manuale.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Costi</td>
+                                            <td class="p-2 border">Usage-based billing per minuti, storage e egress; governance necessaria per contenere i consumi.</td>
+                                            <td class="p-2 border">Licenze + infrastruttura (runner, storage, monitoring) da calcolare separatamente.</td>
+                                            <td class="p-2 border">Costi legati all’infrastruttura scelta; scalabilità oltre pochi runner è manuale.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Categoria Scalabilità & Performance -->
+
+                    <!-- Categoria Scalabilità &amp; Alta Disponibilità -->
                     <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
                         <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
-                            <span>📈 Scalabilità & Performance</span>
+                            <span>📈 Scalabilità &amp; Alta Disponibilità</span>
                             <span class="accordion-arrow transition-transform duration-300">▼</span>
                         </button>
                         <div class="accordion-content">
-                            <div class="p-5 border-t border-slate-200 text-slate-700">
-                                <p><strong>GitHub Cloud:</strong> Scalabilità gestita da Microsoft, virtualmente infinita per un utente finale. Performance generalmente ottime, con CDN globale. I limiti su API e LFS sono ben documentati.</p>
-                                <p class="mt-2"><strong>GitLab Self-hosted:</strong> La scalabilità dipende interamente dall'architettura scelta (Reference Architectures). Supporta configurazioni HA complesse con clustering e replica (Geo). Richiede expertise SRE significativa per scalare oltre i 1000 utenti in modo affidabile.</p>
-                                <p class="mt-2"><strong>Gitea:</strong> Molto performante per team piccoli e medi. È un singolo binario Go, facile da scalare verticalmente. Il clustering è in fase di sviluppo ma meno maturo. Oltre i 500-1000 utenti attivi, la gestione può diventare complessa e richiede attente valutazioni prestazionali.</p>
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Architettura</td>
+                                            <td class="p-2 border">Multi-region su Microsoft Azure, replica asincrona e failover automatico (SaaS completamente gestito).</td>
+                                            <td class="p-2 border">Reference architectures ufficiali (AWS/GCP/on-prem) fino a migliaia di utenti con PostgreSQL HA, Redis Sentinel, Geo-replica.</td>
+                                            <td class="p-2 border">Scalabilità principalmente verticale; clustering limitato e roadmap community.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Operatività</td>
+                                            <td class="p-2 border">Nessuna manutenzione infrastrutturale; governance su policy, compliance e costi.</td>
+                                            <td class="p-2 border">Richiede team DevOps/SRE per patching, scaling, monitoring e DR.</td>
+                                            <td class="p-2 border">Gestibile da team ridotto fino a ~500 utenti; scaling oltre richiede interventi manuali.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Backup &amp; restore</td>
+                                            <td class="p-2 border">Backup automatici ogni 4 ore, retention 30 giorni, replica geografica; GitHub Enterprise Server supporta backup/DR configurabili.</td>
+                                            <td class="p-2 border">Backup automatizzati, replica Geo e DR documentato; RPO/RTO configurabili in self-managed.</td>
+                                            <td class="p-2 border">Backup manuali (dump/ZIP); DR dipendente dall’infrastruttura scelta.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">RPO / RTO</td>
+                                            <td class="p-2 border">RPO &lt; 1h, RTO &lt; 4h.</td>
+                                            <td class="p-2 border">RPO &lt; 1h, RTO &lt; 8h (dipende dalla reference architecture).</td>
+                                            <td class="p-2 border">Dipendono dalla configurazione; richiedono piani di DR dedicati.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Supporto monorepo</td>
+                                            <td class="p-2 border">Supporto repo &gt;50GB, ottimizzazioni (es. Scalar) e partial clone.</td>
+                                            <td class="p-2 border">Supporto repo grandi con ottimizzazioni documentate e multi storage.</td>
+                                            <td class="p-2 border">Supporto limitato per monorepo molto grandi; ottimizzazioni manuali necessarie.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria Performance &amp; Limiti -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>⚙️ Performance &amp; Limiti Tecnici</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Tempi clone/fetch</td>
+                                            <td class="p-2 border">Veloci grazie a CDN globale e ottimizzazioni lato server.</td>
+                                            <td class="p-2 border">Dipendono dall'infrastruttura scelta; richiedono tuning per throughput elevato.</td>
+                                            <td class="p-2 border">Adeguati per team piccoli/medi; variano in base all'hardware.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Limiti Git LFS</td>
+                                            <td class="p-2 border">100MB/file nel piano Free; LFS a consumo con API batch dedicate.</td>
+                                            <td class="p-2 border">Limiti configurabili, API native per la gestione di oggetti LFS.</td>
+                                            <td class="p-2 border">Limiti configurabili via config; richiede storage dedicato.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Rate limit API</td>
+                                            <td class="p-2 border">300 req/min senza auth, 3.000 req/min con auth.</td>
+                                            <td class="p-2 border">Configurabile a livello di istanza; dipende dalla capacità dell'infrastruttura.</td>
+                                            <td class="p-2 border">Limitazioni di base per prevenire overload; tuning via reverse proxy.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Gestione monorepo</td>
+                                            <td class="p-2 border">Ottimizzazioni per repository massivi; supporto sparse checkout e partial clone.</td>
+                                            <td class="p-2 border">Ottimizzazioni documentate per monorepo; supporto multi storage.</td>
+                                            <td class="p-2 border">Gestione manuale necessaria per repository molto grandi.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria Ecosistema -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🔌 Ecosistema &amp; Integrazioni</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Marketplace / App</td>
+                                            <td class="p-2 border">Oltre 1.000 integrazioni nel GitHub Marketplace (azioni, app, security).</td>
+                                            <td class="p-2 border">Ecosistema ampio con integrazioni native e partner certificati.</td>
+                                            <td class="p-2 border">Marketplace limitato, community-driven.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">API &amp; GraphQL</td>
+                                            <td class="p-2 border">REST e GraphQL mature, ampio supporto SDK.</td>
+                                            <td class="p-2 border">REST e GraphQL complete, automazioni end-to-end.</td>
+                                            <td class="p-2 border">API REST e GraphQL di base; alcune feature via plugin.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Integrazione IDE</td>
+                                            <td class="p-2 border">VS Code, JetBrains, GitKraken, estensioni dedicate.</td>
+                                            <td class="p-2 border">VS Code, JetBrains, strumenti CLI integrati.</td>
+                                            <td class="p-2 border">VS Code e JetBrains tramite plugin community.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Issue &amp; Project Management</td>
+                                            <td class="p-2 border">Issue avanzate con board, milestone e time tracking.</td>
+                                            <td class="p-2 border">Issue/MR integrate, board Kanban, epics, OKR.</td>
+                                            <td class="p-2 border">Issue e board base; milestone essenziali.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Package Registry</td>
+                                            <td class="p-2 border">npm, Docker, Maven, PyPI, NuGet, RubyGems.</td>
+                                            <td class="p-2 border">npm, Docker, Maven, PyPI e registri personalizzati.</td>
+                                            <td class="p-2 border">Registri limitati, spesso delegati a servizi esterni.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Vulnerability DB</td>
+                                            <td class="p-2 border">GitHub Advisory Database con notifiche automatiche.</td>
+                                            <td class="p-2 border">Database CVE integrato, scansioni SAST/DAST.</td>
+                                            <td class="p-2 border">Database CVE limitato; supporto SBOM tramite plugin.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria Amministrazione -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🧭 Amministrazione &amp; Governance</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Gestione utenti</td>
+                                            <td class="p-2 border">Bulk import/export, SCIM, deprovisioning automatico.</td>
+                                            <td class="p-2 border">Bulk import/export, SCIM, provisioning granulare.</td>
+                                            <td class="p-2 border">Bulk import limitato, provisioning prevalentemente manuale.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Permessi &amp; policy</td>
+                                            <td class="p-2 border">Ruoli custom, branch protection via API, policy as code.</td>
+                                            <td class="p-2 border">Ruoli granulari, compliance frameworks, policy di sicurezza.</td>
+                                            <td class="p-2 border">Permessi granulari base, policy tramite CLI/config.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Automazione &amp; template</td>
+                                            <td class="p-2 border">Repository template, issue/PR template, org policies.</td>
+                                            <td class="p-2 border">Project template, issue/MR template, orchestrazione pipeline.</td>
+                                            <td class="p-2 border">Template essenziali; automazioni estese via script.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria Collaborazione -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🤝 Collaborazione &amp; Qualità del Codice</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Pull/Merge Request</td>
+                                            <td class="p-2 border">UX curata per collaborazione OSS/enterprise: merge queue, code owners, review multi-branch.</td>
+                                            <td class="p-2 border">Flussi DevSecOps integrati con approvazioni, security gate e compliance dashboard.</td>
+                                            <td class="p-2 border">Esperienza leggera e veloce, ma con feature avanzate limitate.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Assistenti AI</td>
+                                            <td class="p-2 border">GitHub Copilot e Copilot for PR (licenza aggiuntiva).</td>
+                                            <td class="p-2 border">GitLab Duo disponibile nei piani Premium/Ultimate.</td>
+                                            <td class="p-2 border">Nessun assistente AI nativo; solo plugin community.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Ricerca &amp; diff</td>
+                                            <td class="p-2 border">Ricerca semantica su codice/PR, diff sintattici e supporto file binari &gt;10MB.</td>
+                                            <td class="p-2 border">Ricerca avanzata nei piani enterprise, diff sintattici e suggerimenti inline.</td>
+                                            <td class="p-2 border">Ricerca basica; diff binari limitati e senza semantica.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -199,21 +570,146 @@
                     <!-- Categoria TCO -->
                     <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
                         <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
-                            <span>💰 Costo Totale di Proprietà (TCO)</span>
+                            <span>💰 Costo Totale di Possesso (TCO)</span>
                             <span class="accordion-arrow transition-transform duration-300">▼</span>
                         </button>
                         <div class="accordion-content">
-                            <div class="p-5 border-t border-slate-200 text-slate-700">
-                                <p><strong>GitHub Cloud:</strong> Prevalentemente Opex. Costi prevedibili basati su piano per utente + overage per Actions/storage. Il TCO è generalmente inferiore per team fino a 150-200 persone perché elimina i costi operativi di gestione dell'infrastruttura.</p>
-                                <p class="mt-2"><strong>GitLab Self-hosted:</strong> Mix di Capex (se on-prem) e Opex (licenze, cloud, personale). I costi nascosti sono significativi: personale SRE/DevOps (1-3 FTE), infrastruttura (calcolo, storage, network), backup, monitoring. Il TCO può diventare vantaggioso solo su scale molto grandi (>500 dev) dove l'economia di scala interna supera i costi della licenza cloud.</p>
-                                <p class="mt-2"><strong>Gitea:</strong> TCO più basso. Costi limitati all'infrastruttura (può girare su una piccola VM) e al personale per la manutenzione (minima). L'assenza di costi di licenza è un grande vantaggio, ma va bilanciata con le feature mancanti.</p>
+                            <div class="p-5 border-t border-slate-200 text-slate-700 space-y-6">
+                                <div class="space-y-2">
+                                    <h4 class="text-lg font-semibold text-slate-900">GitHub Cloud</h4>
+                                    <ul class="list-disc pl-5 space-y-1 text-sm">
+                                        <li>Licenza: ~$21/utente/mese (GitHub Enterprise Cloud ≈ $252/anno).</li>
+                                        <li>CI/CD: minuti di esecuzione inclusi variabili per piano con fatturazione usage-based (OS/dimensione runner).</li>
+                                        <li>Storage LFS, artifact e traffico privato: tariffazione a consumo.</li>
+                                        <li>TCO: riduce l’Opex interno (SaaS gestito) ma comporta minor controllo sulla residenza dei dati.</li>
+                                    </ul>
+                                </div>
+                                <div class="space-y-2">
+                                    <h4 class="text-lg font-semibold text-slate-900">GitLab Self-Hosted su AWS</h4>
+                                    <ul class="list-disc pl-5 space-y-1 text-sm">
+                                        <li>Licenza: ~$29/utente/mese (Premium ≈ $348/anno; Ultimate ≈ $1.188/anno).</li>
+                                        <li>Infrastruttura: EC2 (es. m6i.2xlarge), storage EBS, backup S3/Glacier, monitoring (CloudWatch/Prometheus).</li>
+                                        <li>CI/CD: runner autoscalati (spot/on-demand), artifact e registry da dimensionare.</li>
+                                        <li>TCO: medio-alto con costi Capex/Opex separati; richiede personale DevOps/SRE dedicato.</li>
+                                    </ul>
+                                </div>
+                                <div class="space-y-2">
+                                    <h4 class="text-lg font-semibold text-slate-900">Gitea Self-Hosted</h4>
+                                    <ul class="list-disc pl-5 space-y-1 text-sm">
+                                        <li>Licenza: $0 (MIT) o ~$114/anno per Gitea Enterprise (supporto).</li>
+                                        <li>Infrastruttura: VPS/VM (~$40/mese) + costi di storage, backup, monitoring e runner separati.</li>
+                                        <li>TCO: basso su piccola scala ma cresce con l’effort manuale richiesto oltre ~500 utenti.</li>
+                                    </ul>
+                                </div>
+                                <p class="text-sm text-slate-500">Il TCO effettivo dipende dal volume CI/CD (minuti, artifact, LFS, egress), dai requisiti di disponibilità e dalla maturità operativa del team.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria Privacy -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🔐 Privacy &amp; Sovranità dei Dati</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Trattamento dati personali</td>
+                                            <td class="p-2 border">Conforme GDPR con data residency UE/USA/Australia; dati ospitati su Microsoft Azure (es. Amsterdam/Dublino).</td>
+                                            <td class="p-2 border">Conforme GDPR; residenza dati interamente controllata dall'organizzazione (self-managed).</td>
+                                            <td class="p-2 border">Dipende dal provider scelto o dall’on-prem: responsabilità del team.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Isolamento di rete</td>
+                                            <td class="p-2 border">Supporto per VPC, IP allow-listing, integrazione con VPN.</td>
+                                            <td class="p-2 border">Supporto per VPC dedicati, segmentazione di rete, firewall.</td>
+                                            <td class="p-2 border">Dipende dall'infrastruttura; configurabile tramite network locale/VPN.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Private Links</td>
+                                            <td class="p-2 border">Supporto per AWS PrivateLink e connessioni private.</td>
+                                            <td class="p-2 border">Supporto per AWS PrivateLink e collegamenti privati.</td>
+                                            <td class="p-2 border">Supporto limitato; richiede configurazioni manuali.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Gestione dei segreti</td>
+                                            <td class="p-2 border">Secret scanning avanzato, integrazione con vault esterni.</td>
+                                            <td class="p-2 border">Secret scanning, integrazione con HashiCorp Vault e simili.</td>
+                                            <td class="p-2 border">Secret scanning di base; integrazione vault tramite plugin.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">BYOK / KMS</td>
+                                            <td class="p-2 border">Bring Your Own Key / Key Management Service disponibile (GitHub Enterprise Cloud).</td>
+                                            <td class="p-2 border">BYOK/KMS disponibile nei piani Ultimate / Dedicated.</td>
+                                            <td class="p-2 border">Non disponibile nativamente.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categoria Community -->
+                    <div class="accordion-item bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-5 font-semibold">
+                            <span>🌱 Community &amp; Longevità</span>
+                            <span class="accordion-arrow transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-5 border-t border-slate-200 text-slate-700 overflow-x-auto">
+                                <table class="w-full table-auto border-collapse min-w-[640px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-left">
+                                            <th class="p-2 border font-medium">Criterio</th>
+                                            <th class="p-2 border font-medium">GitHub Cloud</th>
+                                            <th class="p-2 border font-medium">GitLab Self-Hosted</th>
+                                            <th class="p-2 border font-medium">Gitea Self-Hosted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="align-top">
+                                        <tr>
+                                            <td class="p-2 border font-medium">Roadmap</td>
+                                            <td class="p-2 border">Rilasci trimestrali (major) e mensili (minor) con roadmap pubblica.</td>
+                                            <td class="p-2 border">Roadmap pubblica, rilasci mensili.</td>
+                                            <td class="p-2 border">Roadmap community-driven con rilasci frequenti.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Frequenza rilasci</td>
+                                            <td class="p-2 border">Aggiornamenti continui con release notes dettagliate.</td>
+                                            <td class="p-2 border">Rilasci mensili con cadenza ufficiale.</td>
+                                            <td class="p-2 border">Rilasci frequenti ma variabili in base al contributo community.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Salute del progetto</td>
+                                            <td class="p-2 border">Alto bus factor, ampia community e supporto enterprise.</td>
+                                            <td class="p-2 border">Alto bus factor, modello open-core sostenuto da GitLab Inc.</td>
+                                            <td class="p-2 border">Bus factor moderato, forte dipendenza dalla community.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 border font-medium">Governance</td>
+                                            <td class="p-2 border">Governance centralizzata orientata all'enterprise.</td>
+                                            <td class="p-2 border">Governance condivisa tra azienda e community.</td>
+                                            <td class="p-2 border">Governance totalmente community-driven.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
+                <p class="text-sm text-slate-500 max-w-5xl mx-auto">Nota: GitHub Enterprise Server e GitLab Self-Managed offrono controllo completo sulla residenza dei dati e supportano strategie di backup/replica con RPO/RTO configurabili.</p>
 
-            </section>
-            
             <!-- Framework Decisionale -->
             <section id="framework" class="space-y-16 scroll-mt-24 pt-20">
                 <div class="text-center">
@@ -221,54 +717,100 @@
                     <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">Usa questi strumenti per trovare la soluzione più adatta alle tue esigenze specifiche.</p>
                 </div>
 
+                <!-- Domande Chiave -->
+                <div class="bg-white border border-slate-200 rounded-xl shadow-md p-6">
+                    <h3 class="text-2xl font-semibold text-center mb-4">1. Domande chiave prima di scegliere</h3>
+                    <ul class="list-disc pl-6 space-y-2 text-slate-700 text-sm sm:text-base text-left">
+                        <li>Qual è la dimensione attuale del team e la previsione di crescita nei prossimi 24 mesi?</li>
+                        <li>Quali requisiti di sicurezza e compliance devono essere soddisfatti (es. ISO 27001, SOC 2, GDPR)?</li>
+                        <li>Serve una soluzione SaaS completamente gestita o è necessario il controllo completo via self-hosting?</li>
+                        <li>Qual è il budget disponibile e come bilanciare Opex vs Capex infrastrutturale?</li>
+                        <li>Quali integrazioni con altri strumenti (IDE, package registry, vulnerability DB) sono imprescindibili?</li>
+                        <li>Esistono vincoli sulla residenza dei dati in specifiche regioni (es. UE)?</li>
+                        <li>Quale livello di supporto e manutenzione interna può essere garantito nel tempo?</li>
+                    </ul>
+                </div>
+
                 <!-- Albero Decisionale -->
                 <div>
-                    <h3 class="text-2xl font-semibold text-center mb-8">1. Albero Decisionale Semplificato</h3>
-                    <div class="flex flex-col items-center">
-                        <div class="decision-node bg-white p-4 rounded-lg shadow-md w-full max-w-lg text-center">
-                            <p class="font-semibold">Domanda 1:</p>
-                            <p>La sovranità assoluta dei dati e/o l'isolamento completo della rete sono requisiti legali/di sicurezza non negoziabili?</p>
-                        </div>
-                        <div class="flex w-full max-w-lg mt-4">
-                            <div class="w-1/2 pr-4 text-center">
-                                <div class="decision-path" style="height: 20px;"></div>
-                                <div class="font-bold text-green-700">SÌ</div>
-                                <div class="decision-path" style="height: 20px;"></div>
-                                <div class="decision-node bg-green-50 p-4 rounded-lg shadow-sm text-center">
-                                    <p class="font-semibold">Soluzione: Self-Hosted</p>
-                                    <p class="text-sm">Scegli <strong>GitLab Self-hosted</strong> per feature complete o <strong>Gitea</strong> per semplicità e basso costo.</p>
-                                </div>
+                    <h3 class="text-2xl font-semibold text-center mb-8">2. Albero Decisionale Semplificato</h3>
+                    <div class="space-y-10 max-w-3xl mx-auto">
+                        <div class="flex flex-col items-center">
+                            <div class="decision-node bg-white p-4 rounded-lg shadow-md w-full text-center">
+                                <p class="font-semibold">Domanda 1</p>
+                                <p>Il team conta 5–20 sviluppatori con budget limitato e requisiti di base?</p>
                             </div>
-                            <div class="w-1/2 pl-4 text-center">
-                                <div class="decision-path" style="height: 20px;"></div>
-                                <div class="font-bold text-red-700">NO</div>
-                                <div class="decision-path" style="height: 20px;"></div>
-                                 <div class="decision-node bg-white p-4 rounded-lg shadow-md text-center">
-                                    <p class="font-semibold">Domanda 2:</p>
-                                    <p>La priorità assoluta è minimizzare l'overhead operativo e massimizzare la produttività degli sviluppatori con il miglior ecosistema?</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex w-full max-w-lg mt-4 justify-end">
-                            <div class="w-1/2 pl-4">
-                                <div class="flex w-full">
-                                    <div class="w-1/2 pr-2 text-center">
-                                        <div class="decision-path" style="height: 20px;"></div>
-                                        <div class="font-bold text-green-700">SÌ</div>
-                                        <div class="decision-path" style="height: 20px;"></div>
-                                        <div class="decision-node bg-green-50 p-4 rounded-lg shadow-sm text-center">
-                                            <p class="font-semibold">Soluzione: Cloud</p>
-                                            <p class="text-sm"><strong>GitHub Cloud</strong> è la scelta ideale.</p>
-                                        </div>
+                            <div class="flex flex-col sm:flex-row mt-4 w-full gap-4">
+                                <div class="flex-1 text-center">
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="font-bold text-green-700">SÌ</div>
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="decision-node bg-green-50 p-4 rounded-lg shadow-sm">
+                                        <p class="font-semibold">Soluzione consigliata</p>
+                                        <p class="text-sm">Adotta <strong>Gitea Self-Hosted</strong>: licenza MIT, costi minimi, gestione semplice.</p>
                                     </div>
-                                    <div class="w-1/2 pl-2 text-center">
-                                        <div class="decision-path" style="height: 20px;"></div>
-                                        <div class="font-bold text-red-700">NO</div>
-                                        <div class="decision-path" style="height: 20px;"></div>
-                                        <div class="decision-node bg-blue-50 p-4 rounded-lg shadow-sm text-center">
-                                            <p class="font-semibold">Valutazione finale</p>
-                                            <p class="text-sm">Le tue esigenze sono complesse. Usa la scorecard qui sotto per una valutazione dettagliata.</p>
-                                        </div>
+                                </div>
+                                <div class="flex-1 text-center">
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="font-bold text-red-700">NO</div>
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="decision-node bg-white p-4 rounded-lg shadow-md">
+                                        <p class="font-semibold">Vai alla Domanda 2</p>
+                                        <p class="text-sm">Il team crescerà fino a 150 sviluppatori e richiede controllo e personalizzazione self-hosted?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center">
+                            <div class="decision-node bg-white p-4 rounded-lg shadow-md w-full text-center">
+                                <p class="font-semibold">Domanda 2</p>
+                                <p>Serve una piattaforma self-hosted con policy di compliance avanzate e runner dedicati su AWS/on-prem?</p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row mt-4 w-full gap-4">
+                                <div class="flex-1 text-center">
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="font-bold text-green-700">SÌ</div>
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="decision-node bg-green-50 p-4 rounded-lg shadow-sm">
+                                        <p class="font-semibold">Soluzione consigliata</p>
+                                        <p class="text-sm">Implementa <strong>GitLab Self-Hosted su AWS</strong> con reference architecture scalabile.</p>
+                                    </div>
+                                </div>
+                                <div class="flex-1 text-center">
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="font-bold text-red-700">NO</div>
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="decision-node bg-white p-4 rounded-lg shadow-md">
+                                        <p class="font-semibold">Vai alla Domanda 3</p>
+                                        <p class="text-sm">L'organizzazione è enterprise (&gt;500 utenti) con requisiti SaaS gestito e compliance rigorosa?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center">
+                            <div class="decision-node bg-white p-4 rounded-lg shadow-md w-full text-center">
+                                <p class="font-semibold">Domanda 3</p>
+                                <p>È preferibile una soluzione SaaS con SLA globali, gestione completa e funzioni di sicurezza avanzate?</p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row mt-4 w-full gap-4">
+                                <div class="flex-1 text-center">
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="font-bold text-green-700">SÌ</div>
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="decision-node bg-green-50 p-4 rounded-lg shadow-sm">
+                                        <p class="font-semibold">Soluzione consigliata</p>
+                                        <p class="text-sm">Scegli <strong>GitHub Cloud Enterprise</strong>: SaaS gestito, compliance SOC 2/ISO 27001, ecosistema esteso.</p>
+                                    </div>
+                                </div>
+                                <div class="flex-1 text-center">
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="font-bold text-red-700">NO</div>
+                                    <div class="decision-path mx-auto" style="height: 20px;"></div>
+                                    <div class="decision-node bg-blue-50 p-4 rounded-lg shadow-sm">
+                                        <p class="font-semibold">Approfondisci</p>
+                                        <p class="text-sm">Le esigenze sono ibride: usa la scorecard ponderata per pesare i criteri personalizzati.</p>
                                     </div>
                                 </div>
                             </div>
@@ -276,28 +818,104 @@
                     </div>
                 </div>
 
-                <!-- Scorecard Ponderata -->
+            <!-- Scorecard Ponderata -->
                 <div>
-                    <h3 class="text-2xl font-semibold text-center mb-2">2. Scorecard Ponderata</h3>
-                    <p class="text-center text-slate-600 mb-8">Modifica i pesi in base alle priorità del tuo team. Il grafico si aggiornerà in tempo reale.</p>
+                    <h3 class="text-2xl font-semibold text-center mb-2">3. Scorecard Ponderata</h3>
+                    <p class="text-center text-slate-600 mb-4">Modifica i pesi in base alle priorità del tuo team. Il grafico si aggiornerà in tempo reale.</p>
+                    <p class="text-center text-slate-500 text-sm mb-8">Baseline (pesi PDF): GitHub Cloud ≈ 8.30 (8.25 nel report), GitLab Self-Hosted ≈ 7.30 (7.25), Gitea ≈ 5.95 (5.75).</p>
                     <div class="grid md:grid-cols-3 gap-8">
                         <div class="md:col-span-1 bg-white p-6 rounded-xl shadow-md border border-slate-200 space-y-4" id="weights-container">
-                            <!-- Sliders verranno inseriti qui da JS -->
+                            <!-- Sliders inseriti via JS -->
                         </div>
                         <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                             <div class="chart-container">
+                            <div class="chart-container">
                                 <canvas id="scorecardChart"></canvas>
                             </div>
+                            <p id="scorecard-summary" class="text-center text-sm text-slate-600 mt-4"></p>
                         </div>
                     </div>
+                    <div class="mt-8 bg-white border border-slate-200 rounded-xl shadow-md p-6 overflow-x-auto">
+                        <h4 class="text-lg font-semibold text-slate-900 mb-4 text-center">Scorecard sintetica (baseline 10 ottobre 2025)</h4>
+                        <table class="w-full table-auto border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-100">
+                                    <th class="p-2 border font-medium">Criterio</th>
+                                    <th class="p-2 border font-medium">Peso %</th>
+                                    <th class="p-2 border font-medium">GitHub</th>
+                                    <th class="p-2 border font-medium">GitLab</th>
+                                    <th class="p-2 border font-medium">Gitea</th>
+                                </tr>
+                            </thead>
+                            <tbody class="align-top">
+                                <tr>
+                                    <td class="p-2 border">Sicurezza &amp; Compliance</td>
+                                    <td class="p-2 border text-center">25</td>
+                                    <td class="p-2 border text-center">9</td>
+                                    <td class="p-2 border text-center">8</td>
+                                    <td class="p-2 border text-center">6</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border">CI/CD &amp; Automazione</td>
+                                    <td class="p-2 border text-center">20</td>
+                                    <td class="p-2 border text-center">8</td>
+                                    <td class="p-2 border text-center">7</td>
+                                    <td class="p-2 border text-center">5</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border">Licensing &amp; Costi</td>
+                                    <td class="p-2 border text-center">20</td>
+                                    <td class="p-2 border text-center">7</td>
+                                    <td class="p-2 border text-center">6</td>
+                                    <td class="p-2 border text-center">9</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border">Operatività &amp; Manutenzione</td>
+                                    <td class="p-2 border text-center">15</td>
+                                    <td class="p-2 border text-center">10</td>
+                                    <td class="p-2 border text-center">4</td>
+                                    <td class="p-2 border text-center">8</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border">Scalabilità &amp; HA</td>
+                                    <td class="p-2 border text-center">10</td>
+                                    <td class="p-2 border text-center">9</td>
+                                    <td class="p-2 border text-center">8</td>
+                                    <td class="p-2 border text-center">5</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border">Ecosistema &amp; Integrazioni</td>
+                                    <td class="p-2 border text-center">10</td>
+                                    <td class="p-2 border text-center">9</td>
+                                    <td class="p-2 border text-center">8</td>
+                                    <td class="p-2 border text-center">4</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="text-xs text-slate-500 mt-3 text-center">Punteggi su scala 0-10, derivati da documentazione ufficiale aggiornata al 10 ottobre 2025.</p>
+                    </div>
                 </div>
-
             </section>
-            
+
+            <!-- Conclusione -->
+            <section id="conclusione" class="scroll-mt-24 pt-20">
+                <div class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-xl shadow-md p-8 space-y-4">
+                    <h2 class="text-3xl font-bold text-slate-900 text-center">Conclusione</h2>
+                    <p class="text-lg text-slate-700">La scelta tra <strong>GitHub Cloud</strong>, <strong>GitLab Self-Hosted</strong> e <strong>Gitea</strong> dipende da un mix di requisiti tecnici, economici e organizzativi. GitHub Cloud risponde meglio alle esigenze di aziende strutturate con team distribuiti, bisogno di SLA globali e funzioni di sicurezza avanzate. GitLab Self-Hosted è ideale quando servono controllo completo, personalizzazione e isolamento dei dati su AWS o on-premise. Gitea resta l'opzione più agile e conveniente per team piccoli che vogliono autonomia e costi contenuti.</p>
+                    <p class="text-lg text-slate-700">Il framework decisionale e la scorecard ponderata convertono l'analisi qualitativa in criteri misurabili: allinea i pesi ai tuoi vincoli per ottenere un punteggio immediato e oggettivo. Usa queste sezioni come canvas dinamico per guidare stakeholder tecnici e business verso una decisione condivisa e motivata.</p>
+                    <p class="text-sm text-slate-500 text-center">Tutti i dati e le assunzioni riportati fanno riferimento alla documentazione ufficiale disponibile al 10 ottobre 2025.</p>
+                </div>
+            </section>
+
             <!-- Fonti & Glossario -->
             <section id="fonti" class="space-y-12 scroll-mt-24 pt-20">
                 <div class="text-center">
                      <h2 class="text-3xl font-bold text-slate-900">Fonti & Glossario</h2>
+                </div>
+                <div class="max-w-5xl mx-auto">
+                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4 text-sm text-slate-600">
+                        <p><strong>Ultimo aggiornamento:</strong> 10 ottobre 2025.</p>
+                        <p class="mt-1">Valutazioni basate su documentazione ufficiale GitHub (Enterprise Cloud 2025), GitLab (Reference Architectures 2025) e Gitea (Administration Docs 2024-2025).</p>
+                    </div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-x-12 gap-y-8 max-w-5xl mx-auto">
                     <div>
@@ -333,6 +951,10 @@
                             <div>
                                 <dt class="font-semibold text-slate-800">SBOM (Software Bill of Materials)</dt>
                                 <dd class="text-slate-600">Una lista formale e leggibile da una macchina di tutti i componenti, librerie e dipendenze di un software.</dd>
+                            </div>
+                            <div>
+                                <dt class="font-semibold text-slate-800">BYOK (Bring Your Own Key)</dt>
+                                <dd class="text-slate-600">Modello in cui il cliente gestisce le proprie chiavi di cifratura tramite un KMS esterno, mantenendo il controllo sui dati crittografati.</dd>
                             </div>
                         </dl>
                     </div>
@@ -389,38 +1011,25 @@
 
             // Scorecard chart logic
             const criteria = {
-                'Sicurezza & Compliance': { weight: 25, scores: { github: 9, gitlab: 10, gitea: 6 } },
-                'CI/CD': { weight: 20, scores: { github: 9, gitlab: 8, gitea: 5 } },
-                'Costo Totale (TCO)': { weight: 20, scores: { github: 7, gitlab: 6, gitea: 9 } },
-                'Operatività & Manutenzione': { weight: 15, scores: { github: 10, gitlab: 4, gitea: 8 } },
-                'Scalabilità & HA': { weight: 10, scores: { github: 9, gitlab: 8, gitea: 6 } },
-                'Ecosistema & Integrazioni': { weight: 10, scores: { github: 10, gitlab: 7, gitea: 5 } }
+                'Licensing & Costi': { weight: 20, scores: { github: 7, gitlab: 6, gitea: 9 } },
+                'Sicurezza & Compliance': { weight: 25, scores: { github: 9, gitlab: 8, gitea: 6 } },
+                'CI/CD & Automazione': { weight: 20, scores: { github: 8, gitlab: 7, gitea: 5 } },
+                'Scalabilità & HA': { weight: 15, scores: { github: 9, gitlab: 8, gitea: 5 } },
+                'Ecosistema & Integrazioni': { weight: 10, scores: { github: 9, gitlab: 8, gitea: 4 } },
+                'Amministrazione & Governance': { weight: 10, scores: { github: 8, gitlab: 7, gitea: 5 } }
             };
 
             const weightsContainer = document.getElementById('weights-container');
             const ctx = document.getElementById('scorecardChart').getContext('2d');
+            const summaryEl = document.getElementById('scorecard-summary');
             let scorecardChart;
 
             function calculateScores() {
                 const totalWeight = Object.values(criteria).reduce((sum, item) => sum + item.weight, 0);
-                
-                const finalScores = {
-                    github: 0,
-                    gitlab: 0,
-                    gitea: 0
-                };
-
-                for (const key in criteria) {
-                    const criterion = criteria[key];
-                    finalScores.github += (criterion.scores.github / 10) * (criterion.weight / totalWeight);
-                    finalScores.gitlab += (criterion.scores.gitlab / 10) * (criterion.weight / totalWeight);
-                    finalScores.gitea += (criterion.scores.gitea / 10) * (criterion.weight / totalWeight);
-                }
-
                 return {
-                    github: (finalScores.github * 100).toFixed(1),
-                    gitlab: (finalScores.gitlab * 100).toFixed(1),
-                    gitea: (finalScores.gitea * 100).toFixed(1)
+                    github: parseFloat((Object.values(criteria).reduce((sum, item) => sum + item.scores.github * item.weight, 0) / totalWeight).toFixed(2)),
+                    gitlab: parseFloat((Object.values(criteria).reduce((sum, item) => sum + item.scores.gitlab * item.weight, 0) / totalWeight).toFixed(2)),
+                    gitea: parseFloat((Object.values(criteria).reduce((sum, item) => sum + item.scores.gitea * item.weight, 0) / totalWeight).toFixed(2))
                 };
             }
 
@@ -428,6 +1037,7 @@
                 const scores = calculateScores();
                 scorecardChart.data.datasets[0].data = [scores.github, scores.gitlab, scores.gitea];
                 scorecardChart.update();
+                updateSummary(scores);
             }
 
             function createSliders() {
@@ -454,6 +1064,10 @@
                     container.appendChild(slider);
                     weightsContainer.appendChild(container);
                 }
+            }
+
+            function updateSummary(scores) {
+                summaryEl.textContent = `Punteggi attuali (0-10): GitHub Cloud ${scores.github.toFixed(2)}, GitLab Self-Hosted ${scores.gitlab.toFixed(2)}, Gitea ${scores.gitea.toFixed(2)}.`;
             }
 
             function createChart() {
@@ -485,10 +1099,10 @@
                         scales: {
                             x: {
                                 beginAtZero: true,
-                                max: 100,
+                                max: 10,
                                 title: {
                                     display: true,
-                                    text: 'Punteggio Finale'
+                                    text: 'Punteggio Finale (0-10)'
                                 }
                             }
                         },
@@ -499,13 +1113,14 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return ` Punteggio: ${context.raw}`;
+                                        return ` Punteggio: ${context.raw.toFixed(2)} / 10`;
                                     }
                                 }
                             }
                         }
                     }
                 });
+                updateSummary(initialScores);
             }
 
             createSliders();
