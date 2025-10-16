@@ -224,7 +224,7 @@
     <section class="panel" id="tab-challenge" role="tabpanel" aria-labelledby="btn-challenge">
       <h2>Challenge Design</h2>
       <p class="callout"><b>Massima libertà creativa:</b> i team possono proporre <b>qualsiasi idea</b> coerente con voice/AI ElevenLabs. Se preferisci partire da spunti pronti, puoi usare le card sotto come <b>esempi</b> non vincolanti.</p>
-      <h3>4 Challenge Card (esempi, non vincolanti)</h3>
+      <h3>Challenge Card (esempi, non vincolanti)</h3>
       <ol>
         <li><b>Customer Support Voice Agent</b>
           <ol>
@@ -248,6 +248,18 @@
           <ol>
             <li><b>Obiettivo:</b> analizzare conversazioni per trend, sentiment e rischi di non‑compliance.</li>
             <li><b>Output demo:</b> agente che tagga 2–3 “red flag” in sample calls e genera report sintetico.</li>
+          </ol>
+        </li>
+        <li><b>Guardrail & Interruption Clinic</b>
+          <ol>
+            <li><b>Obiettivo:</b> garantire turn‑taking corretto (nessuna sovrapposizione), gestione silenzi e fuori‑contesto, con fallback ed escalation puliti.</li>
+            <li><b>Output demo:</b> 3 scenari (interruzione, silenzio, domanda fuori ambito) in cui l’agente rispetta le regole di conversazione e resta nel perimetro.</li>
+          </ol>
+        </li>
+        <li><b>Cattura Alfanumerici & Handoff</b>
+          <ol>
+            <li><b>Obiettivo:</b> catturare codici alfanumerici con conferma e <i>validazione server‑side</i>, quindi eseguire handoff verso un altro sistema mantenendo il contesto.</li>
+            <li><b>Output demo:</b> l’agente acquisisce e valida un codice (es. ID pratica), conferma i caratteri, e trasferisce con <i>snapshot</i> di sessione (dati ri‑idratati).</li>
           </ol>
         </li>
       </ol>
