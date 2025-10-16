@@ -18,21 +18,21 @@
 
 ## Sommario
 
-1. [Oggetto e Finalità](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-2. [Organizzazione, Sede e Data](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-3. [Requisiti di Partecipazione e Selezione](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-4. [Modalità di Partecipazione e Gruppi di Lavoro](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-5. [Durata e Programma di Massima (14:00–21:00)](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-6. [Tecnologie e Requisiti Tecnici](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-7. [Dati, Privacy & Compliance dei Materiali](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-8. [Proprietà Intellettuale e Utilizzo dei Materiali](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-9. [Criteri di Valutazione e Premi](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-10. [Codice di Condotta](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-11. [Privacy e Trattamento dei Dati Personali](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-12. [Responsabilità, Sicurezza e Manleva](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-13. [Modifiche al Regolamento](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-14. [Accettazione del Regolamento e Contatti](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
-15. [Appendici Operative](https://www.notion.so/Documento-Ufficiale-28404d204fa2806d9315e34d97237582?pvs=21)
+1. Oggetto e Finalità
+2. Organizzazione, Sede e Data
+3. Requisiti di Partecipazione e Selezione
+4. Modalità di Partecipazione e Gruppi di Lavoro
+5. Durata e Programma di Massima (14:00–21:00)
+6. Tecnologie e Requisiti Tecnici
+7. Dati, Privacy & Compliance dei Materiali
+8. Proprietà Intellettuale e Utilizzo dei Materiali
+9. Criteri di Valutazione e Premi
+10. Codice di Condotta
+11. Privacy e Trattamento dei Dati Personali
+12. Responsabilità, Sicurezza e Manleva
+13. Modifiche al Regolamento
+14. Accettazione del Regolamento e Contatti
+15. Appendici Operative
 
 ---
 
@@ -118,11 +118,11 @@ Sono favoriti casi d’uso concreti per **Sales, Customer Support, Product e Rev
 
 **Valutazione:**
 
-1. Fattibilità & Scalabilità
-2. Impatto Business
-3. Uso tecnologia ElevenLabs
-4. UX & Demo Readiness
-5. Bonus: Creatività e collaborazione.
+1. **Fattibilità & Scalabilità** — end‑to‑end che regge “at all” e può crescere in contesti reali (robustezza, semplicità, passi concreti verso PoC). **Valutazione: Datapizza**.
+2. **Valore d’Uso Reale** — chiarezza dello use case e di come risolve un problema concreto; non servono metriche stringenti, conta la spiegazione credibile. **Valutazione: ElevenLabs**.
+3. **Aderenza a ElevenLabs** — uso pertinente e creativo delle capability voice/AI. **Valutazione: ElevenLabs**.
+4. **Qualità Esterna** — UX/presentazione della demo, chiarezza narrativa, stabilità percepita. **Valutazione: Datapizza**.
+5. **Bonus** — creatività, collaborazione, qualità del pitch.
 
 **Premi:**
 
@@ -191,3 +191,12 @@ Con la candidatura, il partecipante dichiara di **aver letto e accettato integra
 - **Problem framing** → **Use case** → **Scope MVP** (demo < 3 min)
 - Definire 1 tool call e 1 knowledge base
 - Focus su **sostenibilità e scalabilità**
+
+### C) Policy Mock & Demo (cosa fare / non fare)
+
+- **Usare solo dati sintetici/pubblici**; **vietati** dati reali o sensibili.
+- **Integrazioni simulate consentite** (mock endpoint, sandbox/test, fogli o DB fittizi). Niente accessi a **sistemi produttivi**.
+- **Strumenti e vendor citati sono esempi** (non obbligatori). Ogni team può scegliere alternative equivalenti.
+- **Chiarezza in pitch**: dichiarare esplicitamente cosa è mock e cosa è reale.
+- **Divieti**: scraping non autorizzato, invio di comunicazioni reali (email/SMS/call) a terzi, download di dati personali.
+- **Riproducibilità**: preparare un percorso demo semplice (script/istruzioni) per l’esecuzione in sede senza setup complessi.

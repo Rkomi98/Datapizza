@@ -20,6 +20,8 @@
     .partner-logos{display:flex;align-items:center;gap:14px;margin-left:32px;padding:6px 16px;border-radius:999px;background:linear-gradient(135deg,rgba(0, 0, 0, 0.92),rgba(52, 75, 106, 0.88));border:1px solid rgba(96,230,255,.16);box-shadow:0 10px 24px rgba(0,0,0,.34)}
     .partner-logos img{height:26px;width:auto;max-width:140px;object-fit:contain;filter:none;opacity:1}
     .partner-logos img:first-child{height:35px;max-width:120px}
+    /* Improve ELEVEN logo contrast on dark bg */
+    .partner-logos img[alt="ElevenLabs"]{filter: invert(1) brightness(1.2) contrast(1.05) drop-shadow(0 0 3px rgba(0,0,0,.35)); opacity: .95}
 
     /* TAB BAR */
     .tabs{position:sticky;top:0;z-index:50;display:block;padding:14px 18px;margin:16px 0 26px;border-radius:20px;border:1px solid rgba(96,230,255,.14);background:linear-gradient(180deg,rgba(10,13,18,.95),rgba(10,13,18,.78) 55%,rgba(10,12,15,0));backdrop-filter:saturate(160%) blur(14px);box-shadow:0 22px 60px rgba(0,0,0,.48)}
@@ -56,6 +58,12 @@
     /* Utility */
     .two{columns:2;column-gap:24px}
     @media(max-width:900px){.two{columns:1}}
+    /* TOC styling (Regolamento index) */
+    #reg-sommario+ol{list-style: none;margin:12px 0 18px;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+    #reg-sommario+ol li{margin:0}
+    #reg-sommario+ol a{display:block;padding:10px 12px;border-radius:12px;text-decoration:none;color:var(--ink);background:linear-gradient(135deg,rgba(17,25,36,.9),rgba(12,17,26,.86));border:1px solid rgba(96,230,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.28)}
+    #reg-sommario+ol a:hover{transform:translateY(-2px);transition:transform .18s ease, box-shadow .2s ease;box-shadow:0 14px 30px rgba(0,0,0,.34)}
+
     @media(max-width:720px){header{flex-direction:column;align-items:flex-start;gap:16px}.partner-logos{align-self:flex-start;margin-left:0;padding:6px 14px;gap:12px}.partner-logos img{height:22px;max-width:110px}.partner-logos img:first-child{height:20px;max-width:96px}.title h1{font-size:20px}.logo{width:42px;height:42px;border-radius:12px}}
   </style>
 </head>
@@ -168,10 +176,10 @@
         <div class="slot"><div class="time">14:45–15:00</div><div><b>Ideathon kickoff (guidato, facoltativo)</b>
           <ol>
             <li><b>Team‑only icebreaker (3’):</b> giro rapido interno al team.</li>
-            <li><b>Problem framing (7’):</b> 1–2 pain statement (Sales/CS/RevOps). Esempi:
+            <li><b>Problem framing (7’):</b> 1–2 pain statement (Sales/CS/RevOps). Esempi (solo a titolo illustrativo, non vincolanti):
               <ul>
-                <li>Agente voce che capisce intento, usa <b>RAG</b>, risolve o apre ticket <b>Zendesk</b>.</li>
-                <li>Qualifica lead incoerente: agente con <b>BANT light</b> che aggiorna <b>Salesforce/HubSpot</b> e <b>prenota meeting</b> (Cal.com).</li>
+                <li>Agente voce che capisce intento, usa <b>RAG</b>, risolve o apre un ticket nel sistema di helpdesk scelto (es. Zendesk/HubSpot — come esempio).</li>
+                <li>Qualifica lead incoerente: agente con <b>domande di qualifica minime</b> che aggiorna il CRM scelto (es. Salesforce/HubSpot — come esempio) e <b>prenota meeting</b>.</li>
               </ul>
             </li>
             <li><b>Convergenza rapida (5’):</b> dot‑voting → 1 idea + scope MVP. Domande guida:
@@ -215,18 +223,19 @@
 
     <section class="panel" id="tab-challenge" role="tabpanel" aria-labelledby="btn-challenge">
       <h2>Challenge Design</h2>
-      <h3>4 Challenge Card (esempi)</h3>
+      <p class="callout"><b>Massima libertà creativa:</b> i team possono proporre <b>qualsiasi idea</b> coerente con voice/AI ElevenLabs. Se preferisci partire da spunti pronti, puoi usare le card sotto come <b>esempi</b> non vincolanti.</p>
+      <h3>4 Challenge Card (esempi, non vincolanti)</h3>
       <ol>
         <li><b>Customer Support Voice Agent</b>
           <ol>
-            <li><b>Obiettivo:</b> ridurre i tempi di risposta gestendo FAQ, creando ticket in Zendesk/HubSpot e facendo handoff umano.</li>
+            <li><b>Obiettivo:</b> ridurre i tempi di risposta gestendo FAQ, creando ticket e facendo handoff umano. <i>Integrazioni con tool di helpdesk a scelta (esempi: Zendesk, HubSpot, Freshdesk).</i></li>
             <li><b>Output demo:</b> agente che capisce intento, risponde da KB mock via RAG, e apre ticket automatico.</li>
           </ol>
         </li>
         <li><b>Sales Qualification & Enablement</b>
           <ol>
             <li><b>Obiettivo:</b> automatizzare la qualifica lead e fornire insight post‑call.</li>
-            <li><b>Output demo:</b> agente che fa 2–3 domande BANT light, aggiorna lead su Salesforce sandbox, e produce recap con next steps.</li>
+            <li><b>Output demo:</b> agente che fa 2–3 <b>domande di qualifica</b> (senza framework prescritto), aggiorna lead su un CRM di esempio e produce recap con next steps.</li>
           </ol>
         </li>
         <li><b>Knowledge Voice QA</b>
@@ -248,18 +257,18 @@
     <section class="panel" id="tab-criteria" role="tabpanel" aria-labelledby="btn-criteria">
       <h2>Criteri di Valutazione (focus sostenibilità)</h2>
       <ol>
-        <li><b>Fattibilità & Scalabilità (30%)</b> – integrabilità, robustezza, passi verso PoC. Valutazione Datapizza</li>
-        <li><b>Impatto Business (30%)</b> – valore per Sales/CS/RevOps, metriche chiare. Valutazione ElevenLabs</li>
-        <li><b>Uso tecnologia ElevenLabs (20%)</b> – aderenza e sfruttamento intelligente. Valutazione ElevenLabs</li>
-        <li><b>UX & Demo Readiness (20%)</b> – chiarezza flusso, comprensibilità. Valutazione Datapizza</li>
+        <li><b>Fattibilità & Scalabilità</b> – end‑to‑end che regge “at all” e può crescere in contesti reali (robustezza, semplicità, passi concreti verso PoC). <b>Valutazione: Datapizza</b>.</li>
+        <li><b>Valore d’Uso Reale</b> – chiarezza dello use case e di come risolve un problema concreto; non servono metriche stringenti, conta la spiegazione credibile. <b>Valutazione: ElevenLabs</b>.</li>
+        <li><b>Aderenza a ElevenLabs</b> – uso pertinente e creativo delle capability voice/AI. <b>Valutazione: ElevenLabs</b>.</li>
+        <li><b>Qualità Esterna</b> – UX/presentazione della demo, chiarezza narrativa, stabilità percepita. <b>Valutazione: Datapizza</b>.</li>
       </ol>
-      <p><b>Bonus (fino a +5 pt):</b> creatività, collaborazione, qualità pitch. Insieme</p>
+      <p><b>Bonus (fino a +5 pt):</b> creatività, collaborazione, qualità del pitch.</p>
     </section>
 
     <section class="panel" id="tab-jury" role="tabpanel" aria-labelledby="btn-jury">
       <h2>Giuria & Processo</h2>
       <ul>
-        <li><b>Composizione:</b> 1–2 ElevenLabs, almeno 1–2 Datapizza.</li>
+        <li><b>Composizione:</b> 1–2 ElevenLabs e 1–2 Datapizza.</li>
         <li><b>Valutazione:</b> <b>no live scoring</b>; la giuria usa scorecard e delibera <b>off‑line</b>. Timekeeping rigoroso soprattutto durante le demo. <b>Premiazione post‑evento</b>.</li>
       </ul>
     </section>
@@ -465,6 +474,15 @@
         <li><strong>Problem framing</strong> → <strong>Use case</strong> → <strong>Scope MVP</strong> (demo &lt; 3 min)</li>
         <li>Definire 1 tool call e 1 knowledge base</li>
         <li>Focus su <strong>sostenibilità e scalabilità</strong></li>
+      </ul>
+      <h4 id="reg-appendici-c">C) Policy Mock &amp; Demo (cosa fare / non fare)</h4>
+      <ul>
+        <li><b>Usare solo dati sintetici/pubblici</b>; <b>vietati</b> dati reali o sensibili.</li>
+        <li><b>Integrazioni simulate consentite</b> (mock endpoint, sandbox/test, fogli o DB fittizi). Niente accessi a <b>sistemi produttivi</b>.</li>
+        <li><b>Strumenti e vendor citati sono esempi</b> (non obbligatori). Ogni team può scegliere alternative equivalenti.</li>
+        <li><b>Chiarezza in pitch</b>: dichiarare esplicitamente cosa è mock e cosa è reale.</li>
+        <li><b>Divieti</b>: scraping non autorizzato, invio di comunicazioni reali (email/SMS/call) a terzi, download di dati personali.</li>
+        <li><b>Riproducibilità</b>: preparare un percorso demo semplice (script/istruzioni) in modo che funzioni in sede senza setup complessi.</li>
       </ul>
     </section>
   </div>
