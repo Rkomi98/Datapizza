@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datapizza-AI | MAKEathon 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --dark: #1A1A2E;
+            --light: #F7F7F7;
+            --accent: #FFE66D;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow: hidden;
+            cursor: default;
+        }
+
+        /* Slide Container */
+        .slides-container {
+            display: flex;
+            height: 100vh;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .slides-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .slide {
+            flex: 0 0 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            border-radius: 24px;
+            background: rgba(17, 17, 31, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            scroll-snap-align: center;
+            overflow-y: auto;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 2rem;
+        }
+
+        h3 {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: rgba(30, 30, 46, 0.8);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            width: 90%;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            animation: shimmer 2s infinite;
+        }
+
+        pre {
+            color: var(--light);
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .highlight {
+            color: var(--accent);
+        }
+
+        .keyword {
+            color: var(--primary);
+        }
+
+        .string {
+            color: var(--secondary);
+        }
+
+        .comment {
+            color: #6c7293;
+            font-style: italic;
+        }
+
+        /* Interactive Elements */
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Pizza Animation */
+        .pizza-icon {
+            font-size: 4rem;
+            animation: spin 4s linear infinite;
+            margin: 2rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 1000px;
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            z-index: -1;
+        }
+
+        .timeline-item {
+            background: var(--dark);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            transform: scale(1.1);
+            border-color: var(--secondary);
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        /* Navigation */
+        .slide-number {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Terminal Animation */
+        .terminal {
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 700px;
+        }
+
+        .terminal-header {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27c93f; }
+
+        .typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end);
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline {
+                flex-direction: column;
+                align-items: center;
+                gap: 2rem;
+            }
+            
+            .timeline::before {
+                width: 2px;
+                height: 100%;
+                top: 0;
+                left: 50%;
+            }
+        }
+
+        /* QR Code */
+        .qr-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="slides-container" id="slidesContainer">
+        
+        <!-- Slide 1: Title -->
+        <div class="slide" id="slide-1" style="background: radial-gradient(circle at top right, rgba(255, 107, 107, 0.1), transparent 50%);">
+            <div class="pizza-icon">🍕</div>
+            <h1>Datapizza-AI</h1>
+            <p class="fade-in" style="animation-delay: 0.3s;">From Idea to AI Agent in Minutes</p>
+            <h3 class="fade-in" style="animation-delay: 0.6s;">MAKEathon 2025</h3>
+            <button class="btn fade-in" style="animation-delay: 0.9s;" onclick="nextSlide()">Let's Build →</button>
+            <span class="slide-number">1/10</span>
+        </div>
+
+        <!-- Slide 2: The Problem -->
+        <div class="slide" id="slide-2">
+            <h2>The Challenge 🤔</h2>
+            <div class="feature-grid fade-in">
+                <div class="feature-card">
+                    <div class="feature-icon">🧩</div>
+                    <h3>Complex Setup</h3>
+                    <p>Traditional AI development requires extensive boilerplate</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3>Time Consuming</h3>
+                    <p>Hours spent on configuration instead of innovation</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Steep Learning Curve</h3>
+                    <p>Complex frameworks with overwhelming documentation</p>
+                </div>
+            </div>
+            <span class="slide-number">2/10</span>
+        </div>
+
+        <!-- Slide 3: The Solution -->
+        <div class="slide" id="slide-3" style="background: radial-gradient(circle at bottom left, rgba(78, 205, 196, 0.1), transparent 50%);">
+            <h1>The Solution ✨</h1>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="feature-icon">💡</div>
+                    <p style="margin: 0;">Idea</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="feature-icon">🚀</div>
+                    <p style="margin: 0;">Prototype</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="feature-icon">📦</div>
+                    <p style="margin: 0;">Product</p>
+                </div>
+            </div>
+            <h3 class="fade-in">Reduce complexity. Build faster. Scale smarter.</h3>
+            <span class="slide-number">3/10</span>
+        </div>
+
+        <!-- Slide 4: Installation -->
+        <div class="slide" id="slide-4">
+            <h2>Get Started in Seconds 🏃‍♂️</h2>
+            <div class="terminal fade-in">
+                <div class="terminal-header">
+                    <div class="terminal-btn red"></div>
+                    <div class="terminal-btn yellow"></div>
+                    <div class="terminal-btn green"></div>
+                </div>
+                <pre class="typing"><span class="highlight">$</span> pip install datapizza-ai</pre>
+            </div>
+            <p class="fade-in" style="animation-delay: 2s;">That's it. You're ready to build.</p>
+            <span class="slide-number">4/10</span>
+        </div>
+
+        <!-- Slide 5: First Agent Code -->
+        <div class="slide" id="slide-5">
+            <h2>Your First Agent 🤖</h2>
+            <div class="code-block">
+                <pre><span class="comment"># app.py - Your first AI agent in 10 lines</span>
+<span class="keyword">from</span> datapizza_ai <span class="keyword">import</span> Agent, Message
+
+<span class="comment"># Create your agent</span>
+agent = Agent(
+    name=<span class="string">"Assistant"</span>,
+    model=<span class="string">"gpt-4"</span>,
+    system_prompt=<span class="string">"You are a helpful AI assistant"</span>
+)
+
+<span class="comment"># Get response</span>
+response = agent.chat(<span class="string">"Hello! Help me build something cool"</span>)
+<span class="keyword">print</span>(response.content)</pre>
+            </div>
+            <button class="btn" onclick="runDemo()">Run Demo 🚀</button>
+            <div id="demoOutput" style="display:none;" class="code-block">
+                <pre id="outputText"></pre>
+            </div>
+            <span class="slide-number">5/10</span>
+        </div>
+
+        <!-- Slide 6: Add Memory -->
+        <div class="slide" id="slide-6">
+            <h2>Level Up: Add Memory 🧠</h2>
+            <div class="code-block">
+                <pre><span class="keyword">from</span> datapizza_ai <span class="keyword">import</span> Agent, Memory
+
+<span class="comment"># Agent with memory</span>
+agent = Agent(
+    name=<span class="string">"SmartBot"</span>,
+    model=<span class="string">"gpt-4"</span>,
+    memory=Memory(type=<span class="string">"conversation"</span>)
+)
+
+<span class="comment"># It remembers context!</span>
+agent.chat(<span class="string">"My name is Alex"</span>)
+response = agent.chat(<span class="string">"What's my name?"</span>)
+<span class="comment"># Output: "Your name is Alex!"</span></pre>
+            </div>
+            <span class="slide-number">6/10</span>
+        </div>
+
+        <!-- Slide 7: Add Tools -->
+        <div class="slide" id="slide-7">
+            <h2>Power Up: Add Tools 🛠️</h2>
+            <div class="code-block">
+                <pre><span class="keyword">from</span> datapizza_ai <span class="keyword">import</span> Agent, Tool
+
+<span class="comment"># Define a custom tool</span>
+<span class="keyword">@Tool</span>
+<span class="keyword">def</span> <span class="highlight">search_web</span>(query: str):
+    <span class="string">"""Search the web for information"""</span>
+    <span class="keyword">return</span> f<span class="string">"Results for: {query}"</span>
+
+<span class="comment"># Agent with tools</span>
+agent = Agent(
+    name=<span class="string">"ResearchBot"</span>,
+    tools=[search_web]
+)
+
+response = agent.chat(<span class="string">"Find info about MAKEathon"</span>)
+<span class="comment"># Agent automatically uses the search tool!</span></pre>
+            </div>
+            <span class="slide-number">7/10</span>
+        </div>
+
+        <!-- Slide 8: Use Cases -->
+        <div class="slide" id="slide-8">
+            <h2>Who Can Build What? 🎯</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎓</div>
+                    <h3>Students</h3>
+                    <p>Quiz generators, Study buddies, Paper summarizers</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💻</div>
+                    <h3>Developers</h3>
+                    <p>Code assistants, API integrators, Automation bots</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Designers</h3>
+                    <p>Brand generators, UX advisors, Creative tools</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Founders</h3>
+                    <p>MVP builders, Market analyzers, Pitch assistants</p>
+                </div>
+            </div>
+            <span class="slide-number">8/10</span>
+        </div>
+
+        <!-- Slide 9: Architecture -->
+        <div class="slide" id="slide-9">
+            <h2>Simple Yet Powerful 🏗️</h2>
+            <div style="text-align: center; width: 100%; max-width: 900px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0;">
+                    <div class="feature-card" style="flex: 1; margin: 0 1rem;">
+                        <h3>Inputs</h3>
+                        <p>Prompts, APIs, Data</p>
+                    </div>
+                    <div style="font-size: 2rem;">→</div>
+                    <div class="feature-card" style="flex: 1; margin: 0 1rem; border-color: var(--primary);">
+                        <h3>Agent Runtime</h3>
+                        <p>Memory, Routing, Logic</p>
+                    </div>
+                    <div style="font-size: 2rem;">→</div>
+                    <div class="feature-card" style="flex: 1; margin: 0 1rem;">
+                        <h3>Outputs</h3>
+                        <p>Results, Logs, Actions</p>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 3rem;">
+                <p>✅ Composable building blocks</p>
+                <p>✅ Model & tool agnostic</p>
+                <p>✅ Production ready</p>
+            </div>
+            <span class="slide-number">9/10</span>
+        </div>
+
+        <!-- Slide 10: Call to Action -->
+        <div class="slide" id="slide-10" style="background: radial-gradient(circle at center, rgba(255, 235, 109, 0.1), transparent 50%);">
+            <h1>Build Tonight 🌙</h1>
+            <p style="font-size: 1.5rem; margin: 2rem 0;">You have the ideas.<br/>We have the tools.</p>
+            
+            <div class="qr-container">
+                <div style="width: 200px; height: 200px; background: black; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <span style="color: white; font-size: 1.2rem;">📱 QR Code</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+                <button class="btn" onclick="window.open('https://datapizza.ai', '_blank')">🌐 Website</button>
+                <button class="btn" onclick="window.open('https://github.com/datapizza-ai', '_blank')">💻 GitHub</button>
+                <button class="btn" onclick="window.open('https://docs.datapizza.ai', '_blank')">📚 Docs</button>
+            </div>
+            
+            <p style="margin-top: 3rem; font-style: italic; opacity: 0.8;">
+                "If you can write 10 lines, you can ship your first AI agent tonight."
+            </p>
+            <span class="slide-number">10/10</span>
+        </div>
+
+    </div>
+
+    <script>
+        const slidesContainer = document.getElementById('slidesContainer');
+        const slides = Array.from(document.querySelectorAll('.slide'));
+
+        function scrollIndex() {
+            const slideWidth = slides[0]?.offsetWidth || window.innerWidth;
+            return Math.round(slidesContainer.scrollLeft / slideWidth);
+        }
+
+        window.goToSlide = function(index) {
+            const targetIndex = Math.max(0, Math.min(index, slides.length - 1));
+            slides[targetIndex].scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest'
+            });
+        };
+
+        window.nextSlide = function() {
+            goToSlide(scrollIndex() + 1);
+        };
+
+        window.prevSlide = function() {
+            goToSlide(scrollIndex() - 1);
+        };
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                prevSlide();
+            }
+        });
+
+        slidesContainer.addEventListener('wheel', (event) => {
+            if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+                event.preventDefault();
+                slidesContainer.scrollBy({
+                    left: event.deltaY,
+                    behavior: 'smooth'
+                });
+            }
+        }, { passive: false });
+
+        function runDemo() {
+            const output = document.getElementById('demoOutput');
+            const text = document.getElementById('outputText');
+            output.style.display = 'block';
+            
+            const messages = [
+                '> Initializing Datapizza-AI...',
+                '> Loading model: gpt-4...',
+                '> Agent ready!',
+                '',
+                '💬 User: "Hello! Help me build something cool"',
+                '',
+                '🤖 Assistant: "I\'d love to help you build something amazing! With Datapizza-AI, you can create:',
+                '   • Intelligent chatbots in minutes',
+                '   • API automation tools',
+                '   • Content generation systems',
+                '   • And much more!',
+                '',
+                'What kind of project are you thinking about?"'
+            ];
+            
+            text.innerHTML = '';
+            let index = 0;
+            
+            const typeMessage = () => {
+                if (index < messages.length) {
+                    text.innerHTML += messages[index] + '\n';
+                    index++;
+                    setTimeout(typeMessage, 200);
+                }
+            };
+            
+            typeMessage();
+        }
+        window.runDemo = runDemo;
+    </script>
+</body>
+</html>
