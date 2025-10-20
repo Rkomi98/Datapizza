@@ -23,11 +23,11 @@ npm run build
 npm run preview
 ```
 
-Il build produce gli asset statici nella cartella `dist/`.
+Il build produce gli asset statici nella cartella `dist/GSK/`.
 
 ## GitHub Pages
 
-Il workflow `Deploy to GitHub Pages` (`.github/workflows/deploy.yml`) compila automaticamente il progetto e pubblica la cartella `dist` su GitHub Pages ad ogni push su `main`. Una volta effettuato il primo deploy, assicurati che nelle impostazioni della repository la sorgente di GitHub Pages punti all’ambiente creato dal workflow (`GitHub Actions`). Il sito sarà raggiungibile da `https://rkomi98.github.io/Datapizza/`.
+Il workflow `Deploy to GitHub Pages` (`.github/workflows/deploy.yml`) compila automaticamente il progetto e pubblica la cartella `dist` su GitHub Pages ad ogni push su `main`. Una volta effettuato il primo deploy, assicurati che nelle impostazioni della repository la sorgente di GitHub Pages punti all’ambiente creato dal workflow (`GitHub Actions`). Il sito sarà raggiungibile da `https://rkomi98.github.io/Datapizza/GSK/`.
 
 ## Struttura cartelle principale
 
