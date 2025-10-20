@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Download, BookOpen, FileText, Table, Users, GitCompare, FileCheck, Workflow, MessageSquare } from 'lucide-react';
+import datapizzaLogo from './assets/datapizza.png';
 
 const EserciziDataPizza = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -149,9 +150,16 @@ const EserciziDataPizza = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            🍕 Esercizi DataPizza
-          </h1>
+          <div className="flex flex-col items-center justify-center gap-3 mb-3">
+            <img
+              src={datapizzaLogo}
+              alt="Logo Datapizza"
+              className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-md"
+            />
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Esercizi Datapizza
+            </h1>
+          </div>
           <p className="text-slate-600 text-lg">
             Seleziona un esercizio e scarica i materiali necessari
           </p>
