@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Includi file Excel solo nella cartella /data
+!public/Esercizi/*.xlsx
+!public/Esercizi/*.xls
