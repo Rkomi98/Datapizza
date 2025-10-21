@@ -24,5 +24,5 @@ dist-ssr
 *.sw?
 
 # Includi file Excel solo nella cartella /data
-!public/Esercizi/*.xlsx
+!public/Esercizi/02_Analisi_dati_Excel/*.xlsx
 !public/Esercizi/*.xls
