@@ -40,7 +40,7 @@ cd tuo-repository
 
 ### 3. Configura Firebase (locale)
 
-Copia `firebase-config-local.example.js` in `firebase-config-local.js` nella root del progetto e compila i campi con le credenziali del tuo progetto Firebase (console Firebase: Settings > General > Your apps > SDK snippet). Il file copiato viene caricato prima di `app.js` solo in locale e **non va committato**.
+Crea manualmente un file `firebase-config-local.js` nella root del progetto con il seguente contenuto e compila i campi con le credenziali del tuo progetto Firebase (console Firebase: Settings > General > Your apps > SDK snippet). Questo file viene caricato prima di `app.js` solo in locale e NON va committato.
 
 ```javascript
 // firebase-config-local.js
@@ -59,7 +59,7 @@ window.firebaseConfigLocal = {
 };
 ```
 
-In produzione GitHub Actions genera automaticamente un file `firebase-config.js` (anch'esso ignorato da git) popolato con le tue secrets.
+**Nota**: `firebase-config-local.js` non viene committato né usato in produzione.
 
 ### 4. Installa le Dipendenze
 

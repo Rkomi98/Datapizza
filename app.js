@@ -2,22 +2,22 @@
 // Core logic for the hackathon voting game.
 
 // Firebase configuration
-function resolveFirebaseConfig() {
-    if (typeof window !== 'undefined') {
-        if (window.firebaseConfigLocal) {
-            return window.firebaseConfigLocal;
-        }
-        if (window.firebaseConfig) {
-            return window.firebaseConfig;
-        }
-    }
-    if (typeof firebaseConfigLocal !== 'undefined') {
-        return firebaseConfigLocal;
-    }
-    throw new Error('Missing Firebase configuration. Ensure firebase-config.js (production) or firebase-config-local.js (development) is loaded before app.js.');
-}
+// These placeholders will be replaced by GitHub Actions with actual secrets
+const firebaseConfig = {
+    apiKey: "{{FIREBASE_API_KEY}}",
+    authDomain: "{{FIREBASE_AUTH_DOMAIN}}",
+    databaseURL: "{{FIREBASE_DATABASE_URL}}",
+    projectId: "{{FIREBASE_PROJECT_ID}}",
+    storageBucket: "{{FIREBASE_STORAGE_BUCKET}}",
+    messagingSenderId: "{{FIREBASE_MESSAGING_SENDER_ID}}",
+    appId: "{{FIREBASE_APP_ID}}",
+    measurementId: "{{FIREBASE_MEASUREMENT_ID}}"
+};
 
-const firebaseConfig = resolveFirebaseConfig();
+// Override with local config if available (for development)
+if (typeof firebaseConfigLocal !== 'undefined') {
+    Object.assign(firebaseConfig, firebaseConfigLocal);
+}
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);

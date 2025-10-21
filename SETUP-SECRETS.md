@@ -31,24 +31,16 @@ Devi configurare le seguenti secrets con i valori del tuo progetto Firebase:
 ## Come funziona
 
 - **Locale**: L'app usa `firebase-config-local.js` per il testing locale
-- **Produzione**: GitHub Actions genera un file `firebase-config.js` a partire dalle secrets e lo include nell'artefatto pubblicato su GitHub Pages
+- **Produzione**: GitHub Actions sostituisce automaticamente i placeholder in `app.js` con le tue secrets
 
 ## Testing locale
 
-Per testare localmente, assicurati che il file `firebase-config-local.js` esista (puoi copiarlo da `firebase-config-local.example.js`).
+Per testare localmente, assicurati che il file `firebase-config-local.js` esista (è già configurato).
 
 ## Deploy
 
 Ogni volta che fai push su `main`, GitHub Actions:
-1. Costruisce il sito statico
-2. Crea `firebase-config.js` con le secrets
-3. Fa il deploy automatico su GitHub Pages
+1. Sostituisce i placeholder con le secrets
+2. Fa il deploy automatico su GitHub Pages
 
-**Nota**: Dopo aver configurato le secrets, fai un nuovo commit per triggerare il deploy. 
-
-## Dopo un'esposizione accidentale
-
-Se una delle credenziali Firebase finisce pubblicamente nel repository:
-- rigenera la chiave dalla console Firebase (`Project Settings` > `General` > `Your apps`);
-- aggiorna immediatamente i valori nelle GitHub Secrets;
-- elimina eventuali file locali che contengono la vecchia chiave. 
+**Nota**: Dopo aver configurato le secrets, fai un nuovo commit per triggering il deploy. 

@@ -37,41 +37,23 @@ jobs:
           npm ci
           npm run build
 
-      - name: Build static site (inject Firebase config)
-        env:
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+      - name: Build static site (replace Firebase placeholders)
         run: |
-          set -euo pipefail
+          set -e
           mkdir -p dist
           rsync -av --delete --exclude '.git' --exclude '.github' --exclude 'node_modules' --exclude 'GSK' ./ dist/
-          rm -f dist/firebase-config-local.js
-          : "${FIREBASE_API_KEY:?FIREBASE_API_KEY secret is missing}"
-          : "${FIREBASE_AUTH_DOMAIN:?FIREBASE_AUTH_DOMAIN secret is missing}"
-          : "${FIREBASE_DATABASE_URL:?FIREBASE_DATABASE_URL secret is missing}"
-          : "${FIREBASE_PROJECT_ID:?FIREBASE_PROJECT_ID secret is missing}"
-          : "${FIREBASE_STORAGE_BUCKET:?FIREBASE_STORAGE_BUCKET secret is missing}"
-          : "${FIREBASE_MESSAGING_SENDER_ID:?FIREBASE_MESSAGING_SENDER_ID secret is missing}"
-          : "${FIREBASE_APP_ID:?FIREBASE_APP_ID secret is missing}"
-          : "${FIREBASE_MEASUREMENT_ID:?FIREBASE_MEASUREMENT_ID secret is missing}"
-          cat <<EOF > dist/firebase-config.js
-window.firebaseConfig = {
-  apiKey: "${FIREBASE_API_KEY}",
-  authDomain: "${FIREBASE_AUTH_DOMAIN}",
-  databaseURL: "${FIREBASE_DATABASE_URL}",
-  projectId: "${FIREBASE_PROJECT_ID}",
-  storageBucket: "${FIREBASE_STORAGE_BUCKET}",
-  messagingSenderId: "${FIREBASE_MESSAGING_SENDER_ID}",
-  appId: "${FIREBASE_APP_ID}",
-  measurementId: "${FIREBASE_MEASUREMENT_ID}"
-};
-EOF
+          sed -i "s|{{FIREBASE_API_KEY}}|${{ secrets.FIREBASE_API_KEY }}|g" dist/app.js
+          sed -i "s|{{FIREBASE_AUTH_DOMAIN}}|${{ secrets.FIREBASE_AUTH_DOMAIN }}|g" dist/app.js
+          sed -i "s|{{FIREBASE_DATABASE_URL}}|${{ secrets.FIREBASE_DATABASE_URL }}|g" dist/app.js
+          sed -i "s|{{FIREBASE_PROJECT_ID}}|${{ secrets.FIREBASE_PROJECT_ID }}|g" dist/app.js
+          sed -i "s|{{FIREBASE_STORAGE_BUCKET}}|${{ secrets.FIREBASE_STORAGE_BUCKET }}|g" dist/app.js
+          sed -i "s|{{FIREBASE_MESSAGING_SENDER_ID}}|${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}|g" dist/app.js
+          sed -i "s|{{FIREBASE_APP_ID}}|${{ secrets.FIREBASE_APP_ID }}|g" dist/app.js
+          sed -i "s|{{FIREBASE_MEASUREMENT_ID}}|${{ secrets.FIREBASE_MEASUREMENT_ID }}|g" dist/app.js
+          if grep -q '{{FIREBASE_' dist/app.js; then
+            echo 'One or more Firebase secrets were not replaced. Check repository Secrets.'
+            exit 1
+          fi
 
       - name: Copy GSK build into artifact
         run: |
