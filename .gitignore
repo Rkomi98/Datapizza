@@ -6,6 +6,7 @@
  
 # Environment files
 firebase-config-local.js 
+firebase-config.js
 
 *xlsx
 *csv
