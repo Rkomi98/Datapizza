@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, BookOpen, FileText, Table, Users, GitCompare, FileCheck, Workflow, MessageSquare } from 'lucide-react';
+import { Download, BookOpen, FileText, Table, Users, GitCompare, FileCheck, Workflow, MessageSquare, Sparkles } from 'lucide-react';
 import datapizzaLogo from './assets/datapizza.png';
 
 const EserciziDataPizza = () => {
@@ -163,6 +163,17 @@ const EserciziDataPizza = () => {
           <p className="text-slate-600 text-lg">
             Seleziona un esercizio e scarica i materiali necessari
           </p>
+          <div className="mt-6 flex justify-center">
+            <a
+              href="/doubt_GSK.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-transform duration-200"
+            >
+              <Sparkles size={18} className="text-white" />
+              <span>Approfondisci l&apos;AI</span>
+            </a>
+          </div>
         </div>
 
         {/* Tabs Navigation */}

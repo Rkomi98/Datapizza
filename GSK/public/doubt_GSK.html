@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Approfondimento AI | Datapizza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #ec4899;
+        --text: #0f172a;
+        --muted: #475569;
+        --surface: rgba(255, 255, 255, 0.92);
+        --border: rgba(148, 163, 184, 0.4);
+        --shadow: 0 35px 80px rgba(15, 23, 42, 0.12);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+          'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #e0e7ff 0%, #fdf2f8 45%, #f8fafc 100%);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 48px 20px;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page-shell {
+        max-width: 1080px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .page-intro {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: var(--muted);
+        text-decoration: none;
+        transition: all 0.25s ease;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+      }
+
+      .back-link:hover {
+        color: var(--primary);
+        border-color: rgba(99, 102, 241, 0.45);
+        transform: translateY(-2px);
+      }
+
+      .title-block {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 720px;
+      }
+
+      .slide .title-block {
+        margin-bottom: 28px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(99, 102, 241, 0.12);
+        color: var(--primary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 4vw, 2.95rem);
+        line-height: 1.1;
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .intro-text {
+        font-size: 1.05rem;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .presentation-container {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        backdrop-filter: blur(12px);
+      }
+
+      .slide {
+        display: none;
+        padding: 68px 72px;
+        animation: fadeIn 0.45s ease;
+      }
+
+      .slide.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: clamp(1.6rem, 3vw, 2.1rem);
+        color: var(--primary);
+        margin-bottom: 28px;
+      }
+
+      h3 {
+        font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+        color: var(--text);
+        margin: 32px 0 16px;
+      }
+
+      h4 {
+        font-size: 1.1rem;
+        color: var(--primary-dark);
+        margin-bottom: 8px;
+      }
+
+      p {
+        color: var(--muted);
+        line-height: 1.75;
+        font-size: 1.02rem;
+        margin-bottom: 18px;
+      }
+
+      .lead {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+      }
+
+      ul {
+        margin: 18px 0 12px 0;
+        padding-left: 24px;
+        display: grid;
+        gap: 12px;
+      }
+
+      li {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      strong {
+        color: var(--text);
+      }
+
+      .visual-box {
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 20px;
+        padding: 28px 32px;
+        margin: 28px 0;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+      }
+
+      .visual-box--warm {
+        background: rgba(251, 191, 36, 0.12);
+        border-color: rgba(245, 158, 11, 0.35);
+      }
+
+      .visual-box--cool {
+        background: rgba(56, 189, 248, 0.12);
+        border-color: rgba(14, 165, 233, 0.3);
+      }
+
+      .visual-box--alert {
+        background: rgba(248, 113, 113, 0.12);
+        border-color: rgba(248, 113, 113, 0.4);
+      }
+
+      .visual-box--success {
+        background: rgba(16, 185, 129, 0.12);
+        border-color: rgba(16, 185, 129, 0.35);
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+        margin-top: 22px;
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 16px;
+        padding: 20px 18px;
+        text-align: left;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+      }
+
+      .feature-card strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 1.08rem;
+        color: var(--primary-dark);
+      }
+
+      .feature-card--success {
+        border-color: rgba(16, 185, 129, 0.4);
+      }
+
+      .feature-card--success strong {
+        color: #047857;
+      }
+
+      .feature-card--warning {
+        border-color: rgba(245, 158, 11, 0.4);
+      }
+
+      .feature-card--warning strong {
+        color: #b45309;
+      }
+
+      .feature-card--danger {
+        border-color: rgba(248, 113, 113, 0.45);
+      }
+
+      .feature-card--danger strong {
+        color: #b91c1c;
+      }
+
+      .diagram {
+        margin: 26px 0;
+        padding: 22px 24px;
+        border-radius: 18px;
+        border: 1px dashed rgba(148, 163, 184, 0.55);
+        background: rgba(241, 245, 249, 0.85);
+      }
+
+      .diagram--accent {
+        border-color: rgba(14, 165, 233, 0.4);
+        background: rgba(224, 242, 254, 0.92);
+      }
+
+      .diagram--alert {
+        border-color: rgba(248, 113, 113, 0.4);
+        background: rgba(254, 226, 226, 0.95);
+      }
+
+      .diagram p {
+        margin-bottom: 10px;
+      }
+
+      .arrow {
+        display: inline-block;
+        margin: 0 10px;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .closing-note {
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-top: 32px;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 32px;
+        border-top: 1px solid rgba(148, 163, 184, 0.3);
+        background: rgba(248, 250, 252, 0.9);
+      }
+
+      .control-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px 22px;
+        border-radius: 14px;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        box-shadow: 0 18px 35px rgba(99, 102, 241, 0.28);
+        transition: transform 0.2s ease, box-shadow 0.2s ease,
+          filter 0.2s ease;
+      }
+
+      .control-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 45px rgba(236, 72, 153, 0.25);
+        filter: brightness(1.05);
+      }
+
+      .control-button:disabled {
+        background: rgba(148, 163, 184, 0.4);
+        color: rgba(148, 163, 184, 0.9);
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .slide-indicator {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .slide-indicator span {
+        color: var(--primary);
+      }
+
+      @media (max-width: 900px) {
+        body {
+          padding: 32px 16px;
+        }
+
+        .slide {
+          padding: 52px 36px;
+        }
+
+        .controls {
+          flex-direction: column;
+          gap: 16px;
+          align-items: stretch;
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 28px 14px;
+        }
+
+        .presentation-container {
+          border-radius: 22px;
+        }
+
+        .slide {
+          padding: 38px 24px;
+        }
+
+        .visual-box {
+          padding: 22px 20px;
+        }
+
+        .feature-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .control-button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="page-intro">
+        <a class="back-link" href="/">
+          <span aria-hidden="true">←</span>
+          Torna alla pagina principale
+        </a>
+      </div>
+
+      <div class="presentation-container" role="region" aria-live="polite">
+        <div class="slide active" data-slide="1">
+          <div class="title-block">
+            <span class="badge">Approfondimento</span>
+            <h1>Concetti di Intelligenza Artificiale</h1>
+            <p class="intro-text">
+              Una panoramica chiara e visiva sui temi principali dell'intelligenza
+              artificiale: dalla fiducia nei chatbot, al reinforcement learning,
+              fino al deep learning e alla visione artificiale.
+            </p>
+          </div>
+          <div class="visual-box">
+            <p class="lead">Cosa approfondiremo in questo viaggio:</p>
+            <div class="feature-grid">
+              <div class="feature-card">
+                <strong>Fiducia nei chatbot</strong>
+                <p>Quando possiamo affidarci alle risposte dei modelli linguistici.</p>
+              </div>
+              <div class="feature-card">
+                <strong>Reinforcement Learning</strong>
+                <p>Come gli algoritmi imparano premiando azioni corrette.</p>
+              </div>
+              <div class="feature-card">
+                <strong>Deep Learning</strong>
+                <p>Reti neurali che riconoscono pattern complessi nei dati.</p>
+              </div>
+            </div>
+          </div>
+          <p class="closing-note">
+            Pronti a esplorare insieme il mondo dell'intelligenza artificiale?
+          </p>
+        </div>
+
+        <div class="slide" data-slide="2">
+          <h2>💬 Chatbot: quanta fiducia?</h2>
+          <div class="visual-box">
+            <h3>Cosa sono i chatbot?</h3>
+            <p>
+              Strumenti basati sull'AI che conversano con noi in linguaggio naturale.
+              Esempi: ChatGPT, Claude, Gemini, assistenti virtuali aziendali.
+            </p>
+          </div>
+          <h3>Livelli di fiducia consigliati</h3>
+          <div class="feature-grid">
+            <div class="feature-card feature-card--success">
+              <strong>Alta fiducia ✅</strong>
+              <p>Idee creative, sintesi, supporto allo studio e brainstorming.</p>
+            </div>
+            <div class="feature-card feature-card--warning">
+              <strong>Media fiducia ⚠️</strong>
+              <p>Fatti specifici, dati storici, statistiche: servono verifiche extra.</p>
+            </div>
+            <div class="feature-card feature-card--danger">
+              <strong>Bassa fiducia ❌</strong>
+              <p>
+                Decisioni critiche: consigli medici, legali, finanziari o di sicurezza.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide" data-slide="3">
+          <h2>⚠️ Perché non fidarsi ciecamente?</h2>
+          <h3>1. Le allucinazioni</h3>
+          <div class="diagram diagram--alert">
+            <p>
+              Un chatbot può inventare informazioni plausibili ma inesatte.
+            </p>
+            <p>
+              Esempio: “La Torre Eiffel fu inaugurata nel 1887”
+              <span class="arrow">→</span>
+              Sembra corretto, ma la data giusta è 1889.
+            </p>
+          </div>
+          <h3>2. Bias nei dati</h3>
+          <div class="diagram">
+            <p>
+              I modelli apprendono da contenuti online
+              <span class="arrow">→</span>
+              possono ripetere stereotipi o pregiudizi.
+            </p>
+          </div>
+          <h3>3. Aggiornamenti limitati</h3>
+          <div class="diagram">
+            <p>
+              Molti modelli hanno una data di conoscenza fissa
+              <span class="arrow">→</span>
+              non sanno eventi recenti.
+            </p>
+          </div>
+          <div class="visual-box visual-box--alert">
+            <strong>Regola d'oro:</strong>
+            verifica sempre le informazioni importanti su fonti affidabili.
+          </div>
+        </div>
+
+        <div class="slide" data-slide="4">
+          <h2>🎯 Reinforcement Learning</h2>
+          <h3>Come funziona l'apprendimento per rinforzo?</h3>
+          <div class="visual-box">
+            <p class="lead">È come addestrare un cane con premi e correzioni.</p>
+            <div class="diagram">
+              <p>
+                Azione
+                <span class="arrow">→</span>
+                Risultato
+                <span class="arrow">→</span>
+                Ricompensa
+              </p>
+              <p>Più l'azione è corretta, più la ricompensa è alta.</p>
+            </div>
+          </div>
+          <h3>I tre elementi chiave</h3>
+          <ul>
+            <li><strong>Agente:</strong> l'entità che apprende (robot, software, avatar).</li>
+            <li><strong>Ambiente:</strong> il contesto in cui agisce (gioco, simulazione, mondo reale).</li>
+            <li><strong>Ricompensa:</strong> feedback positivo o negativo che guida l'apprendimento.</li>
+          </ul>
+        </div>
+
+        <div class="slide" data-slide="5">
+          <h2>🔄 Il ciclo del reinforcement learning</h2>
+          <div class="visual-box visual-box--cool">
+            <div>
+              <p><strong>1.</strong> Osserva lo stato attuale</p>
+              <p><strong>2.</strong> Scegli un'azione</p>
+              <p><strong>3.</strong> Agisci nell'ambiente</p>
+              <p><strong>4.</strong> Ricevi ricompensa o penalità</p>
+              <p><strong>5.</strong> Aggiorna la strategia</p>
+              <p><strong>Ripeti!</strong> Ogni ciclo migliora le decisioni future.</p>
+            </div>
+          </div>
+          <h3>Esempio: robot che impara a camminare</h3>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <strong>Tentativo 1</strong>
+              <p>Cade subito ❌</p>
+              <p>Punizione: -10</p>
+            </div>
+            <div class="feature-card">
+              <strong>Tentativo 50</strong>
+              <p>Fa qualche passo 🚶</p>
+              <p>Ricompensa: +5</p>
+            </div>
+            <div class="feature-card feature-card--success">
+              <strong>Tentativo 1000</strong>
+              <p>Cammina bene! ✅</p>
+              <p>Ricompensa: +100</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide" data-slide="6">
+          <h2>🧠 Deep Learning: come funziona?</h2>
+          <div class="visual-box">
+            <h3>Cos'è una rete neurale?</h3>
+            <p>
+              Una rete di neuroni artificiali collegati tra loro, organizzati in
+              strati che trasformano progressivamente i dati.
+            </p>
+            <div class="diagram">
+              <p>🔵 — 🔵 — 🔵</p>
+              <p>╲ ╱ ╲ ╱ ╲ ╱</p>
+              <p>🔵 — 🔵 — 🔵</p>
+              <p>╱ ╲ ╱ ╲ ╱ ╲</p>
+              <p>🔵 — 🔵 — 🔵</p>
+            </div>
+          </div>
+          <h3>Come impara?</h3>
+          <ul>
+            <li><strong>Input:</strong> riceve dati in ingresso (immagini, testo, audio).</li>
+            <li><strong>Elaborazione:</strong> ogni strato estrae caratteristiche diverse.</li>
+            <li><strong>Output:</strong> produce una risposta (classificazione, previsione, suggerimento).</li>
+          </ul>
+        </div>
+
+        <div class="slide" data-slide="7">
+          <h2>🧁🐕 Muffin o chihuahua?</h2>
+          <div class="visual-box visual-box--warm">
+            <h3>La sfida visiva</h3>
+            <p>
+              Alcuni muffin assomigliano tantissimo a chihuahua. Per l'occhio umano
+              è divertente, per un algoritmo è una sfida complessa!
+            </p>
+            <p style="font-size: 2.6rem; margin: 20px 0">🧁 ≈ 🐕</p>
+          </div>
+          <h3>Cosa osserva il computer?</h3>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <strong>Forma rotonda ⭕</strong>
+              <p>La sagoma complessiva è simile.</p>
+            </div>
+            <div class="feature-card">
+              <strong>Tonalità marrone 🟫</strong>
+              <p>I colori possono ingannare la classificazione.</p>
+            </div>
+            <div class="feature-card">
+              <strong>Texture 🔍</strong>
+              <p>
+                Il pelo del cane e l'impasto del muffin hanno pattern irregolari.
+              </p>
+            </div>
+          </div>
+          <p class="closing-note">Come può il deep learning distinguerli con precisione?</p>
+        </div>
+
+        <div class="slide" data-slide="8">
+          <h2>🔍 Deep learning: riconoscimento dei pattern</h2>
+          <h3>Gli strati della rete neurale</h3>
+          <div class="diagram">
+            <h4>Strato 1: caratteristiche base</h4>
+            <p>Detecta bordi, contorni, colori primari.</p>
+          </div>
+          <div class="diagram">
+            <h4>Strato 2: combinazioni intermedie</h4>
+            <p>Riconosce occhi, orecchie, gocce di cioccolato.</p>
+          </div>
+          <div class="diagram">
+            <h4>Strato 3: concetti complessi</h4>
+            <p>Ricostruisce un volto completo o un muffin decorato.</p>
+          </div>
+          <div class="visual-box visual-box--success">
+            <p>
+              Il modello calcola la probabilità che l'immagine corrisponda a una
+              classe o all'altra. Non è infallibile, ma migliora con tanti esempi.
+            </p>
+          </div>
+        </div>
+
+        <div class="slide" data-slide="9">
+          <h2>📐 Geometria nascosta nel deep learning</h2>
+          <h3>Come il computer “vede” le forme</h3>
+          <div class="visual-box">
+            <p><strong>Tutto diventa numeri e pattern geometrici:</strong></p>
+            <div class="feature-grid">
+              <div class="feature-card">
+                <strong>Cerchi 🔵</strong>
+                <p>Occhi e gocce di cioccolato.</p>
+              </div>
+              <div class="feature-card">
+                <strong>Triangoli 🔺</strong>
+                <p>Orecchie o decorazioni appuntite.</p>
+              </div>
+              <div class="feature-card">
+                <strong>Curve 〰️</strong>
+                <p>Contorni e superfici morbide.</p>
+              </div>
+            </div>
+          </div>
+          <h3>Il trucco del deep learning</h3>
+          <ul>
+            <li><strong>Combinazione:</strong> mette insieme migliaia di pattern.</li>
+            <li><strong>Gerarchia:</strong> dal semplice al complesso.</li>
+            <li><strong>Probabilità:</strong> restituisce sempre un livello di confidenza.</li>
+          </ul>
+          <div class="diagram diagram--accent">
+            <p><strong>Esempio visivo:</strong></p>
+            <p>Pixel → Linee → Forme → Parti → Oggetto completo</p>
+            <p>🟦 → ➖ → ⭕ → 👁️ → 🐕</p>
+          </div>
+        </div>
+
+        <div class="slide" data-slide="10">
+          <h2>🎯 Riassunto finale</h2>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <strong>💬 Chatbot</strong>
+              <p>Utili e versatili, ma richiedono pensiero critico e verifica.</p>
+            </div>
+            <div class="feature-card">
+              <strong>🎯 Reinforcement Learning</strong>
+              <p>Impara iterando: prova, errore e ricompensa.</p>
+            </div>
+            <div class="feature-card">
+              <strong>🧠 Deep Learning</strong>
+              <p>Riconosce pattern complessi su grandi quantità di dati.</p>
+            </div>
+          </div>
+          <div class="visual-box" style="margin-top: 36px">
+            <h3>Come usare al meglio l'AI</h3>
+            <ul>
+              <li>È potente, ma non infallibile.</li>
+              <li>Serve sempre supervisione umana.</li>
+              <li>Usiamola come supporto, non come sostituto del giudizio.</li>
+            </ul>
+          </div>
+          <p class="closing-note">Grazie per l'attenzione! 🙏</p>
+        </div>
+
+        <div class="controls">
+          <button type="button" id="prevBtn" class="control-button">
+            ← Indietro
+          </button>
+          <span class="slide-indicator">
+            Slide
+            <span id="currentSlide">1</span>
+            di
+            <span id="totalSlides">10</span>
+          </span>
+          <button type="button" id="nextBtn" class="control-button">
+            Avanti →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const totalSlides = slides.length;
+      const indicator = document.getElementById('currentSlide');
+      const totalIndicator = document.getElementById('totalSlides');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      let currentSlide = 1;
+
+      totalIndicator.textContent = totalSlides;
+
+      function renderSlide(index) {
+        currentSlide = Math.min(Math.max(index, 1), totalSlides);
+
+        slides.forEach((slide, position) => {
+          slide.classList.toggle('active', position === currentSlide - 1);
+        });
+
+        indicator.textContent = currentSlide;
+        prevBtn.disabled = currentSlide === 1;
+        nextBtn.disabled = currentSlide === totalSlides;
+      }
+
+      function changeSlide(delta) {
+        renderSlide(currentSlide + delta);
+      }
+
+      prevBtn.addEventListener('click', () => changeSlide(-1));
+      nextBtn.addEventListener('click', () => changeSlide(1));
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft') changeSlide(-1);
+        if (event.key === 'ArrowRight') changeSlide(1);
+      });
+
+      renderSlide(currentSlide);
+    </script>
+  </body>
+</html>
