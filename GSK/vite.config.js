@@ -7,7 +7,7 @@ export default defineConfig(({ command }) => ({
   base: command === 'serve' ? '/' : repoBase,
   plugins: [react()],
   build: {
-    outDir: 'dist',
+    outDir: 'dist/GSK',
     emptyOutDir: true,
   },
 }))
