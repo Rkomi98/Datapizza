@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download, BookOpen, FileText, Table, Users, GitCompare, FileCheck, Workflow, MessageSquare, Sparkles } from 'lucide-react';
 import datapizzaLogo from './assets/datapizza.png';
+import ExerciseTimer from './ExerciseTimer.jsx';
 
 const EserciziDataPizza = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -262,6 +263,13 @@ const EserciziDataPizza = () => {
                 📦 Scarica cartella completa esercizio {currentExercise.id}
               </a>
             </div>
+          </div>
+
+          <div className="mt-8">
+            <ExerciseTimer
+              defaultMinutes={30}
+              accentGradient={currentExercise.color}
+            />
           </div>
         </div>
 
