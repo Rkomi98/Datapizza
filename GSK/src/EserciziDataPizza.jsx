@@ -61,7 +61,7 @@ const EserciziDataPizza = () => {
       description: 'Sintetizza le minute di un meeting in modo strutturato.',
       files: [
         { name: 'Istruzioni.docx', path: 'Esercizi/04_Minute/Istruzioni.docx' },
-        { name: 'Materiale - Meeting Minutes Synthesizer.docx', path: 'Esercizi/04_Minute/Copia di Materiale – Esercizio 11 _Meeting‑Minutes Synthesizer_.docx' },
+        { name: 'Materiale - Meeting Minutes Synthesizer.docx', path: 'Esercizi/04_Minute/Materiale – Meeting‑Minutes Synthesizer.docx' },
         { name: '[SPOILER] Prompt di supporto.docx', path: 'Esercizi/04_Minute/[SPOILER] - Prompt di supporto – Esercizio 11 _Meeting‑Minutes Synthesizer_.docx', spoiler: true }
       ]
     },
