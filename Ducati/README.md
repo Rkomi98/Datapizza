@@ -47,7 +47,7 @@ Per avviare il notebook e seguire il tutorial:
     uv run jupyter notebook
     ```
     
-2.  Aprire il file `Notebook/Ducati.ipynb` dall'interfaccia del browser.
+2.  Aprire il file `Notebook/Ducati.ipynb`.
 
 3.  Assicurarsi che il kernel selezionato sia quello dell'ambiente virtuale creato (solitamente indicato come `Python 3 (ipykernel)` o simile, ma eseguendo tramite `uv run` dovrebbe essere automatico).
 
