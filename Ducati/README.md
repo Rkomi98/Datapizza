@@ -4,7 +4,7 @@ Questo progetto contiene un Jupyter Notebook introduttivo per l'utilizzo della l
 
 ## 1. Prerequisiti
 
-*   Python 3.12 o superiore
+*   Python 3.12 o 3.13
 *   `uv` (Package manager per Python)
 
 ## 2. Installazione
