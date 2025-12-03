@@ -44,24 +44,24 @@
 
         h1 {
             color: var(--accent-red);
-            font-size: 2.8vw;
+            font-size: 3.3vw;
             line-height: 1.2;
         }
 
         h2 {
             color: var(--text-dark);
-            font-size: 1.8vw;
+            font-size: 2.2vw;
             margin-bottom: 1.5vh;
         }
 
         h3 {
             color: var(--text-dark);
-            font-size: 1.1vw;
+            font-size: 1.4vw;
             margin-bottom: 0.8vh;
         }
 
         p {
-            font-size: 0.95vw;
+            font-size: 1.1vw;
             line-height: 1.5;
             margin-bottom: 0.8vh;
         }
@@ -123,16 +123,9 @@
             z-index: 10;
         }
 
-        .logo svg {
-            width: 2vw;
-            height: 2vw;
-        }
-
-        .logo-text {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            font-size: 1vw;
-            color: var(--text-dark);
+        .logo img {
+            height: 2.2vw;
+            width: auto;
         }
 
         /* Background Pizza Watermark */
@@ -179,7 +172,7 @@
             height: 10vw;
             max-width: 120px;
             max-height: 120px;
-            background: var(--accent-red);
+            background: none;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -188,10 +181,10 @@
             box-shadow: 0 20px 60px rgba(193, 42, 34, 0.3);
         }
 
-        .slide.cover .logo-circle svg {
-            width: 55%;
-            height: 55%;
-            fill: white;
+        .slide.cover .logo-circle img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
         }
 
         .slide.cover h1 {
@@ -200,13 +193,13 @@
         }
 
         .slide.cover .subtitle {
-            font-size: 1.3vw;
+            font-size: 1.6vw;
             color: var(--text-body);
             margin-bottom: 3vh;
         }
 
         .slide.cover .author {
-            font-size: 1vw;
+            font-size: 1.2vw;
             color: var(--text-body);
         }
 
@@ -220,7 +213,7 @@
             position: relative;
             padding-left: 1.5vw;
             margin-bottom: 0.7vh;
-            font-size: 0.9vw;
+            font-size: 1.05vw;
             line-height: 1.5;
         }
 
@@ -262,7 +255,7 @@
         .info-box p {
             margin: 0;
             color: var(--text-dark);
-            font-size: 0.85vw;
+            font-size: 1.05vw;
         }
 
         /* Definition Box */
@@ -301,17 +294,17 @@
 
         .param-card h3 {
             color: var(--accent-red);
-            font-size: 1vw;
+            font-size: 1.2vw;
             margin-bottom: 0.5vh;
         }
 
         .param-card p {
-            font-size: 0.8vw;
+            font-size: 1vw;
             margin-bottom: 0.4vh;
         }
 
         .param-card ul li {
-            font-size: 0.8vw;
+            font-size: 1vw;
             margin-bottom: 0.3vh;
         }
 
@@ -320,7 +313,7 @@
             background: #F1F5F9;
             padding: 0.2vw 0.5vw;
             border-radius: 0.3vw;
-            font-size: 0.8vw;
+            font-size: 1.05vw;
             color: var(--accent-red);
         }
 
@@ -341,20 +334,20 @@
             border-radius: 0.5vw;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
-            font-size: 0.8vw;
+            font-size: 1vw;
             text-align: center;
             min-width: 6vw;
             box-shadow: 0 8px 25px rgba(193, 42, 34, 0.3);
         }
 
         .flow-box small {
-            font-size: 0.6vw;
+            font-size: 0.95vw;
             font-weight: 400;
             opacity: 0.9;
         }
 
         .flow-arrow {
-            font-size: 1.2vw;
+            font-size: 1.4vw;
             color: var(--accent-red);
         }
 
@@ -387,23 +380,23 @@
             justify-content: center;
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            font-size: 0.9vw;
+            font-size: 1.1vw;
             flex-shrink: 0;
         }
 
         .step-content h3 {
             margin-bottom: 0.3vh;
-            font-size: 0.95vw;
+            font-size: 1.15vw;
         }
 
         .step-content p {
             margin: 0;
-            font-size: 0.8vw;
+            font-size: 1vw;
         }
 
         /* Source Citation */
         .source {
-            font-size: 0.7vw;
+            font-size: 0.9vw;
             color: #94A3B8;
             margin-top: 0.8vh;
             font-style: italic;
@@ -411,7 +404,7 @@
 
         /* Quote */
         .quote {
-            font-size: 1vw;
+            font-size: 1.2vw;
             font-style: italic;
             color: var(--text-dark);
             border-left: 0.2vw solid var(--accent-red);
@@ -467,7 +460,7 @@
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
             color: var(--text-dark);
-            font-size: 0.9vw;
+            font-size: 1.1vw;
             min-width: 5vw;
             text-align: center;
         }
@@ -497,7 +490,7 @@
         }
 
         .qa p {
-            font-size: 1.3vw;
+            font-size: 1.5vw;
         }
 
         /* Comparison Table */
@@ -505,7 +498,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 1.2vh 0;
-            font-size: 0.8vw;
+            font-size: 1vw;
         }
 
         .comparison-table th,
@@ -520,7 +513,7 @@
             color: white;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
-            font-size: 0.85vw;
+            font-size: 1.1vw;
         }
 
         .comparison-table tr:nth-child(even) {
@@ -544,17 +537,17 @@
         }
 
         .feature-card .icon {
-            font-size: 2vw;
+            font-size: 2.4vw;
             margin-bottom: 0.8vh;
         }
 
         .feature-card h3 {
-            font-size: 0.95vw;
+            font-size: 1.2vw;
             margin-bottom: 0.5vh;
         }
 
         .feature-card p {
-            font-size: 0.75vw;
+            font-size: 1vw;
             margin: 0;
         }
 
@@ -580,7 +573,7 @@
             border-radius: 0.4vw;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
-            font-size: 0.75vw;
+            font-size: 1vw;
             text-align: center;
         }
 
@@ -589,7 +582,7 @@
         }
 
         .vertical-arrow {
-            font-size: 1vw;
+            font-size: 1.2vw;
             color: var(--text-body);
         }
 
@@ -607,7 +600,7 @@
             color: #E2E8F0;
             padding: 1vw;
             border-radius: 0.4vw;
-            font-size: 0.7vw;
+            font-size: 0.95vw;
             line-height: 1.4;
             overflow: hidden;
         }
@@ -636,12 +629,7 @@
                 <div class="slide cover">
                     <div class="slide-content">
                         <div class="logo-circle">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                                <circle cx="9" cy="8" r="1.5" fill="#C12A22"/>
-                                <circle cx="15" cy="8" r="1.5" fill="#C12A22"/>
-                                <circle cx="12" cy="11" r="1.5" fill="#C12A22"/>
-                            </svg>
+                            <img src="datapizza.png" alt="Datapizza logo" />
                         </div>
                         <h1>AI Fundamentals</h1>
                         <p class="subtitle">LLM, RAG, Agenti e RAG Agentica</p>
@@ -652,17 +640,9 @@
                 <!-- SLIDE 2: Agenda -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Agenda</h2>
                         <ul>
@@ -679,17 +659,9 @@
                 <!-- SLIDE 3: Cos'è un LLM -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Cos'è un LLM</h2>
                         <div class="definition">
@@ -723,17 +695,9 @@
                 <!-- SLIDE 4: Come funziona un LLM -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Come funziona un LLM</h2>
                         <p>Il modello predice il <strong>token successivo</strong> basandosi sul contesto precedente. Ogni token può essere una parola, parte di parola o simbolo.</p>
@@ -757,17 +721,9 @@
                 <!-- SLIDE 5: Cos'è un Client -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Cos'è un client</h2>
                         <div class="definition">
@@ -800,17 +756,9 @@
                 <!-- SLIDE 6: Architettura Client-Server -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Architettura client-server</h2>
                         <div class="flow-diagram">
@@ -830,17 +778,9 @@
                 <!-- SLIDE 7: Temperatura -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Temperatura</h2>
                         <div class="definition">
@@ -884,17 +824,9 @@
                 <!-- SLIDE 8: Parametri - Parte 1 -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Parametri importanti (1/2)</h2>
                         <div class="param-grid">
@@ -929,17 +861,9 @@
                 <!-- SLIDE 9: Parametri - Parte 2 -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Parametri importanti (2/2)</h2>
                         <div class="param-grid">
@@ -972,17 +896,9 @@
                 <!-- SLIDE 10: Introduzione a RAG -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Cos'è RAG</h2>
                         <div class="definition">
@@ -999,17 +915,9 @@
                 <!-- SLIDE 11: Perché RAG -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Perché usare RAG</h2>
                         <div class="three-columns">
@@ -1038,17 +946,9 @@
                 <!-- SLIDE 12: RAG Pipeline Overview -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>La pipeline RAG</h2>
                         <p>Un sistema RAG si compone di due fasi: <strong>indicizzazione</strong> (offline) e <strong>retrieval + generation</strong> (runtime).</p>
@@ -1079,17 +979,9 @@
                 <!-- SLIDE 13: RAG Step 1 - Chunking -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Step 1: chunking dei documenti</h2>
                         <p>I documenti vengono divisi in <strong>chunk</strong> (frammenti) di dimensione gestibile.</p>
@@ -1121,17 +1013,9 @@
                 <!-- SLIDE 14: RAG Step 2 - Embeddings -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Step 2: embedding</h2>
                         <div class="definition">
@@ -1160,17 +1044,9 @@
                 <!-- SLIDE 15: RAG Step 3 - Vector Database -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Step 3: vector database</h2>
                         <p>Gli embedding vengono salvati in un <strong>vector database</strong> ottimizzato per ricerche di similarità.</p>
@@ -1201,17 +1077,9 @@
                 <!-- SLIDE 16: RAG Step 4 - Retrieval -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Step 4: retrieval</h2>
                         <p>A runtime, la query viene trasformata in embedding e usata per recuperare i chunk più rilevanti.</p>
@@ -1244,17 +1112,9 @@
                 <!-- SLIDE 17: RAG Step 5 - Generation -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Step 5: generation</h2>
                         <p>I chunk recuperati vengono inseriti nel <strong>prompt</strong> come contesto.</p>
@@ -1275,17 +1135,9 @@
                 <!-- SLIDE 18: RAG Avanzato -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Tecniche RAG avanzate</h2>
                         <div class="param-grid">
@@ -1312,17 +1164,9 @@
                 <!-- SLIDE 19: Cos'è un Agente -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Cos'è un agente AI</h2>
                         <div class="definition">
@@ -1338,17 +1182,9 @@
                 <!-- SLIDE 20: Componenti di un Agente -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Componenti di un agente</h2>
                         <div class="three-columns">
@@ -1385,17 +1221,9 @@
                 <!-- SLIDE 21: Tool Use -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Tool use (function calling)</h2>
                         <p>L'LLM può invocare <strong>funzioni esterne</strong>, ricevere i risultati e continuare il ragionamento.</p>
@@ -1427,17 +1255,9 @@
                 <!-- SLIDE 22: ReAct Pattern -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Il pattern ReAct</h2>
                         <div class="definition">
@@ -1474,17 +1294,9 @@
                 <!-- SLIDE 23: Introduzione RAG Agentica -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Cos'è la RAG agentica</h2>
                         <div class="definition">
@@ -1500,17 +1312,9 @@
                 <!-- SLIDE 24: RAG vs RAG Agentica -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>RAG tradizionale vs RAG agentica</h2>
                         <table class="comparison-table">
@@ -1555,17 +1359,9 @@
                 <!-- SLIDE 25: Architettura RAG Agentica -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Architettura RAG agentica</h2>
                         <div class="agentic-diagram">
@@ -1598,17 +1394,9 @@
                 <!-- SLIDE 26: Capacità RAG Agentica -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Capacità della RAG agentica</h2>
                         <div class="param-grid">
@@ -1635,17 +1423,9 @@
                 <!-- SLIDE 27: Esempio pratico -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Esempio: RAG agentica in azione</h2>
                         <p><strong>Query:</strong> "Confronta le performance Q3 2024 di Apple e Microsoft"</p>
@@ -1685,17 +1465,9 @@
                 <!-- SLIDE 28: Framework RAG -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Framework per RAG</h2>
                         <div class="param-grid">
@@ -1722,17 +1494,9 @@
                 <!-- SLIDE 29: Framework Agenti -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Framework per agenti</h2>
                         <div class="param-grid">
@@ -1759,17 +1523,9 @@
                 <!-- SLIDE 30: Best Practices -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Best practices</h2>
                         <div class="param-grid">
@@ -1796,17 +1552,9 @@
                 <!-- SLIDE 31: Riepilogo -->
                 <div class="slide">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
-                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
-                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                    </svg>
+                    <img class="pizza-watermark" src="datapizza.png" alt="Decorative Datapizza circle" />
                     <div class="slide-content">
                         <h2>Riepilogo</h2>
                         <div class="rag-pipeline">
@@ -1845,13 +1593,7 @@
                 <!-- SLIDE 32: Q&A -->
                 <div class="slide qa">
                     <div class="logo">
-                        <svg viewBox="0 0 24 24" fill="#C12A22">
-                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
-                            <circle cx="9" cy="8" r="1.5" fill="white"/>
-                            <circle cx="15" cy="8" r="1.5" fill="white"/>
-                            <circle cx="12" cy="11" r="1.5" fill="white"/>
-                        </svg>
-                        <span class="logo-text">Datapizza</span>
+                        <img src="datapizzaLogo.png" alt="Datapizza logo" />
                     </div>
                     <div class="slide-content" style="text-align: center; justify-content: center;">
                         <h1>Q&A</h1>
