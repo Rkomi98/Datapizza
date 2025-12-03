@@ -107,6 +107,7 @@ Assistente: Il motore è un bicilindrico a V di 90°...
 ```
 
 Il chatbot risponde esclusivamente in base al contenuto del documento indicizzato.
+Se la cartella `./qdrant_data` non esiste o è vuota, il programma chiede di eseguire prima l'ingestion.
 
 ---
 
@@ -146,7 +147,7 @@ Carica la API key dal file `.env`. Termina con errore se non presente.
 
 ```python
 def get_vectorstore(create_collection: bool = False) -> QdrantVectorstore:
-    vectorstore = QdrantVectorstore(path=QDRANT_PATH)
+    vectorstore = QdrantVectorstore(location=None, path=QDRANT_PATH)
     
     if create_collection:
         vectorstore.create_collection(

@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datapizza - AI Fundamentals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-red: #C12A22;
+            --text-dark: #1E293B;
+            --text-body: #475569;
+            --bg-white: #FFFFFF;
+            --slide-ratio: 56.25%; /* 16:9 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            color: var(--text-body);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+        }
+
+        h1 {
+            color: var(--accent-red);
+            font-size: 2.8vw;
+            line-height: 1.2;
+        }
+
+        h2 {
+            color: var(--text-dark);
+            font-size: 1.8vw;
+            margin-bottom: 1.5vh;
+        }
+
+        h3 {
+            color: var(--text-dark);
+            font-size: 1.1vw;
+            margin-bottom: 0.8vh;
+        }
+
+        p {
+            font-size: 0.95vw;
+            line-height: 1.5;
+            margin-bottom: 0.8vh;
+        }
+
+        strong {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        em {
+            font-style: italic;
+        }
+
+        /* Slides Container - 16:9 */
+        .slides-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .slides-viewport {
+            width: 100vw;
+            height: 56.25vw; /* 16:9 ratio */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 16:9 ratio inverse */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slides-wrapper {
+            display: flex;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Individual Slide */
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            padding: 4% 5%;
+            position: relative;
+            background: var(--bg-white);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Logo Top Right */
+        .logo {
+            position: absolute;
+            top: 3%;
+            right: 3%;
+            display: flex;
+            align-items: center;
+            gap: 0.5vw;
+            z-index: 10;
+        }
+
+        .logo svg {
+            width: 2vw;
+            height: 2vw;
+        }
+
+        .logo-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1vw;
+            color: var(--text-dark);
+        }
+
+        /* Background Pizza Watermark */
+        .pizza-watermark {
+            position: absolute;
+            bottom: -5%;
+            right: -3%;
+            width: 22vw;
+            height: 22vw;
+            max-width: 300px;
+            max-height: 300px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Slide Content */
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 2%;
+            max-width: 95%;
+            position: relative;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        /* Cover Slide Specific */
+        .slide.cover {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide.cover .slide-content {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide.cover .logo-circle {
+            width: 10vw;
+            height: 10vw;
+            max-width: 120px;
+            max-height: 120px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3vh;
+            box-shadow: 0 20px 60px rgba(193, 42, 34, 0.3);
+        }
+
+        .slide.cover .logo-circle svg {
+            width: 55%;
+            height: 55%;
+            fill: white;
+        }
+
+        .slide.cover h1 {
+            font-size: 3.5vw;
+            margin-bottom: 1.5vh;
+        }
+
+        .slide.cover .subtitle {
+            font-size: 1.3vw;
+            color: var(--text-body);
+            margin-bottom: 3vh;
+        }
+
+        .slide.cover .author {
+            font-size: 1vw;
+            color: var(--text-body);
+        }
+
+        /* Content Lists */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 1.5vw;
+            margin-bottom: 0.7vh;
+            font-size: 0.9vw;
+            line-height: 1.5;
+        }
+
+        ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5vw;
+            width: 0.5vw;
+            height: 0.5vw;
+            background: var(--accent-red);
+            border-radius: 50%;
+        }
+
+        /* Two Column Layout */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3vw;
+            margin-top: 1.5vh;
+        }
+
+        .column {
+            padding: 1.5vw;
+            background: #F8FAFC;
+            border-radius: 0.6vw;
+            border-left: 0.2vw solid var(--accent-red);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%);
+            border-left: 0.2vw solid var(--accent-red);
+            padding: 1.2vw 1.5vw;
+            border-radius: 0 0.6vw 0.6vw 0;
+            margin: 1.2vh 0;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: var(--text-dark);
+            font-size: 0.85vw;
+        }
+
+        /* Definition Box */
+        .definition {
+            background: #F1F5F9;
+            padding: 1.5vw;
+            border-radius: 0.8vw;
+            margin: 1.2vh 0;
+            border: 1px solid #E2E8F0;
+        }
+
+        .definition h3 {
+            color: var(--accent-red);
+            margin-bottom: 0.8vh;
+        }
+
+        .definition p {
+            margin-bottom: 0;
+        }
+
+        /* Parameter Card */
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2vw;
+            margin-top: 1.5vh;
+        }
+
+        .param-card {
+            background: var(--bg-white);
+            padding: 1.2vw;
+            border-radius: 0.6vw;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-top: 0.2vw solid var(--accent-red);
+        }
+
+        .param-card h3 {
+            color: var(--accent-red);
+            font-size: 1vw;
+            margin-bottom: 0.5vh;
+        }
+
+        .param-card p {
+            font-size: 0.8vw;
+            margin-bottom: 0.4vh;
+        }
+
+        .param-card ul li {
+            font-size: 0.8vw;
+            margin-bottom: 0.3vh;
+        }
+
+        .param-value {
+            font-family: 'Courier New', monospace;
+            background: #F1F5F9;
+            padding: 0.2vw 0.5vw;
+            border-radius: 0.3vw;
+            font-size: 0.8vw;
+            color: var(--accent-red);
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8vw;
+            margin: 1.5vh 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #991B1B 100%);
+            color: white;
+            padding: 0.8vw 1.2vw;
+            border-radius: 0.5vw;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.8vw;
+            text-align: center;
+            min-width: 6vw;
+            box-shadow: 0 8px 25px rgba(193, 42, 34, 0.3);
+        }
+
+        .flow-box small {
+            font-size: 0.6vw;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .flow-arrow {
+            font-size: 1.2vw;
+            color: var(--accent-red);
+        }
+
+        /* RAG Pipeline */
+        .rag-pipeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1vh;
+            margin: 1.2vh 0;
+        }
+
+        .rag-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1vw;
+            background: #F8FAFC;
+            padding: 1vw 1.2vw;
+            border-radius: 0.5vw;
+            border-left: 0.2vw solid var(--accent-red);
+        }
+
+        .step-number {
+            background: var(--accent-red);
+            color: white;
+            width: 2vw;
+            height: 2vw;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 0.9vw;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 0.3vh;
+            font-size: 0.95vw;
+        }
+
+        .step-content p {
+            margin: 0;
+            font-size: 0.8vw;
+        }
+
+        /* Source Citation */
+        .source {
+            font-size: 0.7vw;
+            color: #94A3B8;
+            margin-top: 0.8vh;
+            font-style: italic;
+        }
+
+        /* Quote */
+        .quote {
+            font-size: 1vw;
+            font-style: italic;
+            color: var(--text-dark);
+            border-left: 0.2vw solid var(--accent-red);
+            padding-left: 1.2vw;
+            margin: 1.5vh 0;
+        }
+
+        /* Navigation */
+        .navigation {
+            position: fixed;
+            bottom: 2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 1.5vw;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.8vw 1.5vw;
+            border-radius: 3vw;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn {
+            width: 3vw;
+            height: 3vw;
+            max-width: 45px;
+            max-height: 45px;
+            border: none;
+            background: var(--accent-red);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #991B1B;
+            transform: scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            background: #E2E8F0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9vw;
+            min-width: 5vw;
+            text-align: center;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 0.3vh;
+            min-height: 3px;
+            background: var(--accent-red);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        /* Q&A Slide */
+        .slide.qa {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .qa h1 {
+            font-size: 5vw;
+            margin-bottom: 1.5vh;
+        }
+
+        .qa p {
+            font-size: 1.3vw;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2vh 0;
+            font-size: 0.8vw;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.7vw 1vw;
+            text-align: left;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .comparison-table th {
+            background: var(--accent-red);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85vw;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #F8FAFC;
+        }
+
+        /* Three Column */
+        .three-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5vw;
+            margin-top: 1.5vh;
+        }
+
+        .feature-card {
+            background: #F8FAFC;
+            padding: 1.2vw;
+            border-radius: 0.6vw;
+            text-align: center;
+            border-bottom: 0.2vw solid var(--accent-red);
+        }
+
+        .feature-card .icon {
+            font-size: 2vw;
+            margin-bottom: 0.8vh;
+        }
+
+        .feature-card h3 {
+            font-size: 0.95vw;
+            margin-bottom: 0.5vh;
+        }
+
+        .feature-card p {
+            font-size: 0.75vw;
+            margin: 0;
+        }
+
+        /* Agentic RAG Diagram */
+        .agentic-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8vh;
+            margin: 1.5vh 0;
+        }
+
+        .agent-layer {
+            display: flex;
+            gap: 1vw;
+            align-items: center;
+        }
+
+        .agent-box {
+            background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+            color: white;
+            padding: 0.6vw 1vw;
+            border-radius: 0.4vw;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.75vw;
+            text-align: center;
+        }
+
+        .agent-box.rag {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #991B1B 100%);
+        }
+
+        .vertical-arrow {
+            font-size: 1vw;
+            color: var(--text-body);
+        }
+
+        /* Highlight Numbers */
+        .highlight-num {
+            color: var(--accent-red);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Code block in slides */
+        .code-block {
+            font-family: 'Courier New', monospace;
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 1vw;
+            border-radius: 0.4vw;
+            font-size: 0.7vw;
+            line-height: 1.4;
+            overflow: hidden;
+        }
+
+        .code-block .yellow {
+            color: #FCD34D;
+        }
+
+        /* Four column for tools */
+        .four-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1vw;
+            margin-top: 1.5vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="slides-container">
+        <div class="slides-viewport">
+            <div class="slides-wrapper" id="slidesWrapper">
+
+                <!-- SLIDE 1: Cover -->
+                <div class="slide cover">
+                    <div class="slide-content">
+                        <div class="logo-circle">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                                <circle cx="9" cy="8" r="1.5" fill="#C12A22"/>
+                                <circle cx="15" cy="8" r="1.5" fill="#C12A22"/>
+                                <circle cx="12" cy="11" r="1.5" fill="#C12A22"/>
+                            </svg>
+                        </div>
+                        <h1>AI Fundamentals</h1>
+                        <p class="subtitle">LLM, RAG, Agenti e RAG Agentica</p>
+                        <p class="author">Datapizza Academy</p>
+                    </div>
+                </div>
+
+                <!-- SLIDE 2: Agenda -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Agenda</h2>
+                        <ul>
+                            <li><strong>Cos'è un LLM</strong> — Fondamenti dei Large Language Models</li>
+                            <li><strong>Client e API</strong> — Come interagire con i modelli</li>
+                            <li><strong>Temperatura e parametri</strong> — Controllare l'output</li>
+                            <li><strong>RAG</strong> — Retrieval-Augmented Generation in dettaglio</li>
+                            <li><strong>Agenti AI</strong> — Sistemi autonomi e tool use</li>
+                            <li><strong>RAG Agentica</strong> — L'evoluzione del retrieval intelligente</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- SLIDE 3: Cos'è un LLM -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Cos'è un LLM</h2>
+                        <div class="definition">
+                            <h3>Large Language Model</h3>
+                            <p>Un <strong>LLM</strong> è un modello di intelligenza artificiale addestrato su enormi quantità di testo per comprendere e generare linguaggio naturale.</p>
+                        </div>
+                        <div class="two-columns">
+                            <div class="column">
+                                <h3>Caratteristiche principali</h3>
+                                <ul>
+                                    <li>Miliardi di <strong>parametri</strong> (pesi neurali)</li>
+                                    <li>Addestramento su <strong>terabyte</strong> di testo</li>
+                                    <li>Architettura <strong>Transformer</strong></li>
+                                    <li>Capacità di <em>generazione autogressiva</em></li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <h3>Esempi di LLM</h3>
+                                <ul>
+                                    <li><strong>GPT-4</strong> — OpenAI</li>
+                                    <li><strong>Claude</strong> — Anthropic</li>
+                                    <li><strong>Gemini</strong> — Google</li>
+                                    <li><strong>Llama</strong> — Meta (open source)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="source">Fonte: Vaswani et al., "Attention Is All You Need", 2017</p>
+                    </div>
+                </div>
+
+                <!-- SLIDE 4: Come funziona un LLM -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Come funziona un LLM</h2>
+                        <p>Il modello predice il <strong>token successivo</strong> basandosi sul contesto precedente. Ogni token può essere una parola, parte di parola o simbolo.</p>
+                        <div class="flow-diagram">
+                            <div class="flow-box">Input Text</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Tokenizzazione</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Embedding</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Transformer</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Output</div>
+                        </div>
+                        <div class="info-box">
+                            <p><strong>Concetto chiave:</strong> L'LLM non "capisce" nel senso umano. Calcola probabilità statistiche basate sui pattern appresi durante l'addestramento.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 5: Cos'è un Client -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Cos'è un client</h2>
+                        <div class="definition">
+                            <h3>Client API</h3>
+                            <p>Un <strong>client</strong> è un'applicazione o libreria che comunica con un server (in questo caso, un LLM) tramite <strong>API</strong> (Application Programming Interface).</p>
+                        </div>
+                        <div class="two-columns">
+                            <div class="column">
+                                <h3>Tipi di client</h3>
+                                <ul>
+                                    <li><strong>SDK ufficiali</strong> — OpenAI Python, Anthropic SDK</li>
+                                    <li><strong>HTTP diretto</strong> — Chiamate REST API</li>
+                                    <li><strong>Interfacce web</strong> — ChatGPT, Claude.ai</li>
+                                    <li><strong>Framework</strong> — LangChain, LlamaIndex</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <h3>Componenti di una richiesta</h3>
+                                <ul>
+                                    <li><strong>Endpoint</strong> — URL del servizio</li>
+                                    <li><strong>API Key</strong> — Autenticazione</li>
+                                    <li><strong>Payload</strong> — Messaggio e parametri</li>
+                                    <li><strong>Headers</strong> — Metadati della richiesta</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 6: Architettura Client-Server -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Architettura client-server</h2>
+                        <div class="flow-diagram">
+                            <div class="flow-box">Your App<br><small>(Client)</small></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">API Gateway<br><small>(Auth + Rate Limit)</small></div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">LLM Server<br><small>(Inference)</small></div>
+                        </div>
+                        <div class="info-box">
+                            <p><strong>Nota:</strong> Il modello gira su server remoti con GPU potenti. Il client invia solo testo e riceve risposte — non esegue calcoli pesanti.</p>
+                        </div>
+                        <p style="margin-top: 1.5vh;">Il flusso tipico: <strong>richiesta</strong> → autenticazione → <strong>elaborazione</strong> → risposta in <em>streaming</em> o batch.</p>
+                    </div>
+                </div>
+
+                <!-- SLIDE 7: Temperatura -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Temperatura</h2>
+                        <div class="definition">
+                            <h3>Cos'è la temperatura?</h3>
+                            <p>La <strong>temperatura</strong> controlla la <em>casualità</em> delle risposte. Valori bassi = output prevedibili, valori alti = output creativi.</p>
+                        </div>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Valore</th>
+                                    <th>Comportamento</th>
+                                    <th>Caso d'uso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-value">0.0</span></td>
+                                    <td>Deterministico, sempre la stessa risposta</td>
+                                    <td>Codice, dati strutturati</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-value">0.3 - 0.5</span></td>
+                                    <td>Bilanciato, leggera variazione</td>
+                                    <td>Q&A, assistenza</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-value">0.7 - 1.0</span></td>
+                                    <td>Creativo, più variabilità</td>
+                                    <td>Scrittura creativa</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-value">&gt; 1.0</span></td>
+                                    <td>Molto casuale, può essere incoerente</td>
+                                    <td>Sperimentazione</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SLIDE 8: Parametri - Parte 1 -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Parametri importanti (1/2)</h2>
+                        <div class="param-grid">
+                            <div class="param-card">
+                                <h3>Max Tokens</h3>
+                                <p>Limite massimo di token nella risposta.</p>
+                                <p>Tipico: <span class="param-value">256 - 4096</span></p>
+                                <p class="source">1 token ≈ 0.75 parole in italiano</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Top-P (Nucleus Sampling)</h3>
+                                <p>Considera solo i token con probabilità cumulativa ≤ P.</p>
+                                <p>Tipico: <span class="param-value">0.9 - 1.0</span></p>
+                                <p class="source">Alternativa alla temperatura</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Top-K</h3>
+                                <p>Considera solo i K token più probabili.</p>
+                                <p>Tipico: <span class="param-value">40 - 100</span></p>
+                                <p class="source">Limita il vocabolario di scelta</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Frequency Penalty</h3>
+                                <p>Penalizza token già usati frequentemente.</p>
+                                <p>Range: <span class="param-value">-2.0 a 2.0</span></p>
+                                <p class="source">Evita ripetizioni</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 9: Parametri - Parte 2 -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Parametri importanti (2/2)</h2>
+                        <div class="param-grid">
+                            <div class="param-card">
+                                <h3>Presence Penalty</h3>
+                                <p>Penalizza token già apparsi (indipendentemente dalla frequenza).</p>
+                                <p>Range: <span class="param-value">-2.0 a 2.0</span></p>
+                                <p class="source">Favorisce nuovi argomenti</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Stop Sequences</h3>
+                                <p>Stringhe che fermano la generazione.</p>
+                                <p>Esempio: <span class="param-value">["\n\n", "END"]</span></p>
+                                <p class="source">Controllo preciso dell'output</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>System Prompt</h3>
+                                <p>Istruzioni iniziali per definire il comportamento del modello.</p>
+                                <p class="source">Definisce personalità e regole</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Context Window</h3>
+                                <p>Quantità massima di token che il modello può "vedere".</p>
+                                <p>Tipico: <span class="param-value">8K - 200K tokens</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 10: Introduzione a RAG -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Cos'è RAG</h2>
+                        <div class="definition">
+                            <h3>Retrieval-Augmented Generation</h3>
+                            <p><strong>RAG</strong> è un pattern architetturale che combina la <em>ricerca di informazioni</em> da fonti esterne con la <em>generazione</em> di un LLM, permettendo risposte basate su dati specifici e aggiornati.</p>
+                        </div>
+                        <div class="quote">
+                            "RAG permette agli LLM di accedere a conoscenza oltre il loro training, riducendo le allucinazioni e fornendo risposte verificabili."
+                        </div>
+                        <p class="source">Fonte: Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", 2020</p>
+                    </div>
+                </div>
+
+                <!-- SLIDE 11: Perché RAG -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Perché usare RAG</h2>
+                        <div class="three-columns">
+                            <div class="feature-card">
+                                <div class="icon">📚</div>
+                                <h3>Dati aggiornati</h3>
+                                <p>Accesso a informazioni <strong>post-training</strong> senza riaddestramento del modello.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="icon">✅</div>
+                                <h3>Meno allucinazioni</h3>
+                                <p>Risposte basate su <strong>fonti verificabili</strong>, non solo conoscenza parametrica.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="icon">🔒</div>
+                                <h3>Dati proprietari</h3>
+                                <p>Integra <strong>documenti interni</strong> senza esporli nel training.</p>
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <p><strong>Confronto:</strong> Fine-tuning modifica i pesi del modello (costoso, rigido). RAG aggiunge contesto a runtime (economico, flessibile).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 12: RAG Pipeline Overview -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>La pipeline RAG</h2>
+                        <p>Un sistema RAG si compone di due fasi: <strong>indicizzazione</strong> (offline) e <strong>retrieval + generation</strong> (runtime).</p>
+                        <div class="flow-diagram">
+                            <div class="flow-box">Documenti</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Chunking</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Embedding</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Vector DB</div>
+                        </div>
+                        <p style="text-align: center; font-size: 1.2vw; margin: 1vh 0;">⬇️ <em>Query time</em> ⬇️</p>
+                        <div class="flow-diagram">
+                            <div class="flow-box">Query</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Retrieval</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Context</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">LLM</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Risposta</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 13: RAG Step 1 - Chunking -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Step 1: chunking dei documenti</h2>
+                        <p>I documenti vengono divisi in <strong>chunk</strong> (frammenti) di dimensione gestibile.</p>
+                        <div class="two-columns">
+                            <div class="column">
+                                <h3>Strategie di chunking</h3>
+                                <ul>
+                                    <li><strong>Fixed size</strong> — N caratteri/token con overlap</li>
+                                    <li><strong>Sentence-based</strong> — Frasi complete</li>
+                                    <li><strong>Semantic</strong> — Paragrafi/sezioni logiche</li>
+                                    <li><strong>Recursive</strong> — Split gerarchico</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <h3>Parametri tipici</h3>
+                                <ul>
+                                    <li><strong>Chunk size:</strong> 256-1024 token</li>
+                                    <li><strong>Overlap:</strong> 10-20% del chunk</li>
+                                    <li><strong>Metadata:</strong> Titolo, fonte, data</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <p><strong>Trade-off:</strong> Chunk piccoli = retrieval preciso ma poco contesto. Chunk grandi = più contesto ma meno precisione.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 14: RAG Step 2 - Embeddings -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Step 2: embedding</h2>
+                        <div class="definition">
+                            <h3>Cos'è un embedding?</h3>
+                            <p>Un <strong>embedding</strong> è una rappresentazione numerica densa (vettore) che cattura il <em>significato semantico</em> del testo. Testi simili hanno vettori vicini nello spazio.</p>
+                        </div>
+                        <div class="two-columns">
+                            <div class="column">
+                                <h3>Modelli di embedding</h3>
+                                <ul>
+                                    <li><strong>OpenAI</strong> — text-embedding-3</li>
+                                    <li><strong>Cohere</strong> — embed-v3</li>
+                                    <li><strong>Open Source</strong> — BGE, E5, SBERT</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <h3>Dimensioni tipiche</h3>
+                                <p>I vettori hanno <span class="highlight-num">256</span> - <span class="highlight-num">3072</span> dimensioni.</p>
+                                <p>Più dimensioni = più capacità espressiva.</p>
+                            </div>
+                        </div>
+                        <p class="source">Nota: Lo stesso modello di embedding deve essere usato per documenti e query.</p>
+                    </div>
+                </div>
+
+                <!-- SLIDE 15: RAG Step 3 - Vector Database -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Step 3: vector database</h2>
+                        <p>Gli embedding vengono salvati in un <strong>vector database</strong> ottimizzato per ricerche di similarità.</p>
+                        <div class="two-columns">
+                            <div class="column">
+                                <h3>Database popolari</h3>
+                                <ul>
+                                    <li><strong>Pinecone</strong> — Managed, scalabile</li>
+                                    <li><strong>Weaviate</strong> — Open source, ibrido</li>
+                                    <li><strong>Qdrant</strong> — Open source, Rust</li>
+                                    <li><strong>Chroma</strong> — Leggero, embedded</li>
+                                    <li><strong>pgvector</strong> — Extension PostgreSQL</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <h3>Metriche di similarità</h3>
+                                <ul>
+                                    <li><strong>Cosine</strong> — Angolo tra vettori</li>
+                                    <li><strong>Euclidean</strong> — Distanza geometrica</li>
+                                    <li><strong>Dot product</strong> — Prodotto scalare</li>
+                                </ul>
+                                <p class="source" style="margin-top: 1vh;">Algoritmi: HNSW, IVF, LSH</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 16: RAG Step 4 - Retrieval -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Step 4: retrieval</h2>
+                        <p>A runtime, la query viene trasformata in embedding e usata per recuperare i chunk più rilevanti.</p>
+                        <div class="rag-pipeline">
+                            <div class="rag-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>Query embedding</h3>
+                                    <p>La domanda viene convertita in vettore con lo stesso modello usato per i documenti.</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>Similarity search</h3>
+                                    <p>Il vector DB trova i <strong>top-K</strong> chunk più simili (tipicamente K = 3-10).</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>Reranking (opzionale)</h3>
+                                    <p>Un modello di reranking riordina i risultati per maggiore precisione.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 17: RAG Step 5 - Generation -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Step 5: generation</h2>
+                        <p>I chunk recuperati vengono inseriti nel <strong>prompt</strong> come contesto.</p>
+                        <div class="code-block">
+                            <span class="yellow">System:</span> Usa SOLO il contesto seguente per rispondere.<br>
+                            Se non trovi la risposta, dì "Non ho informazioni sufficienti."<br><br>
+                            <span class="yellow">Contesto:</span><br>
+                            {chunk_1}<br>
+                            {chunk_2}<br>
+                            {chunk_3}<br><br>
+                            <span class="yellow">Domanda:</span> {user_query}<br><br>
+                            <span class="yellow">Risposta:</span>
+                        </div>
+                        <p class="source">Best practice: Istruire il modello a citare le fonti e ammettere quando non sa.</p>
+                    </div>
+                </div>
+
+                <!-- SLIDE 18: RAG Avanzato -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Tecniche RAG avanzate</h2>
+                        <div class="param-grid">
+                            <div class="param-card">
+                                <h3>Hybrid Search</h3>
+                                <p>Combina <strong>semantic search</strong> (embeddings) con <strong>keyword search</strong> (BM25).</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Query Expansion</h3>
+                                <p>L'LLM riformula la query in multiple varianti per catturare più risultati.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>HyDE</h3>
+                                <p>Genera un documento ipotetico ideale e usa il suo embedding per la ricerca.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Parent-Child Retrieval</h3>
+                                <p>Recupera chunk piccoli ma passa al modello il <strong>documento parent</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 19: Cos'è un Agente -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Cos'è un agente AI</h2>
+                        <div class="definition">
+                            <h3>AI Agent</h3>
+                            <p>Un <strong>agente</strong> è un sistema AI che può <em>ragionare</em>, <em>pianificare</em> e <em>agire autonomamente</em> per raggiungere un obiettivo, utilizzando strumenti esterni e iterando fino al completamento.</p>
+                        </div>
+                        <div class="info-box">
+                            <p><strong>Differenza chiave:</strong> Un LLM risponde a una domanda. Un agente <em>risolve un problema</em> usando multiple azioni e strumenti.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 20: Componenti di un Agente -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Componenti di un agente</h2>
+                        <div class="three-columns">
+                            <div class="feature-card">
+                                <div class="icon">🧠</div>
+                                <h3>LLM (Cervello)</h3>
+                                <p>Il modello che ragiona, pianifica e decide quale azione eseguire.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="icon">🔧</div>
+                                <h3>Tools</h3>
+                                <p>Strumenti esterni: API, database, browser, calculator.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="icon">💾</div>
+                                <h3>Memory</h3>
+                                <p>Contesto della conversazione e memoria a lungo termine.</p>
+                            </div>
+                        </div>
+                        <div class="flow-diagram" style="margin-top: 2vh;">
+                            <div class="flow-box">Input</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Reason</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Act</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Observe</div>
+                            <span class="flow-arrow">→</span>
+                            <div class="flow-box">Repeat</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 21: Tool Use -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Tool use (function calling)</h2>
+                        <p>L'LLM può invocare <strong>funzioni esterne</strong>, ricevere i risultati e continuare il ragionamento.</p>
+                        <div class="two-columns">
+                            <div class="column">
+                                <h3>Come funziona</h3>
+                                <ul>
+                                    <li>Definisci tools con schema JSON</li>
+                                    <li>L'LLM decide se/quando usarli</li>
+                                    <li>Genera una "function call"</li>
+                                    <li>Il sistema esegue la funzione</li>
+                                    <li>Il risultato torna all'LLM</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <h3>Esempi di tools</h3>
+                                <ul>
+                                    <li><strong>web_search</strong> — Cerca su internet</li>
+                                    <li><strong>calculator</strong> — Calcoli matematici</li>
+                                    <li><strong>send_email</strong> — Invia email</li>
+                                    <li><strong>query_database</strong> — Query SQL</li>
+                                    <li><strong>create_file</strong> — Genera file</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 22: ReAct Pattern -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Il pattern ReAct</h2>
+                        <div class="definition">
+                            <h3>Reasoning + Acting</h3>
+                            <p><strong>ReAct</strong> alterna fasi di <em>ragionamento</em> (Thought) e <em>azione</em> (Action), permettendo all'agente di "pensare ad alta voce".</p>
+                        </div>
+                        <div class="rag-pipeline">
+                            <div class="rag-step">
+                                <div class="step-number">T</div>
+                                <div class="step-content">
+                                    <h3>Thought</h3>
+                                    <p>"Devo trovare il prezzo corrente delle azioni Apple. Userò web_search."</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">A</div>
+                                <div class="step-content">
+                                    <h3>Action</h3>
+                                    <p>web_search("Apple stock price today")</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">O</div>
+                                <div class="step-content">
+                                    <h3>Observation</h3>
+                                    <p>Risultato: "AAPL: $178.50 (+1.2%)"</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="source">Fonte: Yao et al., "ReAct: Synergizing Reasoning and Acting in Language Models", 2022</p>
+                    </div>
+                </div>
+
+                <!-- SLIDE 23: Introduzione RAG Agentica -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Cos'è la RAG agentica</h2>
+                        <div class="definition">
+                            <h3>Agentic RAG</h3>
+                            <p><strong>RAG Agentica</strong> combina il retrieval di RAG con le capacità decisionali degli agenti. L'LLM non si limita a recuperare e rispondere, ma <em>ragiona</em> su cosa cercare, <em>valuta</em> i risultati e <em>itera</em> autonomamente.</p>
+                        </div>
+                        <div class="quote">
+                            "La RAG tradizionale è un one-shot. La RAG agentica è un processo iterativo e adattivo."
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 24: RAG vs RAG Agentica -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>RAG tradizionale vs RAG agentica</h2>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Aspetto</th>
+                                    <th>RAG Tradizionale</th>
+                                    <th>RAG Agentica</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Retrieval</strong></td>
+                                    <td>Single-shot, statico</td>
+                                    <td>Multi-step, dinamico</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Query</strong></td>
+                                    <td>Query originale dell'utente</td>
+                                    <td>Query riformulate dall'agente</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Valutazione</strong></td>
+                                    <td>Nessuna</td>
+                                    <td>L'agente valuta i risultati</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Iterazione</strong></td>
+                                    <td>No</td>
+                                    <td>Sì, fino a soddisfazione</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tool use</strong></td>
+                                    <td>Solo vector search</td>
+                                    <td>Multiple fonti e strumenti</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SLIDE 25: Architettura RAG Agentica -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Architettura RAG agentica</h2>
+                        <div class="agentic-diagram">
+                            <div class="agent-layer">
+                                <div class="agent-box">🎯 User Query</div>
+                            </div>
+                            <div class="vertical-arrow">⬇️</div>
+                            <div class="agent-layer">
+                                <div class="agent-box">🧠 Agent (Planning)</div>
+                            </div>
+                            <div class="vertical-arrow">⬇️</div>
+                            <div class="agent-layer">
+                                <div class="agent-box rag">📚 Vector DB</div>
+                                <div class="agent-box rag">🌐 Web Search</div>
+                                <div class="agent-box rag">📊 SQL DB</div>
+                                <div class="agent-box rag">📁 File System</div>
+                            </div>
+                            <div class="vertical-arrow">⬇️</div>
+                            <div class="agent-layer">
+                                <div class="agent-box">🔄 Evaluate & Iterate</div>
+                            </div>
+                            <div class="vertical-arrow">⬇️</div>
+                            <div class="agent-layer">
+                                <div class="agent-box">✅ Final Response</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 26: Capacità RAG Agentica -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Capacità della RAG agentica</h2>
+                        <div class="param-grid">
+                            <div class="param-card">
+                                <h3>Query decomposition</h3>
+                                <p>Scompone domande complesse in sotto-query più semplici da risolvere separatamente.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Routing intelligente</h3>
+                                <p>Decide <strong>quale fonte</strong> interrogare in base al tipo di domanda.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Self-reflection</h3>
+                                <p>Valuta la qualità dei risultati e decide se cercare ancora o rispondere.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Multi-hop reasoning</h3>
+                                <p>Usa informazioni da una ricerca per formulare la successiva.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 27: Esempio pratico -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Esempio: RAG agentica in azione</h2>
+                        <p><strong>Query:</strong> "Confronta le performance Q3 2024 di Apple e Microsoft"</p>
+                        <div class="rag-pipeline">
+                            <div class="rag-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>Planning</h3>
+                                    <p>"Devo cercare i report Q3 di entrambe le aziende separatamente."</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>Retrieval 1</h3>
+                                    <p>Cerca "Apple Q3 2024 earnings" → trova revenue, profit, guidance.</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>Retrieval 2</h3>
+                                    <p>Cerca "Microsoft Q3 2024 earnings" → trova metriche equivalenti.</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h3>Synthesis</h3>
+                                    <p>Combina i dati, crea confronto strutturato, cita le fonti.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 28: Framework RAG -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Framework per RAG</h2>
+                        <div class="param-grid">
+                            <div class="param-card">
+                                <h3>LlamaIndex</h3>
+                                <p>Framework RAG completo con connettori per molte fonti dati.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>LangChain</h3>
+                                <p>Orchestrazione LLM con chains, agents e memory.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Haystack</h3>
+                                <p>Pipeline modulari per search e RAG, ottimo per produzione.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>Semantic Kernel</h3>
+                                <p>Framework Microsoft per integrare AI in applicazioni enterprise.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 29: Framework Agenti -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Framework per agenti</h2>
+                        <div class="param-grid">
+                            <div class="param-card">
+                                <h3>AutoGen</h3>
+                                <p>Framework Microsoft per creare sistemi multi-agente conversazionali.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>CrewAI</h3>
+                                <p>Orchestrazione di team di agenti con ruoli specializzati.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>LangGraph</h3>
+                                <p>Workflow agentici come grafi, controllo fine del flusso.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>OpenAI Assistants</h3>
+                                <p>API managed con tools integrati (code, retrieval, functions).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 30: Best Practices -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Best practices</h2>
+                        <div class="param-grid">
+                            <div class="param-card">
+                                <h3>1. Inizia semplice</h3>
+                                <p>RAG base prima di passare ad agentic. Valida che il retrieval funzioni.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>2. Qualità dei dati</h3>
+                                <p>Garbage in, garbage out. Cura la pulizia e struttura dei documenti.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>3. Evaluation</h3>
+                                <p>Misura retrieval precision/recall. Usa framework come RAGAS.</p>
+                            </div>
+                            <div class="param-card">
+                                <h3>4. Guardrails</h3>
+                                <p>Limita iterazioni degli agenti. Implementa timeout e fallback.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 31: Riepilogo -->
+                <div class="slide">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <svg class="pizza-watermark" viewBox="0 0 24 24" fill="#C12A22">
+                        <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <div class="slide-content">
+                        <h2>Riepilogo</h2>
+                        <div class="rag-pipeline">
+                            <div class="rag-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>LLM</h3>
+                                    <p>Modelli che generano testo predendo token. Controllabili via temperatura e parametri.</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>RAG</h3>
+                                    <p>Arricchisce l'LLM con conoscenza esterna tramite retrieval da vector database.</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>Agenti</h3>
+                                    <p>Sistemi autonomi che usano LLM + tools per raggiungere obiettivi complessi.</p>
+                                </div>
+                            </div>
+                            <div class="rag-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h3>RAG Agentica</h3>
+                                    <p>Unisce retrieval intelligente con capacità agentiche per query complesse.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 32: Q&A -->
+                <div class="slide qa">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="#C12A22">
+                            <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                            <circle cx="9" cy="8" r="1.5" fill="white"/>
+                            <circle cx="15" cy="8" r="1.5" fill="white"/>
+                            <circle cx="12" cy="11" r="1.5" fill="white"/>
+                        </svg>
+                        <span class="logo-text">Datapizza</span>
+                    </div>
+                    <div class="slide-content" style="text-align: center; justify-content: center;">
+                        <h1>Q&A</h1>
+                        <p style="font-size: 1.3vw; color: var(--text-body);">Domande?</p>
+                        <div style="margin-top: 4vh;">
+                            <svg viewBox="0 0 24 24" fill="#C12A22" style="width: 8vw; height: 8vw; opacity: 0.3;">
+                                <path d="M12 2C7.58 2 4 5.58 4 10c0 4.42 5 10 8 12 3-2 8-7.58 8-12 0-4.42-3.58-8-8-8z"/>
+                                <circle cx="9" cy="8" r="1.5" fill="white"/>
+                                <circle cx="15" cy="8" r="1.5" fill="white"/>
+                                <circle cx="12" cy="11" r="1.5" fill="white"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="prevSlide()">←</button>
+        <span class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">32</span></span>
+        <button class="nav-btn" id="nextBtn" onclick="nextSlide()">→</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const wrapper = document.getElementById('slidesWrapper');
+        const progressBar = document.getElementById('progressBar');
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function updateSlide() {
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+
+        updateSlide();
+    </script>
+</body>
+</html>
