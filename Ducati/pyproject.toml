@@ -10,6 +10,7 @@ dependencies = [
     "qdrant-client",
     "python-dotenv",
     "notebook",
+    "openai",
 ]
 
 [[tool.uv.index]]
