@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool, Agenti e RAG Agentico - Datapizza</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/theme/white.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+    
+    <style>
+        :root {
+            --primary: #C12A22;
+            --text-dark: #1E293B;
+            --text-gray: #475569;
+            --text-light: #64748B;
+            --bg-white: #FFFFFF;
+            --bg-card: #F8FAFC;
+            --card-red-bg: #FEF2F2;
+            --card-red-border: #FEE2E2;
+            --card-blue-bg: #EFF6FF;
+            --card-blue-border: #DBEAFE;
+            --card-green-bg: #ECFDF5;
+            --card-green-border: #D1FAE5;
+            --card-yellow-bg: #FEF3C7;
+            --card-yellow-border: #F59E0B;
+        }
+
+        .reveal {
+            font-family: 'Lato', sans-serif;
+            font-weight: 400;
+            color: var(--text-gray);
+            font-size: 26px;
+        }
+
+        .reveal h1, .reveal h2, .reveal h3 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: -0.02em;
+        }
+
+        .reveal h1 {
+            font-size: 2em;
+            color: var(--primary);
+        }
+
+        .reveal h2 {
+            font-size: 1.55em;
+            color: var(--text-dark);
+            margin-bottom: 0.25em;
+        }
+
+        .reveal p {
+            font-size: 0.8em;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        .reveal section {
+            text-align: left;
+            padding: 40px 60px;
+            height: 100%;
+            box-sizing: border-box;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        /* Logo fisso */
+        .logo-fixed {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            width: 120px;
+            height: auto;
+            z-index: 1000;
+        }
+
+        .logo-fixed img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            width: 150px;
+            height: 150px;
+            opacity: 0.12;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .watermark img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.65;
+        }
+
+        /* Badge numero slide */
+        .slide-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .slide-header > div:last-child {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-header h2 {
+            margin: 0;
+        }
+
+        .slide-header .subtitle {
+            margin: 6px 0 0 0 !important;
+        }
+
+        .slide-badge {
+            position: relative;
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.55em;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Subtitle */
+        .subtitle {
+            font-size: 0.95em !important;
+            color: var(--text-light) !important;
+            margin-top: -5px !important;
+            margin-bottom: 40px !important;
+        }
+
+        /* Cover slide */
+        .cover-slide {
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cover-logo {
+            width: 160px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .cover-logo img {
+            width: 75%;
+            height: auto;
+        }
+
+        .cover-title {
+            font-size: 2.3em !important;
+            margin-bottom: 15px !important;
+        }
+
+        .cover-subtitle {
+            font-size: 1em;
+            color: var(--text-gray);
+            margin-bottom: 35px;
+        }
+
+        .cover-line {
+            width: 140px;
+            height: 4px;
+            background: var(--primary);
+            margin: 0 auto 35px;
+            border-radius: 2px;
+        }
+
+        .cover-footer {
+            font-size: 0.7em;
+            color: var(--text-light);
+            margin-top: 50px;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 10px 18px;
+            background: #F1F5F9;
+            border-radius: 8px;
+            font-size: 0.65em;
+            color: var(--text-dark);
+            margin: 5px;
+            font-weight: 600;
+        }
+
+        .tag.red { background: var(--card-red-bg); color: var(--primary); }
+        .tag.blue { background: var(--card-blue-bg); color: #1D4ED8; }
+        .tag.green { background: var(--card-green-bg); color: #059669; }
+        .tag.yellow { background: var(--card-yellow-bg); color: #B45309; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 22px 26px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .card-accent {
+            background: var(--card-red-bg);
+            border-left: 5px solid var(--primary);
+        }
+
+        .card-blue {
+            background: var(--card-blue-bg);
+            border-left: 5px solid #1D4ED8;
+        }
+
+        .card-green {
+            background: var(--card-green-bg);
+            border-left: 5px solid #059669;
+        }
+
+        .card-yellow {
+            background: var(--card-yellow-bg);
+            border-left: 5px solid #B45309;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .card-title.gray { color: var(--text-light); }
+        .card-title.blue { color: #1D4ED8; }
+        .card-title.green { color: #059669; }
+        .card-title.yellow { color: #B45309; }
+
+        .card p {
+            font-size: 0.78em;
+            margin: 0;
+        }
+
+        /* Source citation */
+        .source {
+            position: absolute;
+            bottom: 25px;
+            left: 80px;
+            font-size: 0.5em;
+            color: #94A3B8;
+            font-style: italic;
+        }
+
+        /* ==================== */
+        /* MERMAID DIAGRAMS CSS */
+        /* ==================== */
+
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        /* Sequence Diagram */
+        .sequence-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .seq-participants {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .seq-participant {
+            text-align: center;
+            width: 140px;
+        }
+
+        .seq-participant-box {
+            background: var(--bg-card);
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.75em;
+            color: var(--text-dark);
+        }
+
+        .seq-participant-box.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .seq-participant-box.accent {
+            background: var(--card-red-bg);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .seq-lifeline {
+            width: 3px;
+            height: 320px;
+            background: linear-gradient(180deg, #E2E8F0 0%, #E2E8F0 100%);
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .seq-messages {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            margin-top: -320px;
+        }
+
+        .seq-message {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            font-size: 0.65em;
+            color: var(--text-dark);
+        }
+
+        .seq-arrow {
+            height: 2px;
+            background: var(--primary);
+            position: relative;
+            min-width: 80px;
+        }
+
+        .seq-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -5px;
+            border: 6px solid transparent;
+            border-left-color: var(--primary);
+        }
+
+        .seq-arrow.reverse::after {
+            right: auto;
+            left: 0;
+            border-left-color: transparent;
+            border-right-color: var(--primary);
+        }
+
+        .seq-arrow.dashed {
+            background: repeating-linear-gradient(90deg, var(--text-light), var(--text-light) 5px, transparent 5px, transparent 10px);
+        }
+
+        .seq-label {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Flowchart */
+        .flowchart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .flowchart.vertical {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .flow-node {
+            padding: 18px 28px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85em;
+            text-align: center;
+            color: var(--text-dark);
+            background: var(--bg-card);
+            border: 2px solid #E2E8F0;
+            min-width: 120px;
+        }
+
+        .flow-node.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .flow-node.accent {
+            background: var(--card-red-bg);
+            border-color: var(--primary);
+        }
+
+        .flow-node.circle {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            min-width: auto;
+        }
+
+        .flow-node.diamond {
+            transform: rotate(0deg);
+            background: var(--card-yellow-bg);
+            border-color: #B45309;
+            padding: 15px 25px;
+        }
+
+        .flow-node.blue {
+            background: var(--card-blue-bg);
+            border-color: #1D4ED8;
+            color: #1D4ED8;
+        }
+
+        .flow-node.green {
+            background: var(--card-green-bg);
+            border-color: #059669;
+            color: #059669;
+        }
+
+        .flow-arrow {
+            font-size: 1.8em;
+            color: var(--text-light);
+            font-weight: 300;
+        }
+
+        .flow-arrow.down {
+            transform: rotate(90deg);
+        }
+
+        .flow-label {
+            font-size: 0.65em;
+            color: var(--text-light);
+            margin: 0 -5px;
+        }
+
+        /* RAG Flowchart specific */
+        .rag-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .rag-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .rag-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Loop indicator */
+        .loop-arrow {
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 120px;
+            border: 3px solid var(--primary);
+            border-left: none;
+            border-radius: 0 60px 60px 0;
+        }
+
+        .loop-arrow::after {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: -8px;
+            border: 8px solid transparent;
+            border-bottom-color: var(--primary);
+        }
+
+        /* Two columns layout */
+        .two-columns {
+            display: flex;
+            gap: 35px;
+            text-align: left;
+            height: auto;
+            flex-wrap: wrap;
+        }
+
+        .two-columns > div {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        /* Quote box */
+        .quote-box {
+            background: var(--card-red-bg);
+            border-left: 5px solid var(--primary);
+            padding: 25px 30px;
+            border-radius: 0 12px 12px 0;
+            margin: 20px 0;
+        }
+
+        .quote-box p {
+            font-size: 0.95em !important;
+            font-style: italic;
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .quote-box .author {
+            font-size: 0.7em;
+            color: var(--text-light);
+            font-style: normal;
+            margin-top: 15px;
+            display: block;
+        }
+
+        /* Bullet points */
+        .bullet-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .bullet-list li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+            color: var(--text-gray);
+        }
+
+        .bullet-list li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        /* Code block */
+        .code-block {
+            position: relative;
+            background: #0F172A;
+            color: #E2E8F0;
+            padding: 38px 26px 22px;
+            border-radius: 12px;
+            font-size: 0.78em;
+            text-align: left;
+            overflow: visible;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            line-height: 1.55;
+            overflow-x: auto;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #E2E8F0;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7em;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .copy-btn::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23E2E8F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>') center/contain no-repeat;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Comparison layout */
+        .comparison {
+            display: flex;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .comparison > div {
+            flex: 1;
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+        .comparison .classic {
+            background: #F1F5F9;
+            border: 2px solid #E2E8F0;
+        }
+
+        .comparison .agentic {
+            background: var(--card-green-bg);
+            border: 2px solid var(--card-green-border);
+        }
+
+        .comparison h3 {
+            font-size: 1em;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .comparison ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .comparison li {
+            font-size: 0.75em;
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .comparison .classic li::before {
+            content: "✗";
+            position: absolute;
+            left: 0;
+            color: #DC2626;
+            font-weight: bold;
+        }
+
+        .comparison .agentic li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #059669;
+            font-weight: bold;
+        }
+
+        /* Metric cards */
+        .metrics-row {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .metric-card {
+            flex: 1;
+            background: linear-gradient(135deg, var(--card-red-bg) 0%, var(--bg-white) 100%);
+            border: 2px solid var(--card-red-border);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .metric-card .number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-card .label {
+            font-size: 0.75em;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        /* Diagram slide - centered */
+        .diagram-slide {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center !important;
+        }
+
+        .diagram-slide .slide-header {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .diagram-slide .slide-header h2,
+        .diagram-slide .slide-header .subtitle {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo fisso -->
+    <div class="logo-fixed">
+        <img src="datapizzaLogo.png" alt="Datapizza" />
+    </div>
+
+    <!-- Watermark -->
+    <div class="watermark">
+        <img src="datapizza.png" alt="Watermark Datapizza" />
+    </div>
+
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- SLIDE 1: Cover -->
+            <section class="cover-slide">
+                <div class="cover-logo">
+                    <img src="datapizza.png" alt="Logo Datapizza" />
+                </div>
+                <h1 class="cover-title">Tool, Agenti e RAG Agentico</h1>
+                <p class="cover-subtitle">Guida pratica con il framework datapizza-ai</p>
+                <div class="cover-line"></div>
+                <div>
+                    <span class="tag red">🛠️ Tool</span>
+                    <span class="tag blue">🤖 Agenti</span>
+                    <span class="tag green">📚 RAG</span>
+                    <span class="tag yellow">⚡ ReAct</span>
+                </div>
+                <p class="cover-footer">Presentazione a cura di Datapizza</p>
+            </section>
+
+            <!-- SLIDE 2: Cosa sono i Tool -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">01</div>
+
+                    <div>
+
+                        <h2>Cosa sono i Tool?</h2>
+
+                        <p class="subtitle">Estendere le capacità dell'LLM oltre la sua knowledge base</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Definizione</div>
+                            <p>I tool consentono all'LLM di eseguire operazioni fuori dalla sua knowledge base: <strong>accedere a dati aggiornati</strong>, <strong>interrogare servizi</strong> o <strong>effettuare calcoli</strong>.</p>
+                        </div>
+                        
+                        <ul class="bullet-list">
+                            <li><strong>Informativi:</strong> ritornano dati (API, database)</li>
+                            <li><strong>Operativi:</strong> eseguono azioni (email, calcoli)</li>
+                            <li>L'LLM decide <strong>autonomamente</strong> quando usarli</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="card card-blue">
+                            <div class="card-title blue">Punto Chiave</div>
+                            <p>Il decoratore <code>@tool</code> genera automaticamente lo schema JSON richiesto dall'LLM, traducendo docstring e type hint.</p>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-title gray">Best Practice</div>
+                            <p>Gestire bene le <strong>descrizioni</strong> aiuta il modello a scegliere il tool corretto.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 0.1</p>
+            </section>
+
+            <!-- SLIDE 3: MERMAID - Sequence Diagram Tool -->
+            <section class="diagram-slide">
+                <div class="slide-header">
+
+                    <div class="slide-badge">02</div>
+
+                    <div>
+
+                        <h2>Flusso di Interazione con i Tool</h2>
+
+                        <p class="subtitle">Diagramma di sequenza: dal prompt alla risposta finale</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="diagram-container">
+                    <svg width="1100" height="420" viewBox="0 0 1100 420">
+                        <!-- Participants -->
+                        <rect x="50" y="20" width="120" height="50" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+                        <text x="110" y="52" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="16" fill="#1E293B">👤 Utente</text>
+                        
+                        <rect x="300" y="20" width="120" height="50" rx="10" fill="#C12A22" stroke="#C12A22" stroke-width="2"/>
+                        <text x="360" y="52" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="16" fill="white">🧠 LLM</text>
+                        
+                        <rect x="550" y="20" width="120" height="50" rx="10" fill="#FEF2F2" stroke="#C12A22" stroke-width="2"/>
+                        <text x="610" y="52" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="16" fill="#C12A22">🔧 Tool</text>
+                        
+                        <rect x="800" y="20" width="140" height="50" rx="10" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+                        <text x="870" y="52" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="16" fill="#1D4ED8">🌐 Sistema</text>
+                        
+                        <!-- Lifelines -->
+                        <line x1="110" y1="80" x2="110" y2="400" stroke="#E2E8F0" stroke-width="3" stroke-dasharray="8,4"/>
+                        <line x1="360" y1="80" x2="360" y2="400" stroke="#E2E8F0" stroke-width="3" stroke-dasharray="8,4"/>
+                        <line x1="610" y1="80" x2="610" y2="400" stroke="#E2E8F0" stroke-width="3" stroke-dasharray="8,4"/>
+                        <line x1="870" y1="80" x2="870" y2="400" stroke="#E2E8F0" stroke-width="3" stroke-dasharray="8,4"/>
+                        
+                        <!-- Message 1: User to LLM -->
+                        <line x1="110" y1="120" x2="350" y2="120" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="350,120 340,115 340,125" fill="#C12A22"/>
+                        <rect x="160" y="100" width="140" height="30" rx="6" fill="white" stroke="#E2E8F0"/>
+                        <text x="230" y="120" text-anchor="middle" font-family="Lato" font-size="13" fill="#475569">Prompt utente</text>
+                        
+                        <!-- Message 2: LLM thinks (self-loop) -->
+                        <path d="M 370 160 Q 420 140 420 180 Q 420 220 370 200" stroke="#C12A22" stroke-width="2" fill="none"/>
+                        <polygon points="370,200 378,208 380,196" fill="#C12A22"/>
+                        <rect x="430" y="160" width="100" height="30" rx="6" fill="#FEF2F2"/>
+                        <text x="480" y="180" text-anchor="middle" font-family="Lato" font-size="12" fill="#C12A22">Ragiona...</text>
+                        
+                        <!-- Message 3: LLM to Tool -->
+                        <line x1="360" y1="240" x2="600" y2="240" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="600,240 590,235 590,245" fill="#C12A22"/>
+                        <rect x="405" y="220" width="160" height="30" rx="6" fill="white" stroke="#E2E8F0"/>
+                        <text x="485" y="240" text-anchor="middle" font-family="Monaco" font-size="12" fill="#475569">get_weather("Bologna")</text>
+                        
+                        <!-- Message 4: Tool to System -->
+                        <line x1="610" y1="280" x2="860" y2="280" stroke="#1D4ED8" stroke-width="2"/>
+                        <polygon points="860,280 850,275 850,285" fill="#1D4ED8"/>
+                        <rect x="680" y="260" width="130" height="30" rx="6" fill="white" stroke="#E2E8F0"/>
+                        <text x="745" y="280" text-anchor="middle" font-family="Lato" font-size="12" fill="#475569">Recupera dati</text>
+                        
+                        <!-- Message 5: System to Tool (return) -->
+                        <line x1="860" y1="320" x2="620" y2="320" stroke="#1D4ED8" stroke-width="2" stroke-dasharray="6,4"/>
+                        <polygon points="620,320 630,315 630,325" fill="#1D4ED8"/>
+                        <rect x="680" y="300" width="130" height="30" rx="6" fill="#EFF6FF"/>
+                        <text x="745" y="320" text-anchor="middle" font-family="Lato" font-size="12" fill="#1D4ED8">Risultato JSON</text>
+                        
+                        <!-- Message 6: Tool to LLM (return) -->
+                        <line x1="600" y1="355" x2="370" y2="355" stroke="#C12A22" stroke-width="2" stroke-dasharray="6,4"/>
+                        <polygon points="370,355 380,350 380,360" fill="#C12A22"/>
+                        <rect x="420" y="335" width="140" height="30" rx="6" fill="#FEF2F2"/>
+                        <text x="490" y="355" text-anchor="middle" font-family="Monaco" font-size="11" fill="#C12A22">{temp: 22, ...}</text>
+                        
+                        <!-- Message 7: LLM to User (return) -->
+                        <line x1="350" y1="390" x2="120" y2="390" stroke="#059669" stroke-width="2"/>
+                        <polygon points="120,390 130,385 130,395" fill="#059669"/>
+                        <rect x="160" y="370" width="150" height="30" rx="6" fill="#ECFDF5" stroke="#059669"/>
+                        <text x="235" y="390" text-anchor="middle" font-family="Lato" font-size="13" fill="#059669">Risposta finale ✓</text>
+                    </svg>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 0.1: Tool</p>
+            </section>
+
+            <!-- SLIDE 4: Ciclo ReAct intro -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">03</div>
+
+                    <div>
+
+                        <h2>Agenti: Il Ciclo ReAct</h2>
+
+                        <p class="subtitle">Reason + Act: ragionamento iterativo per task complessi</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="quote-box">
+                    <p>"Gli agenti implementano un loop ReAct (Reason + Act). Ad ogni iterazione pensano, decidono se agire, osservano il risultato e aggiornano il contesto prima di rispondere o continuare."</p>
+                    <span class="author">— Guida datapizza-ai, Sezione 0.2</span>
+                </div>
+                
+                <div class="two-columns" style="margin-top: 30px;">
+                    <div>
+                        <div class="card card-green">
+                            <div class="card-title green">Perché sono utili?</div>
+                            <p>Mantengono <strong>memoria</strong> delle azioni svolte, orchestrano <strong>più tool</strong>, e possono <strong>pianificare</strong> passi intermedi.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-yellow">
+                            <div class="card-title yellow">Debugging</div>
+                            <p>Parametri come <code>max_steps</code> e <code>stream_invoke()</code> facilitano il controllo dell'esecuzione.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 0.2</p>
+            </section>
+
+            <!-- SLIDE 5: MERMAID - ReAct Flowchart -->
+            <section class="diagram-slide">
+                <div class="slide-header">
+
+                    <div class="slide-badge">04</div>
+
+                    <div>
+
+                        <h2>Flowchart del Ciclo ReAct</h2>
+
+                        <p class="subtitle">Il loop iterativo: THOUGHT → ACTION → OBSERVATION</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="diagram-container">
+                    <svg width="1050" height="380" viewBox="0 0 1050 380">
+                        <!-- Node 1: Domanda utente -->
+                        <rect x="30" y="155" width="140" height="60" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+                        <text x="100" y="180" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="14" fill="#1E293B">📝 Domanda</text>
+                        <text x="100" y="198" text-anchor="middle" font-family="Lato" font-size="12" fill="#64748B">utente</text>
+                        
+                        <!-- Arrow 1 -->
+                        <line x1="170" y1="185" x2="220" y2="185" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="220,185 210,180 210,190" fill="#C12A22"/>
+                        
+                        <!-- Node 2: THOUGHT (circle) -->
+                        <circle cx="290" cy="185" r="55" fill="#C12A22"/>
+                        <text x="290" y="180" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="14" fill="white">🧠</text>
+                        <text x="290" y="198" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="13" fill="white">THOUGHT</text>
+                        
+                        <!-- Arrow 2 -->
+                        <line x1="345" y1="185" x2="400" y2="185" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="400,185 390,180 390,190" fill="#C12A22"/>
+                        
+                        <!-- Node 3: Diamond - Serve tool? -->
+                        <polygon points="500,185 430,145 500,105 570,145" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+                        <text x="500" y="140" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="12" fill="#B45309">Serve</text>
+                        <text x="500" y="155" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="12" fill="#B45309">tool?</text>
+                        
+                        <!-- Branch: YES path (down) -->
+                        <line x1="500" y1="185" x2="500" y2="230" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="500,230 495,220 505,220" fill="#C12A22"/>
+                        <text x="520" y="210" font-family="Lato" font-size="11" fill="#059669">Sì</text>
+                        
+                        <!-- Node 4: Seleziona tool -->
+                        <rect x="430" y="240" width="140" height="50" rx="10" fill="#FEF2F2" stroke="#C12A22" stroke-width="2"/>
+                        <text x="500" y="270" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="13" fill="#C12A22">⚡ Seleziona tool</text>
+                        
+                        <!-- Arrow down -->
+                        <line x1="500" y1="290" x2="500" y2="320" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="500,320 495,310 505,310" fill="#C12A22"/>
+                        
+                        <!-- Node 5: Esegui tool -->
+                        <rect x="430" y="325" width="140" height="50" rx="10" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+                        <text x="500" y="355" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="13" fill="#1D4ED8">🔧 Esegui tool</text>
+                        
+                        <!-- Arrow to OBSERVATION -->
+                        <line x1="570" y1="350" x2="620" y2="350" stroke="#1D4ED8" stroke-width="2"/>
+                        <polygon points="620,350 610,345 610,355" fill="#1D4ED8"/>
+                        
+                        <!-- Node 6: OBSERVATION -->
+                        <rect x="630" y="320" width="140" height="60" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+                        <text x="700" y="345" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="13" fill="#059669">👁️ OBSERVATION</text>
+                        <text x="700" y="365" text-anchor="middle" font-family="Lato" font-size="11" fill="#64748B">risultato tool</text>
+                        
+                        <!-- Loop back arrow -->
+                        <path d="M 700 320 L 700 70 L 290 70 L 290 130" stroke="#C12A22" stroke-width="2" fill="none" stroke-dasharray="6,4"/>
+                        <polygon points="290,130 285,120 295,120" fill="#C12A22"/>
+                        <rect x="440" y="55" width="80" height="24" rx="6" fill="#FEF2F2"/>
+                        <text x="480" y="72" text-anchor="middle" font-family="Lato" font-size="11" fill="#C12A22">loop</text>
+                        
+                        <!-- Branch: NO path (right) -->
+                        <line x1="570" y1="145" x2="750" y2="145" stroke="#059669" stroke-width="2"/>
+                        <polygon points="750,145 740,140 740,150" fill="#059669"/>
+                        <text x="600" y="135" font-family="Lato" font-size="11" fill="#DC2626">No</text>
+                        
+                        <!-- Node 7: ANSWER (circle) -->
+                        <circle cx="820" cy="145" r="55" fill="#059669"/>
+                        <text x="820" y="140" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="14" fill="white">✅</text>
+                        <text x="820" y="158" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="13" fill="white">ANSWER</text>
+                        
+                        <!-- Arrow to Output -->
+                        <line x1="875" y1="145" x2="920" y2="145" stroke="#059669" stroke-width="2"/>
+                        <polygon points="920,145 910,140 910,150" fill="#059669"/>
+                        
+                        <!-- Node 8: Output finale -->
+                        <rect x="930" y="115" width="110" height="60" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+                        <text x="985" y="140" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="13" fill="#059669">📤 Output</text>
+                        <text x="985" y="158" text-anchor="middle" font-family="Lato" font-size="11" fill="#64748B">finale</text>
+                    </svg>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 0.2: Ciclo ReAct</p>
+            </section>
+
+            <!-- SLIDE 6: RAG Agentico intro -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">05</div>
+
+                    <div>
+
+                        <h2>RAG Agentico</h2>
+
+                        <p class="subtitle">L'agente decide quando e come cercare nei documenti</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Cos'è?</div>
+                            <p>Nel RAG agentico l'agente <strong>valuta se serve consultare i documenti</strong>, riformula la query se necessario e può <strong>ripetere la ricerca</strong> fino a ottenere un contesto sufficiente.</p>
+                        </div>
+                        
+                        <div class="card card-blue" style="margin-top: 20px;">
+                            <div class="card-title blue">vs RAG Classico</div>
+                            <p>Nel RAG classico ogni query genera <strong>sempre</strong> un embedding e una ricerca, anche per un semplice "Ciao!"</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-green">
+                            <div class="card-title green">Benefici Principali</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li><strong>Efficienza:</strong> evita ricerche inutili</li>
+                                <li><strong>Copertura:</strong> query iterative e riformulazioni</li>
+                                <li><strong>Flessibilità:</strong> combina ricerca con altri tool</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 0.3</p>
+            </section>
+
+            <!-- SLIDE 7: MERMAID - RAG Agentico Flowchart -->
+            <section class="diagram-slide">
+                <div class="slide-header">
+
+                    <div class="slide-badge">06</div>
+
+                    <div>
+
+                        <h2>Flowchart RAG Agentico</h2>
+
+                        <p class="subtitle">Ricerca guidata dall'agente con riformulazione iterativa</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="diagram-container">
+                    <svg width="900" height="450" viewBox="0 0 900 450">
+                        <!-- Node 1: Domanda utente -->
+                        <rect x="375" y="20" width="150" height="55" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+                        <text x="450" y="45" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="14" fill="#1E293B">📝 Domanda utente</text>
+                        <text x="450" y="62" text-anchor="middle" font-family="Lato" font-size="11" fill="#64748B">input iniziale</text>
+                        
+                        <!-- Arrow down -->
+                        <line x1="450" y1="75" x2="450" y2="105" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="450,105 445,95 455,95" fill="#C12A22"/>
+                        
+                        <!-- Node 2: Agente RAG -->
+                        <rect x="375" y="110" width="150" height="55" rx="12" fill="#C12A22"/>
+                        <text x="450" y="135" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="14" fill="white">🤖 Agente RAG</text>
+                        <text x="450" y="152" text-anchor="middle" font-family="Lato" font-size="11" fill="rgba(255,255,255,0.8)">analizza intenzione</text>
+                        
+                        <!-- Arrow down -->
+                        <line x1="450" y1="165" x2="450" y2="195" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="450,195 445,185 455,185" fill="#C12A22"/>
+                        
+                        <!-- Node 3: Diamond - Serve ricerca? -->
+                        <polygon points="450,260 370,220 450,180 530,220" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+                        <text x="450" y="215" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="12" fill="#B45309">Serve</text>
+                        <text x="450" y="230" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="12" fill="#B45309">ricerca?</text>
+                        
+                        <!-- Branch LEFT: No -->
+                        <line x1="370" y1="220" x2="220" y2="220" stroke="#059669" stroke-width="2"/>
+                        <polygon points="220,220 230,215 230,225" fill="#059669"/>
+                        <text x="300" y="210" font-family="Lato" font-size="12" fill="#DC2626">No</text>
+                        
+                        <!-- Node: Risposta diretta -->
+                        <rect x="70" y="195" width="150" height="50" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+                        <text x="145" y="225" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="13" fill="#059669">✅ Risposta diretta</text>
+                        
+                        <!-- Branch RIGHT: Sì -->
+                        <line x1="530" y1="220" x2="610" y2="220" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="610,220 600,215 600,225" fill="#C12A22"/>
+                        <text x="565" y="210" font-family="Lato" font-size="12" fill="#059669">Sì</text>
+                        
+                        <!-- Node: search_documents -->
+                        <rect x="610" y="195" width="170" height="50" rx="12" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+                        <text x="695" y="225" text-anchor="middle" font-family="Monaco" font-weight="600" font-size="12" fill="#1D4ED8">🔍 search_documents</text>
+                        
+                        <!-- Arrow down from search -->
+                        <line x1="695" y1="245" x2="695" y2="280" stroke="#1D4ED8" stroke-width="2"/>
+                        <polygon points="695,280 690,270 700,270" fill="#1D4ED8"/>
+                        
+                        <!-- Diamond: Info sufficienti? -->
+                        <polygon points="695,345 615,305 695,265 775,305" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+                        <text x="695" y="300" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="11" fill="#B45309">Info</text>
+                        <text x="695" y="315" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="11" fill="#B45309">sufficienti?</text>
+                        
+                        <!-- Branch DOWN: No - Riformula -->
+                        <line x1="695" y1="345" x2="695" y2="385" stroke="#C12A22" stroke-width="2"/>
+                        <polygon points="695,385 690,375 700,375" fill="#C12A22"/>
+                        <text x="720" y="365" font-family="Lato" font-size="11" fill="#DC2626">No</text>
+                        
+                        <!-- Node: Riformula query -->
+                        <rect x="610" y="390" width="170" height="45" rx="10" fill="#FEF2F2" stroke="#C12A22" stroke-width="2"/>
+                        <text x="695" y="418" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="12" fill="#C12A22">🔄 Riformula query</text>
+                        
+                        <!-- Loop back arrow -->
+                        <path d="M 780 412 L 850 412 L 850 220 L 780 220" stroke="#C12A22" stroke-width="2" fill="none" stroke-dasharray="6,4"/>
+                        <polygon points="780,220 790,215 790,225" fill="#C12A22"/>
+                        
+                        <!-- Branch LEFT from diamond: Sì -->
+                        <line x1="615" y1="305" x2="520" y2="305" stroke="#059669" stroke-width="2"/>
+                        <polygon points="520,305 530,300 530,310" fill="#059669"/>
+                        <text x="575" y="295" font-family="Lato" font-size="11" fill="#059669">Sì</text>
+                        
+                        <!-- Node: Contestualizza -->
+                        <rect x="345" y="280" width="175" height="50" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+                        <text x="432" y="310" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="12" fill="#059669">📋 Contestualizza risultati</text>
+                        
+                        <!-- Arrow down -->
+                        <line x1="432" y1="330" x2="432" y2="365" stroke="#059669" stroke-width="2"/>
+                        <polygon points="432,365 427,355 437,355" fill="#059669"/>
+                        
+                        <!-- Node: Risposta basata sui doc -->
+                        <rect x="320" y="370" width="225" height="50" rx="12" fill="#059669"/>
+                        <text x="432" y="400" text-anchor="middle" font-family="Poppins" font-weight="600" font-size="13" fill="white">✅ Risposta basata sui documenti</text>
+                    </svg>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 0.3: RAG agentico</p>
+            </section>
+
+            <!-- SLIDE 8: Setup variabili -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">07</div>
+
+                    <div>
+
+                        <h2>Setup: Variabili d'Ambiente</h2>
+
+                        <p class="subtitle">Carica l'API key e definisci i parametri globali</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY non trovata")
+
+LLM_MODEL = "gpt-5.1"
+EMBEDDING_MODEL = "text-embedding-3-small"
+QDRANT_PATH = "../qdrant_data"
+COLLECTION_NAME = "ducati_docs"
+
+print("Setup completato")
+print(f"Modello LLM: {LLM_MODEL}")</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Prerequisiti</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>File <code>.env</code> con <strong>OPENAI_API_KEY</strong></li>
+                                <li>Vector store Qdrant già popolato</li>
+                                <li>Notebook di riferimento: <strong>Agents_Tutorial.ipynb</strong></li>
+                            </ul>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title gray">Parametri chiave</div>
+                            <p>Centralizza nome modello, embedder e path del vector store per riusarli in tutta la pipeline.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 1.1</p>
+            </section>
+
+            <!-- SLIDE 9: Client OpenAI -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">08</div>
+
+                    <div>
+
+                        <h2>Client OpenAI</h2>
+
+                        <p class="subtitle">Inizializza il client che alimenta gli agenti</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">from datapizza.agents import Agent
+from datapizza.clients.openai import OpenAIClient
+
+client = OpenAIClient(
+    api_key=api_key,
+    model=LLM_MODEL,
+)
+
+print("Client OpenAI creato")</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-blue">
+                            <div class="card-title blue">Perché prima il client?</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Riutilizzi lo stesso client per più agenti.</li>
+                                <li>Centralizzi rate-limit e telemetria.</li>
+                                <li>Puoi sostituire il modello variando un solo parametro.</li>
+                            </ul>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title gray">Tip</div>
+                            <p>Imposta il modello via variabile d'ambiente per passare rapidamente da <code>gpt-4o-mini</code> a <code>gpt-5.1</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 1.2</p>
+            </section>
+
+            <!-- SLIDE 8: Codice Tool -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">09</div>
+
+                    <div>
+
+                        <h2>Esempio: Tool Meteo</h2>
+
+                        <p class="subtitle">Il decoratore @tool in azione</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">@tool
+def get_weather(city: str, unit: str = "celsius") -> str:
+    """Restituisce le condizioni meteo di una città italiana."""
+    weather_data = {
+        "bologna": {"temp": 22, "condition": "soleggiato"},
+        "milano": {"temp": 18, "condition": "nuvoloso"},
+        "roma": {"temp": 25, "condition": "sereno"},
+    }
+
+    city_lower = city.lower()
+    if city_lower not in weather_data:
+        return f"Città {city} non trovata nel database meteo."
+
+    data = weather_data[city_lower]
+    temp = data["temp"]
+    if unit == "fahrenheit":
+        temp = temp * 9 / 5 + 32
+
+    return (
+        f"A {city} ci sono {temp}°{'F' if unit == 'fahrenheit' else 'C'}, "
+        f"cielo {data['condition']}."
+    )</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Schema Generato</div>
+                            <p>datapizza-ai traduce automaticamente docstring e type hint in uno schema JSON compatibile con OpenAI function calling.</p>
+                        </div>
+                        
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title gray">Output Esempio</div>
+                            <p style="font-family: Monaco; font-size: 0.75em; background: #F1F5F9; padding: 10px; border-radius: 6px;">
+                                "A Bologna ci sono 22°C, cielo soleggiato."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 2.1</p>
+            </section>
+
+            <!-- SLIDE 9B: Tool Calcolatrice -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">10</div>
+
+                    <div>
+
+                        <h2>Esempio: Tool Calcolatrice</h2>
+
+                        <p class="subtitle">Eval controllato con funzioni matematiche consentite</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">import math
+
+@tool
+def calculate(expression: str) -> str:
+    """Esegue calcoli matematici (pow, sqrt, trig)."""
+    allowed_names = {
+        "sqrt": math.sqrt,
+        "pow": pow,
+        "abs": abs,
+        "round": round,
+        "sin": math.sin,
+        "cos": math.cos,
+        "pi": math.pi,
+    }
+
+    try:
+        result = eval(expression, {"__builtins__": {}}, allowed_names)
+        return f"Il risultato di {expression} è {result}"
+    except Exception as exc:
+        return f"Errore nel calcolo: {exc}"
+</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-blue">
+                            <div class="card-title blue">Perimetro sicuro</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Nessun <code>__builtins__</code> disponibile → impossibile eseguire codice arbitrario.</li>
+                                <li>Whitelist di funzioni matematiche comuni.</li>
+                                <li>Messaggi di errore controllati per migliorare il reasoning.</li>
+                            </ul>
+                        </div>
+
+                        <div class="card card-yellow" style="margin-top: 20px;">
+                            <div class="card-title yellow">Uso tipico</div>
+                            <p>Esegui calcoli intermedi all'interno del loop ReAct senza uscire dal contesto conversazionale.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 2.2</p>
+            </section>
+
+            <!-- SLIDE 10: Creare un Agente -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">11</div>
+
+                    <div>
+
+                        <h2>Creare un Agente</h2>
+
+                        <p class="subtitle">Configurazione con datapizza-ai</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">from datapizza.agents import Agent
+from datapizza.clients.openai import OpenAIClient
+
+agent = Agent(
+    name="weather_agent",
+    system_prompt="""Sei un assistente che può fornire info meteo
+    e fare calcoli matematici.""",
+    client=OpenAIClient(api_key=api_key, model="gpt-4o-mini"),
+    tools=[get_weather, calculate],
+    max_steps=5,
+)</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-blue">
+                            <div class="card-title blue">Parametri Chiave</div>
+                            <ul class="bullet-list" style="margin: 0; font-size: 0.8em;">
+                                <li><strong>name:</strong> identificativo agente</li>
+                                <li><strong>system_prompt:</strong> istruzioni</li>
+                                <li><strong>tools:</strong> lista di tool</li>
+                                <li><strong>max_steps:</strong> limite iterazioni</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card card-yellow" style="margin-top: 20px;">
+                            <div class="card-title yellow">💡 Tip</div>
+                            <p>Usa <code>stream_invoke()</code> per vedere ogni step del ragionamento in tempo reale.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 3</p>
+            </section>
+
+            <!-- SLIDE 11: Agente Meteo + Calcoli -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">12</div>
+
+                    <div>
+
+                        <h2>Weather & Calculator Agent</h2>
+
+                        <p class="subtitle">Combina tool eterogenei e un solo LLM client</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">weather_agent = Agent(
+    name="weather_calculator_agent",
+    system_prompt="""Sei un assistente utile che fornisce
+meteo in Italia ed esegue calcoli matematici.
+Rispondi sempre in italiano.""",
+    client=client,
+    tools=[get_weather, calculate],
+    max_steps=5,
+)
+
+print("Agente creato con tool: get_weather, calculate")
+</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-green">
+                            <div class="card-title green">Cosa fa</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Interroga il tool corretto in base alla domanda.</li>
+                                <li>Converte le unità (es. °C → °F) usando <code>calculate</code>.</li>
+                                <li>Risponde con tono coerente e lingua italiana.</li>
+                            </ul>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title gray">Parametri rilevanti</div>
+                            <p><strong>max_steps=5</strong> limita il loop ReAct, mentre il <strong>system_prompt</strong> esplicita quando usare i tool.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 3.1</p>
+            </section>
+
+            <!-- SLIDE 12: Test agente -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">13</div>
+
+                    <div>
+
+                        <h2>Testare l'agente</h2>
+
+                        <p class="subtitle">Verifica percorsi meteo, matematici e conversazionali</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python"># Domanda meteo
+response = weather_agent.run("Che tempo fa a Bologna?")
+print(response.text)
+
+# Calcolo matematico
+response = weather_agent.run("Quanto fa 2 elevato alla 16?")
+print(response.text)
+
+# Ragionamento multi-step
+response = weather_agent.run(
+    "Se a Bologna ci sono 22 gradi, quanto fa il quadrato della temperatura?"
+)
+print(response.text)
+
+# Small talk (no tool)
+print(weather_agent.run("Ciao, come stai?").text)</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Cosa monitorare</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Che il modello risponda direttamente quando non serve un tool.</li>
+                                <li>Che gli output dei tool vengano interpretati correttamente.</li>
+                                <li>Che errori o città sconosciute vengano gestiti con grazia.</li>
+                            </ul>
+                        </div>
+
+                        <div class="card card-blue" style="margin-top: 20px;">
+                            <div class="card-title blue">Suggerimento</div>
+                            <p>Automatizza questi test in un notebook per confrontare versioni diverse del prompt o dei tool.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 3.1 (Testing)</p>
+            </section>
+
+            <!-- SLIDE 13: stream_invoke -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">14</div>
+
+                    <div>
+
+                        <h2>Debug con stream_invoke()</h2>
+
+                        <p class="subtitle">Visualizza ogni THOUGHT/ACTION/OBSERVATION in tempo reale</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">for step in weather_agent.stream_invoke(
+        "Che temperatura c'è a Roma in Fahrenheit?"):
+    print(f"\n--- Step {step.index} ---")
+    print(step.text[:200])</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-yellow">
+                            <div class="card-title yellow">Perché usarlo</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Capisci quando e perché l'agente decide di chiamare un tool.</li>
+                                <li>Diagnostichi prompt ambigui o descrizioni poco chiare.</li>
+                                <li>Tracci i token step-by-step senza aspettare la risposta finale.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 3.2</p>
+            </section>
+
+            <!-- SLIDE 14B: Vectorstore setup -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">15</div>
+
+                    <div>
+
+                        <h2>Vector Store & Embedder</h2>
+
+                        <p class="subtitle">Qdrant locale + OpenAI embeddings</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">from datapizza.vectorstores.qdrant import QdrantVectorstore
+from datapizza.embedders.openai import OpenAIEmbedder
+
+vectorstore = QdrantVectorstore(
+    location=None,
+    path=QDRANT_PATH,
+)
+
+embedder = OpenAIEmbedder(
+    api_key=api_key,
+    model_name=EMBEDDING_MODEL,
+)
+
+print(f"Vector store caricato da: {QDRANT_PATH}")</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-green">
+                            <div class="card-title green">Checklist</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Qdrant avviato in locale (<code>path</code> nel repo).</li>
+                                <li>Collection <code>ducati_docs</code> già popolata.</li>
+                                <li>Embedder coerente con i vettori indicizzati.</li>
+                            </ul>
+                        </div>
+
+                        <div class="card card-accent" style="margin-top: 20px;">
+                            <div class="card-title">Tip</div>
+                            <p>Allinea il modello di embedding in fase di indexing e query per evitare degrado rilevanza.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 4.1</p>
+            </section>
+
+            <!-- SLIDE 15: Tool search_documents -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">16</div>
+
+                    <div>
+
+                        <h2>Tool: search_documents</h2>
+
+                        <p class="subtitle">Il cuore del RAG agentico</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">@tool
+def search_documents(query: str, num_results: int = 3) -> str:
+    """Cerca informazioni nei documenti Ducati indicizzati."""
+    try:
+        query_embedding = embedder.embed(query)
+        results = vectorstore.search(
+            query_vector=query_embedding,
+            collection_name=COLLECTION,
+            k=num_results,
+        )
+
+        if not results:
+            return "Nessun documento trovato per questa ricerca."
+
+        formatted = []
+        for idx, chunk in enumerate(results, start=1):
+            text = chunk.text[:500]
+            suffix = "..." if len(chunk.text) > 500 else ""
+            formatted.append(f"[Risultato {idx}]
+{text}{suffix}")
+
+        return "
+
+".join(formatted)
+    except Exception as exc:
+        return f"Errore nella ricerca: {exc}"
+</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-green">
+                            <div class="card-title green">Stack Tecnologico</div>
+                            <div style="margin-top: 15px;">
+                                <span class="tag">Qdrant</span>
+                                <span class="tag blue">OpenAI Embeddings</span>
+                                <span class="tag yellow">text-embedding-3-small</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title gray">Flusso</div>
+                            <p>Query → Embedding → Ricerca vettoriale → Top-K risultati → Formattazione</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 4.2</p>
+            </section>
+
+            <!-- SLIDE 16: Agente RAG -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">17</div>
+
+                    <div>
+
+                        <h2>Agente RAG Ducati</h2>
+
+                        <p class="subtitle">Decide quando cercare e come usare i risultati</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">rag_agent = Agent(
+    name="ducati_rag_agent",
+    system_prompt="""Sei un assistente esperto dei
+documenti Ducati. Usa search_documents solo per
+domande sull'azienda. Se non trovi info sufficienti
+ritenta la ricerca e dillo chiaramente.""",
+    client=client,
+    tools=[search_documents],
+    max_steps=5,
+)
+
+print("Agente RAG creato")</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-green">
+                            <div class="card-title green">Regole più importanti</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Invoca il tool SOLO per domande su Ducati.</li>
+                                <li>Riformula la query se il contesto è insufficiente.</li>
+                                <li>Risponde in italiano e cita la mancanza di dati.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 4.3</p>
+            </section>
+
+            <!-- SLIDE 17: Test Agente RAG -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">18</div>
+
+                    <div>
+
+                        <h2>Test dell'Agente RAG</h2>
+
+                        <p class="subtitle">Mix di domande con e senza ricerca</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block">
+<pre><code class="language-python">print("Domanda: Quanti dipendenti IT ha Ducati?")
+for step in rag_agent.stream_invoke(
+        "Quanti dipendenti IT ha Ducati?"):
+    print(f"Step {step.index}: {step.text[:160]}")
+
+print("\nDomanda: Ciao, come ti chiami?")
+print(rag_agent.run("Ciao, come ti chiami?").text)
+
+for question in [
+        "Quali strumenti AI usa Ducati?",
+        "Chi è il CIO di Ducati?",
+        "Qual è il fatturato annuo di Ducati?",
+]:
+    print(f"\nDomanda: {question}")
+    print(rag_agent.run(question).text)</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Osserva</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Il loop decide se avviare una ricerca o rispondere subito.</li>
+                                <li>Le query iterate migliorano copertura e recall.</li>
+                                <li>Le domande generiche non dovrebbero toccare il vector store.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 4.4</p>
+            </section>
+
+            <!-- SLIDE 18: Confronto RAG -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">19</div>
+
+                    <div>
+
+                        <h2>RAG Classico vs Agentico</h2>
+
+                        <p class="subtitle">Due approcci a confronto</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="comparison">
+                    <div class="classic">
+                        <h3 style="color: var(--text-dark);">📚 RAG Classico</h3>
+                        <p style="font-size: 0.75em; margin-bottom: 20px;">Ogni query genera <strong>sempre</strong> embedding + ricerca</p>
+                        <ul>
+                            <li>"Ciao!" → Cerca nel DB (inutile)</li>
+                            <li>Costi elevati per query semplici</li>
+                            <li>Nessuna riformulazione possibile</li>
+                            <li>Un solo tentativo di ricerca</li>
+                        </ul>
+                    </div>
+                    <div class="agentic">
+                        <h3 style="color: #059669;">🤖 RAG Agentico</h3>
+                        <p style="font-size: 0.75em; margin-bottom: 20px;">L'agente <strong>decide</strong> se e come cercare</p>
+                        <ul>
+                            <li>"Ciao!" → Risposta diretta</li>
+                            <li>Costi ottimizzati</li>
+                            <li>Riformulazione query automatica</li>
+                            <li>Iterazioni multiple se necessario</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 4.5</p>
+            </section>
+
+            <!-- SLIDE 19: System Prompt -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">20</div>
+
+                    <div>
+
+                        <h2>System Prompt dell'Agente RAG</h2>
+
+                        <p class="subtitle">Regole chiare per comportamento prevedibile</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block" style="font-size: 0.65em;">
+<pre><code class="language-python">system_prompt = """
+Sei un assistente esperto dei documenti aziendali Ducati.
+
+REGOLE IMPORTANTI:
+1. Usa search_documents SOLO per domande su Ducati
+2. Per domande generiche rispondi SENZA usare il tool
+3. Se non trovi info sufficienti, riformula la query
+4. Basa le risposte sui documenti
+5. Se non trovi nulla, dillo
+
+Rispondi sempre in italiano.
+"""
+</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Anatomia del Prompt</div>
+                            <ul class="bullet-list" style="margin: 0; font-size: 0.75em;">
+                                <li><strong>Ruolo:</strong> definisce personalità</li>
+                                <li><strong>Regole numerate:</strong> chiarezza</li>
+                                <li><strong>Scope tool:</strong> quando usare/non usare</li>
+                                <li><strong>Lingua:</strong> output consistente</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sezione 4.3</p>
+            </section>
+
+            <!-- SLIDE 20: Best Practices -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">21</div>
+
+                    <div>
+
+                        <h2>Best Practices</h2>
+
+                        <p class="subtitle">Consigli pratici per agenti efficaci</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="card card-green">
+                            <div class="card-title green">✅ Da Fare</div>
+                            <ul class="bullet-list" style="margin: 0; font-size: 0.75em;">
+                                <li>Descrizioni tool chiare e dettagliate</li>
+                                <li>Imposta <code>max_steps</code> ragionevole (5-10)</li>
+                                <li>Usa <code>stream_invoke()</code> per debugging</li>
+                                <li>Testa query che NON richiedono tool</li>
+                                <li>Gestisci errori nei tool</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">⚠️ Da Evitare</div>
+                            <ul class="bullet-list" style="margin: 0; font-size: 0.75em;">
+                                <li>Descrizioni vaghe o duplicate</li>
+                                <li>System prompt senza regole chiare</li>
+                                <li>max_steps troppo alto (spreco token)</li>
+                                <li>Ignorare casi edge</li>
+                                <li>Non monitorare latenza e costi</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Best practices</p>
+            </section>
+
+            <!-- SLIDE 21: Citazioni -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">22</div>
+
+                    <div>
+
+                        <h2>Citazioni Chiave</h2>
+
+                        <p class="subtitle">I concetti fondamentali dalla guida</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="quote-box">
+                    <p>"I tool consentono all'LLM di eseguire operazioni fuori dalla sua knowledge base: accedere a dati aggiornati, interrogare servizi interni o effettuare calcoli affidabili."</p>
+                    <span class="author">— Guida datapizza-ai, Sezione 0.1</span>
+                </div>
+                
+                <div class="quote-box" style="margin-top: 25px;">
+                    <p>"Nel RAG classico ogni query genera sempre un embedding e una ricerca. Nel RAG agentico l'agente valuta se serve consultare i documenti, riformula la query se necessario."</p>
+                    <span class="author">— Guida datapizza-ai, Sezione 0.3</span>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Citazioni aggregate</p>
+            </section>
+
+            <!-- SLIDE 22: Key Takeaways -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">23</div>
+
+                    <div>
+
+                        <h2>Key Takeaways</h2>
+
+                        <p class="subtitle">Cosa portare a casa</p>
+
+                    </div>
+
+                </div>
+                
+                <div class="two-columns">
+                    <div>
+                        <div class="card card-accent" style="margin-bottom: 20px;">
+                            <div class="card-title">1. Tool = Estensione</div>
+                            <p>I tool estendono l'LLM oltre la sua knowledge base. Il decoratore <code>@tool</code> elimina il boilerplate.</p>
+                        </div>
+                        
+                        <div class="card card-blue" style="margin-bottom: 20px;">
+                            <div class="card-title blue">2. Agenti = Ragionamento</div>
+                            <p>Il ciclo ReAct (Thought → Action → Observation) permette ragionamento iterativo su task complessi.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-green" style="margin-bottom: 20px;">
+                            <div class="card-title green">3. RAG Agentico = Efficienza</div>
+                            <p>L'agente decide quando cercare, evitando ricerche inutili e permettendo riformulazioni.</p>
+                        </div>
+                        
+                        <div class="card card-yellow">
+                            <div class="card-title yellow">4. Prompt = Controllo</div>
+                            <p>Un system prompt ben strutturato garantisce comportamento prevedibile e consistente.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="source">Fonte: Guida datapizza-ai - Sintesi</p>
+            </section>
+
+            <!-- SLIDE 23: Appendice manual tool -->
+            <section>
+                <div class="slide-header">
+
+                    <div class="slide-badge">24</div>
+
+                    <div>
+
+                        <h2>Appendice: Tool manuali</h2>
+
+                        <p class="subtitle">Quando serve definire schema e funzione a mano</p>
+
+                    </div>
+
+                </div>
+
+                <div class="two-columns">
+                    <div>
+                        <div class="code-block" style="font-size: 0.7em;">
+<pre><code class="language-python">def get_weather(city: str, unit: str = "celsius") -> dict:
+    ... # restituisce dict con temperatura e condizione
+
+weather_tool = {
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Restituisce il meteo di una città italiana",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {"type": "string"},
+                "unit": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                },
+            },
+            "required": ["city"],
+        },
+    },
+}</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-accent">
+                            <div class="card-title">Quando usarli</div>
+                            <ul class="bullet-list" style="margin: 0;">
+                                <li>Framework diversi da datapizza-ai.</li>
+                                <li>Necessità di pieno controllo sul JSON delle funzioni.</li>
+                                <li>Compatibilità con API che si aspettano schema esplicito.</li>
+                            </ul>
+                        </div>
+
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title gray">Consiglio</div>
+                            <p>Riutilizza docstring e enum anche qui per mantenere le descrizioni allineate con i tool decorati.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="source">Fonte: Guida datapizza-ai - Appendice</p>
+            </section>
+
+            <!-- SLIDE 16: Q&A -->
+            <section class="cover-slide">
+                <div class="cover-logo">
+                    <img src="datapizza.png" alt="Logo Datapizza" />
+                </div>
+                <h1 class="cover-title">Q&A</h1>
+                <p class="cover-subtitle">Domande e Risposte</p>
+                <div class="cover-line"></div>
+                <div style="margin: 30px 0;">
+                    <span class="tag">📧 info@datapizza.tech</span>
+                    <span class="tag blue">🌐 datapizza.tech</span>
+                    <span class="tag green">📚 github.com/datapizza</span>
+                </div>
+                <p class="cover-footer">Grazie per l'attenzione!</p>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Reveal.js -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/math/math.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+    
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: false,
+            controls: true,
+            progress: true,
+            center: false,
+            transition: 'slide',
+            width: 1280,
+            height: 720,
+            margin: 0.04,
+            math: {
+                mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+                config: 'TeX-AMS_HTML-full'
+            },
+            plugins: [RevealMath.MathJax3]
+        });
+
+        hljs.highlightAll();
+
+        document.querySelectorAll('.code-block pre code').forEach((block) => {
+            const button = document.createElement('button');
+            button.className = 'copy-btn';
+            button.setAttribute('type', 'button');
+            button.textContent = 'Copy';
+
+            button.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(block.innerText);
+                    const original = button.textContent;
+                    button.textContent = 'Copiato!';
+                    setTimeout(() => (button.textContent = original), 2000);
+                } catch (err) {
+                    button.textContent = 'Errore';
+                    setTimeout(() => (button.textContent = 'Copy'), 2000);
+                }
+            });
+
+            const container = block.closest('.code-block');
+            if (container) {
+                container.appendChild(button);
+            }
+        });
+    </script>
+</body>
+</html>
