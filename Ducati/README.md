@@ -59,22 +59,46 @@ Il progetto utilizza `uv` per la gestione delle dipendenze e dell'ambiente virtu
 
 > Dopo l’installazione, chiudi e riapri il terminale se il comando `uv` non viene riconosciuto.
 
+### 1.4. Reperibilità delle librerie Datapizza
+
+`datapizza-ai` e i relativi plugin sono pubblicati sul PyPI standard:
+
+```bash
+pip install datapizza-ai datapizza-ai-parsers-docling
+```
+
+funziona senza configurazioni extra.
+
+Se dovessi vedere errori `401 Unauthorized` verso `repository.datapizza.tech`, significa che stai usando un vecchio `pyproject.toml` o un file `uv.lock` che forza quell’indice. Aggiorna il progetto (vedi git pull) o elimina eventuali impostazioni personalizzate di `uv` così da tornare all’indice pubblico `https://pypi.org/simple`.
+
 ## 2. Installazione del progetto (ambiente riproducibile)
 
 Una volta installati Python (3.12+) e `uv`, puoi creare l’ambiente virtuale e installare le dipendenze in modo riproducibile.
 
-1.  **Clonare il repository** (se necessario):
-    ```bash
-    git clone <url-repository>
-    cd Ducati
-    ```
+1.  **Clonare la cartella `Ducati`**:
+
+    - Se hai accesso al repository standalone:
+        ```bash
+        git clone https://github.com/datapizza/Ducati.git
+        cd Ducati
+        ```
+
+    - Se stai lavorando dal monorepo `datapizza/Datapizza` (quello che contiene più cartelle) e vuoi evitare di scaricare tutto, puoi usare lo sparse checkout:
+        ```bash
+        git clone --filter=blob:none https://github.com/datapizza/Datapizza.git
+        cd Datapizza
+        git sparse-checkout init --cone
+        git sparse-checkout set Ducati
+        cd Ducati
+        ```
+
+        In questo modo Git scarica solo la cartella `Ducati` e i file strettamente necessari.
 
 2.  **Sincronizzare l'ambiente**:
 
     Questo comando:
     - crea l'ambiente virtuale `.venv`
     - installa tutte le dipendenze rispettando le versioni definite in `uv.lock`
-    - configura automaticamente il repository privato Datapizza
 
     ```bash
     uv sync
@@ -121,5 +145,3 @@ Il notebook `Ducati.ipynb` copre i seguenti argomenti:
 *   **Chiamata API**: Esempio base di invio prompt.
 *   **Chatbot**: Implementazione di una classe con memoria persistente della conversazione.
 *   **Tools**: Esempio di integrazione di funzioni Python (calcolatrice, meteo) richiamabili dal modello.
-
-
