@@ -110,6 +110,40 @@ Una volta installati Python (3.12+) e `uv`, puoi creare l’ambiente virtuale e 
     uv sync --frozen
     ```
 
+## 2-bis. Setup tramite Docker (se non puoi installare Python 3.12 o manca l’accesso a internet)
+
+Se lavori su una macchina bloccata a Python 3.11 o senza accesso a PyPI, puoi usare il container incluso nel repository. Serve una macchina che abbia Docker e connessione **solo durante la build** (per scaricare le dipendenze una volta per tutte).
+
+1.  **Build dell'immagine** (eseguila nella root del progetto):
+    ```bash
+    docker build -t ducati-ai .
+    ```
+
+2.  **Avvio del notebook**:
+    ```bash
+    docker run --rm -it \
+        -p 8888:8888 \
+        -e OPENAI_API_KEY=sk-... \
+        -v "$(pwd)/Notebook:/app/Notebook" \
+        -v "$(pwd)/qdrant_data:/app/qdrant_data" \
+        ducati-ai
+    ```
+
+    - La porta `8888` viene mappata sul tuo host: apri il browser sull’URL stampato da Jupyter.
+    - I volumi montati garantiscono che il notebook e il database Qdrant restino persistenti sul tuo filesystem host.
+
+3.  **Eseguire la pipeline RAG da linea di comando** (esempio ingestion):
+    ```bash
+    docker run --rm -it \
+        -e OPENAI_API_KEY=sk-... \
+        -v "$(pwd)/data:/app/data" \
+        -v "$(pwd)/qdrant_data:/app/qdrant_data" \
+        ducati-ai \
+        uv run python rag_pipeline.py ingest data/MonsterRev02.pdf
+    ```
+
+In questo modo non ti serve installare Python 3.12/uv sul sistema host e i pacchetti restano già presenti nell’immagine Docker.
+
 ## 3. Configurazione
 
 Prima di eseguire il notebook, è necessario configurare le credenziali API.
