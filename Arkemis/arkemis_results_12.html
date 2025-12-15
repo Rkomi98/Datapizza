@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Dev Authority - Arkemis 2025</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/theme/white.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #C12A22;
+            --text-dark: #1E293B;
+            --text-gray: #475569;
+            --text-light: #64748B;
+            --bg-slide: #FFFFFF;
+            --bg-card: #F8FAFC;
+            --card-red-bg: #FEF2F2;
+            --card-red-border: #FEE2E2;
+            --card-blue-bg: #EFF6FF;
+            --card-blue-border: #DBEAFE;
+            --card-green-bg: #ECFDF5;
+            --card-green-border: #D1FAE5;
+            --card-yellow-bg: #FEF3C7;
+            --card-yellow-border: #F59E0B;
+        }
+
+        .reveal {
+            font-family: 'Lato', sans-serif;
+            font-size: 24px;
+            color: var(--text-dark);
+        }
+
+        .reveal .slides {
+            text-align: left;
+        }
+
+        .reveal .slides section {
+            padding: 50px 60px;
+            box-sizing: border-box;
+            height: 720px;
+            width: 1280px;
+        }
+
+        .reveal h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.6em;
+            color: var(--primary);
+            margin-bottom: 0.3em;
+        }
+
+        .reveal h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.8em;
+            color: var(--text-dark);
+            margin-bottom: 0.3em;
+        }
+
+        .reveal h3 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.2em;
+            color: var(--text-dark);
+        }
+
+        .reveal p {
+            font-size: 1em;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        /* Logo fisso */
+        .logo-fixed {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            height: 50px;
+            width: auto;
+            z-index: 100;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            width: 150px;
+            opacity: 0.04;
+            z-index: 1;
+        }
+
+        /* Badge numero slide */
+        .slide-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 0.9em;
+            padding: 8px 18px;
+            border-radius: 6px;
+            margin-right: 20px;
+        }
+
+        .slide-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .slide-header h2 {
+            margin: 0;
+        }
+
+        /* Subtitle */
+        .subtitle {
+            font-size: 1.1em;
+            color: var(--text-light);
+            margin-top: -15px;
+            margin-bottom: 30px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 12px 0;
+            text-align: left;
+        }
+
+        .card-accent {
+            background: var(--card-red-bg);
+            border-left: 5px solid var(--primary);
+        }
+
+        .card-blue {
+            background: var(--card-blue-bg);
+            border-left: 5px solid #1D4ED8;
+        }
+
+        .card-green {
+            background: var(--card-green-bg);
+            border-left: 5px solid #059669;
+        }
+
+        .card-yellow {
+            background: var(--card-yellow-bg);
+            border-left: 5px solid #B45309;
+        }
+
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+
+        .card-title.gray { color: var(--text-light); }
+        .card-title.blue { color: #1D4ED8; }
+        .card-title.green { color: #059669; }
+        .card-title.yellow { color: #B45309; }
+
+        /* Layouts */
+        .two-columns {
+            display: flex;
+            gap: 40px;
+            text-align: left;
+        }
+
+        .two-columns > div {
+            flex: 1;
+        }
+
+        .three-columns {
+            display: flex;
+            gap: 30px;
+        }
+
+        .three-columns > div {
+            flex: 1;
+        }
+
+        /* HERO METRIC */
+        .hero-metric {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, var(--card-red-bg) 0%, #FFFFFF 50%, var(--card-blue-bg) 100%);
+            border-radius: 20px;
+            border: 2px solid var(--card-red-border);
+            margin-bottom: 30px;
+        }
+
+        .hero-metric .number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 5em;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .hero-metric .label {
+            font-size: 1.3em;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* Metric Card */
+        .metric-card {
+            background: linear-gradient(135deg, var(--card-red-bg) 0%, #FFFFFF 100%);
+            border: 2px solid var(--card-red-border);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .metric-card .number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.1;
+        }
+
+        .metric-card .label {
+            font-size: 1em;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .metric-card .sublabel {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        .metric-card.blue {
+            background: linear-gradient(135deg, var(--card-blue-bg) 0%, #FFFFFF 100%);
+            border-color: var(--card-blue-border);
+        }
+        .metric-card.blue .number { color: #1D4ED8; }
+
+        .metric-card.green {
+            background: linear-gradient(135deg, var(--card-green-bg) 0%, #FFFFFF 100%);
+            border-color: var(--card-green-border);
+        }
+        .metric-card.green .number { color: #059669; }
+
+        /* GRAFICI ACCATTIVANTI */
+        
+        /* Bar Chart orizzontale */
+        .bar-chart {
+            margin: 20px 0;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .bar-label {
+            width: 120px;
+            font-weight: 600;
+            font-size: 0.95em;
+            color: var(--text-dark);
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 40px;
+            background: #E2E8F0;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9em;
+            transition: width 1s ease;
+        }
+
+        .bar-fill.red { background: linear-gradient(90deg, #C12A22, #E53E3E); }
+        .bar-fill.blue { background: linear-gradient(90deg, #1D4ED8, #3B82F6); }
+        .bar-fill.green { background: linear-gradient(90deg, #059669, #10B981); }
+        .bar-fill.yellow { background: linear-gradient(90deg, #B45309, #F59E0B); }
+        .bar-fill.purple { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+
+        .bar-value {
+            width: 100px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 1em;
+            color: var(--text-dark);
+            margin-left: 15px;
+        }
+
+        /* Donut Chart */
+        .donut-chart {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .donut-chart svg {
+            transform: rotate(-90deg);
+        }
+
+        .donut-chart .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .donut-chart .center-number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .donut-chart .center-label {
+            font-size: 0.8em;
+            color: var(--text-gray);
+        }
+
+        /* Growth Arrow */
+        .growth-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: var(--card-green-bg);
+            border-radius: 30px;
+            color: #059669;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .growth-indicator.negative {
+            background: var(--card-red-bg);
+            color: var(--primary);
+        }
+
+        .growth-indicator svg {
+            margin-right: 8px;
+        }
+
+        /* Comparison Visual */
+        .comparison-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .comparison-box {
+            text-align: center;
+            padding: 25px 40px;
+            border-radius: 16px;
+        }
+
+        .comparison-box.before {
+            background: #FEE2E2;
+            border: 2px dashed var(--primary);
+        }
+
+        .comparison-box.after {
+            background: var(--card-green-bg);
+            border: 2px solid #059669;
+        }
+
+        .comparison-box .value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .comparison-arrow {
+            font-size: 3em;
+            color: var(--primary);
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ring-visual {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .ring-visual svg {
+            transform: rotate(-90deg);
+        }
+
+        .ring-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.3em;
+            color: var(--primary);
+        }
+
+        /* Table Styled */
+        .reveal table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+            margin-top: 20px;
+        }
+
+        .reveal table th {
+            background: var(--text-dark);
+            color: white;
+            padding: 14px 16px;
+            text-align: left;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .reveal table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .reveal table tr:nth-child(even) td {
+            background: #FAFAFA;
+        }
+
+        .reveal table tr:nth-child(odd) td {
+            background: #FFFFFF;
+        }
+
+        .reveal table tr.highlight td {
+            background: var(--card-red-bg);
+            font-weight: 600;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #F1F5F9;
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: var(--text-dark);
+            margin: 4px;
+            font-weight: 600;
+        }
+
+        .tag.red { background: var(--card-red-bg); color: var(--primary); }
+        .tag.blue { background: var(--card-blue-bg); color: #1D4ED8; }
+        .tag.green { background: var(--card-green-bg); color: #059669; }
+        .tag.yellow { background: var(--card-yellow-bg); color: #B45309; }
+
+        /* Cover slide */
+        .cover-slide {
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cover-logo {
+            width: 120px;
+            height: 120px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(193, 42, 34, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-logo img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            filter: brightness(0) invert(1);
+        }
+
+        .cover-line {
+            width: 150px;
+            height: 5px;
+            background: var(--primary);
+            margin: 25px auto;
+            border-radius: 3px;
+        }
+
+        .cover-footer {
+            font-size: 1em;
+            color: var(--text-light);
+            margin-top: 40px;
+        }
+
+        /* Timeline */
+        .timeline {
+            display: flex;
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .timeline-item {
+            flex: 1;
+            position: relative;
+            padding: 25px;
+            padding-left: 30px;
+            border-left: 4px solid var(--primary);
+            background: var(--card-red-bg);
+            border-radius: 0 16px 16px 0;
+        }
+
+        .timeline-item.blue { 
+            border-left-color: #1D4ED8; 
+            background: var(--card-blue-bg);
+        }
+        .timeline-item.green { 
+            border-left-color: #059669; 
+            background: var(--card-green-bg);
+        }
+
+        .timeline-month {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .timeline-item.blue .timeline-month { color: #1D4ED8; }
+        .timeline-item.green .timeline-month { color: #059669; }
+
+        .timeline-item ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .timeline-item li {
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .timeline-item li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .timeline-item.blue li::before { color: #1D4ED8; }
+        .timeline-item.green li::before { color: #059669; }
+
+        /* Agenda */
+        .agenda-card {
+            padding: 30px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border-left: 5px solid var(--primary);
+            height: 100%;
+        }
+
+        .agenda-card.blue { border-left-color: #1D4ED8; }
+        .agenda-card.green { border-left-color: #059669; }
+
+        .agenda-num {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 3em;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: 15px;
+        }
+
+        .agenda-card.blue .agenda-num { color: #1D4ED8; }
+        .agenda-card.green .agenda-num { color: #059669; }
+
+        /* Best Card */
+        .best-card {
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .best-emoji {
+            font-size: 2.5em;
+        }
+
+        .best-content h4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--text-dark);
+            margin: 0 0 8px 0;
+        }
+
+        .best-content .stats {
+            font-size: 1em;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+
+        .best-content .why {
+            font-size: 0.9em;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        /* KPI Box */
+        .kpi-box {
+            background: white;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .kpi-box .kpi-label {
+            font-size: 0.75em;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .kpi-box .kpi-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+
+        .kpi-box .kpi-target {
+            font-size: 0.8em;
+            color: var(--text-gray);
+        }
+
+        /* Source citation */
+        .source {
+            position: absolute;
+            bottom: 20px;
+            left: 60px;
+            font-size: 0.7em;
+            color: #94A3B8;
+            font-style: italic;
+        }
+
+        /* List styling */
+        ul.styled-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.styled-list li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            font-size: 1em;
+        }
+
+        ul.styled-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* Split Channel Card */
+        .channel-card {
+            padding: 30px;
+            border-radius: 16px;
+            height: 100%;
+        }
+
+        .channel-card.instagram {
+            background: linear-gradient(135deg, #FECACA 0%, #FEF2F2 100%);
+            border-top: 5px solid #E4405F;
+        }
+
+        .channel-card.linkedin {
+            background: linear-gradient(135deg, #BFDBFE 0%, #EFF6FF 100%);
+            border-top: 5px solid #0A66C2;
+        }
+
+        .channel-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .channel-icon.ig {
+            background: linear-gradient(45deg, #E4405F, #FCAF45);
+            color: white;
+        }
+
+        .channel-icon.li {
+            background: #0A66C2;
+            color: white;
+        }
+
+        /* Quadrant Matrix */
+        .matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .matrix-cell {
+            padding: 25px;
+            border-radius: 16px;
+        }
+
+        /* Before/After */
+        .before-after-container {
+            display: flex;
+            gap: 40px;
+            align-items: stretch;
+        }
+
+        .ba-box {
+            flex: 1;
+            padding: 30px;
+            border-radius: 16px;
+        }
+
+        .ba-box.before {
+            background: #FEF2F2;
+            border: 3px dashed #FCA5A5;
+        }
+
+        .ba-box.after {
+            background: #ECFDF5;
+            border: 3px solid #6EE7B7;
+        }
+
+        .ba-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .ba-box.before .ba-title { color: #DC2626; }
+        .ba-box.after .ba-title { color: #059669; }
+
+        /* Win Section */
+        .win-section {
+            background: linear-gradient(135deg, #FEF2F2 0%, #EFF6FF 50%, #ECFDF5 100%);
+            border-radius: 20px;
+            padding: 35px;
+            margin-top: 20px;
+        }
+
+        /* Stop Tweak Start */
+        .sts-card {
+            padding: 25px;
+            border-radius: 16px;
+            height: 100%;
+        }
+
+        .sts-card.stop {
+            background: #FEF2F2;
+            border-top: 5px solid #DC2626;
+        }
+
+        .sts-card.tweak {
+            background: #FEF3C7;
+            border-top: 5px solid #F59E0B;
+        }
+
+        .sts-card.start {
+            background: #ECFDF5;
+            border-top: 5px solid #059669;
+        }
+
+        .sts-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .sts-card.stop .sts-title { color: #DC2626; }
+        .sts-card.tweak .sts-title { color: #B45309; }
+        .sts-card.start .sts-title { color: #059669; }
+
+        .sts-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sts-card li {
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .sts-card.stop li::before { content: "✕"; color: #DC2626; position: absolute; left: 0; font-weight: bold; }
+        .sts-card.tweak li::before { content: "↻"; color: #B45309; position: absolute; left: 0; font-weight: bold; }
+        .sts-card.start li::before { content: "✓"; color: #059669; position: absolute; left: 0; font-weight: bold; }
+
+        /* Totale visual */
+        .total-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, #E53E3E 100%);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .total-banner .total-item {
+            text-align: center;
+        }
+
+        .total-banner .total-number {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .total-banner .total-label {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo fisso -->
+    <img src="datapizzaLogo.png" alt="Datapizza logo" class="logo-fixed">
+
+    <!-- Watermark -->
+    <img src="datapizza.png" alt="Datapizza watermark" class="watermark">
+
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- SLIDE 1: COVER -->
+            <section class="cover-slide">
+                <div class="cover-logo">
+                    <img src="datapizza.png" alt="Datapizza logo">
+                </div>
+                <h1 style="font-size: 3em; margin-bottom: 10px;">SCALING DEV AUTHORITY</h1>
+                <p style="font-size: 1.4em; color: #64748B;">Costruire autorevolezza nel mondo Dev</p>
+                <div class="cover-line"></div>
+                <p style="font-size: 1.2em; color: #475569;">Analisi delle performance 2025 e Strategia 2026</p>
+                <div class="cover-footer">
+                    <p>Presentazione a cura di <strong style="color: #C12A22;">Datapizza</strong> × <strong>Arkemis</strong></p>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: AGENDA -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">01</span>
+                    <h2>Agenda</h2>
+                </div>
+                
+                <div class="three-columns" style="margin-top: 40px; height: 480px;">
+                    <div class="agenda-card">
+                        <div class="agenda-num">1</div>
+                        <h3 style="margin-bottom: 15px;">L'Ecosistema Organico</h3>
+                        <p style="font-size: 0.95em;">Analisi As-Is: i numeri della crescita, l'analisi dei canali (IG vs LI) e il focus specifico su Telegram.</p>
+                    </div>
+                    <div class="agenda-card blue">
+                        <div class="agenda-num">2</div>
+                        <h3 style="margin-bottom: 15px;">L'Amplificatore</h3>
+                        <p style="font-size: 0.95em;">Datapizza Boost: l'impatto della partnership sulla visibilità e l'autorità del brand.</p>
+                    </div>
+                    <div class="agenda-card green">
+                        <div class="agenda-num">3</div>
+                        <h3 style="margin-bottom: 15px;">Il Pivot Strategico</h3>
+                        <p style="font-size: 0.95em;">Roadmap 2026: ottimizzazione dei formati, nuove sinergie e piano d'azione Q1.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: HERO NUMBERS -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">02</span>
+                    <h2>I Numeri della Crescita</h2>
+                </div>
+                <p class="subtitle">Overview Luglio - Novembre 2025</p>
+                
+                <div class="hero-metric">
+                    <div class="number">~1.000.000</div>
+                    <div class="label">Touchpoint Totali Stimati</div>
+                    <p style="font-size: 1em; color: #64748B; margin-top: 15px;">Organico Arkemis + Community Datapizza</p>
+                </div>
+
+                <div class="three-columns">
+                    <div class="metric-card">
+                        <div class="number">+950%</div>
+                        <div class="label">Crescita LinkedIn</div>
+                        <div class="sublabel">Da 166 a 1.756 Follower</div>
+                    </div>
+                    <div class="metric-card blue">
+                        <div class="number">~4x</div>
+                        <div class="label">Crescita Discord</div>
+                        <div class="sublabel">Da &lt;100 a 390 Membri</div>
+                    </div>
+                    <div class="metric-card green">
+                        <div class="number">3</div>
+                        <div class="label">Driver di Crescita</div>
+                        <div class="sublabel">Tech Media + Personal Brand + Boost</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: LINKEDIN GROWTH CHART -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">03</span>
+                    <h2>LinkedIn: Crescita Impressions</h2>
+                </div>
+                <p class="subtitle">Trend mensile Luglio - Novembre 2025</p>
+
+                <div class="bar-chart" style="margin-top: 40px;">
+                    <div class="bar-item">
+                        <span class="bar-label">Luglio</span>
+                        <div class="bar-container">
+                            <div class="bar-fill red" style="width: 40%;">70.561</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Agosto</span>
+                        <div class="bar-container">
+                            <div class="bar-fill red" style="width: 82%;">142.249</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Settembre</span>
+                        <div class="bar-container">
+                            <div class="bar-fill red" style="width: 30%;">51.459</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Ottobre</span>
+                        <div class="bar-container">
+                            <div class="bar-fill red" style="width: 56%;">96.732</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label" style="color: var(--primary); font-weight: 700;">Novembre</span>
+                        <div class="bar-container">
+                            <div class="bar-fill red" style="width: 100%;">174.357 🏆</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-accent" style="margin-top: 30px;">
+                    <p style="margin: 0; font-size: 1.05em;"><strong>🚀 All-Time High a Novembre:</strong> Record storico grazie al post "Tech Writing" e alla sinergia con i Boost Datapizza</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 5: LINKEDIN INSIGHTS -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">04</span>
+                    <h2>LinkedIn: Insight Mensili</h2>
+                </div>
+                <p class="subtitle">Cosa abbiamo imparato mese per mese</p>
+
+                <div class="two-columns" style="margin-top: 30px;">
+                    <div>
+                        <div class="card" style="margin-bottom: 15px;">
+                            <div class="card-title gray">LUGLIO</div>
+                            <p style="margin: 0;"><strong>70.561 Impressions • 303 Reactions</strong></p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.9em;">Partenza solida su topic verticali (es. Elixir)</p>
+                        </div>
+                        <div class="card" style="margin-bottom: 15px;">
+                            <div class="card-title gray">AGOSTO</div>
+                            <p style="margin: 0;"><strong>142.249 Impressions • 469 Reactions</strong></p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.9em;">Picco di viralità estiva (es. post "Psycho")</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-title gray">SETTEMBRE</div>
+                            <p style="margin: 0;"><strong>51.459 Impressions • 385 Reactions</strong></p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.9em;">Fase di Test: evidenze su timing (no weekend) e tono (stop meme leggeri, focus autorevolezza)</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card" style="margin-bottom: 15px;">
+                            <div class="card-title gray">OTTOBRE</div>
+                            <p style="margin: 0;"><strong>96.732 Impressions • 717 Reactions</strong></p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.9em;">Ripresa & Crescita: trend positivo consolidato pre-boost</p>
+                        </div>
+                        <div class="card card-accent">
+                            <div class="card-title">NOVEMBRE ⭐</div>
+                            <p style="margin: 0;"><strong style="color: var(--primary);">174.357 Impressions • 1.005 Reactions</strong></p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.9em;">All-Time High: Record grazie al post "Tech Writing" e alla sinergia con i Boost</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: INSTAGRAM GROWTH CHART -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">05</span>
+                    <h2>Instagram: Trend Impressions</h2>
+                </div>
+                <p class="subtitle">Trend mensile Luglio - Novembre 2025</p>
+
+                <div class="bar-chart" style="margin-top: 40px;">
+                    <div class="bar-item">
+                        <span class="bar-label">Luglio</span>
+                        <div class="bar-container">
+                            <div class="bar-fill purple" style="width: 73%;">47.785</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Agosto</span>
+                        <div class="bar-container">
+                            <div class="bar-fill purple" style="width: 100%;">65.707</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Settembre</span>
+                        <div class="bar-container">
+                            <div class="bar-fill purple" style="width: 97%;">63.923</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Ottobre</span>
+                        <div class="bar-container">
+                            <div class="bar-fill purple" style="width: 67%;">44.035</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Novembre</span>
+                        <div class="bar-container">
+                            <div class="bar-fill purple" style="width: 42%;">27.425</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-green" style="margin-top: 30px;">
+                    <p style="margin: 0; font-size: 1.05em;"><strong>📊 Retention Focus:</strong> Calo fisiologico della Reach, ma <span style="color: #059669; font-weight: 700;">Engagement Record</span> grazie alla serialità tecnica (es. serie Docker) - 1.500 Reactions a Novembre!</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: INSTAGRAM INSIGHTS -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">06</span>
+                    <h2>Instagram: Insight Mensili</h2>
+                </div>
+                <p class="subtitle">Evoluzione della strategia contenuti</p>
+
+                <div class="two-columns" style="margin-top: 30px;">
+                    <div>
+                        <div class="card" style="margin-bottom: 15px;">
+                            <div class="card-title gray">LUGLIO • 47.785 Imp • 760 React</div>
+                            <p style="margin: 0; font-size: 0.95em;"><strong>Pivot Formati:</strong> Introduzione caroselli tecnici in un canale "Reel-first". Ingresso sfidante ma buon Engagement Rate.</p>
+                        </div>
+                        <div class="card" style="margin-bottom: 15px;">
+                            <div class="card-title gray">AGOSTO • 65.707 Imp • 1.422 React</div>
+                            <p style="margin: 0; font-size: 0.95em;"><strong>Brand Reveal:</strong> Prima connessione esplicita tra il canale "Dev Life" (intrattenimento) e il brand Arkemis.</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-title gray">SETTEMBRE • 63.923 Imp • 1.056 React</div>
+                            <p style="margin: 0; font-size: 0.95em;"><strong>Pattern Tematici:</strong> Ottima resa intersezione "AI & Code". Bassa performance dei meme semplici monoslide.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card" style="margin-bottom: 15px;">
+                            <div class="card-title gray">OTTOBRE • 44.035 Imp • 1.334 React</div>
+                            <p style="margin: 0; font-size: 0.95em;"><strong>Insight Formati:</strong> Bene i contenuti educativi. Flop dei post statici promo-eventi (Stop autoreferenzialità nel feed).</p>
+                        </div>
+                        <div class="card card-green">
+                            <div class="card-title green">NOVEMBRE • 27.425 Imp • 1.500 React ⭐</div>
+                            <p style="margin: 0; font-size: 0.95em;"><strong>Retention Focus:</strong> Calo fisiologico della Reach, ma Engagement Record grazie alla serialità tecnica (es. serie Docker).</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: ANALISI QUALITATIVA MATRICE -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">07</span>
+                    <h2>Analisi Qualitativa</h2>
+                </div>
+                <p class="subtitle">Matrice Viralità vs Utilità</p>
+
+                <div class="matrix">
+                    <div class="matrix-cell card-accent">
+                        <div class="card-title">Tech Deep Dive</div>
+                        <p style="font-size: 1em; margin: 0 0 10px 0;"><strong>Es:</strong> Docker, Elixir, Cache</p>
+                        <div style="margin: 15px 0;">
+                            <span class="tag">Bassa Viralità</span>
+                            <span class="tag red">Alta Authority</span>
+                        </div>
+                        <p style="font-size: 0.95em; margin: 0;">Generano <strong>Salvataggi</strong> e fidelizzazione. Costruiscono la "Libreria Tecnica". L'utente salva per studiare dopo.</p>
+                    </div>
+                    <div class="matrix-cell card-blue">
+                        <div class="card-title blue">Culture & Soft Skills</div>
+                        <p style="font-size: 1em; margin: 0 0 10px 0;"><strong>Es:</strong> Dev Life, Meme, Psycho</p>
+                        <div style="margin: 15px 0;">
+                            <span class="tag blue">Alta Viralità</span>
+                            <span class="tag">Awareness</span>
+                        </div>
+                        <p style="font-size: 0.95em; margin: 0;">Fondamentali per allargare l'audience (Top of Funnel), ma bassa retention nel tempo.</p>
+                    </div>
+                    <div class="matrix-cell card" style="border-left: 5px solid #94A3B8;">
+                        <div class="card-title gray">Brand & Events</div>
+                        <p style="font-size: 1em; margin: 0 0 10px 0;"><strong>Es:</strong> Lancio Sito, AperiTech</p>
+                        <div style="margin: 15px 0;">
+                            <span class="tag">Performance Debole</span>
+                        </div>
+                        <p style="font-size: 0.95em; margin: 0;">I formati statici "locandina" non funzionano. Necessario pivot su Video/Stories.</p>
+                    </div>
+                    <div class="matrix-cell card-green">
+                        <div class="card-title green">Resource / Value ⭐</div>
+                        <p style="font-size: 1em; margin: 0 0 10px 0;"><strong>Es:</strong> Corso Tech Writing, Guide</p>
+                        <div style="margin: 15px 0;">
+                            <span class="tag green">Best Performer</span>
+                            <span class="tag green">Lead Gen</span>
+                        </div>
+                        <p style="font-size: 0.95em; margin: 0;">Quando la promo è "impacchettata" come risorsa utile, <strong>batte ogni algoritmo</strong>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: BEST IN CLASS -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">08</span>
+                    <h2>Best in Class</h2>
+                </div>
+                <p class="subtitle">I contenuti top performer del periodo</p>
+
+                <div class="best-card" style="background: var(--card-yellow-bg);">
+                    <div class="best-emoji">🏆</div>
+                    <div class="best-content">
+                        <h4>Best for RETENTION (Instagram): "Docker: cos'è"</h4>
+                        <div class="stats"><strong style="color: #B45309; font-size: 1.2em;">134 Salvataggi</strong> (vs media di categoria ~37)</div>
+                        <div class="why">Perché ha vinto: Tutorial puro, sintetico, "pronto all'uso".</div>
+                    </div>
+                </div>
+
+                <div class="best-card" style="background: var(--card-red-bg);">
+                    <div class="best-emoji">🚀</div>
+                    <div class="best-content">
+                        <h4>Best for REACH (LinkedIn): "Corso Technical Writing"</h4>
+                        <div class="stats"><strong style="color: var(--primary); font-size: 1.2em;">~110.000 Impressions</strong> (All-time record) • 642 Reactions + 292 Click</div>
+                        <div class="why">Perché ha vinto: Ha toccato un pain point di carriera (Soft Skill per Senior) offrendo una soluzione.</div>
+                    </div>
+                </div>
+
+                <div class="best-card" style="background: var(--card-blue-bg);">
+                    <div class="best-emoji">🔥</div>
+                    <div class="best-content">
+                        <h4>Best for ENGAGEMENT (Instagram): "Dev Life (Summer Edition)"</h4>
+                        <div class="stats"><strong style="color: #1D4ED8; font-size: 1.2em;">~1.000 Reactions</strong> + 34.000 Views</div>
+                        <div class="why">Perché ha vinto: Relatability pura. Ha rispecchiato perfettamente il mood della community.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: CONFRONTO CANALI VISUAL -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">09</span>
+                    <h2>Confronto Canali</h2>
+                </div>
+                <p class="subtitle">Instagram vs LinkedIn: ruoli complementari</p>
+
+                <div class="two-columns" style="margin-top: 30px; gap: 50px;">
+                    <div class="channel-card instagram">
+                        <div class="channel-icon ig">📸</div>
+                        <h3 style="margin-bottom: 15px; font-size: 1.4em;">Instagram</h3>
+                        <div class="card-title" style="color: #E4405F;">BRAND AFFINITY</div>
+                        <p style="font-size: 1em; margin-bottom: 20px;">Il luogo della "Cultura". Funziona per Caroselli educativi (Salvataggi) e Reel (Simpatia).</p>
+                        <div style="background: white; padding: 15px; border-radius: 10px;">
+                            <p style="font-size: 0.9em; color: var(--primary); margin: 0;"><strong>⚠️ Limite:</strong> I link nei post non sono cliccabili (collo di bottiglia per eventi).</p>
+                        </div>
+                    </div>
+
+                    <div class="channel-card linkedin">
+                        <div class="channel-icon li">💼</div>
+                        <h3 style="margin-bottom: 15px; font-size: 1.4em;">LinkedIn</h3>
+                        <div class="card-title blue">GROWTH & CONVERSION</div>
+                        <p style="font-size: 1em; margin-bottom: 20px;">Il motore della crescita. L'utente legge, approfondisce e clicca. Perfetto per formati ibridi (Opinione + Tecnica).</p>
+                        <div style="background: white; padding: 15px; border-radius: 10px;">
+                            <p style="font-size: 0.9em; color: #059669; margin: 0;"><strong>✓ Punto di forza:</strong> Ideale per portare traffico al sito/Discord.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 11: CONFRONTO METRICHE -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">10</span>
+                    <h2>Metriche a Confronto</h2>
+                </div>
+                <p class="subtitle">Instagram vs LinkedIn: chi vince su cosa</p>
+
+                <table style="margin-top: 25px;">
+                    <thead>
+                        <tr>
+                            <th>Metrica</th>
+                            <th>Instagram</th>
+                            <th>LinkedIn</th>
+                            <th>Vincitore</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Engagement Rate</strong></td>
+                            <td>2.5% - 5.0%</td>
+                            <td>1.0% - 2.5%</td>
+                            <td><span class="tag" style="background: linear-gradient(45deg, #E4405F, #FCAF45); color: white;">IG</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Click-Through (Nov)</strong></td>
+                            <td>64 click</td>
+                            <td>478 click</td>
+                            <td><span class="tag" style="background: #0A66C2; color: white;">LI</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Viral Potential</strong></td>
+                            <td>Medio (Reels dipendente)</td>
+                            <td>Alto (Text + PDF)</td>
+                            <td><span class="tag" style="background: #0A66C2; color: white;">LI</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Retention (Saves)</strong></td>
+                            <td>High (Visual)</td>
+                            <td>Low (Text)</td>
+                            <td><span class="tag" style="background: linear-gradient(45deg, #E4405F, #FCAF45); color: white;">IG</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="two-columns" style="margin-top: 25px;">
+                    <div class="card card-accent">
+                        <p style="margin: 0; font-size: 0.95em;"><strong>IG vince per:</strong> Calore community, interazioni veloci, "Libreria tascabile" per salvare tutorial</p>
+                    </div>
+                    <div class="card card-blue">
+                        <p style="margin: 0; font-size: 0.95em;"><strong>LI vince per:</strong> Volume click grazie al link diretto, più chance di viralità organica sui contenuti tecnici</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 12: TELEGRAM -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">11</span>
+                    <h2>Telegram: Riposizionamento</h2>
+                </div>
+                <p class="subtitle">Da specchio dei social a hub di risorse esclusive</p>
+
+                <div class="before-after-container" style="margin-top: 30px;">
+                    <div class="ba-box before">
+                        <div class="ba-title">❌ PRIMA: Strategia "Mirroring"</div>
+                        <ul class="styled-list">
+                            <li style="font-size: 1em;">Copia dei post social = ridondanza</li>
+                            <li style="font-size: 1em;">Troppi sotto-canali = frammentazione attenzione</li>
+                            <li style="font-size: 1em;">Valore percepito basso</li>
+                            <li style="font-size: 1em;">L'utente non ha motivo di restare</li>
+                        </ul>
+                    </div>
+
+                    <div class="ba-box after">
+                        <div class="ba-title">✓ DOPO: Strategia "Resource Hub"</div>
+                        <ul class="styled-list">
+                            <li style="font-size: 1em;">Meno post, solo valore esclusivo</li>
+                            <li style="font-size: 1em;">PDF scaricabili</li>
+                            <li style="font-size: 1em;">Sconti e offerte dedicate</li>
+                            <li style="font-size: 1em;">Accesso prioritario agli eventi</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card card-accent" style="margin-top: 25px;">
+                    <p style="margin: 0; font-size: 1.1em;"><strong>🎯 Nuova Policy:</strong> Trasformare il canale in un "Resource Hub" con contenuti esclusivi che giustifichino l'iscrizione.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 13: EFFETTO DATAPIZZA -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">12</span>
+                    <h2>L'Effetto Datapizza</h2>
+                </div>
+                <p class="subtitle">Amplificazione Organica: i 4 driver</p>
+
+                <div class="matrix" style="margin-top: 20px;">
+                    <div class="card card-accent">
+                        <div class="card-title">1. REACH MULTIPLIER</div>
+                        <p style="margin: 0; font-size: 1em;">I contenuti sul network Datapizza hanno generato <strong style="color: var(--primary);">picchi oltre 100k views</strong>, garantendo visibilità immediata su un pubblico verticale e profilato.</p>
+                    </div>
+                    <div class="card card-blue">
+                        <div class="card-title blue">2. QUALIFIED ENGAGEMENT</div>
+                        <p style="margin: 0; font-size: 1em;">Il CTR è risultato <strong style="color: #1D4ED8;">doppio rispetto alla media</strong>, dimostrando forte affinità tra l'audience della community e i temi Arkemis.</p>
+                    </div>
+                    <div class="card card-green">
+                        <div class="card-title green">3. TRUST TRANSFER</div>
+                        <p style="margin: 0; font-size: 1em;">Partnership Editoriale strategica: Datapizza <strong style="color: #059669;">trasferisce autorevolezza</strong> al brand, accelerando l'acquisizione di fiducia.</p>
+                    </div>
+                    <div class="card card-yellow">
+                        <div class="card-title yellow">4. IMPATTO ECOSISTEMA</div>
+                        <p style="margin: 0; font-size: 1em;">Traffico esterno come <strong style="color: #B45309;">acceleratore</strong>: alimenta direttamente follower sui profili e membri nel Discord.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 14: DATAPIZZA BOOST CHART -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">13</span>
+                    <h2>Datapizza Boost: Performance</h2>
+                </div>
+                <p class="subtitle">Impressions e Click per canale</p>
+
+                <div class="bar-chart" style="margin-top: 30px;">
+                    <div class="bar-item">
+                        <span class="bar-label">IG Feed</span>
+                        <div class="bar-container">
+                            <div class="bar-fill purple" style="width: 100%;">~192.000</div>
+                        </div>
+                        <span class="bar-value">150 click</span>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">LinkedIn</span>
+                        <div class="bar-container">
+                            <div class="bar-fill blue" style="width: 30%;">~57.000</div>
+                        </div>
+                        <span class="bar-value">107 click</span>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">IG Stories</span>
+                        <div class="bar-container">
+                            <div class="bar-fill green" style="width: 9%;">~17.500</div>
+                        </div>
+                        <span class="bar-value" style="color: var(--primary); font-weight: 700;">445 click ⭐</span>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">Newsletter</span>
+                        <div class="bar-container">
+                            <div class="bar-fill yellow" style="width: 18%;">~35.000</div>
+                        </div>
+                        <span class="bar-value">316 click</span>
+                    </div>
+                </div>
+
+                <div class="total-banner">
+                    <div class="total-item">
+                        <div class="total-number">~303.000</div>
+                        <div class="total-label">Impressions Totali</div>
+                    </div>
+                    <div style="font-size: 3em; opacity: 0.5;">+</div>
+                    <div class="total-item">
+                        <div class="total-number">~1.018</div>
+                        <div class="total-label">Click Qualificati</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 15: DATAPIZZA INSIGHTS -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">14</span>
+                    <h2>Datapizza Boost: Insight</h2>
+                </div>
+                <p class="subtitle">Cosa abbiamo imparato dai dati</p>
+
+                <div class="two-columns" style="margin-top: 30px;">
+                    <div>
+                        <div class="card" style="margin-bottom: 20px; border-left: 5px solid #7C3AED;">
+                            <div class="card-title" style="color: #7C3AED;">INSTAGRAM FEED • ~192k Imp • 150 Click</div>
+                            <p style="margin: 10px 0 0 0; font-size: 1em;"><strong>Massive Awareness.</strong> Genera volumi enormi di visualizzazioni e Trust, ma il link in bio è una barriera per il traffico diretto.</p>
+                        </div>
+                        <div class="card" style="border-left: 5px solid #0A66C2;">
+                            <div class="card-title" style="color: #0A66C2;">LINKEDIN • ~57k Imp • 107 Click</div>
+                            <p style="margin: 10px 0 0 0; font-size: 1em;"><strong>B2B Quality.</strong> Reach mirata su target professionale. CTR in crescita costante tra Ottobre e Novembre.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card card-green" style="margin-bottom: 20px;">
+                            <div class="card-title green">INSTAGRAM STORIES • ~17.5k Imp • 445 Click ⭐</div>
+                            <p style="margin: 10px 0 0 0; font-size: 1em;"><strong>Traffic Driver #1.</strong> Il formato "Link Sticker" è imbattibile per la conversione diretta verso AK HUB.</p>
+                        </div>
+                        <div class="card card-yellow">
+                            <div class="card-title yellow">NEWSLETTER & TELEGRAM • ~35k Imp • 316 Click</div>
+                            <p style="margin: 10px 0 0 0; font-size: 1em;"><strong>High Intent.</strong> Chi apre questi canali è già motivato. Tasso di conversione click/view altissimo.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 16: STOP TWEAK START -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">15</span>
+                    <h2>Piano di Ottimizzazione</h2>
+                </div>
+                <p class="subtitle">Stop / Tweak / Start</p>
+
+                <div class="three-columns" style="margin-top: 25px;">
+                    <div class="sts-card stop">
+                        <div class="sts-title">🛑 STOP</div>
+                        <p style="font-size: 0.85em; color: #64748B; margin-bottom: 15px;">Cosa tagliare</p>
+                        <ul>
+                            <li><strong>Locandine Eventi nel Feed IG</strong><br>Immagini statiche che sporcano la grid e non convertono</li>
+                            <li><strong>Meme "Vuoti"</strong><br>Stop ai meme fini a se stessi che non aprono discussioni tecniche</li>
+                            <li><strong>Mirroring su Telegram</strong><br>Basta copia-incolla automatico dei post social</li>
+                        </ul>
+                    </div>
+
+                    <div class="sts-card tweak">
+                        <div class="sts-title">🔄 TWEAK</div>
+                        <p style="font-size: 0.85em; color: #64748B; margin-bottom: 15px;">Cosa evolvere</p>
+                        <ul>
+                            <li><strong>Meme Funzionali</strong><br>Sì ai meme come "Gancio" o specchio di problemi reali (Dev Life)</li>
+                            <li><strong>Gestione Eventi</strong><br>Su IG solo tramite Stories (Link). Su LI e TG con post completi</li>
+                            <li><strong>Tech Series</strong><br>Serializzare i formati tecnici per creare abitudine</li>
+                        </ul>
+                    </div>
+
+                    <div class="sts-card start">
+                        <div class="sts-title">🚀 START</div>
+                        <p style="font-size: 0.85em; color: #64748B; margin-bottom: 15px;">Nuove iniziative</p>
+                        <ul>
+                            <li><strong>Risorse</strong><br>Condivisione di librerie, saggi e documentazioni (il dev ama salvare)</li>
+                            <li><strong>Behind The Scenes</strong><br>Più contenuti corporate umani su Instagram</li>
+                            <li><strong>Challenge solo su LI</strong><br>Ottimo engagement B2B, evitare su IG</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 17: NEWSLETTER CROSS-PROMOTION -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">16</span>
+                    <h2>Innovazione & Sinergie</h2>
+                </div>
+                <p class="subtitle">Win-Win: Newsletter Cross-Promotion</p>
+
+                <div class="win-section">
+                    <h3 style="text-align: center; color: var(--text-dark); margin-bottom: 30px; font-size: 1.4em;">💡 Proposta: Scambio di Valore Ricorrente</h3>
+                    
+                    <div class="two-columns">
+                        <div class="card" style="background: white;">
+                            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                                <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+                                    <img src="datapizzaLogo.png" alt="Datapizza logo" style="width: 38px; height: auto;">
+                                </div>
+                                <div>
+                                    <div class="card-title">AZIONE A</div>
+                                    <p style="font-size: 1.1em; margin: 0; font-weight: 600;">Datapizza → Arkemis</p>
+                                </div>
+                            </div>
+                            <p style="font-size: 1em; margin: 0;">Datapizza ospita uno <strong>"Snippet Tecnico"</strong> o una pillola di codice curata da Arkemis nella sua newsletter.</p>
+                        </div>
+
+                        <div class="card" style="background: white;">
+                            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                                <div style="width: 60px; height: 60px; background: #1D4ED8; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+                                    <span style="font-size: 2em;">📰</span>
+                                </div>
+                                <div>
+                                    <div class="card-title blue">AZIONE B</div>
+                                    <p style="font-size: 1.1em; margin: 0; font-weight: 600;">Arkemis → Datapizza</p>
+                                </div>
+                            </div>
+                            <p style="font-size: 1em; margin: 0;">Arkemis ospita un contenuto <strong>Tech/AI Trend o News</strong> curato da Datapizza.</p>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <span class="tag green" style="font-size: 1.1em; padding: 15px 30px;">🎯 Obiettivo: Scambio di audience qualificata e posizionamento reciproco come esperti</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 18: ROADMAP Q1 -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">17</span>
+                    <h2>Roadmap Q1 2026</h2>
+                </div>
+                <p class="subtitle">Timeline Gennaio - Marzo</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-month">📅 GENNAIO</div>
+                        <p style="font-size: 1em; font-weight: 600; color: var(--text-dark); margin-bottom: 12px;">Setup & Tech Culture</p>
+                        <ul>
+                            <li>Nuova policy "Solo Valore" su Telegram</li>
+                            <li>Definizione rubriche tecniche seriali (Docker, Challenge...)</li>
+                            <li>Datapizza Boost: Focus Awareness post-feste</li>
+                        </ul>
+                    </div>
+
+                    <div class="timeline-item blue">
+                        <div class="timeline-month">📅 FEBBRAIO</div>
+                        <p style="font-size: 1em; font-weight: 600; color: var(--text-dark); margin-bottom: 12px;">Engagement & Community</p>
+                        <ul>
+                            <li>Strategia Corporate su IG (Human touch)</li>
+                            <li>Attivazione scambio Newsletter</li>
+                            <li>Consolidamento community Discord</li>
+                        </ul>
+                    </div>
+
+                    <div class="timeline-item green">
+                        <div class="timeline-month">📅 MARZO</div>
+                        <p style="font-size: 1em; font-weight: 600; color: var(--text-dark); margin-bottom: 12px;">Authority & Conversion</p>
+                        <ul>
+                            <li>Pubblicazione "Hero Resource" per Lead Gen</li>
+                            <li>Supporto massivo eventi fisici (AperiTech)</li>
+                            <li>Mix Stories + Telegram + Boost</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 19: KPI GROWTH -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">18</span>
+                    <h2>KPI Targets: Audience Growth</h2>
+                </div>
+                <p class="subtitle">Obiettivi di crescita Q1 2026</p>
+
+                <div class="three-columns" style="margin-top: 30px;">
+                    <div>
+                        <div class="metric-card" style="margin-bottom: 20px;">
+                            <div style="font-size: 0.8em; color: var(--text-light); text-transform: uppercase; font-weight: 600;">LinkedIn Attuale</div>
+                            <div class="number">1.750</div>
+                            <div class="label">Follower</div>
+                        </div>
+                        <div class="card card-accent">
+                            <p style="margin: 0;"><strong>Target Conservativo:</strong> 2.500 (+42%)</p>
+                            <p style="margin: 8px 0 0 0;"><strong>Target Aggressivo:</strong> 3.000 (+70%)</p>
+                            <p style="margin: 10px 0 0 0; font-size: 0.85em; color: var(--text-light);">Con 2 "Hero Content" + Boost = +300/400 follower/mese</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="metric-card blue" style="margin-bottom: 20px;">
+                            <div style="font-size: 0.8em; color: var(--text-light); text-transform: uppercase; font-weight: 600;">Discord Attuale</div>
+                            <div class="number">390</div>
+                            <div class="label">Membri</div>
+                        </div>
+                        <div class="card card-blue">
+                            <p style="margin: 0;"><strong>Target Conservativo:</strong> 600 Membri</p>
+                            <p style="margin: 8px 0 0 0;"><strong>Target Aggressivo:</strong> 800 Membri</p>
+                            <p style="margin: 10px 0 0 0; font-size: 0.85em; color: var(--text-light);"><strong>KPI Primario.</strong> Newsletter e LI devono convogliare qui.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="metric-card green" style="margin-bottom: 20px;">
+                            <div style="font-size: 0.8em; color: var(--text-light); text-transform: uppercase; font-weight: 600;">Instagram Attuale</div>
+                            <div class="number">28k</div>
+                            <div class="label">Follower</div>
+                        </div>
+                        <div class="card card-green">
+                            <p style="margin: 0;"><strong>Target:</strong> Stabile / +2%</p>
+                            <p style="margin: 8px 0 0 0;"><strong>Max:</strong> 29.000</p>
+                            <p style="margin: 10px 0 0 0; font-size: 0.85em; color: var(--text-light);">IG organico è saturo. Manteniamo base senza ossessione crescita.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 20: KPI ENGAGEMENT & CONVERSION -->
+            <section>
+                <div class="slide-header">
+                    <span class="slide-badge">19</span>
+                    <h2>KPI Targets: Quality & Conversion</h2>
+                </div>
+                <p class="subtitle">Engagement e ROI Q1 2026</p>
+
+                <div class="two-columns" style="margin-top: 25px;">
+                    <div>
+                        <div class="card card-blue" style="padding: 30px;">
+                            <div class="card-title blue" style="font-size: 0.9em;">📊 ENGAGEMENT QUALITY</div>
+                            <p style="font-size: 0.9em; color: #64748B; margin-bottom: 20px;">Misuriamo quanto il contenuto "attecchisce"</p>
+                            
+                            <div class="kpi-box" style="margin-bottom: 15px;">
+                                <div class="kpi-label">Avg. Saves per Tech Post (IG)</div>
+                                <div class="kpi-value" style="color: #1D4ED8;">&gt;50</div>
+                                <div class="kpi-target">Mantenere lo standard di "Docker"</div>
+                            </div>
+                            
+                            <div class="kpi-box" style="margin-bottom: 15px;">
+                                <div class="kpi-label">LinkedIn Comments per Post</div>
+                                <div class="kpi-value" style="color: #1D4ED8;">&gt;10</div>
+                                <div class="kpi-target">Escluso team interno. Discussioni reali.</div>
+                            </div>
+                            
+                            <div class="kpi-box">
+                                <div class="kpi-label">Telegram Open Rate</div>
+                                <div class="kpi-value" style="color: #1D4ED8;">30-40%</div>
+                                <div class="kpi-target">Con strategia "Meno post, più valore"</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="card card-green" style="padding: 30px;">
+                            <div class="card-title green" style="font-size: 0.9em;">💰 CONVERSION & ROI</div>
+                            <p style="font-size: 0.9em; color: #64748B; margin-bottom: 20px;">Traffico in uscita</p>
+                            
+                            <div class="metric-card green" style="margin-bottom: 20px;">
+                                <div class="number">1.500</div>
+                                <div class="label">Click Totali Target Q1</div>
+                                <p style="font-size: 0.9em; color: #64748B; margin-top: 8px;">Media 500/mese</p>
+                            </div>
+                            
+                            <p style="font-size: 1em; font-weight: 600; color: var(--text-dark); margin-bottom: 15px;">Distribuzione per fonte:</p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <span class="tag" style="background: #0A66C2; color: white; font-size: 1em;">LinkedIn 70%</span>
+                                <span class="tag" style="background: linear-gradient(45deg, #E4405F, #FCAF45); color: white; font-size: 1em;">IG Stories 20%</span>
+                                <span class="tag" style="font-size: 1em;">TG/Newsletter 10%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 21: Q&A -->
+            <section class="cover-slide">
+                <div class="cover-logo">
+                    <img src="datapizza.png" alt="Datapizza logo">
+                </div>
+                <h1 style="font-size: 3.5em; margin-bottom: 20px;">Q&A</h1>
+                <div class="cover-line"></div>
+                <p style="font-size: 1.5em; color: #475569; margin-top: 25px;">Grazie per l'attenzione!</p>
+                <div class="cover-footer">
+                    <p style="margin-top: 50px; font-size: 1.1em;"><strong style="color: #C12A22;">Datapizza</strong> × <strong>Arkemis</strong> • 2025</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: false,
+            controls: true,
+            progress: true,
+            center: false,
+            transition: 'slide',
+            width: 1280,
+            height: 720,
+            margin: 0.04
+        });
+    </script>
+</body>
+</html>

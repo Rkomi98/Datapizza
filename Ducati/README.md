@@ -69,8 +69,6 @@ pip install datapizza-ai datapizza-ai-parsers-docling
 
 funziona senza configurazioni extra.
 
-Se dovessi vedere errori `401 Unauthorized` verso `repository.datapizza.tech`, significa che stai usando un vecchio `pyproject.toml` o un file `uv.lock` che forza quell’indice. Aggiorna il progetto (vedi git pull) o elimina eventuali impostazioni personalizzate di `uv` così da tornare all’indice pubblico `https://pypi.org/simple`.
-
 ## 2. Installazione del progetto (ambiente riproducibile)
 
 Una volta installati Python (3.12+) e `uv`, puoi creare l’ambiente virtuale e installare le dipendenze in modo riproducibile.
@@ -110,21 +108,6 @@ Una volta installati Python (3.12+) e `uv`, puoi creare l’ambiente virtuale e 
     uv sync --frozen
     ```
 
-## 2-bis. Setup tramite Docker (se non puoi installare Python 3.12 o manca l’accesso a internet)
-
-Se lavori su una macchina bloccata a Python 3.11 o senza accesso a PyPI, puoi usare il container incluso nel repository. Serve una macchina che abbia Docker e connessione **solo durante la build** (per scaricare le dipendenze una volta per tutte).
-
-1.  **Build dell'immagine** (eseguila nella root del progetto):
-    ```bash
-    docker build -t ducati-ai .
-    ```
-
-2.  **Avvio del notebook**:
-    ```bash
-    docker run --rm -it \
-        -p 8888:8888 \
-        -e OPENAI_API_KEY=sk-... \
-        -v "$(pwd)/Notebook:/app/Notebook" \
         -v "$(pwd)/qdrant_data:/app/qdrant_data" \
         ducati-ai
     ```
