@@ -92,6 +92,8 @@
 
         .reveal .slides {
             text-align: left;
+            width: 100%;
+            height: 100%;
         }
 
         .reveal .slides section {
@@ -186,19 +188,6 @@
             background: var(--bg-slide);
             background-image: none !important;
             color: var(--text-dark);
-        }
-
-        .reveal .slides section.theme-datapizza {
-            width: 100vw;
-            min-height: 100vh;
-            margin: 0;
-            background: #FFFFFF;
-        }
-
-        .reveal .slides section.theme-datapizza.cover-slide {
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .theme-arkemis .card,
@@ -632,6 +621,13 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            padding: 0 60px;
+        }
+
+        .cover-full {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
             padding: 0 60px;
         }
 
@@ -1272,10 +1268,81 @@
             font-weight: 700;
         }
 
-        .normal-text {
-            font-size: 0.95em;
-            line-height: 1.5;
+        .center-content {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
         }
+
+        .full-screen-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: -1 !important;
+        }
+
+        .roadmap-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .roadmap-container::before {
+            content: "";
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-blue-border);
+            z-index: 0;
+        }
+
+        .roadmap-step {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            padding: 0 15px;
+            text-align: center;
+        }
+
+        .roadmap-dot {
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin: 28px auto 20px;
+            border: 4px solid var(--bg-slide);
+            box-shadow: 0 0 0 4px var(--card-blue-border);
+        }
+
+        .roadmap-step.blue .roadmap-dot { background: #1D4ED8; }
+        .roadmap-step.green .roadmap-dot { background: #059669; }
+
+        .roadmap-content {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--card-blue-border);
+        }
+
+        .roadmap-month {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .roadmap-step.blue .roadmap-month { color: #1D4ED8; }
+        .roadmap-step.green .roadmap-month { color: #059669; }
     </style>
 </head>
 <body class="theme-arkemis">
@@ -1958,7 +2025,7 @@
             </section>
 
             <!-- SLIDE 12: TELEGRAM -->
-            <section class="theme-arkemis">
+            <section class="theme-datapizza center-content">
                 <div class="slide-header">
                     <span class="slide-badge">11</span>
                     <h2>Telegram: Riposizionamento</h2>
@@ -1997,7 +2064,7 @@
             </section>
 
             <!-- COVER: DATAPIZZA BOOST -->
-            <section class="cover-slide theme-datapizza" data-remove-grid="true">
+            <section class="cover-slide cover-full theme-datapizza" data-remove-grid="true" style="align-items: center; justify-content: center;">
                 <h1 style="font-size: 3em; margin-bottom: 14px;">Datapizza Boost</h1>
                 <div class="cover-line"></div>
                 <p style="font-size: 1.1em; color: var(--text-light); margin-top: 18px;">Da qui in avanti tema Datapizza e piano di amplificazione</p>
@@ -2089,7 +2156,7 @@
             </section>
 
             <!-- SLIDE: EFFETTO DATAPIZZA -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza center-content">
                 <div class="slide-header">
                     <span class="slide-badge">14</span>
                     <h2>L'Effetto Datapizza</h2>
@@ -2123,51 +2190,8 @@
                 <p style="font-size: 1.1em; color: var(--text-light); margin-top: 18px;">Ottimizzazioni, roadmap e nuovi formati</p>
             </section>
 
-            <!-- SLIDE: PIANO DI OTTIMIZZAZIONE -->
-            <section class="theme-datapizza">
-                <div class="slide-header">
-                    <span class="slide-badge">15</span>
-                    <h2>Piano di Ottimizzazione</h2>
-                </div>
-                <p class="subtitle">Stop / Tweak / Start</p>
-
-                <div class="three-columns" style="margin-top: 25px;">
-                    <div class="sts-card stop">
-                        <div class="sts-title">🛑 STOP</div>
-                        <p style="font-size: 0.85em; color: var(--text-light); margin-bottom: 15px;">Cosa tagliare</p>
-                        <ul>
-                            <li><strong>Locandine Eventi nel Feed IG</strong><br>Immagini statiche che sporcano la grid e non convertono</li>
-                            <li><strong>Meme "Vuoti"</strong><br>Stop ai meme fini a se stessi che non aprono discussioni tecniche</li>
-                            <li><strong>Mirroring su Telegram</strong><br>Basta copia-incolla automatico dei post social</li>
-                        </ul>
-                    </div>
-
-                    <div class="sts-card tweak">
-                        <div class="sts-title">🔄 TWEAK</div>
-                        <p style="font-size: 0.85em; color: var(--text-light); margin-bottom: 15px;">Cosa evolvere</p>
-                        <ul>
-                            <li><strong>Meme Funzionali</strong><br>Sì ai meme come "Gancio" o specchio di problemi reali</li>
-                            <li><strong>Gestione Eventi</strong><br>Su IG solo tramite Stories (Link). Su LI e TG con post completi</li>
-                            <li><strong>Tech Series</strong><br>Serializzare i formati tecnici per creare abitudine</li>
-                        </ul>
-                    </div>
-
-                    <div class="sts-card start">
-                        <div class="sts-title">🚀 START</div>
-                        <p style="font-size: 0.85em; color: var(--text-light); margin-bottom: 15px;">Nuove iniziative</p>
-                        <ul>
-                            <li><strong>Metterci la faccia</strong><br>Più contenuti umani/corporate per costruire fiducia</li>
-                            <li><strong>Challenge</strong><br>LinkedIn post + Instagram stories (call-to-action chiara)</li>
-                            <li><strong>Reel virali</strong><br>Pin a Jonny per capitalizzare il boost organico</li>
-                            <li><strong>1 Datapizza Boost/mese</strong><br>Monitoriamo engagement e trasferiamo trust</li>
-                            <li><strong>Risorse</strong><br>Librerie/saggi/documenti salvabili dalla community</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
             <!-- SLIDE: PODCAST -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza center-content">
                 <div class="slide-header">
                     <span class="slide-badge">16</span>
                     <h2>Podcast</h2>
@@ -2183,8 +2207,8 @@
                         <p class="normal-text"><strong>Cross-post:</strong> teaser in newsletter e LinkedIn per portare stream e salvataggi.</p>
                         <p class="normal-text"><strong>Nota:</strong> ospite interno/mentor Datapizza per rafforzare il tono human.</p>
                     </div>
-                    <div class="insight-image" style="min-height: 260px;" data-placeholder="Cover podcast">
-                        <img src="datapizzaLogo.png" alt="Podcast placeholder" style="width: 180px; height: auto; object-fit: contain;">
+                    <div class="insight-image" style="min-height: 260px;">
+                        <img src="Asset/Algo.png" alt="Podcast content">
                     </div>
                 </div>
             </section>
@@ -2222,26 +2246,16 @@
             </section>
 
             <!-- SLIDE: BLOG -->
-            <section class="theme-datapizza">
-                <div class="slide-header">
-                    <span class="slide-badge">19</span>
-                    <h2>Blog</h2>
-                </div>
-                <p class="subtitle">Nuovo touchpoint editoriale</p>
-
-                <div class="two-columns" style="align-items: center;">
-                    <div>
-                        <p class="normal-text"><strong>Obiettivo:</strong> presidiare SEO e offrire long-form a supporto di podcast/tech series.</p>
-                        <p class="normal-text"><strong>Cross-channel:</strong> snippet su LinkedIn, carousel IG, CTA in newsletter.</p>
-                    </div>
-                    <div class="insight-image" style="min-height: 320px;" data-placeholder="Blog preview">
-                        <img src="Asset/blog.png" alt="Blog preview">
-                    </div>
+            <section class="theme-datapizza center-content" data-remove-grid="true">
+                <img src="Asset/blog.png" alt="Blog preview" class="full-screen-img">
+                <div class="card" style="position: relative; z-index: 1; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); max-width: 600px; padding: 40px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+                    <h2 style="color: var(--primary); font-size: 3em; margin-bottom: 20px;">Blog</h2>
+                    <p class="normal-text" style="font-size: 1.2em; line-height: 1.6;">Presidio SEO e contenuti long-form di approfondimento per scalare l'autorità tecnica del brand.</p>
                 </div>
             </section>
 
             <!-- SLIDE: NEWSLETTER CROSS-PROMOTION -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza center-content">
                 <div class="slide-header">
                     <span class="slide-badge">20</span>
                     <h2>Newsletter cross-promotion</h2>
@@ -2255,9 +2269,8 @@
                         <p class="normal-text" style="margin-top: 10px;">CTA reciproca: Arkemis rimanda a Datapizza per trend e community.</p>
                     </div>
                     <div class="card" style="background: var(--bg-card);">
-                        <div class="card-title">Idea podcast</div>
-                        <p class="normal-text" style="margin: 0;">Inserire mini player / link al podcast in newsletter per raccogliere ascolti e feedback.</p>
-                        <p class="normal-text" style="margin-top: 10px;">Promo incrociata: trailer su LinkedIn e stories con swipe/link sticker.</p>
+                        <div class="card-title">News & Newsflash</div>
+                        <p class="normal-text" style="margin: 0;">In caso di notizie rilevanti o lanci strategici, integrazione di una <strong>Call to Action diretta</strong> per massimizzare la conversione immediata.</p>
                     </div>
                 </div>
             </section>
