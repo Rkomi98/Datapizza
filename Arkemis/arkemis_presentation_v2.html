@@ -322,7 +322,7 @@
 
         .hero-metric .number {
             font-family: var(--font-heading);
-            font-size: 4.2em;
+            font-size: 4em;
             font-weight: 700;
             color: var(--primary);
             line-height: 1;
@@ -1055,14 +1055,21 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9em;
-            font-weight: 800;
-            color: white;
+            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid var(--card-blue-border);
         }
 
-        .channel-pill.li .logo { background: var(--li-blue); }
-        .channel-pill.ig .logo { background: linear-gradient(45deg, #E4405F, #FCAF45); }
-        .channel-pill.tg .logo { background: linear-gradient(45deg, #2AABEE, #229ED9); }
+        .channel-pill .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .channel-pill.li .logo { background: rgba(10, 102, 194, 0.12); border-color: #0A66C2; }
+        .channel-pill.ig .logo { background: linear-gradient(45deg, #E4405F22, #FCAF4522); border-color: #E4405F; }
+        .channel-pill.tg .logo { background: linear-gradient(45deg, #2AABEE22, #229ED922); border-color: #2AABEE; }
 
         /* Monthly insight */
         .monthly-insight {
@@ -1135,7 +1142,7 @@
             background: var(--bg-card);
             border: 1px dashed var(--card-blue-border);
             border-radius: 18px;
-            min-height: 360px;
+            min-height: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1144,7 +1151,8 @@
 
         .insight-image img {
             width: 100%;
-            height: 100%;
+            height: auto;
+            max-height: none;
             object-fit: contain;
             display: block;
             position: relative;
@@ -1218,7 +1226,7 @@
                     <div class="cover-logo" style="background: #C12A22;">
                         <img src="Asset/datapizza.png" alt="Datapizza logo">
                     </div>
-                    <div class=".cover-logo.arkemis">
+                    <div>
                         <img src="Asset/app%20icon_squared.svg" alt="Arkemis logo">
                     </div>
                 </div>
@@ -1257,9 +1265,9 @@
                 </div>
 
                 <div class="social-row" aria-label="Canali chiave">
-                    <span class="channel-pill li"><span class="logo">in</span>LinkedIn</span>
-                    <span class="channel-pill ig"><span class="logo">IG</span>Instagram</span>
-                    <span class="channel-pill tg"><span class="logo">TG</span>Telegram</span>
+                    <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
+                    <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
+                    <span class="channel-pill tg"><span class="logo"><img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo"></span>Telegram</span>
                 </div>
             </section>
 
@@ -1361,7 +1369,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">LinkedIn • Luglio</span>
-                            <span class="channel-pill li"><span class="logo">in</span>LinkedIn</span>
+                            <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">70.561 <small>Impression</small></div>
@@ -1387,7 +1395,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">LinkedIn • Agosto</span>
-                            <span class="channel-pill li"><span class="logo">in</span>LinkedIn</span>
+                            <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">142.249 <small>Impression</small></div>
@@ -1413,7 +1421,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">LinkedIn • Settembre</span>
-                            <span class="channel-pill li"><span class="logo">in</span>LinkedIn</span>
+                            <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">51.459 <small>Impression</small></div>
@@ -1439,7 +1447,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">LinkedIn • Ottobre</span>
-                            <span class="channel-pill li"><span class="logo">in</span>LinkedIn</span>
+                            <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">96.732 <small>Impression</small></div>
@@ -1465,7 +1473,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">LinkedIn • Novembre</span>
-                            <span class="channel-pill li"><span class="logo">in</span>LinkedIn</span>
+                            <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">174.357 ⭐ <small>Impression</small></div>
@@ -1537,7 +1545,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">Instagram • Luglio</span>
-                            <span class="channel-pill ig"><span class="logo">IG</span>Instagram</span>
+                            <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">47.785 <small>Impression</small></div>
@@ -1563,7 +1571,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">Instagram • Agosto</span>
-                            <span class="channel-pill ig"><span class="logo">IG</span>Instagram</span>
+                            <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">65.707 <small>Impression</small></div>
@@ -1589,7 +1597,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">Instagram • Settembre</span>
-                            <span class="channel-pill ig"><span class="logo">IG</span>Instagram</span>
+                            <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">63.923 <small>Impression</small></div>
@@ -1615,7 +1623,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">Instagram • Ottobre</span>
-                            <span class="channel-pill ig"><span class="logo">IG</span>Instagram</span>
+                            <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">44.035 <small>Impression</small></div>
@@ -1641,7 +1649,7 @@
                     <div class="month-card">
                         <header>
                             <span class="month-pill">Instagram • Novembre</span>
-                            <span class="channel-pill ig"><span class="logo">IG</span>Instagram</span>
+                            <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
                         </header>
                         <div class="metric-row">
                             <div class="metric-pill">27.425 ⭐ <small>Impression</small></div>
@@ -1787,7 +1795,7 @@
 
                 <div class="two-columns" style="margin-top: 30px; gap: 50px;">
                     <div class="channel-card instagram" style="background: var(--bg-card); border: 1px solid var(--card-blue-border);">
-                        <div class="channel-pill ig" style="margin-bottom: 12px;"><span class="logo">IG</span>Instagram</div>
+                        <div class="channel-pill ig" style="margin-bottom: 12px;"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</div>
                         <h3 style="margin-bottom: 10px; font-size: 1.4em;">Instagram</h3>
                         <div class="card-title" style="color: #E4405F;">BRAND AFFINITY</div>
                         <p class="normal-text" style="margin-bottom: 14px;">Il luogo della "Cultura". Funziona per Caroselli educativi (Salvataggi) e Reel (Simpatia).</p>
@@ -1800,7 +1808,7 @@
                     </div>
 
                     <div class="channel-card linkedin" style="background: var(--bg-card); border: 1px solid var(--card-blue-border);">
-                        <div class="channel-pill li" style="margin-bottom: 12px;"><span class="logo">in</span>LinkedIn</div>
+                        <div class="channel-pill li" style="margin-bottom: 12px;"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</div>
                         <h3 style="margin-bottom: 10px; font-size: 1.4em;">LinkedIn</h3>
                         <div class="card-title blue">GROWTH &amp; CONVERSION</div>
                         <p class="normal-text" style="margin-bottom: 14px;">Il motore della crescita. Qui l'utente legge, approfondisce e clicca. È il canale perfetto per formati ibridi (Opinione + Tecnica) e per portare traffico al sito/Discord.</p>
@@ -1822,8 +1830,8 @@
                 </div>
                 <p class="subtitle">Instagram vs LinkedIn: chi vince su cosa</p>
                 <div class="social-row">
-                    <span class="channel-pill ig"><span class="logo">IG</span>Instagram</span>
-                    <span class="channel-pill li"><span class="logo">in</span>LinkedIn</span>
+                    <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
+                    <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
                 </div>
 
                 <table style="margin-top: 25px;">
@@ -1881,7 +1889,7 @@
                 </div>
                 <p class="subtitle">Da specchio dei social a hub di risorse esclusive</p>
                 <div class="social-row" style="margin-bottom: 10px;">
-                    <span class="channel-pill tg"><span class="logo">TG</span>Telegram</span>
+                    <span class="channel-pill tg"><span class="logo"><img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo"></span>Telegram</span>
                 </div>
 
                 <div class="before-after-container" style="margin-top: 30px;">
