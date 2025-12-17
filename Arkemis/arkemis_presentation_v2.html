@@ -92,13 +92,15 @@
 
         .reveal .slides {
             text-align: left;
-            width: 100%;
             height: 100%;
+            width: 100%;
         }
 
         .reveal .slides section {
             padding: 50px 60px;
             box-sizing: border-box;
+            height: 720px;
+            width: 1280px;
             background: var(--bg-slide);
             color: var(--text-dark);
         }
@@ -186,7 +188,7 @@
             --font-heading: 'Poppins', sans-serif;
             --font-body: 'Lato', sans-serif;
             background: var(--bg-slide);
-            background-image: none !important;
+            background-image: none;
             color: var(--text-dark);
         }
 
@@ -619,9 +621,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            align-content: center;
             justify-content: center;
-            min-height: 100vh;
-            padding: 0 60px;
         }
 
         .cover-full {
@@ -1349,9 +1350,6 @@
     <!-- Logo fisso -->
     <img src="Asset/datapizzaLogo.png" alt="Datapizza logo" class="logo-fixed">
 
-    <!-- Watermark -->
-    <img src="Asset/datapizza.png" alt="Datapizza watermark" class="watermark">
-
     <div class="reveal">
         <div class="slides">
 
@@ -1929,7 +1927,7 @@
             </section>
 
             <!-- SLIDE 10: CONFRONTO CANALI VISUAL -->
-            <section class="theme-arkemis" data-remove-grid="true">
+            <section class="theme-arkemis">
                 <div class="slide-header">
                     <span class="slide-badge">09</span>
                     <h2>Confronto Canali</h2>
@@ -1971,7 +1969,6 @@
                     <span class="slide-badge">10</span>
                     <h2>Metriche a Confronto</h2>
                 </div>
-                <p class="subtitle">Instagram vs LinkedIn: chi vince su cosa</p>
                 <div class="social-row">
                     <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
                     <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
@@ -2025,7 +2022,7 @@
             </section>
 
             <!-- SLIDE 12: TELEGRAM -->
-            <section class="theme-datapizza center-content">
+            <section class="theme-arkemis">
                 <div class="slide-header">
                     <span class="slide-badge">11</span>
                     <h2>Telegram: Riposizionamento</h2>
@@ -2064,7 +2061,7 @@
             </section>
 
             <!-- COVER: DATAPIZZA BOOST -->
-            <section class="cover-slide cover-full theme-datapizza" data-remove-grid="true" style="align-items: center; justify-content: center;">
+            <section class="cover-slide cover-full theme-datapizza" data-remove-grid="false" style="align-items: center; justify-content: center;">
                 <h1 style="font-size: 3em; margin-bottom: 14px;">Datapizza Boost</h1>
                 <div class="cover-line"></div>
                 <p style="font-size: 1.1em; color: var(--text-light); margin-top: 18px;">Da qui in avanti tema Datapizza e piano di amplificazione</p>
@@ -2155,60 +2152,22 @@
                 <p class="insight-note" style="margin-top: 18px;">Spazio pronto per aggiornare impression/click/save appena disponibili.</p>
             </section>
 
-            <!-- SLIDE: EFFETTO DATAPIZZA -->
-            <section class="theme-datapizza center-content">
-                <div class="slide-header">
-                    <span class="slide-badge">14</span>
-                    <h2>L'Effetto Datapizza</h2>
-                </div>
-                <p class="subtitle">Amplificazione Organica: i 4 driver</p>
-
-                <div class="matrix" style="margin-top: 20px;">
-                    <div class="card card-accent">
-                        <div class="card-title">1. REACH MULTIPLIER</div>
-                        <p class="normal-text" style="margin: 0;">I contenuti sul network Datapizza hanno generato <strong style="color: var(--primary);">picchi oltre 100k views</strong>, garantendo visibilità immediata su un pubblico verticale e profilato.</p>
-                    </div>
-                    <div class="card card-blue">
-                        <div class="card-title blue">2. QUALIFIED ENGAGEMENT</div>
-                        <p class="normal-text" style="margin: 0;">Il CTR è risultato <strong style="color: #1D4ED8;">doppio rispetto alla media</strong>, dimostrando forte <span class="highlight-accent">affinità</span> tra l'audience della community e i temi Arkemis.</p>
-                    </div>
-                    <div class="card card-green">
-                        <div class="card-title green">3. TRUST TRANSFER</div>
-                        <p class="normal-text" style="margin: 0;">Partnership Editoriale strategica: Datapizza <strong style="color: #059669;">trasferisce autorevolezza</strong> al brand, accelerando l'acquisizione di fiducia.</p>
-                    </div>
-                    <div class="card card-yellow">
-                        <div class="card-title yellow">4. IMPATTO ECOSISTEMA</div>
-                        <p class="normal-text" style="margin: 0;">Traffico esterno come <strong style="color: #B45309;">acceleratore</strong>: alimenta direttamente follower sui profili e membri nel Discord.</p>
-                    </div>
-                </div>
-            </section>
-
             <!-- COVER: PIVOT STRATEGICO -->
-            <section class="cover-slide theme-datapizza">
-                <h1 style="font-size: 3em; margin-bottom: 14px;">Pivot strategico</h1>
-                <div class="cover-line"></div>
-                <p style="font-size: 1.1em; color: var(--text-light); margin-top: 18px;">Ottimizzazioni, roadmap e nuovi formati</p>
-            </section>
-
             <!-- SLIDE: PODCAST -->
             <section class="theme-datapizza center-content">
                 <div class="slide-header">
                     <span class="slide-badge">16</span>
-                    <h2>Podcast</h2>
+                    <h2>News & Updates</h2>
                 </div>
-                <p class="subtitle">Amplificare autorità con formato audio</p>
+                <p class="subtitle">Comunicazione tempestiva per engagement</p>
 
                 <div class="two-columns" style="align-items: center;">
                     <div>
-                        <div class="channel-pill" style="background: #1DB954; color: #0A0A0A; border: none; margin-bottom: 12px;">
-                            <span class="logo" style="background: #0A0A0A; color: #1DB954;">♫</span>Spotify
-                        </div>
-                        <p class="normal-text"><strong>Concept:</strong> snippet da 10' su temi tecnici (Docker, AI, sfide dev) con CTA verso AK Hub.</p>
-                        <p class="normal-text"><strong>Cross-post:</strong> teaser in newsletter e LinkedIn per portare stream e salvataggi.</p>
-                        <p class="normal-text"><strong>Nota:</strong> ospite interno/mentor Datapizza per rafforzare il tono human.</p>
+                        <p class="normal-text" style="font-size: 1.4em; line-height: 1.6;"><strong>Se c'è la notizia giusta, faccio CTA mirata per portare traffico qualificato all'hub.</strong></p>
+                        <p class="normal-text">Non contenuti pianificati ma opportunità di momentum per amplificare l'engagement.</p>
                     </div>
                     <div class="insight-image" style="min-height: 260px;">
-                        <img src="Asset/Algo.png" alt="Podcast content">
+                        <img src="Asset/Algo.png" alt="News content">
                     </div>
                 </div>
             </section>
@@ -2246,31 +2205,46 @@
             </section>
 
             <!-- SLIDE: BLOG -->
-            <section class="theme-datapizza center-content" data-remove-grid="true">
-                <img src="Asset/blog.png" alt="Blog preview" class="full-screen-img">
-                <div class="card" style="position: relative; z-index: 1; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); max-width: 600px; padding: 40px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
-                    <h2 style="color: var(--primary); font-size: 3em; margin-bottom: 20px;">Blog</h2>
-                    <p class="normal-text" style="font-size: 1.2em; line-height: 1.6;">Presidio SEO e contenuti long-form di approfondimento per scalare l'autorità tecnica del brand.</p>
+            <section class="theme-datapizza">
+                <div class="slide-header">
+                    <h2>Blog</h2>
+                </div>
+                <p class="subtitle">Presidio SEO e contenuti long-form</p>
+
+                <div class="two-columns" style="align-items: center; gap: 40px;">
+                    <div>
+                        <div class="insight-image" style="min-height: 380px;">
+                            <img src="Asset/blog.png" alt="Blog preview" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
+                        </div>
+                    </div>
+                    <div>
+                        <p class="normal-text" style="margin-bottom: 20px;">Articoli tecnici di approfondimento per scalare l'autorità del brand e migliorare il posizionamento SEO.</p>
+                        <div class="card card-blue" style="padding: 20px;">
+                            <p class="normal-text" style="margin: 0;"><strong>Link:</strong></p>
+                            <a href="https://rkomi98.github.io/MyBlog/blog/index.html" target="_blank" style="color: #1D4ED8; text-decoration: underline; word-break: break-all;">https://rkomi98.github.io/MyBlog/blog/index.html</a>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- SLIDE: NEWSLETTER CROSS-PROMOTION -->
-            <section class="theme-datapizza center-content">
+            <section class="theme-datapizza">
                 <div class="slide-header">
                     <span class="slide-badge">20</span>
                     <h2>Newsletter cross-promotion</h2>
                 </div>
-                <p class="subtitle">Snippet tecnico curata da Datapizza</p>
+                <p class="subtitle">Collaborazione strategica con Datapizza</p>
 
                 <div class="two-columns" style="gap: 24px;">
                     <div class="card" style="background: var(--bg-card);">
-                        <div class="card-title">Snippet + CTA</div>
-                        <p class="normal-text" style="margin: 0;"><strong>Curata da Datapizza:</strong> una pillola di codice/AI ogni numero con link a AK Hub o blog.</p>
-                        <p class="normal-text" style="margin-top: 10px;">CTA reciproca: Arkemis rimanda a Datapizza per trend e community.</p>
+                        <div class="card-title">Snippet di codice</div>
+                        <p class="normal-text" style="margin: 0;">Siamo solo noi a ospitare snippet di codice e link al loro sito nella newsletter Datapizza.</p>
+                        <p class="normal-text" style="margin-top: 10px;">Ogni numero include una pillola tecnica curata con link diretto all'AK Hub o al blog.</p>
                     </div>
                     <div class="card" style="background: var(--bg-card);">
-                        <div class="card-title">News & Newsflash</div>
-                        <p class="normal-text" style="margin: 0;">In caso di notizie rilevanti o lanci strategici, integrazione di una <strong>Call to Action diretta</strong> per massimizzare la conversione immediata.</p>
+                        <div class="card-title">Podcast &amp; News</div>
+                        <p class="normal-text" style="margin: 0;">Riferimento al podcast Datapizza in caso di notizie interessanti legate al mondo coding.</p>
+                        <p class="normal-text" style="margin-top: 10px;">Amplificazione reciproca per massimizzare reach e engagement su contenuti di valore.</p>
                     </div>
                 </div>
             </section>
@@ -2364,18 +2338,14 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 18px; border: 1px dashed var(--card-blue-border); border-radius: 12px; padding: 16px; text-align: center; color: var(--text-light);">
-                    Trend line (placeholder)
-                </div>
             </section>
 
             <!-- SLIDE: KPI ENGAGEMENT & CONVERSION -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza center-content">
                 <div class="slide-header">
                     <span class="slide-badge">23</span>
                     <h2>KPI Targets: Quality &amp; Conversion</h2>
                 </div>
-                <p class="subtitle">Engagement e ROI Q1 2026</p>
 
                 <div class="two-columns" style="margin-top: 25px;">
                     <div>
@@ -2439,11 +2409,6 @@
 
             <!-- SLIDE: Q&A MEME -->
             <section class="cover-slide theme-datapizza">
-                <div class="cover-logo" style="background: #C12A22;">
-                    <img src="Asset/datapizza.png" alt="Datapizza logo">
-                </div>
-                <h1 style="font-size: 3.2em; margin-bottom: 20px;">Q&amp;A</h1>
-                <div class="cover-line"></div>
                 <div style="margin-top: 30px;">
                     <img src="Asset/Q&A.png" alt="Q&A meme" style="max-width: 820px; width: 100%; border-radius: 18px; box-shadow: 0 18px 40px rgba(0,0,0,0.12);">
                 </div>
