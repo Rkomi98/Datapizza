@@ -35,11 +35,14 @@
             --font-body: 'Lato', sans-serif;
         }
 
+        body.stage-arkemis { --stage-bg: var(--ark-bg); }
+        body.stage-datapizza { --stage-bg: #FFFFFF; }
+
         html, body {
             height: 100%;
             width: 100%;
             margin: 0;
-            background: var(--bg-slide);
+            background: var(--stage-bg, var(--bg-slide));
             color: var(--text-dark);
         }
 
@@ -87,7 +90,7 @@
             color: var(--text-dark);
             width: 100vw;
             height: 100vh;
-            background: var(--bg-slide);
+            background: var(--stage-bg, var(--bg-slide));
         }
 
         .reveal .slides {
@@ -134,9 +137,7 @@
             line-height: 1.2;
         }
 
-        .reveal img {
-            max-width: 67%; 
-        }
+        .reveal img { max-width: 100%; }
 
         /* Logo fisso */
         .logo-fixed {
@@ -159,7 +160,6 @@
         }
 
         /* Theme surfaces */
-        body.theme-arkemis .reveal .slides section,
         .reveal .slides section.theme-arkemis {
             background-color: var(--bg-slide);
             background-image:
@@ -585,6 +585,12 @@
             border-bottom: 1px solid var(--card-blue-border);
         }
 
+        .reveal table thead th {
+            background: var(--bg-card);
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--card-blue-border);
+        }
+
         .reveal table tr:nth-child(even) td {
             background: var(--bg-card);
         }
@@ -679,36 +685,59 @@
 
         /* Timeline */
         .timeline {
-            display: flex;
-            gap: 25px;
-            margin-top: 25px;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            padding-top: 42px;
+            margin-top: 10px;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            top: 18px;
+            left: 8px;
+            right: 8px;
+            height: 4px;
+            background: linear-gradient(90deg, #C12A22, #F1C0BD, #1D4ED8, #059669);
+            border-radius: 999px;
+            opacity: 0.4;
         }
 
         .timeline-item {
-            flex: 1;
             position: relative;
-            padding: 25px;
-            padding-left: 30px;
-            border-left: 4px solid var(--primary);
-            background: var(--card-red-bg);
-            border-radius: 0 16px 16px 0;
+            padding: 22px;
+            background: var(--bg-card);
+            border: 1px solid var(--card-blue-border);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
 
-        .timeline-item.blue { 
-            border-left-color: #1D4ED8; 
-            background: var(--card-blue-bg);
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            top: -30px;
+            left: 18px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 4px solid var(--bg-slide);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.18);
         }
-        .timeline-item.green { 
-            border-left-color: #059669; 
-            background: var(--card-green-bg);
-        }
+
+        .timeline-item.blue { border-color: var(--card-blue-border); }
+        .timeline-item.green { border-color: var(--card-green-border); }
+        .timeline-item.blue::before { background: #1D4ED8; }
+        .timeline-item.green::before { background: #059669; }
 
         .timeline-month {
             font-family: var(--font-heading);
             font-weight: 700;
             font-size: 1.1em;
             color: var(--primary);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .timeline-item.blue .timeline-month { color: #1D4ED8; }
@@ -721,10 +750,11 @@
         }
 
         .timeline-item li {
-            font-size: 0.85em;
+            font-size: 0.92em;
             margin-bottom: 8px;
-            padding-left: 20px;
+            padding-left: 18px;
             position: relative;
+            color: var(--text-gray);
         }
 
         .timeline-item li::before {
@@ -1346,7 +1376,7 @@
         .roadmap-step.green .roadmap-month { color: #059669; }
     </style>
 </head>
-<body class="theme-arkemis">
+<body class="stage-arkemis">
     <!-- Logo fisso -->
     <img src="Asset/datapizzaLogo.png" alt="Datapizza logo" class="logo-fixed">
 
@@ -1387,7 +1417,7 @@
                         <div class="social-row icons-only" aria-label="Canali chiave">
                             <span class="social-logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>
                             <span class="social-logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>
-                            <span class="social-logo"><img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo"></span>
+                            <span class="social-logo"><img src="Asset/Social/Telegram_logo.svg" alt="Telegram logo"></span>
                         </div>
                     </div>
                     <div class="agenda-card blue">
@@ -1495,8 +1525,6 @@
                     <span class="slide-badge">04</span>
                     <h2>LinkedIn: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Luglio</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1521,8 +1549,6 @@
                     <span class="slide-badge">04</span>
                     <h2>LinkedIn: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Agosto</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1547,8 +1573,6 @@
                     <span class="slide-badge">04</span>
                     <h2>LinkedIn: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Settembre</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1573,8 +1597,6 @@
                     <span class="slide-badge">04</span>
                     <h2>LinkedIn: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Ottobre</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1599,8 +1621,6 @@
                     <span class="slide-badge">04</span>
                     <h2>LinkedIn: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Novembre</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1671,8 +1691,6 @@
                     <span class="slide-badge">05</span>
                     <h2>Instagram: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Luglio</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1697,8 +1715,6 @@
                     <span class="slide-badge">05</span>
                     <h2>Instagram: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Agosto</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1723,8 +1739,6 @@
                     <span class="slide-badge">05</span>
                     <h2>Instagram: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Settembre</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1749,8 +1763,6 @@
                     <span class="slide-badge">05</span>
                     <h2>Instagram: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Ottobre</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -1775,8 +1787,6 @@
                     <span class="slide-badge">05</span>
                     <h2>Instagram: Insight Mensili</h2>
                 </div>
-                <p class="subtitle">Novembre</p>
-
                 <div class="monthly-insight">
                     <div class="month-card">
                         <header>
@@ -2052,8 +2062,8 @@
 
                 <div class="card card-accent" style="margin-top: 25px;">
                     <p style="margin: 0; font-size: 1.1em; display: flex; align-items: center; gap: 10px;">
-                        <span class="logo" style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(45deg, #2AABEE, #229ED9); display: inline-flex; align-items: center; justify-content: center;">
-                            <img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo" style="width: 100%; height: 100%; object-fit: contain;">
+                        <span class="logo" style="width: 50px; height: 50px; border-radius: 8px; background: none; display: inline-flex; align-items: center; justify-content: center;">
+                            <img src="Asset/Social/Telegram_logo.svg" alt="Telegram logo" style="width: 100%; height: 100%; object-fit: contain;">
                         </span>
                         <span><strong>Nuova Policy:</strong> Trasformare il canale in un "Resource Hub" con contenuti esclusivi che giustifichino l'iscrizione.</span>
                     </p>
@@ -2061,14 +2071,14 @@
             </section>
 
             <!-- COVER: DATAPIZZA BOOST -->
-            <section class="cover-slide cover-full theme-datapizza" data-remove-grid="false" style="align-items: center; justify-content: center;">
+            <section class="cover-slide cover-full theme-datapizza" data-remove-grid="true" style="align-items: center; justify-content: center;">
                 <h1 style="font-size: 3em; margin-bottom: 14px;">Datapizza Boost</h1>
                 <div class="cover-line"></div>
                 <p style="font-size: 1.1em; color: var(--text-light); margin-top: 18px;">Da qui in avanti tema Datapizza e piano di amplificazione</p>
             </section>
 
             <!-- SLIDE: DATAPIZZA BOOST PERFORMANCE -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">12</span>
                     <h2>Datapizza Boost: Performance</h2>
@@ -2120,7 +2130,7 @@
             </section>
 
             <!-- SLIDE: TOP PERFORMER BOOST -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">13</span>
                     <h2>Top performer</h2>
@@ -2152,9 +2162,8 @@
                 <p class="insight-note" style="margin-top: 18px;">Spazio pronto per aggiornare impression/click/save appena disponibili.</p>
             </section>
 
-            <!-- COVER: PIVOT STRATEGICO -->
-            <!-- SLIDE: PODCAST -->
-            <section class="theme-datapizza center-content">
+            <!-- SLIDE: NEWS & UPDATES -->
+            <section class="theme-datapizza center-content" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">16</span>
                     <h2>News & Updates</h2>
@@ -2173,7 +2182,7 @@
             </section>
 
             <!-- SLIDE: TECH SERIES -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">17</span>
                     <h2>Tech series</h2>
@@ -2188,53 +2197,20 @@
                 </ul>
             </section>
 
-            <!-- SLIDE: CHALLENGE FRAMEWORK -->
-            <section class="theme-datapizza">
-                <div class="slide-header">
-                    <span class="slide-badge">18</span>
-                    <h2>Challenge framework</h2>
-                </div>
-                <p class="subtitle">Un mese = un tema (o un linguaggio)</p>
-
-                <ul class="styled-list">
-                    <li>Formato: LinkedIn post + Instagram stories con CTA di partecipazione</li>
-                    <li>Focus su linguaggi/tool (es. Rust month, Docker month) con recap finale</li>
-                    <li>Leaderboard leggera + retrospettiva community</li>
-                    <li>Sinergia con podcast e tech series per alimentare i topic</li>
-                </ul>
-            </section>
-
             <!-- SLIDE: BLOG -->
-            <section class="theme-datapizza">
-                <div class="slide-header">
-                    <span class="slide-badge">19</span>
-                    <h2>Blog</h2>
-                </div>
-                <p class="subtitle">Nuovo touchpoint editoriale</p>
-
-                <div class="two-columns" style="align-items: center; gap: 40px;">
-                    <div>
-                        <div class="insight-image" style="min-height: 380px;">
-                            <img src="Asset/blog.png" alt="Blog preview" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
-                        </div>
-                    </div>
-                    <div>
-                        <p class="normal-text" style="margin-bottom: 20px;">Articoli tecnici di approfondimento per scalare l'autorità del brand e migliorare il posizionamento SEO.</p>
-                        <div class="card card-blue" style="padding: 20px;">
-                            <p class="normal-text" style="margin: 0;"><strong>Link:</strong></p>
-                            <a href="https://rkomi98.github.io/MyBlog/blog/index.html" target="_blank" style="color: #1D4ED8; text-decoration: underline; word-break: break-all;">https://rkomi98.github.io/MyBlog/blog/index.html</a>
-                        </div>
-                    </div>
+            <section class="theme-datapizza center-content" data-remove-grid="true" style="padding: 0;">
+                <div style="position: relative; width: 100%; height: 100%;">
+                    <img src="Asset/blog.png" alt="Blog preview" style="inset: 0; width: 100%; height: 100%; object-fit: cover;">
                 </div>
             </section>
 
             <!-- SLIDE: NEWSLETTER CROSS-PROMOTION -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">20</span>
                     <h2>Newsletter cross-promotion</h2>
                 </div>
-                <p class="subtitle">Collaborazione strategica con Datapizza</p>
+                <p class="subtitle">Snippet tecnico fisso + CTA mirata quando la news lo richiede</p>
 
                 <div class="two-columns" style="gap: 24px;">
                     <div class="card" style="background: var(--bg-card);">
@@ -2243,15 +2219,15 @@
                         <p class="normal-text" style="margin-top: 10px;">Ogni numero include una pillola tecnica curata con link diretto all'AK Hub o al blog.</p>
                     </div>
                     <div class="card" style="background: var(--bg-card);">
-                        <div class="card-title">Podcast &amp; News</div>
-                        <p class="normal-text" style="margin: 0;">Riferimento al podcast Datapizza in caso di notizie interessanti legate al mondo coding.</p>
-                        <p class="normal-text" style="margin-top: 10px;">Amplificazione reciproca per massimizzare reach e engagement su contenuti di valore.</p>
+                        <div class="card-title">Newsflash + CTA</div>
+                        <p class="normal-text" style="margin: 0;">Se c'è la notizia giusta, inseriamo una CTA diretta per convogliare traffico qualificato all'hub.</p>
+                        <p class="normal-text" style="margin-top: 10px;">Formati rapidi (banner o box) da attivare solo quando il momentum merita di essere spinto.</p>
                     </div>
                 </div>
             </section>
 
             <!-- SLIDE: ROADMAP Q1 -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">21</span>
                     <h2>Roadmap Q1 2026</h2>
@@ -2293,7 +2269,7 @@
             </section>
 
             <!-- SLIDE: KPI GROWTH -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">22</span>
                     <h2>KPI Targets: Audience Growth</h2>
@@ -2342,7 +2318,7 @@
             </section>
 
             <!-- SLIDE: KPI ENGAGEMENT & CONVERSION -->
-            <section class="theme-datapizza center-content">
+            <section class="theme-datapizza center-content" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">23</span>
                     <h2>KPI Targets: Quality &amp; Conversion</h2>
@@ -2391,7 +2367,7 @@
             </section>
 
             <!-- SLIDE: BRAINSTORM KPI -->
-            <section class="theme-datapizza">
+            <section class="theme-datapizza" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">24</span>
                     <h2>Brainstorm KPI</h2>
@@ -2409,10 +2385,8 @@
             </section>
 
             <!-- SLIDE: Q&A MEME -->
-            <section class="cover-slide theme-datapizza">
-                <div style="margin-top: 30px;">
-                    <img src="Asset/Q&A.png" alt="Q&A meme" style="max-width: 820px; width: 100%; border-radius: 18px; box-shadow: 0 18px 40px rgba(0,0,0,0.12);">
-                </div>
+            <section class="cover-slide theme-datapizza center-content" data-remove-grid="true">
+                <img src="Asset/Q&A.png" alt="Q&A meme" style="max-width: 920px; width: 100%; border-radius: 18px; box-shadow: 0 18px 40px rgba(0,0,0,0.12);">
             </section>
 
         </div>
@@ -2429,8 +2403,18 @@
             transition: 'slide',
             width: 1280,
             height: 720,
-            margin: 0.04
+            margin: 0
         });
+
+        const setStageTheme = (slide) => {
+            const isDatapizza = !!slide?.classList?.contains('theme-datapizza');
+            document.body.classList.toggle('stage-datapizza', isDatapizza);
+            document.body.classList.toggle('stage-arkemis', !isDatapizza);
+        };
+
+        Reveal.on('ready', (event) => setStageTheme(event.currentSlide));
+        Reveal.on('slidechanged', (event) => setStageTheme(event.currentSlide));
+        setStageTheme(Reveal.getCurrentSlide());
     </script>
 </body>
 </html>
