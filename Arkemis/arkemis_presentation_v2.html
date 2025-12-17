@@ -127,7 +127,7 @@
         .reveal p {
             font-size: 1em;
             color: var(--text-gray);
-            line-height: 1.5;
+            line-height: 1;
         }
 
         /* Logo fisso */
@@ -613,6 +613,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
+            padding: 0 60px;
         }
 
         .cover-logo {
@@ -1036,6 +1038,30 @@
             margin-top: 10px;
         }
 
+        .social-row.icons-only {
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .social-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--card-blue-border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+        }
+
+        .social-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
         .channel-pill {
             display: inline-flex;
             align-items: center;
@@ -1074,7 +1100,7 @@
         /* Monthly insight */
         .monthly-insight {
             display: grid;
-            grid-template-columns: 1.05fr 1fr;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
             gap: 24px;
             align-items: stretch;
         }
@@ -1143,16 +1169,20 @@
             border: 1px dashed var(--card-blue-border);
             border-radius: 18px;
             min-height: 0;
+            max-height: 560px;
+            max-width: 620px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            padding: 10px;
+            justify-self: end;
         }
 
         .insight-image img {
             width: 100%;
             height: auto;
-            max-height: none;
+            max-height: 90%;
             object-fit: contain;
             display: block;
             position: relative;
@@ -1251,6 +1281,11 @@
                         <div class="agenda-num">1</div>
                         <h3 style="margin-bottom: 15px;">L'Ecosistema Organico</h3>
                         <p class="normal-text">Analisi As-Is: i numeri della crescita, l'analisi dei canali e il focus specifico su Telegram.</p>
+                        <div class="social-row icons-only" aria-label="Canali chiave">
+                            <span class="social-logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>
+                            <span class="social-logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>
+                            <span class="social-logo"><img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo"></span>
+                        </div>
                     </div>
                     <div class="agenda-card blue">
                         <div class="agenda-num">2</div>
@@ -1262,12 +1297,6 @@
                         <h3 style="margin-bottom: 15px;">Il Pivot Strategico</h3>
                         <p class="normal-text">Roadmap 2026: ottimizzazione dei formati, nuove sinergie e piano d'azione Q1.</p>
                     </div>
-                </div>
-
-                <div class="social-row" aria-label="Canali chiave">
-                    <span class="channel-pill li"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</span>
-                    <span class="channel-pill ig"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</span>
-                    <span class="channel-pill tg"><span class="logo"><img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo"></span>Telegram</span>
                 </div>
             </section>
 
