@@ -127,7 +127,11 @@
         .reveal p {
             font-size: 1em;
             color: var(--text-gray);
-            line-height: 1;
+            line-height: 1.2;
+        }
+
+        .reveal img {
+            max-width: 67%; 
         }
 
         /* Logo fisso */
@@ -161,7 +165,8 @@
             color: var(--text-dark);
         }
 
-        .reveal .slides section.theme-datapizza {
+        .reveal .slides section.theme-datapizza,
+        .reveal .slides section[data-remove-grid="true"] {
             --primary: #C12A22;
             --text-dark: #1E293B;
             --text-gray: #475569;
@@ -179,8 +184,21 @@
             --font-heading: 'Poppins', sans-serif;
             --font-body: 'Lato', sans-serif;
             background: var(--bg-slide);
-            background-image: none;
+            background-image: none !important;
             color: var(--text-dark);
+        }
+
+        .reveal .slides section.theme-datapizza {
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            background: #FFFFFF;
+        }
+
+        .reveal .slides section.theme-datapizza.cover-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .theme-arkemis .card,
@@ -978,6 +996,7 @@
             margin-bottom: 12px;
             padding-left: 25px;
             position: relative;
+            line-height: 1.2;
         }
 
         .sts-card.stop li::before { content: "✕"; color: #DC2626; position: absolute; left: 0; font-weight: bold; }
@@ -1095,7 +1114,8 @@
 
         .channel-pill.li .logo { background: rgba(10, 102, 194, 0.12); border-color: #0A66C2; }
         .channel-pill.ig .logo { background: linear-gradient(45deg, #E4405F22, #FCAF4522); border-color: #E4405F; }
-        .channel-pill.tg .logo { background: linear-gradient(45deg, #2AABEE22, #229ED922); border-color: #2AABEE; }
+        .channel-pill.tg .logo { background: linear-gradient(45deg, #2AABEE, #229ED9); border-color: #2AABEE; }
+        .channel-pill.tg .logo img { filter: invert(45%) sepia(97%) saturate(749%) hue-rotate(169deg) brightness(97%) contrast(95%); }
 
         /* Monthly insight */
         .monthly-insight {
@@ -1103,6 +1123,16 @@
             grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
             gap: 24px;
             align-items: stretch;
+        }
+
+        .best-layout {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+            align-items: center;
+        }
+
+        .best-layout .insight-image {
+            max-height: 90vh;
+            max-width: 720px;
         }
 
         .month-card {
@@ -1187,6 +1217,14 @@
             display: block;
             position: relative;
             z-index: 1;
+        }
+
+        .insight-caption {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: var(--text-gray);
+            font-weight: 600;
+            text-align: right;
         }
 
         .insight-image[data-placeholder]:after {
@@ -1747,19 +1785,22 @@
                 </div>
                 <p class="subtitle">Focus: Retention</p>
 
-                <div class="best-card" style="background: var(--card-yellow-bg);">
-                    <div class="best-emoji">🏆</div>
-                    <div class="best-content">
-                        <h4>Best for RETENTION (Instagram): "Docker: cos'è"</h4>
-                        <div class="stats"><strong style="color: #B45309; font-size: 1.2em;">134 Salvataggi</strong> (vs media di categoria ~37)</div>
-                        <div class="why">Perché ha avuto successo? Tutorial puro, sintetico, "pronto all'uso".</div>
+                <div class="monthly-insight best-layout">
+                    <div>
+                        <div class="best-card" style="background: var(--card-yellow-bg);">
+                            <div class="best-emoji">🏆</div>
+                            <div class="best-content">
+                                <h4>Best for RETENTION (Instagram): "Docker: cos'è"</h4>
+                                <div class="stats"><strong style="color: #B45309; font-size: 1.2em;">134 Salvataggi</strong> (vs media di categoria ~37)</div>
+                                <div class="why">Perché ha avuto successo? Tutorial puro, sintetico, "pronto all'uso".</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="thumb-grid">
-                    <div class="thumb-item">
-                        <img src="Asset/Meme/Best/Retention.png" alt="Post best retention">
-                        <div class="thumb-caption">Carosello Docker: focus utilità immediata</div>
+                    <div>
+                        <div class="insight-image">
+                            <img src="Asset/Meme/Best/Retention.png" alt="Post best retention">
+                        </div>
+                        <div class="insight-caption">Carosello Docker: focus utilità immediata</div>
                     </div>
                 </div>
             </section>
@@ -1772,19 +1813,22 @@
                 </div>
                 <p class="subtitle">Focus: Reach</p>
 
-                <div class="best-card" style="background: var(--card-red-bg);">
-                    <div class="best-emoji">🚀</div>
-                    <div class="best-content">
-                        <h4>Best for REACH (LinkedIn): "Corso Technical Writing"</h4>
-                        <div class="stats"><strong style="color: var(--primary); font-size: 1.2em;">~110.000 Impressions</strong> (All-time record) • 642 Reactions + 292 Click</div>
-                        <div class="why">Perché ha avuto successo? Ha toccato un pain point di carriera (Soft Skill per Senior) offrendo una soluzione.</div>
+                <div class="monthly-insight best-layout">
+                    <div>
+                        <div class="best-card" style="background: var(--card-red-bg);">
+                            <div class="best-emoji">🚀</div>
+                            <div class="best-content">
+                                <h4>Best for REACH (LinkedIn): "Corso Technical Writing"</h4>
+                                <div class="stats"><strong style="color: var(--primary); font-size: 1.2em;">~110.000 Impressions</strong> (All-time record) • 642 Reactions + 292 Click</div>
+                                <div class="why">Perché ha avuto successo? Ha toccato un pain point di carriera (Soft Skill per Senior) offrendo una soluzione.</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="thumb-grid">
-                    <div class="thumb-item">
-                        <img src="Asset/Meme/Best/reach.png" alt="Post best reach">
-                        <div class="thumb-caption">Hero post LinkedIn "Tech Writing"</div>
+                    <div>
+                        <div class="insight-image">
+                            <img src="Asset/Meme/Best/reach.png" alt="Post best reach">
+                        </div>
+                        <div class="insight-caption">Hero post LinkedIn "Tech Writing"</div>
                     </div>
                 </div>
             </section>
@@ -1797,25 +1841,28 @@
                 </div>
                 <p class="subtitle">Focus: Engagement</p>
 
-                <div class="best-card" style="background: var(--card-blue-bg);">
-                    <div class="best-emoji">🔥</div>
-                    <div class="best-content">
-                        <h4>Best for ENGAGEMENT (Instagram): "Dev Life (Summer Edition)"</h4>
-                        <div class="stats"><strong style="color: #1D4ED8; font-size: 1.2em;">~1.000 Reactions</strong> + 34.000 Views</div>
-                        <div class="why">Perché ha avuto successo? Relatability pura. Ha rispecchiato perfettamente il mood della community.</div>
+                <div class="monthly-insight best-layout">
+                    <div>
+                        <div class="best-card" style="background: var(--card-blue-bg);">
+                            <div class="best-emoji">🔥</div>
+                            <div class="best-content">
+                                <h4>Best for ENGAGEMENT (Instagram): "Dev Life (Summer Edition)"</h4>
+                                <div class="stats"><strong style="color: #1D4ED8; font-size: 1.2em;">~1.000 Reactions</strong> + 34.000 Views</div>
+                                <div class="why">Perché ha avuto successo? Relatability pura. Ha rispecchiato perfettamente il mood della community.</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="thumb-grid">
-                    <div class="thumb-item">
-                        <img src="Asset/Meme/Best/Engagement.png" alt="Post best engagement">
-                        <div class="thumb-caption">Meme estivo alto coinvolgimento</div>
+                    <div>
+                        <div class="insight-image">
+                            <img src="Asset/Meme/Best/Engagement.png" alt="Post best engagement">
+                        </div>
+                        <div class="insight-caption">Meme estivo alto coinvolgimento</div>
                     </div>
                 </div>
             </section>
 
             <!-- SLIDE 10: CONFRONTO CANALI VISUAL -->
-            <section class="theme-arkemis">
+            <section class="theme-arkemis" data-remove-grid="true">
                 <div class="slide-header">
                     <span class="slide-badge">09</span>
                     <h2>Confronto Canali</h2>
@@ -1825,7 +1872,7 @@
                 <div class="two-columns" style="margin-top: 30px; gap: 50px;">
                     <div class="channel-card instagram" style="background: var(--bg-card); border: 1px solid var(--card-blue-border);">
                         <div class="channel-pill ig" style="margin-bottom: 12px;"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span>Instagram</div>
-                        <h3 style="margin-bottom: 10px; font-size: 1.4em;">Instagram</h3>
+                
                         <div class="card-title" style="color: #E4405F;">BRAND AFFINITY</div>
                         <p class="normal-text" style="margin-bottom: 14px;">Il luogo della "Cultura". Funziona per Caroselli educativi (Salvataggi) e Reel (Simpatia).</p>
                         <div class="card" style="padding: 15px; margin: 0; border-left: 4px solid #059669;">
@@ -1838,7 +1885,7 @@
 
                     <div class="channel-card linkedin" style="background: var(--bg-card); border: 1px solid var(--card-blue-border);">
                         <div class="channel-pill li" style="margin-bottom: 12px;"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span>LinkedIn</div>
-                        <h3 style="margin-bottom: 10px; font-size: 1.4em;">LinkedIn</h3>
+                        
                         <div class="card-title blue">GROWTH &amp; CONVERSION</div>
                         <p class="normal-text" style="margin-bottom: 14px;">Il motore della crescita. Qui l'utente legge, approfondisce e clicca. È il canale perfetto per formati ibridi (Opinione + Tecnica) e per portare traffico al sito/Discord.</p>
                         <div class="card" style="padding: 15px; margin: 0; border-left: 4px solid #059669;">
@@ -1877,25 +1924,25 @@
                             <td><strong>Engagement Rate</strong></td>
                             <td>2.5% - 5.0%</td>
                             <td>1.0% - 2.5%</td>
-                            <td><span class="tag" style="background: linear-gradient(45deg, #E4405F, #FCAF45); color: white;">IG</span></td>
+                            <td><span class="channel-pill ig" style="border: none; padding: 6px 10px;"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span></span></td>
                         </tr>
                         <tr>
                             <td><strong>Click-Through (Nov)</strong></td>
                             <td>64 click</td>
                             <td>478 click</td>
-                            <td><span class="tag" style="background: #0A66C2; color: white;">LI</span></td>
+                            <td><span class="channel-pill li" style="border: none; padding: 6px 10px;"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span></span></td>
                         </tr>
                         <tr>
                             <td><strong>Viral Potential</strong></td>
                             <td>Medio (Reels dipendente)</td>
                             <td>Alto (Text + PDF)</td>
-                            <td><span class="tag" style="background: #0A66C2; color: white;">LI</span></td>
+                            <td><span class="channel-pill li" style="border: none; padding: 6px 10px;"><span class="logo"><img src="Asset/Social/LinkedIn_icon.svg" alt="LinkedIn logo"></span></span></td>
                         </tr>
                         <tr>
                             <td><strong>Retention (Saves)</strong></td>
                             <td>High (Visual)</td>
                             <td>Low (Text)</td>
-                            <td><span class="tag" style="background: linear-gradient(45deg, #E4405F, #FCAF45); color: white;">IG</span></td>
+                            <td><span class="channel-pill ig" style="border: none; padding: 6px 10px;"><span class="logo"><img src="Asset/Social/Instagram_logo_2016.svg" alt="Instagram logo"></span></span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -1917,10 +1964,6 @@
                     <h2>Telegram: Riposizionamento</h2>
                 </div>
                 <p class="subtitle">Da specchio dei social a hub di risorse esclusive</p>
-                <div class="social-row" style="margin-bottom: 10px;">
-                    <span class="channel-pill tg"><span class="logo"><img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo"></span>Telegram</span>
-                </div>
-
                 <div class="before-after-container" style="margin-top: 30px;">
                     <div class="ba-box before">
                         <div class="ba-title">❌ PRIMA: Strategia "Mirroring"</div>
@@ -1944,12 +1987,17 @@
                 </div>
 
                 <div class="card card-accent" style="margin-top: 25px;">
-                    <p style="margin: 0; font-size: 1.1em;"><strong>🎯 Nuova Policy:</strong> Trasformare il canale in un "Resource Hub" con contenuti esclusivi che giustifichino l'iscrizione.</p>
+                    <p style="margin: 0; font-size: 1.1em; display: flex; align-items: center; gap: 10px;">
+                        <span class="logo" style="width: 50px; height: 50px; border-radius: 8px; background: linear-gradient(45deg, #2AABEE, #229ED9); display: inline-flex; align-items: center; justify-content: center;">
+                            <img src="Asset/Social/Telegram_black_logo.svg" alt="Telegram logo" style="width: 100%; height: 100%; object-fit: contain;">
+                        </span>
+                        <span><strong>Nuova Policy:</strong> Trasformare il canale in un "Resource Hub" con contenuti esclusivi che giustifichino l'iscrizione.</span>
+                    </p>
                 </div>
             </section>
 
             <!-- COVER: DATAPIZZA BOOST -->
-            <section class="cover-slide theme-datapizza">
+            <section class="cover-slide theme-datapizza" data-remove-grid="true">
                 <h1 style="font-size: 3em; margin-bottom: 14px;">Datapizza Boost</h1>
                 <div class="cover-line"></div>
                 <p style="font-size: 1.1em; color: var(--text-light); margin-top: 18px;">Da qui in avanti tema Datapizza e piano di amplificazione</p>
