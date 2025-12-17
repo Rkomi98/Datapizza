@@ -65,29 +65,29 @@
             --font-body: 'Space Grotesk', 'Lato', sans-serif;
         }
 
-        .theme-datapizza {
-            --primary: #C12A22;
-            --text-dark: #1E293B;
-            --text-gray: #475569;
-            --text-light: #64748B;
-            --bg-slide: #FFFFFF;
-            --bg-card: #F8FAFC;
-            --card-red-bg: #FEF2F2;
-            --card-red-border: #FEE2E2;
-            --card-blue-bg: #EFF6FF;
-            --card-blue-border: #DBEAFE;
-            --card-green-bg: #ECFDF5;
-            --card-green-border: #D1FAE5;
+	        .theme-datapizza {
+	            --primary: #C12A22;
+	            --text-dark: #1E293B;
+	            --text-gray: #475569;
+	            --text-light: #64748B;
+	            --bg-slide: #FFFFFF;
+	            --bg-card: #F8FAFC;
+	            --card-red-bg: #FEF2F2;
+	            --card-red-border: #FEE2E2;
+	            --card-blue-bg: #EFF6FF;
+	            --card-blue-border: #DBEAFE;
+	            --card-green-bg: #ECFDF5;
+	            --card-green-border: #D1FAE5;
             --card-yellow-bg: #FEF3C7;
             --card-yellow-border: #F59E0B;
             --font-heading: 'Poppins', sans-serif;
-            --font-body: 'Lato', sans-serif;
-        }
+	            --font-body: 'Lato', sans-serif;
+	        }
 
-        .reveal {
-            font-family: var(--font-body);
-            font-size: 22px;
-            color: var(--text-dark);
+	        .reveal {
+	            font-family: var(--font-body);
+	            font-size: 22px;
+	            color: var(--text-dark);
             width: 100vw;
             height: 100vh;
             background: var(--stage-bg, var(--bg-slide));
@@ -1264,28 +1264,91 @@
             z-index: 0;
         }
 
-        /* Thumbnail grid */
-        .thumb-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
+	        /* Thumbnail grid */
+	        .thumb-grid {
+	            display: grid;
+	            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	            gap: 16px;
+	            margin-top: 16px;
+	        }
 
-        .thumb-item {
-            background: var(--bg-card);
-            border: 1px solid var(--card-blue-border);
-            border-radius: 12px;
-            padding: 10px;
-        }
+	        .thumb-item {
+	            background: var(--bg-card);
+	            border: 1px solid var(--card-blue-border);
+	            border-radius: 12px;
+	            padding: 10px;
+	        }
 
-        .thumb-item img {
-            width: 100%;
-            height: 140px;
-            object-fit: cover;
-            border-radius: 8px;
-            display: block;
-        }
+	        .thumb-item img {
+	            width: 100%;
+	            height: 140px;
+	            object-fit: cover;
+	            border-radius: 8px;
+	            display: block;
+	        }
+
+	        /* Slide: Top performer split (thumbs + chart) */
+	        .top-performer-slide {
+	            padding: 34px 42px !important;
+	            display: flex !important;
+	            flex-direction: column;
+	            gap: 18px;
+	        }
+
+	        .top-performer-layout {
+	            display: flex;
+	            gap: 24px;
+	            flex: 1 1 auto;
+	            min-height: 0;
+	            align-items: stretch;
+	        }
+
+	        .top-performer-left {
+	            flex: 0 0 min(48%, 62vh);
+	        }
+
+	        .top-performer-right {
+	            flex: 1 1 auto;
+	            min-width: 0;
+	            min-height: 0;
+	            display: flex;
+	        }
+
+	        .top-performer-thumbs {
+	            margin-top: 0;
+	            grid-template-columns: repeat(2, 1fr);
+	        }
+
+	        .top-performer-thumbs .thumb-item {
+	            padding: 10px;
+	            border-radius: 16px;
+	            aspect-ratio: 1 / 1;
+	            overflow: hidden;
+	        }
+
+	        .top-performer-thumbs .thumb-item img {
+	            height: 100% !important;
+	            border-radius: 12px;
+	        }
+
+	        .top-performer-chart {
+	            width: 100%;
+	            flex: 1 1 auto;
+	            min-height: 0;
+	            background: #fff;
+	            border: 1px solid var(--card-blue-border);
+	            border-radius: 16px;
+	            overflow: hidden;
+	            padding: 8px;
+	        }
+
+	        .top-performer-chart .flourish-embed,
+	        .top-performer-chart .flourish-embed iframe,
+	        .top-performer-chart .flourish-embed embed,
+	        .top-performer-chart .flourish-embed object {
+	            width: 100% !important;
+	            height: 100% !important;
+	        }
 
         .thumb-caption {
             margin-top: 8px;
@@ -2129,32 +2192,38 @@
                 </div>
             </section>
 
-	            <!-- SLIDE: TOP PERFORMER BOOST -->
-	            <section class="theme-datapizza" data-remove-grid="true">
-                    <div class="slide-header">
-                        <span class="slide-badge">13</span>
-                        <h2>Top performer</h2>
-                    </div>
-                    
-	                <div class="thumb-grid">
-	                    <div class="thumb-item">
-	                        <img src="Asset/Meme/Boost/Linkedin.png" alt="Top boost LinkedIn">
-	                    </div>
-	                    <div class="thumb-item">
-	                        <img src="Asset/Meme/Boost/IG.png" alt="Top boost Instagram">
-	                    </div>
-	                    <div class="thumb-item">
-	                        <img src="Asset/Meme/Boost/Storia.png" alt="Top boost Stories">
-	                    </div>
-	                    <div class="thumb-item">
-	                        <img src="Asset/Meme/Boost/Newsletter.png" alt="Top boost Newsletter">
-	                    </div>
-	                </div>
-	
-	                <div style="margin-top: 5px;height: 300px;">
-	                    <div class="flourish-embed flourish-chart" data-src="visualisation/26878666"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26878666/thumbnail" width="100%" alt="chart visualization" /></noscript></div>
-	                </div>
-	            </section>
+		            <!-- SLIDE: TOP PERFORMER BOOST -->
+		            <section class="theme-datapizza top-performer-slide" data-remove-grid="true">
+		                <div class="slide-header">
+		                    <span class="slide-badge">13</span>
+		                    <h2>Top performer</h2>
+		                </div>
+
+		                <div class="top-performer-layout">
+		                    <div class="top-performer-left">
+		                        <div class="thumb-grid top-performer-thumbs">
+		                            <div class="thumb-item">
+		                                <img src="Asset/Meme/Boost/Linkedin.png" alt="Top boost LinkedIn">
+		                            </div>
+		                            <div class="thumb-item">
+		                                <img src="Asset/Meme/Boost/IG.png" alt="Top boost Instagram">
+		                            </div>
+		                            <div class="thumb-item">
+		                                <img src="Asset/Meme/Boost/Storia.png" alt="Top boost Stories">
+		                            </div>
+		                            <div class="thumb-item">
+		                                <img src="Asset/Meme/Boost/Newsletter.png" alt="Top boost Newsletter">
+		                            </div>
+		                        </div>
+		                    </div>
+
+		                    <div class="top-performer-right">
+		                        <div class="top-performer-chart">
+		                            <div class="flourish-embed flourish-chart" data-src="visualisation/26878666"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26878666/thumbnail" width="100%" alt="chart visualization" /></noscript></div>
+		                        </div>
+		                    </div>
+		                </div>
+		            </section>
 
             <!-- SLIDE: NEWS & UPDATES -->
             <section class="theme-datapizza center-content" data-remove-grid="true">
