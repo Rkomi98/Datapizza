@@ -182,16 +182,20 @@
       font-size: 0.55em;
       padding: 6px 14px;
       border-radius: 20px;
-      margin-right: 14px;
       line-height: 1;
-      vertical-align: middle;
       z-index: 10;
     }
 
-    .slide-badge + h2 {
-      display: inline-block;
-      vertical-align: middle;
-      margin-top: 0;
+    .slide-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 0.4em;
+      flex-wrap: wrap;
+    }
+
+    .slide-heading h2 {
+      margin: 0;
     }
     
     /* ========================================
@@ -470,12 +474,17 @@
       padding: 20px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
-
+<!--  transform: translateY(-4px); -->
     .cover-logo img {
       width: 100%;
       height: 100%;
       object-fit: contain;
+      object-position: center;
       display: block;
     }
     
@@ -732,8 +741,10 @@
            SLIDE 2: PERCHÉ QUESTE 3 CHALLENGE
            ========================================== -->
       <section>
-        <span class="slide-badge">02</span>
-        <h2>Perché queste 3 Challenge</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">02</span>
+          <h2>Perché queste 3 Challenge</h2>
+        </div>
         <p>Target e valore per l'ecosistema bancario</p>
         
         <div class="two-columns">
@@ -782,8 +793,10 @@
            SLIDE 3: ASSUNZIONI DI LAVORO
            ========================================== -->
       <section>
-        <span class="slide-badge">03</span>
-        <h2>Assunzioni di Lavoro</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">03</span>
+          <h2>Assunzioni di Lavoro</h2>
+        </div>
         <p>Paletti e vincoli per l'hackathon</p>
         
         <div class="two-columns">
@@ -824,8 +837,10 @@
            SLIDE 4: MVP vs NON-GOALS
            ========================================== -->
       <section>
-        <span class="slide-badge">04</span>
-        <h2>Definizioni Comuni: MVP vs Non-Goals</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">04</span>
+          <h2>Definizioni Comuni: MVP vs Non-Goals</h2>
+        </div>
         <p>Cosa è dentro e cosa è fuori scope</p>
         
         <div class="two-columns">
@@ -865,8 +880,10 @@
            SLIDE 5: CRITERI DI VALUTAZIONE
            ========================================== -->
       <section>
-        <span class="slide-badge">05</span>
-        <h2>Criteri di Valutazione</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">05</span>
+          <h2>Criteri di Valutazione</h2>
+        </div>
         <p>Rubric comune per tutte le challenge</p>
         
         <div class="three-columns">
@@ -910,8 +927,10 @@
            SLIDE 6: DELIVERABLE PER TEAM
            ========================================== -->
       <section>
-        <span class="slide-badge">06</span>
-        <h2>Cosa Consegna Ogni Team</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">06</span>
+          <h2>Cosa Consegna Ogni Team</h2>
+        </div>
         <p>Deliverable attesi a fine hackathon</p>
         
         <div class="two-columns">
@@ -966,8 +985,10 @@
            SLIDE 8: AI ACT NAVIGATOR - OVERVIEW
            ========================================== -->
       <section>
-        <span class="slide-badge">08</span>
-        <h2>AI Act Navigator — Overview</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">08</span>
+          <h2>AI Act Navigator — Overview</h2>
+        </div>
         <p>Contesto, utenti e valore</p>
         
         <div class="two-columns">
@@ -1010,8 +1031,10 @@
            SLIDE 9: AI ACT NAVIGATOR - MVP & GUARDRAIL
            ========================================== -->
       <section>
-        <span class="slide-badge">09</span>
-        <h2>AI Act Navigator — MVP & Guardrail</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">09</span>
+          <h2>AI Act Navigator — MVP & Guardrail</h2>
+        </div>
         <p>Non-goals, output e rischi</p>
         
         <div class="two-columns">
@@ -1051,8 +1074,10 @@
            SLIDE 10: AI ACT NAVIGATOR - FLUSSO POC
            ========================================== -->
       <section>
-        <span class="slide-badge">10</span>
-        <h2>AI Act Navigator — Flusso PoC</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">10</span>
+          <h2>AI Act Navigator — Flusso PoC</h2>
+        </div>
         <p>Percorso ideale end-to-end</p>
         
         <div class="flow-steps">
@@ -1103,8 +1128,10 @@
            SLIDE 11: AI ACT NAVIGATOR - COMPONENTI
            ========================================== -->
       <section>
-        <span class="slide-badge">11</span>
-        <h2>AI Act Navigator — Componenti & Tracciabilità</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">11</span>
+          <h2>AI Act Navigator — Componenti & Tracciabilità</h2>
+        </div>
         <p>Architettura minima del PoC</p>
         
         <div class="two-columns">
@@ -1152,8 +1179,10 @@
            SLIDE 12: AI ACT NAVIGATOR - ASSET
            ========================================== -->
       <section>
-        <span class="slide-badge">12</span>
-        <h2>AI Act Navigator — Asset Necessari</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">12</span>
+          <h2>AI Act Navigator — Asset Necessari</h2>
+        </div>
         <p>Dati e materiali richiesti per il PoC</p>
         
         <div class="two-columns">
@@ -1188,8 +1217,10 @@
            SLIDE 13: AI ACT NAVIGATOR - EFFORT & OUTPUT
            ========================================== -->
       <section>
-        <span class="slide-badge">13</span>
-        <h2>AI Act Navigator — Effort & Valutazione</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">13</span>
+          <h2>AI Act Navigator — Effort & Valutazione</h2>
+        </div>
         <p>Stime e criteri specifici</p>
         
         <div class="two-columns">
@@ -1246,8 +1277,10 @@
            SLIDE 15: FRIA/DPIA - OVERVIEW
            ========================================== -->
       <section>
-        <span class="slide-badge">15</span>
-        <h2>FRIA/DPIA Builder — Overview</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">15</span>
+          <h2>FRIA/DPIA Builder — Overview</h2>
+        </div>
         <p>Contesto, utenti e valore</p>
         
         <div class="two-columns">
@@ -1290,8 +1323,10 @@
            SLIDE 16: FRIA/DPIA - NON-GOALS & RISCHI
            ========================================== -->
       <section>
-        <span class="slide-badge">16</span>
-        <h2>FRIA/DPIA Builder — Non-Goals & Rischi</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">16</span>
+          <h2>FRIA/DPIA Builder — Non-Goals & Rischi</h2>
+        </div>
         <p>Cosa evitare e come mitigare</p>
         
         <div class="two-columns">
@@ -1331,8 +1366,10 @@
            SLIDE 17: FRIA/DPIA - FLUSSO POC
            ========================================== -->
       <section>
-        <span class="slide-badge">17</span>
-        <h2>FRIA/DPIA Builder — Flusso PoC</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">17</span>
+          <h2>FRIA/DPIA Builder — Flusso PoC</h2>
+        </div>
         <p>Architettura e componenti</p>
         
         <div class="flow-steps">
@@ -1378,8 +1415,10 @@
            SLIDE 18: FRIA/DPIA - ASSET
            ========================================== -->
       <section>
-        <span class="slide-badge">18</span>
-        <h2>FRIA/DPIA Builder — Asset Necessari</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">18</span>
+          <h2>FRIA/DPIA Builder — Asset Necessari</h2>
+        </div>
         <p>Dati e materiali richiesti</p>
         
         <div class="two-columns">
@@ -1415,8 +1454,10 @@
            SLIDE 19: FRIA/DPIA - EFFORT & VALUTAZIONE
            ========================================== -->
       <section>
-        <span class="slide-badge">19</span>
-        <h2>FRIA/DPIA Builder — Effort & Valutazione</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">19</span>
+          <h2>FRIA/DPIA Builder — Effort & Valutazione</h2>
+        </div>
         <p>Stime e criteri specifici</p>
         
         <div class="two-columns">
@@ -1472,8 +1513,10 @@
            SLIDE 21: AI BILANCIO - OVERVIEW
            ========================================== -->
       <section>
-        <span class="slide-badge">21</span>
-        <h2>Analisi Bilancio AI — Overview</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">21</span>
+          <h2>Analisi Bilancio AI — Overview</h2>
+        </div>
         <p>Contesto, utenti e valore</p>
         
         <div class="two-columns">
@@ -1516,8 +1559,10 @@
            SLIDE 22: AI BILANCIO - NON-GOALS & RISCHI
            ========================================== -->
       <section>
-        <span class="slide-badge">22</span>
-        <h2>Analisi Bilancio AI — Non-Goals & Rischi</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">22</span>
+          <h2>Analisi Bilancio AI — Non-Goals & Rischi</h2>
+        </div>
         <p>Cosa evitare e come mitigare</p>
         
         <div class="two-columns">
@@ -1556,8 +1601,10 @@
            SLIDE 23: AI BILANCIO - FLUSSO POC
            ========================================== -->
       <section>
-        <span class="slide-badge">23</span>
-        <h2>Analisi Bilancio AI — Flusso PoC</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">23</span>
+          <h2>Analisi Bilancio AI — Flusso PoC</h2>
+        </div>
         <p>Architettura e componenti</p>
         
         <div class="flow-steps">
@@ -1605,8 +1652,10 @@
            SLIDE 24: AI BILANCIO - ASSET
            ========================================== -->
       <section>
-        <span class="slide-badge">24</span>
-        <h2>Analisi Bilancio AI — Asset Necessari</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">24</span>
+          <h2>Analisi Bilancio AI — Asset Necessari</h2>
+        </div>
         <p>Dati e materiali richiesti</p>
         
         <div class="two-columns">
@@ -1642,8 +1691,10 @@
            SLIDE 25: AI BILANCIO - EFFORT & VALUTAZIONE
            ========================================== -->
       <section>
-        <span class="slide-badge">25</span>
-        <h2>Analisi Bilancio AI — Effort & Valutazione</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">25</span>
+          <h2>Analisi Bilancio AI — Effort & Valutazione</h2>
+        </div>
         <p>Stime e criteri specifici</p>
         
         <div class="two-columns">
@@ -1689,8 +1740,10 @@
            SLIDE 26: ASSET PACK COMPLESSIVO
            ========================================== -->
       <section>
-        <span class="slide-badge">26</span>
-        <h2>Asset Pack Complessivo</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">26</span>
+          <h2>Asset Pack Complessivo</h2>
+        </div>
         <p>Riassunto materiali per challenge</p>
         
         <div class="three-columns">
@@ -1734,8 +1787,10 @@
            SLIDE 27: NEXT STEP OPERATIVI
            ========================================== -->
       <section>
-        <span class="slide-badge">27</span>
-        <h2>Next Step Operativi</h2>
+        <div class="slide-heading">
+          <span class="slide-badge">27</span>
+          <h2>Next Step Operativi</h2>
+        </div>
         <p>Azioni per partire</p>
         
         <div class="two-columns">
