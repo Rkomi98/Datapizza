@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hackathon ABI Lab / AI Hub</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  
+  <!-- Reveal.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/theme/white.css">
+  
+  <style>
+    /* ========================================
+       DATAPIZZA WHITE THEME
+       ======================================== */
+    
+    :root {
+      /* Primary Colors */
+      --dp-primary: #C12A22;
+      --dp-primary-light: #E53935;
+      --dp-primary-dark: #9A2119;
+      
+      /* Text Colors */
+      --dp-text-dark: #1E293B;
+      --dp-text-medium: #475569;
+      --dp-text-light: #64748B;
+      
+      /* Background Colors */
+      --dp-bg-white: #FFFFFF;
+      --dp-bg-light: #F8FAFC;
+      --dp-bg-subtle: #F1F5F9;
+      
+      /* Card Variants */
+      --dp-card-base: #F8FAFC;
+      --dp-card-red-light: #FEF2F2;
+      --dp-card-red: #FEE2E2;
+      --dp-card-blue-light: #EFF6FF;
+      --dp-card-blue: #DBEAFE;
+      --dp-card-green-light: #ECFDF5;
+      --dp-card-green: #D1FAE5;
+      --dp-card-yellow-light: #FEF3C7;
+      --dp-card-yellow: #F59E0B;
+      
+      /* Accent Colors */
+      --dp-blue: #3B82F6;
+      --dp-green: #10B981;
+      --dp-yellow: #F59E0B;
+      --dp-purple: #8B5CF6;
+    }
+    
+    /* ========================================
+       BASE STYLES
+       ======================================== */
+    
+    .reveal {
+      font-family: 'Lato', sans-serif;
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--dp-text-dark);
+    }
+    
+    .reveal .slides {
+      text-align: left;
+    }
+    
+    .reveal .slides section {
+      padding: 40px 60px;
+      box-sizing: border-box;
+    }
+    
+    /* ========================================
+       TYPOGRAPHY
+       ======================================== */
+    
+    .reveal h1 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 2.4em;
+      color: var(--dp-primary);
+      margin-bottom: 0.5em;
+      line-height: 1.2;
+    }
+    
+    .reveal h2 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.6em;
+      color: var(--dp-text-dark);
+      margin-bottom: 0.4em;
+      line-height: 1.3;
+    }
+    
+    .reveal h3 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 1.1em;
+      color: var(--dp-text-dark);
+      margin-bottom: 0.3em;
+    }
+    
+    .reveal p {
+      font-size: 0.7em;
+      color: var(--dp-text-medium);
+      line-height: 1.6;
+      margin-bottom: 0.8em;
+    }
+    
+    .reveal ul, .reveal ol {
+      font-size: 0.7em;
+      color: var(--dp-text-medium);
+      line-height: 1.7;
+      margin-left: 1.2em;
+    }
+    
+    .reveal li {
+      margin-bottom: 0.4em;
+    }
+    
+    .reveal li::marker {
+      color: var(--dp-primary);
+    }
+    
+    .reveal strong {
+      color: var(--dp-text-dark);
+      font-weight: 700;
+    }
+    
+    /* ========================================
+       FIXED ELEMENTS
+       ======================================== */
+    
+    /* Logo Top Right */
+    .dp-logo {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      width: 140px;
+      height: auto;
+      z-index: 100;
+    }
+
+    .dp-logo img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    /* Watermark Bottom Right */
+    .dp-watermark {
+      position: fixed;
+      bottom: 20px;
+      right: 30px;
+      width: 120px;
+      height: 120px;
+      opacity: 0.04;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    .dp-watermark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    
+    /* Slide Badge */
+    .slide-badge {
+      position: static;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--dp-primary);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.55em;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-right: 14px;
+      line-height: 1;
+      vertical-align: middle;
+      z-index: 10;
+    }
+
+    .slide-badge + h2 {
+      display: inline-block;
+      vertical-align: middle;
+      margin-top: 0;
+    }
+    
+    /* ========================================
+       CARD COMPONENTS
+       ======================================== */
+    
+    .card {
+      background: var(--dp-card-base);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      border-left: 4px solid transparent;
+    }
+    
+    .card-accent {
+      background: var(--dp-card-red-light);
+      border-left-color: var(--dp-primary);
+    }
+    
+    .card-blue {
+      background: var(--dp-card-blue-light);
+      border-left-color: var(--dp-blue);
+    }
+    
+    .card-green {
+      background: var(--dp-card-green-light);
+      border-left-color: var(--dp-green);
+    }
+    
+    .card-yellow {
+      background: var(--dp-card-yellow-light);
+      border-left-color: var(--dp-yellow);
+    }
+    
+    .card-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.55em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--dp-primary);
+      margin-bottom: 8px;
+    }
+    
+    .card-title.gray { color: var(--dp-text-light); }
+    .card-title.blue { color: var(--dp-blue); }
+    .card-title.green { color: var(--dp-green); }
+    .card-title.yellow { color: var(--dp-yellow); }
+    
+    /* ========================================
+       TAGS
+       ======================================== */
+    
+    .tag {
+      display: inline-block;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.45em;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 16px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      background: var(--dp-card-base);
+      color: var(--dp-text-medium);
+    }
+    
+    .tag.red {
+      background: var(--dp-card-red);
+      color: var(--dp-primary);
+    }
+    
+    .tag.blue {
+      background: var(--dp-card-blue);
+      color: var(--dp-blue);
+    }
+    
+    .tag.green {
+      background: var(--dp-card-green);
+      color: var(--dp-green);
+    }
+    
+    .tag.yellow {
+      background: var(--dp-card-yellow-light);
+      color: #B45309;
+    }
+    
+    /* ========================================
+       LAYOUT UTILITIES
+       ======================================== */
+    
+    .two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 20px;
+    }
+    
+    .three-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    
+    .content-wrapper {
+      margin-top: 20px;
+    }
+    
+    /* ========================================
+       METRIC CARDS
+       ======================================== */
+    
+    .metric-card {
+      background: var(--dp-card-base);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    
+    .metric-card .number {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2em;
+      font-weight: 700;
+      color: var(--dp-primary);
+      line-height: 1;
+    }
+    
+    .metric-card .label {
+      font-size: 0.55em;
+      color: var(--dp-text-light);
+      margin-top: 8px;
+    }
+    
+    /* ========================================
+       FORMULA BOX
+       ======================================== */
+    
+    .formula-box {
+      background: var(--dp-bg-subtle);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.65em;
+      margin: 16px 0;
+      border: 1px solid #E2E8F0;
+    }
+    
+    .formula-box.red {
+      background: var(--dp-card-red-light);
+      border-color: var(--dp-card-red);
+    }
+    
+    .formula-note {
+      font-size: 0.5em;
+      color: var(--dp-text-light);
+      font-style: italic;
+      margin-top: 8px;
+    }
+    
+    /* ========================================
+       SOURCE CITATION
+       ======================================== */
+    
+    .source {
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      font-size: 0.45em;
+      color: var(--dp-text-light);
+      font-style: italic;
+    }
+    
+    /* ========================================
+       TABLES
+       ======================================== */
+    
+    .reveal table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.6em;
+      margin: 16px 0;
+    }
+    
+    .reveal table thead th {
+      background: var(--dp-text-dark);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      padding: 12px 16px;
+      text-align: left;
+    }
+    
+    .reveal table tbody td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    
+    .reveal table tbody tr:nth-child(odd) {
+      background: white;
+    }
+    
+    .reveal table tbody tr:nth-child(even) {
+      background: #FAFAFA;
+    }
+    
+    /* ========================================
+       CODE BLOCKS
+       ======================================== */
+    
+    .code-block {
+      position: relative;
+      background: #1E293B;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+    
+    .code-block pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .code-block code {
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.55em;
+      color: #E2E8F0;
+      line-height: 1.6;
+    }
+    
+    .code-block .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #94A3B8;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.45em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .code-block .copy-btn:hover {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+    
+    /* Syntax Highlighting */
+    .code-block .keyword { color: #C792EA; }
+    .code-block .string { color: #C3E88D; }
+    .code-block .comment { color: #546E7A; }
+    .code-block .function { color: #82AAFF; }
+    .code-block .number { color: #F78C6C; }
+    
+    /* ========================================
+       COVER SLIDE STYLES
+       ======================================== */
+    
+    .cover-slide {
+      text-align: center !important;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    
+    .cover-logo {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 50%;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+
+    .cover-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    
+    .cover-slide h1 {
+      margin-bottom: 0.2em;
+    }
+    
+    .cover-subtitle {
+      font-size: 0.8em;
+      color: var(--dp-text-medium);
+      margin-bottom: 20px;
+    }
+    
+    .cover-line {
+      width: 80px;
+      height: 4px;
+      background: var(--dp-primary);
+      border-radius: 2px;
+      margin: 20px auto;
+    }
+    
+    .cover-tags {
+      margin-top: 30px;
+    }
+    
+    .cover-footer {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.5em;
+      color: var(--dp-text-light);
+    }
+    
+    /* ========================================
+       SECTION DIVIDER STYLES
+       ======================================== */
+    
+    .section-divider {
+      text-align: center !important;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      background: linear-gradient(135deg, var(--dp-card-red-light) 0%, white 100%);
+    }
+    
+    .section-divider h1 {
+      font-size: 2.8em;
+    }
+    
+    .section-number {
+      font-family: 'Poppins', sans-serif;
+      font-size: 4em;
+      font-weight: 700;
+      color: var(--dp-card-red);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    
+    /* ========================================
+       CHECKLIST STYLES
+       ======================================== */
+    
+    .checklist {
+      list-style: none;
+      margin-left: 0;
+      padding-left: 0;
+    }
+    
+    .checklist li {
+      position: relative;
+      padding-left: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--dp-primary);
+      font-size: 1.1em;
+    }
+    
+    .checklist li.checked::before {
+      content: "☑";
+      color: var(--dp-green);
+    }
+    
+    /* ========================================
+       SPECIAL BOXES
+       ======================================== */
+    
+    .warning-box {
+      background: var(--dp-card-yellow-light);
+      border-left: 4px solid var(--dp-yellow);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    
+    .warning-box .icon {
+      color: var(--dp-yellow);
+      font-size: 1.2em;
+      margin-right: 8px;
+    }
+    
+    .info-box {
+      background: var(--dp-card-blue-light);
+      border-left: 4px solid var(--dp-blue);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    
+    .success-box {
+      background: var(--dp-card-green-light);
+      border-left: 4px solid var(--dp-green);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    
+    /* ========================================
+       FLOW DIAGRAM
+       ======================================== */
+    
+    .flow-steps {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .flow-step {
+      background: var(--dp-card-base);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.55em;
+      text-align: center;
+      min-width: 120px;
+      flex: 1;
+    }
+    
+    .flow-step.active {
+      background: var(--dp-primary);
+      color: white;
+    }
+    
+    .flow-arrow {
+      color: var(--dp-text-light);
+      font-size: 1.2em;
+      align-self: center;
+    }
+    
+    /* ========================================
+       Q&A SLIDE
+       ======================================== */
+    
+    .qa-slide {
+      text-align: center !important;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    
+    .qa-slide h1 {
+      font-size: 4em;
+      margin-bottom: 0.3em;
+    }
+    
+    .qa-footer {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6em;
+      color: var(--dp-text-light);
+    }
+
+    /* ========================================
+       COMPACT LIST FOR DENSE CONTENT
+       ======================================== */
+    
+    .compact-list {
+      font-size: 0.6em;
+      line-height: 1.5;
+    }
+    
+    .compact-list li {
+      margin-bottom: 0.3em;
+    }
+
+    /* Small text helper */
+    .small-text {
+      font-size: 0.6em;
+    }
+
+    .tiny-text {
+      font-size: 0.5em;
+    }
+
+    /* Highlight spans */
+    .highlight {
+      background: var(--dp-card-yellow-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .highlight-red {
+      background: var(--dp-card-red);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed Logo -->
+  <div class="dp-logo">
+    <img src="datapizzaLogo.png" alt="Datapizza logo">
+  </div>
+  
+  <!-- Fixed Watermark -->
+  <div class="dp-watermark">
+    <img src="datapizza.png" alt="Datapizza watermark">
+  </div>
+
+  <div class="reveal">
+    <div class="slides">
+      
+      <!-- ==========================================
+           SLIDE 1: COVER
+           ========================================== -->
+      <section class="cover-slide">
+        <div class="cover-logo">
+          <img src="datapizza.png" alt="Datapizza icon">
+        </div>
+        <h1>Hackathon ABI Lab / AI Hub</h1>
+        <p class="cover-subtitle">Sviluppare PoC dimostrabili in 1 giorno su problemi concreti</p>
+        <div class="cover-line"></div>
+        <div class="cover-tags">
+          <span class="tag red">AI Act Navigator</span>
+          <span class="tag blue">FRIA/DPIA Builder</span>
+          <span class="tag green">Analisi Bilancio AI</span>
+        </div>
+        <div class="cover-footer">Presentazione a cura di Datapizza</div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 2: PERCHÉ QUESTE 3 CHALLENGE
+           ========================================== -->
+      <section>
+        <span class="slide-badge">02</span>
+        <h2>Perché queste 3 Challenge</h2>
+        <p>Target e valore per l'ecosistema bancario</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">Target Primario</div>
+              <p><strong>Funzioni di controllo</strong> (Risk / Compliance / DPO / AI Governance)</p>
+              <ul class="compact-list">
+                <li>Standardizzare triage ed evidence</li>
+                <li>Rendere output difendibili e auditabili</li>
+              </ul>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title blue">Target Secondario</div>
+              <p><strong>Stakeholder Business/IT</strong></p>
+              <ul class="compact-list">
+                <li>Ridurre rework</li>
+                <li>Accelerare preparazione dossier</li>
+                <li>Risultati adottabili</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">Valore Multi-Banca</div>
+              <ul class="compact-list">
+                <li>Standardizzare triage e documentazione</li>
+                <li>Migliorare qualità e tracciabilità</li>
+                <li>Output riusabili tra istituti</li>
+              </ul>
+            </div>
+            
+            <h3 style="margin-top: 20px;">Challenge Selezionate</h3>
+            <div style="margin-top: 12px;">
+              <span class="tag red">1. AI Act Navigator</span><br>
+              <span class="tag blue">2. FRIA/DPIA Evidence Builder</span><br>
+              <span class="tag green">3. Analisi di bilancio basata su AI</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 3: ASSUNZIONI DI LAVORO
+           ========================================== -->
+      <section>
+        <span class="slide-badge">03</span>
+        <h2>Assunzioni di Lavoro</h2>
+        <p>Paletti e vincoli per l'hackathon</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">⏱️ Tempo</div>
+              <p>Hackathon = <strong>1 giornata</strong></p>
+              <p>Focus su <strong>MVP</strong> e <strong>percorso ideale</strong> (caso standard, senza eccezioni)</p>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title blue">🔒 Dati</div>
+              <p><strong>No dati reali</strong></p>
+              <p>Solo dati sintetici/anonimizzati; KB/corpus chiusi</p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-yellow">
+              <div class="card-title yellow">📋 Output</div>
+              <p>PoC ≠ prodotto finito</p>
+              <p>Niente "pareri legali" o decisioni automatiche</p>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title green">🛠️ Stack</div>
+              <p>Preferenza per soluzioni <strong>replicabili</strong></p>
+              <ul class="compact-list">
+                <li>Web UI + API</li>
+                <li>Componenti riusabili</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 4: MVP vs NON-GOALS
+           ========================================== -->
+      <section>
+        <span class="slide-badge">04</span>
+        <h2>Definizioni Comuni: MVP vs Non-Goals</h2>
+        <p>Cosa è dentro e cosa è fuori scope</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">✅ MVP / PoC Include</div>
+              <ul class="compact-list">
+                <li>Funzionalità minime dimostrabili</li>
+                <li>Tracciabilità base</li>
+                <li>Export artefatti (PDF/MD/JSON)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">❌ Non-Goals (Comuni)</div>
+              <ul class="compact-list">
+                <li><strong>Integrazioni enterprise reali:</strong>
+                  <ul>
+                    <li>Niente SSO/ruoli/permessi (IAM)</li>
+                    <li>Niente CMDB / inventari asset</li>
+                    <li>Niente workflow GRC</li>
+                    <li>Niente ticket corporate (ServiceNow/Jira)</li>
+                  </ul>
+                </li>
+                <li>Coverage normativa esaustiva</li>
+                <li>Aggiornamento automatico fonti</li>
+                <li>Hardening production-grade</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 5: CRITERI DI VALUTAZIONE
+           ========================================== -->
+      <section>
+        <span class="slide-badge">05</span>
+        <h2>Criteri di Valutazione</h2>
+        <p>Rubric comune per tutte le challenge</p>
+        
+        <div class="three-columns">
+          <div class="metric-card">
+            <div class="number">🎯</div>
+            <div class="label">Utilità</div>
+            <p class="tiny-text" style="margin-top: 8px;">Per utenti target (controlli + stakeholder)</p>
+          </div>
+          <div class="metric-card">
+            <div class="number">🔍</div>
+            <div class="label">Tracciabilità</div>
+            <p class="tiny-text" style="margin-top: 8px;">Perché la risposta; fonti/regole</p>
+          </div>
+          <div class="metric-card">
+            <div class="number">✨</div>
+            <div class="label">Qualità Output</div>
+            <p class="tiny-text" style="margin-top: 8px;">Chiarezza, struttura, riusabilità</p>
+          </div>
+        </div>
+        
+        <div class="three-columns" style="margin-top: 16px;">
+          <div class="metric-card">
+            <div class="number">🛡️</div>
+            <div class="label">Robustezza</div>
+            <p class="tiny-text" style="margin-top: 8px;">Gestione input incompleti, errori, limiti</p>
+          </div>
+          <div class="metric-card">
+            <div class="number">🔐</div>
+            <div class="label">Security/Privacy</div>
+            <p class="tiny-text" style="margin-top: 8px;">By design: minimizzazione, log, disclaimer</p>
+          </div>
+          <div class="metric-card">
+            <div class="number">📈</div>
+            <div class="label">Effort to Scale</div>
+            <p class="tiny-text" style="margin-top: 8px;">Quanto costa portarlo a pilota</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 6: DELIVERABLE PER TEAM
+           ========================================== -->
+      <section>
+        <span class="slide-badge">06</span>
+        <h2>Cosa Consegna Ogni Team</h2>
+        <p>Deliverable attesi a fine hackathon</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">📦 Deliverable Principali</div>
+              <ul class="checklist compact-list">
+                <li>Demo live funzionante</li>
+                <li>Repository con codice</li>
+                <li>README con istruzioni</li>
+              </ul>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title blue">📄 Artefatti Generati</div>
+              <ul class="checklist compact-list">
+                <li>Output demo (PDF/Markdown)</li>
+                <li>Dataset/template usati</li>
+                <li>Configurazioni (JSON/YAML)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">📝 Mini-Report</div>
+              <ul class="checklist compact-list">
+                <li>Cosa funziona</li>
+                <li>Limiti identificati</li>
+                <li>"Next steps" per industrializzazione</li>
+              </ul>
+            </div>
+            
+            <div class="info-box">
+              <p class="small-text"><strong>Formato Demo:</strong> 5–7 minuti + Q&A + "limiti e next steps"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 7: SECTION DIVIDER - CHALLENGE 1
+           ========================================== -->
+      <section class="section-divider">
+        <div class="section-number">01</div>
+        <h1>AI Act Navigator</h1>
+        <p class="cover-subtitle">Pre-valutazione casi d'uso AI in modo consistente e scalabile</p>
+        <div class="cover-line"></div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 8: AI ACT NAVIGATOR - OVERVIEW
+           ========================================== -->
+      <section>
+        <span class="slide-badge">08</span>
+        <h2>AI Act Navigator — Overview</h2>
+        <p>Contesto, utenti e valore</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">🎯 Problema</div>
+              <p>Pre-valutare casi d'uso AI in modo <strong>consistente</strong> e <strong>scalabile</strong></p>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title blue">👥 Utenti</div>
+              <ul class="compact-list">
+                <li>AI Governance</li>
+                <li>Compliance / Legal / Risk</li>
+                <li>IT</li>
+                <li>Business Owner</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">💎 Valore</div>
+              <ul class="compact-list">
+                <li>Triage standardizzato</li>
+                <li>Riduce attriti</li>
+                <li>Accelera escalation corretta</li>
+              </ul>
+            </div>
+            
+            <div class="card card-yellow">
+              <div class="card-title yellow">🚀 MVP (1 giorno)</div>
+              <p>Wizard guidato + scheda caso d'uso + flag/attenzioni + checklist "cosa manca"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 9: AI ACT NAVIGATOR - MVP & GUARDRAIL
+           ========================================== -->
+      <section>
+        <span class="slide-badge">09</span>
+        <h2>AI Act Navigator — MVP & Guardrail</h2>
+        <p>Non-goals, output e rischi</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">❌ Non-Goals</div>
+              <ul class="compact-list">
+                <li>Non sostituisce assessment legale completo</li>
+                <li>Non decide automaticamente go/no-go</li>
+                <li>Non garantisce classificazione "corretta" in senso normativo</li>
+              </ul>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title green">📤 Output Demo</div>
+              <p>UI wizard + export scheda (PDF/MD) su <strong>2–3 casi campione</strong></p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-yellow">
+              <div class="card-title yellow">⚠️ Rischi Principali</div>
+              <ul class="compact-list">
+                <li><strong>Expectation "parere legale"</strong>
+                  <br><span class="tiny-text">→ Mitigare con disclaimer + escalation</span>
+                </li>
+                <li><strong>Opacità (black box)</strong>
+                  <br><span class="tiny-text">→ Mitigare con regole visibili e motivazioni</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 10: AI ACT NAVIGATOR - FLUSSO POC
+           ========================================== -->
+      <section>
+        <span class="slide-badge">10</span>
+        <h2>AI Act Navigator — Flusso PoC</h2>
+        <p>Percorso ideale end-to-end</p>
+        
+        <div class="flow-steps">
+          <div class="flow-step active">1. Input<br><span class="tiny-text">Use case</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">2. Profilazione<br><span class="tiny-text">Domande adattive</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">3. Output<br><span class="tiny-text">Flag + Checklist</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">4. Export<br><span class="tiny-text">PDF/MD/JSON</span></div>
+        </div>
+        
+        <div class="two-columns" style="margin-top: 20px;">
+          <div>
+            <div class="card">
+              <div class="card-title gray">📝 Step 1: Inserimento Use Case</div>
+              <ul class="compact-list">
+                <li>Testo libero (1–2 paragrafi)</li>
+                <li>Campi strutturati:
+                  <ul>
+                    <li>Dominio/processo + finalità</li>
+                    <li>Fase (idea/pilota/produzione)</li>
+                    <li>Modalità (assistivo vs automatizzato)</li>
+                    <li>Dati (personali sì/no, categorie)</li>
+                    <li>Output/impatti + controlli</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card">
+              <div class="card-title gray">🎯 Step 2-3: Profilazione + Output</div>
+              <ul class="compact-list">
+                <li><strong>5–10 domande adattive</strong> solo dove serve</li>
+                <li>Perimetro indicativo (in/out) con motivazione</li>
+                <li>Flag aree sensibili</li>
+                <li>Escalation consigliata (a chi e perché)</li>
+                <li>Checklist: documenti + "info mancanti"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 11: AI ACT NAVIGATOR - COMPONENTI
+           ========================================== -->
+      <section>
+        <span class="slide-badge">11</span>
+        <h2>AI Act Navigator — Componenti & Tracciabilità</h2>
+        <p>Architettura minima del PoC</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-blue">
+              <div class="card-title blue">🧩 Componenti Minimi</div>
+              <ul class="compact-list">
+                <li><strong>UI Web</strong> (wizard) con salvataggio bozza e riepilogo</li>
+                <li><strong>Motore regole</strong> (JSON/YAML/Excel)
+                  <ul>
+                    <li>Mappa risposte → flag/checklist/escalation</li>
+                    <li>Assegna livelli attenzione (basso/medio/alto)</li>
+                  </ul>
+                </li>
+                <li><strong>LLM (opzionale, "assistito")</strong>
+                  <ul>
+                    <li>Solo per riassumere e normalizzare</li>
+                    <li><em>Non</em> come decisore</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">🔍 Tracciabilità ("Explain View")</div>
+              <p>Per ogni output mostra:</p>
+              <ul class="compact-list">
+                <li>Quali regole si sono attivate (es. R12, R27)</li>
+                <li>Su quali risposte si basano</li>
+                <li>Quale effetto hanno avuto</li>
+              </ul>
+            </div>
+            
+            <div class="card card-accent">
+              <div class="card-title">📤 Output Demo</div>
+              <p><strong>2–3 casi campione</strong> completati end-to-end (input → scheda esportata)</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 12: AI ACT NAVIGATOR - ASSET
+           ========================================== -->
+      <section>
+        <span class="slide-badge">12</span>
+        <h2>AI Act Navigator — Asset Necessari</h2>
+        <p>Dati e materiali richiesti per il PoC</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">✅ MUST HAVE</div>
+              <ul class="compact-list">
+                <li><strong>Tassonomia campi</strong> (max 15–25) e opzioni (dominio, finalità, dati, scala, impatto...)</li>
+                <li><strong>Rulebook minimo</strong> (es. 30–60 regole) mapping risposte → flag/checklist</li>
+                <li><strong>Gold set</strong>: 10–15 casi d'uso sintetici con label (per demo + test)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-blue">
+              <div class="card-title blue">💡 NICE TO HAVE</div>
+              <ul class="compact-list">
+                <li>Glossario definizioni ed esempi</li>
+                <li>Libreria "testi standard" per output (disclaimer, escalation, note)</li>
+              </ul>
+            </div>
+            
+            <div class="info-box">
+              <p class="small-text"><strong>Formato consigliato:</strong> rulebook in Excel/CSV + export JSON; use case in JSON/CSV + descrizione testuale</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 13: AI ACT NAVIGATOR - EFFORT & OUTPUT
+           ========================================== -->
+      <section>
+        <span class="slide-badge">13</span>
+        <h2>AI Act Navigator — Effort & Valutazione</h2>
+        <p>Stime e criteri specifici</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card">
+              <div class="card-title gray">⏱️ Effort Indicativo</div>
+              <table style="font-size: 0.9em;">
+                <tr>
+                  <td><strong>Prep con banche</strong></td>
+                  <td>Basso-Medio</td>
+                </tr>
+                <tr>
+                  <td><strong>Focus Hackathon</strong></td>
+                  <td>UI + motore regole + export + explain</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title green">📦 Output Atteso</div>
+              <ul class="compact-list">
+                <li>Demo end-to-end su casi campione</li>
+                <li>Schede generate</li>
+                <li>Rulebook versionato</li>
+                <li>Rubric di valutazione</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">🏆 Criteri Specifici</div>
+              <ul class="compact-list">
+                <li><strong>Coerenza triage</strong> tra casi simili</li>
+                <li><strong>Spiegabilità</strong> (regole/razionale)</li>
+                <li><strong>Qualità scheda</strong> (completezza, gap detection)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 14: SECTION DIVIDER - CHALLENGE 2
+           ========================================== -->
+      <section class="section-divider">
+        <div class="section-number">02</div>
+        <h1>FRIA/DPIA Evidence Builder</h1>
+        <p class="cover-subtitle">Produrre bozze strutturate con segnalazione gap</p>
+        <div class="cover-line"></div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 15: FRIA/DPIA - OVERVIEW
+           ========================================== -->
+      <section>
+        <span class="slide-badge">15</span>
+        <h2>FRIA/DPIA Builder — Overview</h2>
+        <p>Contesto, utenti e valore</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">🎯 Problema</div>
+              <p>Produrre rapidamente bozze strutturate e comparabili (FRIA/DPIA-like) con <strong>segnalazione chiara dei gap</strong></p>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title blue">👥 Utenti</div>
+              <ul class="compact-list">
+                <li>DPO</li>
+                <li>Risk / Compliance</li>
+                <li>AI Governance</li>
+                <li>Legal</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">💎 Valore</div>
+              <ul class="compact-list">
+                <li>Standardizzazione</li>
+                <li>Riduzione tempi</li>
+                <li>Qualità e completezza documentale</li>
+              </ul>
+            </div>
+            
+            <div class="card card-yellow">
+              <div class="card-title yellow">🚀 MVP (1 giorno)</div>
+              <p>Form strutturato → generazione documento + <strong>segnalazione gap</strong> + checklist azioni</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 16: FRIA/DPIA - NON-GOALS & RISCHI
+           ========================================== -->
+      <section>
+        <span class="slide-badge">16</span>
+        <h2>FRIA/DPIA Builder — Non-Goals & Rischi</h2>
+        <p>Cosa evitare e come mitigare</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">❌ Non-Goals</div>
+              <ul class="compact-list">
+                <li>Documento "formalmente valido" per ogni banca</li>
+                <li>Coverage normativa completa</li>
+                <li>Integrazione con sistemi GRC/documentali enterprise</li>
+              </ul>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title green">📤 Output Demo</div>
+              <p>Documento generato (PDF/MD/HTML) + vista <strong>"gap heatmap"</strong></p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-yellow">
+              <div class="card-title yellow">⚠️ Rischi Principali</div>
+              
+              <p class="small-text"><strong>1. Template non condivisibile</strong></p>
+              <p class="tiny-text">Ogni banca ha sezioni/campi diversi</p>
+              <p class="tiny-text highlight">→ <strong>Mitigazione:</strong> Meta-template minimo comune + campi configurabili</p>
+              
+              <p class="small-text" style="margin-top: 12px;"><strong>2. Prosa allucinata</strong></p>
+              <p class="tiny-text">LLM può "inventare" dettagli non presenti</p>
+              <p class="tiny-text highlight">→ <strong>Mitigazione:</strong> Output strutturato (slot-filling) + placeholder + separazione dato/testo</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 17: FRIA/DPIA - FLUSSO POC
+           ========================================== -->
+      <section>
+        <span class="slide-badge">17</span>
+        <h2>FRIA/DPIA Builder — Flusso PoC</h2>
+        <p>Architettura e componenti</p>
+        
+        <div class="flow-steps">
+          <div class="flow-step active">1. Input<br><span class="tiny-text">Form strutturato</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">2. Generazione<br><span class="tiny-text">Slot-filling + LLM</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">3. Gap Detection<br><span class="tiny-text">Warning + mancanti</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">4. Export<br><span class="tiny-text">Doc + Checklist</span></div>
+        </div>
+        
+        <div class="two-columns" style="margin-top: 20px;">
+          <div>
+            <div class="card card-blue">
+              <div class="card-title blue">📝 Input Strutturato</div>
+              <ul class="compact-list">
+                <li>Finalità</li>
+                <li>Sistema</li>
+                <li>Dati trattati</li>
+                <li>Attori coinvolti</li>
+                <li>Controlli esistenti</li>
+                <li>Monitoraggio</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">🧩 Componenti</div>
+              <ul class="compact-list">
+                <li><strong>UI</strong> (form multi-step)</li>
+                <li><strong>Template engine</strong> (markdown) + render PDF</li>
+                <li><strong>Gap detection rules</strong> (mandatory vs optional)</li>
+                <li><strong>LLM controllato</strong> per slot-filling</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 18: FRIA/DPIA - ASSET
+           ========================================== -->
+      <section>
+        <span class="slide-badge">18</span>
+        <h2>FRIA/DPIA Builder — Asset Necessari</h2>
+        <p>Dati e materiali richiesti</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">✅ MUST HAVE</div>
+              <ul class="compact-list">
+                <li><strong>1 template minimo</strong> (FRIA-like o DPIA-like) condivisibile</li>
+                <li><strong>Dizionario campi</strong> (quali campi alimentano quali sezioni)</li>
+                <li><strong>Regole gap</strong> (mandatory vs optional, warning)</li>
+                <li><strong>2–3 esempi</strong> compilati (anche parziali) per demo</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-blue">
+              <div class="card-title blue">💡 NICE TO HAVE</div>
+              <ul class="compact-list">
+                <li>Boilerplate testi approvati (disclaimer, responsabilità, governance)</li>
+                <li>Libreria rischi/controlli ricorrenti</li>
+              </ul>
+            </div>
+            
+            <div class="info-box">
+              <p class="small-text"><strong>Formato consigliato:</strong> template in Markdown + schema campi in JSON/CSV + regole gap in YAML/Excel</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 19: FRIA/DPIA - EFFORT & VALUTAZIONE
+           ========================================== -->
+      <section>
+        <span class="slide-badge">19</span>
+        <h2>FRIA/DPIA Builder — Effort & Valutazione</h2>
+        <p>Stime e criteri specifici</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card">
+              <div class="card-title gray">⏱️ Effort Indicativo</div>
+              <table style="font-size: 0.9em;">
+                <tr>
+                  <td><strong>Prep con banche</strong></td>
+                  <td>Medio</td>
+                </tr>
+                <tr>
+                  <td><strong>Focus Hackathon</strong></td>
+                  <td>UI + generazione + export + gap view</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title green">📦 Output Atteso</div>
+              <ul class="compact-list">
+                <li>Documenti generati su casi campione</li>
+                <li>Repo con template versionato</li>
+                <li>Set esempi</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">🏆 Criteri Specifici</div>
+              <ul class="compact-list">
+                <li><strong>Completezza e chiarezza</strong> della struttura</li>
+                <li><strong>Gap detection</strong> utile e non rumorosa</li>
+                <li><strong>Separazione</strong> "dato inserito" vs "testo generato"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 20: SECTION DIVIDER - CHALLENGE 3
+           ========================================== -->
+      <section class="section-divider">
+        <div class="section-number">03</div>
+        <h1>Analisi di Bilancio AI</h1>
+        <p class="cover-subtitle">KPI, trend e red flag spiegabili</p>
+        <div class="cover-line"></div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 21: AI BILANCIO - OVERVIEW
+           ========================================== -->
+      <section>
+        <span class="slide-badge">21</span>
+        <h2>Analisi Bilancio AI — Overview</h2>
+        <p>Contesto, utenti e valore</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">🎯 Problema</div>
+              <p>Accelerare <strong>analisi preliminare</strong> del bilancio con KPI, trend e red flag spiegabili</p>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title blue">👥 Utenti</div>
+              <ul class="compact-list">
+                <li>Analisti</li>
+                <li>Risk</li>
+                <li>Corporate / SME</li>
+                <li>Advisory interno</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">💎 Valore</div>
+              <ul class="compact-list">
+                <li>Standardizza KPI</li>
+                <li>Riduce tempo su prima lettura</li>
+                <li>Migliora consistenza</li>
+              </ul>
+            </div>
+            
+            <div class="card card-yellow">
+              <div class="card-title yellow">🚀 MVP (1 giorno)</div>
+              <p>Input bilanci standardizzati → KPI + semafori + commento AI "grounded"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 22: AI BILANCIO - NON-GOALS & RISCHI
+           ========================================== -->
+      <section>
+        <span class="slide-badge">22</span>
+        <h2>Analisi Bilancio AI — Non-Goals & Rischi</h2>
+        <p>Cosa evitare e come mitigare</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">❌ Non-Goals</div>
+              <ul class="compact-list">
+                <li>Rating/decisione creditizia automatica</li>
+                <li>Normalizzazione completa di formati eterogenei reali</li>
+                <li>Forecasting avanzato</li>
+                <li>Benchmark di settore completo</li>
+              </ul>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title green">📤 Output Demo</div>
+              <p>Dashboard KPI + export report (PDF/MD) per <strong>2–3 aziende sintetiche</strong></p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-yellow">
+              <div class="card-title yellow">⚠️ Rischi Principali</div>
+              
+              <p class="small-text"><strong>1. Dataset non uniforme</strong></p>
+              <p class="tiny-text highlight">→ Fallisce il PoC. Mitigazione: schema comune fornito in anticipo</p>
+              
+              <p class="small-text" style="margin-top: 12px;"><strong>2. Commenti "fluffy"</strong></p>
+              <p class="tiny-text highlight">→ Mitigare con regole e riferimenti espliciti ai numeri</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 23: AI BILANCIO - FLUSSO POC
+           ========================================== -->
+      <section>
+        <span class="slide-badge">23</span>
+        <h2>Analisi Bilancio AI — Flusso PoC</h2>
+        <p>Architettura e componenti</p>
+        
+        <div class="flow-steps">
+          <div class="flow-step active">1. Upload<br><span class="tiny-text">CSV/Excel</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">2. Parsing<br><span class="tiny-text">Mapping voci</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">3. Calcolo<br><span class="tiny-text">KPI + trend</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">4. Alert<br><span class="tiny-text">Semafori</span></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">5. Report<br><span class="tiny-text">Export</span></div>
+        </div>
+        
+        <div class="two-columns" style="margin-top: 20px;">
+          <div>
+            <div class="card card-blue">
+              <div class="card-title blue">📊 Flusso Dettagliato</div>
+              <ol class="compact-list">
+                <li>Upload CSV/Excel (schema comune) con 2–3 esercizi</li>
+                <li>Parsing + mapping voci → modello semplificato</li>
+                <li>Calcolo KPI (5–10) + trend</li>
+                <li>Red flag con soglie (semaforo) + spiegazione regola</li>
+                <li>Commento AI breve ancorato a KPI/variazioni</li>
+                <li>Export report</li>
+              </ol>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">🧩 Componenti</div>
+              <ul class="compact-list">
+                <li><strong>Data model</strong> semplice + calcolatore KPI</li>
+                <li><strong>Rule-based alerting</strong> (soglie configurabili)</li>
+                <li><strong>LLM</strong> solo per <em>narrazione controllata</em> e "rephrasing"</li>
+                <li><strong>Dashboard</strong> con visualizzazione semafori</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 24: AI BILANCIO - ASSET
+           ========================================== -->
+      <section>
+        <span class="slide-badge">24</span>
+        <h2>Analisi Bilancio AI — Asset Necessari</h2>
+        <p>Dati e materiali richiesti</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">✅ MUST HAVE</div>
+              <ul class="compact-list">
+                <li><strong>Dataset bilanci sintetici</strong> (2–3 anni, 10–30 aziende) in formato uniforme</li>
+                <li><strong>Dizionario mapping voci</strong> (input → modello)</li>
+                <li><strong>Definizione KPI</strong> (formula) + soglie red flag + note interpretative</li>
+                <li><strong>Casi test</strong> (attese: quali alert devono scattare)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-blue">
+              <div class="card-title blue">💡 NICE TO HAVE</div>
+              <ul class="compact-list">
+                <li>Benchmarks settore (anche sintetici)</li>
+                <li>Libreria "pattern" (es. margini in calo + PFN in aumento)</li>
+              </ul>
+            </div>
+            
+            <div class="info-box">
+              <p class="small-text"><strong>Formato consigliato:</strong> CSV/Excel + data dictionary + file "expected_alerts.csv"</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 25: AI BILANCIO - EFFORT & VALUTAZIONE
+           ========================================== -->
+      <section>
+        <span class="slide-badge">25</span>
+        <h2>Analisi Bilancio AI — Effort & Valutazione</h2>
+        <p>Stime e criteri specifici</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card">
+              <div class="card-title gray">⏱️ Effort Indicativo</div>
+              <table style="font-size: 0.9em;">
+                <tr>
+                  <td><strong>Prep con banche</strong></td>
+                  <td>Medio-Alto</td>
+                </tr>
+                <tr>
+                  <td><strong>Focus Hackathon</strong></td>
+                  <td>Dashboard + KPI engine + export + commento grounded</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div class="card card-green">
+              <div class="card-title green">📦 Output Atteso</div>
+              <ul class="compact-list">
+                <li>Demo end-to-end su dataset comune</li>
+                <li>Report generati</li>
+                <li>Dizionario KPI/mapping riusabile</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">🏆 Criteri Specifici</div>
+              <ul class="compact-list">
+                <li><strong>Accuratezza KPI</strong> (rispetto formule)</li>
+                <li><strong>Coerenza alert</strong> e spiegazioni</li>
+                <li><strong>Qualità report</strong> (leggibilità, "next questions" per analista)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 26: ASSET PACK COMPLESSIVO
+           ========================================== -->
+      <section>
+        <span class="slide-badge">26</span>
+        <h2>Asset Pack Complessivo</h2>
+        <p>Riassunto materiali per challenge</p>
+        
+        <div class="three-columns">
+          <div class="card card-accent">
+            <div class="card-title">🧭 AI Act Navigator</div>
+            <ul class="compact-list">
+              <li>Rulebook (30-60 regole)</li>
+              <li>Tassonomie campi</li>
+              <li>Gold use case (10-15)</li>
+              <li>Template scheda output</li>
+            </ul>
+          </div>
+          
+          <div class="card card-blue">
+            <div class="card-title blue">📋 FRIA/DPIA Builder</div>
+            <ul class="compact-list">
+              <li>Template documento</li>
+              <li>Dizionario campi</li>
+              <li>Regole gap</li>
+              <li>Esempi compilati (2-3)</li>
+            </ul>
+          </div>
+          
+          <div class="card card-green">
+            <div class="card-title green">📊 Analisi Bilancio</div>
+            <ul class="compact-list">
+              <li>Dataset sintetici</li>
+              <li>Mapping voci</li>
+              <li>KPI + soglie</li>
+              <li>Casi test con attese</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="info-box" style="margin-top: 30px;">
+          <p class="small-text"><strong>Obiettivo:</strong> Starter-kit comune così i team non perdono tempo su regole/dati durante l'hackathon</p>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 27: NEXT STEP OPERATIVI
+           ========================================== -->
+      <section>
+        <span class="slide-badge">27</span>
+        <h2>Next Step Operativi</h2>
+        <p>Azioni per partire</p>
+        
+        <div class="two-columns">
+          <div>
+            <div class="card card-accent">
+              <div class="card-title">1️⃣ Congelare le Regole del Gioco</div>
+              <ul class="compact-list">
+                <li><strong>Ammesso:</strong> stack/modelli, uso API esterne, licenze</li>
+                <li><strong>Non ammesso:</strong> dati reali, decisioni automatiche, integrazioni enterprise</li>
+                <li><strong>Standard output:</strong> export PDF/MD + JSON</li>
+              </ul>
+            </div>
+            
+            <div class="card card-blue">
+              <div class="card-title blue">2️⃣ Chiudere gli Asset</div>
+              <ul class="compact-list">
+                <li>Per challenge: dataset/template/rulebook + esempi + "expected outputs"</li>
+                <li>Nominare <strong>1 owner</strong> per asset + data di consegna</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <div class="card card-green">
+              <div class="card-title green">3️⃣ Pubblicare Starter Kit</div>
+              <p class="small-text">Repository unico con:</p>
+              <ul class="compact-list">
+                <li><code>/datasets</code>, <code>/templates</code>, <code>/rules</code></li>
+                <li><code>/examples</code>, <code>/rubric</code></li>
+                <li>Istruzioni: come avviare + come valutare</li>
+              </ul>
+            </div>
+            
+            <div class="card card-yellow">
+              <div class="card-title yellow">4️⃣ Definire Valutazione</div>
+              <ul class="compact-list">
+                <li>Rubric finale (criteri + pesi)</li>
+                <li>Checklist giuria</li>
+                <li>Formato demo: <strong>5–7 min</strong> + Q&A + limiti/next steps</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 28: Q&A
+           ========================================== -->
+      <section class="qa-slide">
+        <h1>Q&A</h1>
+        <p class="cover-subtitle">Decisioni richieste</p>
+        <div class="cover-line"></div>
+        
+        <div style="margin-top: 40px; text-align: left; max-width: 600px;">
+          <ul class="compact-list" style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 16px;">
+              <span class="tag red">1</span> Conferma challenge
+            </li>
+            <li style="margin-bottom: 16px;">
+              <span class="tag blue">2</span> Conferma disponibilità asset e owner
+            </li>
+            <li style="margin-bottom: 16px;">
+              <span class="tag green">3</span> Conferma formato dati/template e policy utilizzo
+            </li>
+          </ul>
+        </div>
+        
+        <div class="qa-footer">Grazie per l'attenzione!</div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Reveal.js -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/math/math.js"></script>
+  
+  <script>
+    // Initialize Reveal.js
+    Reveal.initialize({
+      width: 1280,
+      height: 720,
+      margin: 0.04,
+      center: false,
+      transition: 'slide',
+      hash: true,
+      controls: true,
+      progress: true,
+      plugins: [ RevealMath.MathJax3 ]
+    });
+
+    // Copy button functionality
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const code = this.parentElement.querySelector('code').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+          this.textContent = 'Copiato!';
+          setTimeout(() => {
+            this.textContent = 'Copy';
+          }, 2000);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
