@@ -1103,40 +1103,25 @@
           <span class="slide-badge">05</span>
           <h2>Criteri di Valutazione</h2>
         </div>
-        <p>Focus su scalabilità</p>
+        <p>Scalabilità: cosa serve per passare dal PoC all'uso reale</p>
 
         <div class="bottom-blocks two-columns">
-          <div class="card card-blue span-all">
-            <div class="card-title blue">💶 Stima dei costi per scalare</div>
+          <div class="card card-blue">
+            <div class="card-title blue">💶 Quanto costa farlo girare</div>
             <ul class="compact-list">
-              <li>Costo a run per caso (modello/API/infra)</li>
-              <li>Storage + logging + retention</li>
-              <li>Operazioni e monitoraggio</li>
-              <li>Licenze e servizi terzi</li>
+              <li>Costo per portare in produzione il caso d'uso (modello/API/infra)</li>
+              <li>Storage, log e retention</li>
+              <li>Operatività e monitoraggio</li>
+              <li>Licenze e servizi terzi necessari</li>
             </ul>
           </div>
-        </div>
-      </section>
-
-      <!-- ==========================================
-           SLIDE 5C: CRITERI DI VALUTAZIONE - SCALABILITA
-           ========================================== -->
-      <section class="slide-bottom">
-        <div class="slide-heading">
-          <span class="slide-badge">05</span>
-          <h2>Criteri di Valutazione</h2>
-        </div>
-        <p>Focus su scalabilità e passaggio PoC -> Scale</p>
-
-        <div class="bottom-blocks two-columns">
-          <div class="card card-green span-all">
-            <div class="card-title green">📊 KPI PoC -> Scale</div>
+          <div class="card card-green">
+            <div class="card-title green">📊 Come capiamo se scala</div>
             <ul class="compact-list">
-              <li>Tempo medio per caso (dall'inizio alla fine)</li>
-              <li>Quante volte rifacciamo bozze/artefatti</li>
-              <li>Completezza di evidenze e gap</li>
-              <li>Coerenza degli output</li>
-              <li>Costo per caso</li>
+              <li><strong>Dipendenza da dati/asset:</strong> funziona solo con dati sintetici? Quanto labeling serve?</li>
+              <li><strong>Operatività:</strong> minuti di lavoro umano per arrivare all'obiettivo + quanti passaggi servono</li>
+              <li><strong>Integrazione light:</strong> output standard (PDF/MD/JSON) spiegare come si integrerebbe con il resto dell'organizzazione</li>
+              <li><strong>Costi e performance:</strong> costo per caso, latenza, gestione picchi</li>
             </ul>
           </div>
         </div>
@@ -1156,7 +1141,7 @@
           <div>
             <div class="card card-accent">
               <div class="card-title">📦 Deliverable Principali</div>
-              <ul class="checklist compact-list">
+              <ul class="compact-list">
                 <li>Demo live funzionante</li>
                 <li>Repository con il codice</li>
                 <li>README con istruzioni di avvio</li>
@@ -1165,7 +1150,7 @@
             
             <div class="card card-blue">
               <div class="card-title blue">📄 Artefatti Generati</div>
-              <ul class="checklist compact-list">
+              <ul class="compact-list">
                 <li>Output della demo (PDF/Markdown)</li>
                 <li>Dataset e template usati</li>
                 <li>File di configurazione (JSON/YAML)</li>
@@ -1176,7 +1161,7 @@
           <div>
             <div class="card card-green">
               <div class="card-title green">📝 Mini-Report</div>
-              <ul class="checklist compact-list">
+              <ul class="compact-list">
                 <li>Cosa ha funzionato</li>
                 <li>Limiti emersi</li>
                 <li>Prossimi passi per andare in produzione</li>
@@ -1332,7 +1317,7 @@
         <p>Percorso ideale dall'inizio alla fine</p>
         
         <div class="flow-steps">
-          <div class="flow-step active">1. Input<br><span class="tiny-text">Use case</span></div>
+          <div class="flow-step">1. Input<br><span class="tiny-text">Use case</span></div>
           <span class="flow-arrow">→</span>
           <div class="flow-step">2. Profilazione<br><span class="tiny-text">Domande adattive</span></div>
           <span class="flow-arrow">→</span>
@@ -1624,7 +1609,7 @@
         <p>Come funziona</p>
         
         <div class="flow-steps">
-          <div class="flow-step active">1. Input<br><span class="tiny-text">Form strutturato</span></div>
+          <div class="flow-step">1. Input<br><span class="tiny-text">Form strutturato</span></div>
           <span class="flow-arrow">→</span>
           <div class="flow-step">2. Generazione<br><span class="tiny-text">Riempimento campi + modello</span></div>
           <span class="flow-arrow">→</span>
@@ -1859,7 +1844,7 @@
         <p>Come funziona</p>
         
         <div class="flow-steps">
-          <div class="flow-step active">1. Upload<br><span class="tiny-text">CSV/Excel</span></div>
+          <div class="flow-step">1. Upload<br><span class="tiny-text">CSV/Excel</span></div>
           <span class="flow-arrow">→</span>
           <div class="flow-step">2. Parsing<br><span class="tiny-text">Mapping voci</span></div>
           <span class="flow-arrow">→</span>
