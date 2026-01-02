@@ -1520,26 +1520,41 @@
       <section>
         <div class="slide-heading">
           <span class="slide-badge">11</span>
-          <h2>AI Act Navigator — Componenti e Tracciabilità</h2>
+          <h2>AI Act Navigator — Architettura minima</h2>
         </div>
-        <p>Architettura minima</p>
+        <p>Architettura minima per realizzare il prototipo</p>
         
         <div class="two-columns">
           <div>
             <div class="card card-blue">
               <div class="card-title blue">🧩 Componenti Minimi</div>
               <ul class="compact-list">
-                <li><strong>UI web</strong> (wizard) con bozza e riepilogo</li>
-                <li><strong>Motore regole</strong> (JSON/YAML/Excel)
+                <li>
+                  <strong>UI web (wizard)</strong>
+                  <span class="muted">— inserimento guidato</span>
                   <ul>
-                    <li>Mappa risposte → flag/checklist/escalation</li>
-                    <li>Assegna livelli di attenzione (basso/medio/alto)</li>
+                    <li>Salvataggio bozza (dati incompleti ammessi)</li>
+                    <li>Riepilogo “prima di generare” + export</li>
                   </ul>
                 </li>
-                <li><strong>Modello opzionale, solo di supporto</strong>
+                <li>
+                  <strong>Set di regole (parte deterministica)</strong>
+                  <span class="muted">(JSON / YAML / Excel) — parte “deterministica”</span>
                   <ul>
-                    <li>Solo per riassumere e normalizzare</li>
-                    <li><em>Non</em> come decisore</li>
+                    <li>Mappa le risposte → <strong>flag</strong>, <strong>checklist</strong>, <strong>escalation</strong></li>
+                    <li>Assegna un livello di attenzione: <strong>basso / medio / alto</strong> (matrice)</li>
+                    <li class="muted">Nota: stesso input → stesso output (coerenza e auditabilità)</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Modello di supporto</strong>
+                  <span class="muted">— per rendere il testo più chiaro, non per “decidere”</span>
+                  <ul>
+                    <li>Riassume e normalizza la descrizione del caso d’uso</li>
+                    <li>Uniforma il linguaggio (termini, stile, sintesi per diversi ruoli)</li>
+                    <li>
+                      <strong>Non</strong> determina la classificazione.
+                    </li>
                   </ul>
                 </li>
               </ul>
