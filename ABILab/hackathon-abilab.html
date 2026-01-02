@@ -51,6 +51,10 @@
       --dp-green: #10B981;
       --dp-yellow: #F59E0B;
       --dp-purple: #8B5CF6;
+
+      /* Challenge Pills */
+      --dp-challenge-bg: #EDE9FE;
+      --dp-challenge-text: #6D28D9;
     }
     
     /* ========================================
@@ -281,6 +285,24 @@
       background: var(--dp-card-yellow-light);
       color: #B45309;
     }
+
+    .challenge-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin: 12px 0 24px;
+    }
+
+    .challenge-pill {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.55em;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: 999px;
+      text-align: center;
+      background: var(--dp-challenge-bg);
+      color: var(--dp-challenge-text);
+    }
     
     /* ========================================
        LAYOUT UTILITIES
@@ -302,6 +324,19 @@
     
     .content-wrapper {
       margin-top: 20px;
+    }
+
+    .slide-bottom {
+      display: flex !important;
+      flex-direction: column;
+    }
+
+    .slide-bottom .bottom-blocks {
+      margin-top: auto;
+    }
+
+    .span-all {
+      grid-column: 1 / -1;
     }
     
     /* ========================================
@@ -727,7 +762,7 @@
           <img src="datapizza.png" alt="Datapizza icon">
         </div>
         <h1>Hackathon ABI Lab / AI Hub</h1>
-        <p class="cover-subtitle">Sviluppare PoC dimostrabili in 1 giorno su problemi concreti</p>
+        <p class="cover-subtitle">Sviluppare PoC realizzabili in 1 giorno su problemi reali e "per tutti"</p>
         <div class="cover-line"></div>
         <div class="cover-tags">
           <span class="tag red">AI Act Navigator</span>
@@ -747,47 +782,191 @@
         </div>
         <p>Target e valore per l'ecosistema bancario</p>
         
-        <div class="two-columns">
-          <div>
-            <div class="card card-accent">
-              <div class="card-title">Target Primario</div>
-              <p><strong>Funzioni di controllo</strong> (Risk / Compliance / DPO / AI Governance)</p>
-              <ul class="compact-list">
-                <li>Standardizzare triage ed evidence</li>
-                <li>Rendere output chiari e "auditabili"</li>
-              </ul>
-            </div>
-            
-            <div class="card card-blue">
-              <div class="card-title blue">Target Secondario</div>
-              <p><strong>Stakeholder Business/IT</strong></p>
-              <ul class="compact-list">
-                <li>Ridurre rework</li>
-                <li>Accelerare preparazione dossier</li>
-                <li>Risultati adottabili</li>
-              </ul>
-            </div>
+        <h3>Challenge Selezionate</h3>
+        <div class="challenge-row">
+          <div class="challenge-pill">1. AI Act Navigator</div>
+          <div class="challenge-pill">2. FRIA/DPIA Evidence Builder</div>
+          <div class="challenge-pill">3. Analisi di bilancio basata su AI</div>
+        </div>
+
+        <div class="three-columns">
+          <div class="card card-accent">
+            <div class="card-title">Target Primario</div>
+            <p><strong>Funzioni di controllo</strong> (Risk / Compliance / DPO / AI Governance)</p>
+            <ul class="compact-list">
+              <li>Standardizzare principali casi d'uso con AI</li>
+              <li>Rendere output chiari e "auditabili"</li>
+            </ul>
           </div>
           
-          <div>
-            <div class="card card-green">
-              <div class="card-title green">Valore Multi-Banca</div>
-              <ul class="compact-list">
-                <li>Standardizzare triage e documentazione</li>
-                <li>Migliorare qualità e tracciabilità</li>
-                <li>Output riusabili tra istituti</li>
-              </ul>
-            </div>
-            
-            <h3 style="margin-top: 20px;">Challenge Selezionate</h3>
-            <div style="margin-top: 12px;">
-              <span class="tag red">1. AI Act Navigator</span><br>
-              <span class="tag blue">2. FRIA/DPIA Evidence Builder</span><br>
-              <span class="tag green">3. Analisi di bilancio basata su AI</span>
-            </div>
+          <div class="card card-blue">
+            <div class="card-title blue">Target Secondario</div>
+            <p><strong>Stakeholder Business/IT</strong></p>
+            <ul class="compact-list">
+              <li>Ridurre lavoro su bozze con template comuni</li>
+              <li>Accelerare preparazione dossier</li>
+              <li>Output riusabili nei processi interni</li>
+            </ul>
+          </div>
+          
+          <div class="card card-green">
+            <div class="card-title green">Valore Multi-Banca</div>
+            <p>L'idea generale è di trovare use case comuni a più banche:</p>
+            <ul class="compact-list">
+              <li>Standardizzare triage dei casi d'uso e documentazione</li>
+              <li>Migliorare qualità e tracciabilità</li>
+              <li>Output riusabili tra istituti</li>
+            </ul>
           </div>
         </div>
       </section>
+      <!-- ==========================================
+     SLIDE 2b: VALUTAZIONE PROPOSTE - MPS
+     ========================================== -->
+<section>
+  <span class="slide-badge">02b</span>
+  <h2>Valutazione Proposte — MPS</h2>
+  <p>Use case data-heavy e Computer Vision</p>
+  
+  <div class="info-box" style="margin-bottom: 16px;">
+    <p class="small-text">Proposte fortemente dipendenti da algoritmi di CV. <br> Valutate rispetto all'obiettivo: <strong>Progetti realizzabili in 1 giorno realizzabili da tutti</strong></p>
+  </div>
+  
+  <div class="two-columns">
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">🎥 Rilevamento comportamenti sospetti ATM</div>
+        <p class="small-text"><strong>Fattibilità:</strong> <span class="highlight-red">Bassa</span></p>
+        <ul class="compact-list">
+          <li>Fortissima dipendenza da dataset reali (video, contesto, labeling)</li>
+        </ul>
+        <p class="tiny-text" style="margin-top: 8px;">➜ <em>Resta la più CV-heavy e data-dependent</em></p>
+      </div>
+    </div>
+    
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">📄 Anti-tampering documenti (CV)</div>
+        <p class="small-text"><strong>Fattibilità:</strong> <span class="highlight-red">Bassa</span></p>
+        <ul class="compact-list">
+          <li>Dataset affidabile (veri/falsi) non banale da costruire</li>
+          <li>Più Computer Vision che GenAI</li>
+        </ul>
+        <p class="tiny-text" style="margin-top: 8px;">➜ <em>Alta dipendenza dati, basso riuso multi-banca</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 2b: VALUTAZIONE PROPOSTE - MPS
+     ========================================== -->
+<section>
+  <span class="slide-badge">02b</span>
+  <h2>Valutazione Proposte — MPS</h2>
+  <p>Use case data-heavy e Computer Vision</p>
+  
+  <div class="info-box" style="margin-bottom: 16px;">
+    <p class="small-text">Proposte fortemente dipendenti da algoritmi di CV. <br> Valutate rispetto all'obiettivo: <strong>Progetti realizzabili in 1 giorno realizzabili da tutti</strong></p>
+  </div>
+  
+  <div class="two-columns">
+    <div>
+      <div class="card card-yellow">
+        <div class="card-title yellow">📊 Stress test creditizio AI-powered</div>
+        <p class="small-text"><strong>Fattibilità:</strong> <span class="highlight">Media</span></p>
+        <ul class="compact-list">
+          <li>Fattibile con profili cliente/azienda e variabili sintetiche</li>
+          <li>Richiede forti assunzioni di modello e scenario, oltre ad un buon livello dei partecipanti</li>
+        </ul>
+        <p class="tiny-text" style="margin-top: 8px;">➜ <em>Rischio di non ottenere un risultato nel tempo utile</em></p>
+      </div>
+    </div>
+    
+    <div>
+      <div class="card card-accent">
+        <div class="card-title">🎬 Formazione automatica (video tutorial)</div>
+        <p class="small-text"><strong>Fattibilità:</strong> <span class="highlight-red">Non fattibile</span></p>
+        <ul class="compact-list">
+          <li>Dipendenza da asset multimediali</li>
+          <li>Pipeline complesse</li>
+        </ul>
+        <p class="tiny-text" style="margin-top: 8px;">➜ <em>Non fattibile in 1 giorno</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 2c: VALUTAZIONE PROPOSTE - Credem
+     ========================================== -->
+<section>
+  <span class="slide-badge">02c</span>
+  <h2>Valutazione Proposte — Credem</h2>
+  <p>Data Governance & AI Governance</p>
+  
+  <div class="info-box" style="margin-bottom: 16px;">
+    <p class="small-text">Use case orientati a data governance / explainability / GenAI applicata — <strong>più compatibili con un hackathon</strong>, ma con trade-off diversi</p>
+  </div>
+  
+  <div class="two-columns">
+    <div class="card card-accent">
+      <div class="card-title">🔗 Code-to-Lineage Explainer</div>
+      <p class="small-text"><strong>Fattibilità:</strong> <span class="highlight-red">Bassa</span></p>
+      <ul class="compact-list">
+        <li>Tecnicamente interessante ma engineering-heavy</li>
+        <li>Parsing, dialetti SQL e legacy aumentano rischio</li>
+      </ul>
+      <p class="tiny-text" style="margin-top: 8px;">➜ <em>Fattibile solo con scope ridotto e asset preparati e audience molto tecnica</em></p>
+    </div>
+    
+    <div class="card card-yellow">
+      <div class="card-title yellow">💬 Conversational Impact Analysis</div>
+      <p class="small-text"><strong>Fattibilità:</strong> <span class="highlight">Media</span></p>
+      <ul class="compact-list">
+        <li>UX interessante (chat su metadata/lineage)</li>
+        <li>Valore dipendente dal grafo a monte e dal livello dei partecipanti</li>
+      </ul>
+      <p class="tiny-text" style="margin-top: 8px;">➜ <em>Valore post-hackathon dipendente da troppe variabili non controllabili</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SLIDE 2c: VALUTAZIONE PROPOSTE - Credem
+     ========================================== -->
+<section>
+  <span class="slide-badge">02c</span>
+  <h2>Valutazione Proposte — Credem</h2>
+  <p>Data Governance & AI Governance</p>
+  
+  <div class="info-box" style="margin-bottom: 16px;">
+    <p class="small-text">Use case orientati a data governance / explainability / GenAI applicata — <strong>più compatibili con un hackathon</strong>, ma con trade-off diversi</p>
+  </div>
+  
+  <div class="two-columns">
+    <div class="card card-yellow">
+      <div class="card-title yellow">📚 Automated Business Glossary Builder</div>
+      <p class="small-text"><strong>Fattibilità:</strong> <span class="highlight">Media</span></p>
+      <ul class="compact-list">
+        <li>Molto fattibile con 3–6 tabelle, dataset sintetico, golden set</li>
+        <li>Rischio di risultare data management generico</li>
+      </ul>
+      <p class="tiny-text" style="margin-top: 8px;">➜ <em>Utile come acceleratore, meno strategico per AI governance</em></p>
+    </div>
+    
+    <div class="card card-green" style="border-width: 3px;">
+      <div class="card-title green">🧭 AI Governance Navigator ⭐</div>
+      <p class="small-text"><strong>Fattibilità:</strong> <span style="background: #D1FAE5; padding: 2px 8px; border-radius: 4px; color: #047857; font-weight: 700;">ALTA</span></p>
+      <ul class="compact-list">
+        <li>Bassa dipendenza da dati sensibili</li>
+        <li>Adatto anche a team non molto tecnici</li>
+        <li>Allineato a <strong>AI Act, FRIA/DPIA</strong> e bisogni reali</li>
+      </ul>
+      <p class="tiny-text" style="margin-top: 8px;">➜ <em>La versione di CREDEM aggiunge un pezzo alla versione a cui avevamo pensato noi. Di seguito vedremo una versione condensata.</em></p>
+    </div>
+  </div>
+</section>
 
       <!-- ==========================================
            SLIDE 3: ASSUNZIONI DI LAVORO
@@ -810,7 +989,10 @@
             <div class="card card-blue">
               <div class="card-title blue">🔒 Dati</div>
               <p><strong>No dati reali</strong></p>
-              <p>Solo dati sintetici/anonimizzati; KB/corpus chiusi</p>
+              <ul class="compact-list">
+                <li>Solo dati sintetici/anonimizzati;</li>
+                <li>KB/corpus chiusi</li>
+              </ul>
             </div>
           </div>
           
@@ -818,7 +1000,7 @@
             <div class="card card-yellow">
               <div class="card-title yellow">📋 Output</div>
               <p>PoC ≠ prodotto finito</p>
-              <p>Niente "pareri legali" o decisioni automatiche</p>
+              <p>Niente "pareri legali" o decisioni automatiche.<br><strong>Tutto AI Act compliant</strong></p>
             </div>
             
             <div class="card card-green">
@@ -848,7 +1030,7 @@
             <div class="card card-green">
               <div class="card-title green">✅ MVP / PoC Include</div>
               <ul class="compact-list">
-                <li>Funzionalità minime dimostrabili</li>
+                <li>Funzionalità minime realizzabili</li>
                 <li>Tracciabilità base</li>
                 <li>Export artefatti (PDF/MD/JSON)</li>
               </ul>
@@ -917,8 +1099,55 @@
           </div>
           <div class="metric-card">
             <div class="number">📈</div>
-            <div class="label">Effort to Scale</div>
+            <div class="label">Stima per Scalare</div>
             <p class="tiny-text" style="margin-top: 8px;">Quanto costa portarlo a pilota</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 5B: CRITERI DI VALUTAZIONE - SCALABILITA
+           ========================================== -->
+      <section class="slide-bottom">
+        <div class="slide-heading">
+          <span class="slide-badge">05</span>
+          <h2>Criteri di Valutazione</h2>
+        </div>
+        <p>Focus scalabilità e passaggio PoC -> Scale</p>
+
+        <div class="bottom-blocks two-columns">
+          <div class="card card-blue span-all">
+            <div class="card-title blue">💶 Stima dei costi per scalare</div>
+            <ul class="compact-list">
+              <li>Costo run per caso (LLM/API/infra)</li>
+              <li>Storage + logging + retention</li>
+              <li>Ops & monitoring</li>
+              <li>Licensing/servizi terzi</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SLIDE 5C: CRITERI DI VALUTAZIONE - SCALABILITA
+           ========================================== -->
+      <section class="slide-bottom">
+        <div class="slide-heading">
+          <span class="slide-badge">05</span>
+          <h2>Criteri di Valutazione</h2>
+        </div>
+        <p>Focus scalabilità e passaggio PoC -> Scale</p>
+
+        <div class="bottom-blocks two-columns">
+          <div class="card card-green span-all">
+            <div class="card-title green">📊 KPI PoC -> Scale</div>
+            <ul class="compact-list">
+              <li>Tempo medio per caso (end-to-end)</li>
+              <li>Tasso rework su bozze/artefatti</li>
+              <li>Completezza evidenze/gap detection</li>
+              <li>Accuracy/consistenza output</li>
+              <li>Costo per caso</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -1219,14 +1448,14 @@
       <section>
         <div class="slide-heading">
           <span class="slide-badge">13</span>
-          <h2>AI Act Navigator — Effort & Valutazione</h2>
+          <h2>AI Act Navigator — Stima & Valutazione</h2>
         </div>
-        <p>Stime e criteri specifici</p>
+        <p>Stima e criteri specifici</p>
         
         <div class="two-columns">
           <div>
             <div class="card">
-              <div class="card-title gray">⏱️ Effort Indicativo</div>
+              <div class="card-title gray">⏱️ Stima Indicativa</div>
               <table style="font-size: 0.9em;">
                 <tr>
                   <td><strong>Prep con banche</strong></td>
@@ -1456,14 +1685,14 @@
       <section>
         <div class="slide-heading">
           <span class="slide-badge">19</span>
-          <h2>FRIA/DPIA Builder — Effort & Valutazione</h2>
+          <h2>FRIA/DPIA Builder — Stima & Valutazione</h2>
         </div>
-        <p>Stime e criteri specifici</p>
+        <p>Stima e criteri specifici</p>
         
         <div class="two-columns">
           <div>
             <div class="card">
-              <div class="card-title gray">⏱️ Effort Indicativo</div>
+              <div class="card-title gray">⏱️ Stima Indicativa</div>
               <table style="font-size: 0.9em;">
                 <tr>
                   <td><strong>Prep con banche</strong></td>
@@ -1693,14 +1922,14 @@
       <section>
         <div class="slide-heading">
           <span class="slide-badge">25</span>
-          <h2>Analisi Bilancio AI — Effort & Valutazione</h2>
+          <h2>Analisi Bilancio AI — Stima & Valutazione</h2>
         </div>
-        <p>Stime e criteri specifici</p>
+        <p>Stima e criteri specifici</p>
         
         <div class="two-columns">
           <div>
             <div class="card">
-              <div class="card-title gray">⏱️ Effort Indicativo</div>
+              <div class="card-title gray">⏱️ Stima Indicativa</div>
               <table style="font-size: 0.9em;">
                 <tr>
                   <td><strong>Prep con banche</strong></td>
