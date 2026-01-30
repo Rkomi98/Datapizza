@@ -1,6 +1,6 @@
 # Situantionship.py
+
 Fine-tuna la tua vita amorosa con il Machine Learning 👾
-=====================================================
 
 > Un mini-progetto ironico: prende una frase (testo + emoji) e prova a capire che “energia” ha la tua relationship.
 
@@ -36,17 +36,27 @@ Fine-tuna la tua vita amorosa con il Machine Learning 👾
 
 ---
 
-## Avvio rapido
+## Come avviarlo (locale)
+
+### 1) Setup ambiente
 ```bash
+uv venv .venv
 uv sync
-python relationship_energy.py "mi manchi 🥺"
-python relationship_energy.py
+```
+Attiva la venv:
+- macOS/Linux: `source .venv/bin/activate`
+- Windows (PowerShell): `.venv\\Scripts\\Activate.ps1`
+
+### 2) Esegui da terminale (CLI)
+```bash
+uv run python relationship_energy.py "mi manchi 🥺"
+# oppure modalità interattiva
+uv run python relationship_energy.py
 ```
 
-## Frontend demo
+### 3) Avvia la web app (frontend + API)
 Avvia l'API locale e apri il browser su `http://localhost:8000`.
 ```bash
-uv sync
 uv run uvicorn app:app --reload
 ```
 
