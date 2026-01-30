@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relationship Energy</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --panel-2: #f2f4f9;
+      --accent: #d84b3a;
+      --accent-2: #1f6feb;
+      --text: #1c2230;
+      --muted: #5b6575;
+      --stroke: #e1e5ee;
+      --shadow: 0 16px 36px rgba(22, 30, 44, 0.08);
+      --rose: #ffe5e5;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0c0f16;
+      --panel: #141925;
+      --panel-2: #1c2332;
+      --accent: #ff6b6b;
+      --accent-2: #86b4ff;
+      --text: #eef1f6;
+      --muted: #a4adbb;
+      --stroke: #293246;
+      --shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
+      --rose: #2a1b22;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(720px 320px at 6% -8%, rgba(216, 75, 58, 0.12) 0%, transparent 70%),
+        radial-gradient(640px 320px at 92% 0%, rgba(31, 111, 235, 0.08) 0%, transparent 65%),
+        repeating-linear-gradient(0deg, rgba(17, 24, 39, 0.04) 0 1px, transparent 1px 22px),
+        repeating-linear-gradient(90deg, rgba(17, 24, 39, 0.04) 0 1px, transparent 1px 22px),
+        var(--bg);
+    }
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+    header {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .title {
+      font-size: 40px;
+      letter-spacing: -0.02em;
+      margin: 0;
+      color: var(--accent);
+    }
+    .subtitle {
+      color: var(--muted);
+      margin: 0;
+      max-width: 720px;
+      line-height: 1.5;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .chip {
+      border: 1px solid var(--stroke);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.6);
+    }
+    :root[data-theme="dark"] .chip {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+      border: 1px solid var(--stroke);
+      border-radius: 20px;
+      padding: 18px;
+      min-height: 120px;
+      box-shadow: var(--shadow);
+    }
+    :root[data-theme="dark"] .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .panel + .panel { margin-top: 16px; }
+    .input-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    textarea {
+      flex: 1 1 420px;
+      min-height: 110px;
+      border-radius: 16px;
+      border: 1px solid rgba(216, 75, 58, 0.18);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 16px;
+      resize: vertical;
+      font-size: 15px;
+      box-shadow: inset 0 0 0 1px rgba(216, 75, 58, 0.06);
+    }
+    button {
+      padding: 12px 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(216, 75, 58, 0.6);
+      background: linear-gradient(135deg, var(--accent), #ff8a8a);
+      color: #0a0a0a;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      height: 48px;
+      align-self: flex-start;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(216, 75, 58, 0.35); }
+    .theme-toggle {
+      border: 1px solid var(--stroke);
+      background: var(--panel);
+      color: var(--muted);
+      height: 40px;
+      padding: 6px 14px;
+      font-weight: 600;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .result {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .result .label {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .result .tag {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(216, 75, 58, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(216, 75, 58, 0.3);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .score-item {
+      background: linear-gradient(90deg, rgba(255, 229, 229, 0.7), rgba(255, 255, 255, 0.9));
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    :root[data-theme="dark"] .score-item {
+      background: linear-gradient(90deg, rgba(255, 107, 107, 0.12), rgba(255, 255, 255, 0.02));
+    }
+    canvas { max-width: 100%; }
+    footer {
+      margin-top: 32px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="header-row">
+        <h1 class="title">Relationship Energy</h1>
+        <button class="theme-toggle" id="themeToggle" type="button">Tema: Auto</button>
+      </div>
+      <p class="subtitle">Inserisci un messaggio e lascia che il modello italiano capisca se è amore, caos o “dobbiamo parlare”.</p>
+      <div class="chips">
+        <span class="chip">Italian Sentence Transformers</span>
+        <span class="chip">Emoji-aware</span>
+        <span class="chip">Cosine Similarity</span>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <h3>Input</h3>
+        <p>Frase singola o mini-conversazione: testo + emoji. Nessun limite rigido.</p>
+      </div>
+      <div class="card">
+        <h3>Output</h3>
+        <p>Label principale + distribuzione delle percentuali per ogni classe.</p>
+      </div>
+      <div class="card">
+        <h3>Dataset</h3>
+        <p>Si basa su esempi in <code>CONVERSATIONS</code> e può essere esteso in pochi secondi.</p>
+      </div>
+      <div class="card">
+        <h3>Realtime</h3>
+        <p>Inferenza locale via FastAPI, perfetta per demo e prototipi.</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="input-row">
+        <textarea id="textInput" placeholder="Scrivi qui... es. 'Mi manchi tantissimo 🥺'">Mi manchi tantissimo 🥺</textarea>
+        <button id="analyzeBtn">Analizza</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="result">
+        <div class="label">Predizione: <span id="prediction">-</span></div>
+        <div class="tag" id="confidence">in attesa</div>
+      </div>
+      <div style="margin-top: 16px;">
+        <canvas id="chart" height="120"></canvas>
+      </div>
+      <div class="scores" id="scores"></div>
+    </section>
+
+    <footer>Progetto giocoso: non sostituisce una conversazione vera.</footer>
+  </div>
+
+  <script>
+    const btn = document.getElementById("analyzeBtn");
+    const input = document.getElementById("textInput");
+    const prediction = document.getElementById("prediction");
+    const confidence = document.getElementById("confidence");
+    const scoresEl = document.getElementById("scores");
+    const themeToggle = document.getElementById("themeToggle");
+
+    let chart;
+
+    function currentTheme() {
+      return document.documentElement.dataset.theme || "auto";
+    }
+
+    function setTheme(theme) {
+      if (theme === "auto") {
+        document.documentElement.removeAttribute("data-theme");
+      } else {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+      localStorage.setItem("theme", theme);
+      themeToggle.textContent = `Tema: ${theme === "auto" ? "Auto" : theme === "dark" ? "Scuro" : "Chiaro"}`;
+    }
+
+    function renderChart(labels, data) {
+      const isDark = currentTheme() === "dark" ||
+        (currentTheme() === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      const ctx = document.getElementById("chart").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "%",
+            data,
+            backgroundColor: isDark ? "rgba(255, 107, 107, 0.7)" : "rgba(216, 75, 58, 0.7)",
+            borderColor: isDark ? "rgba(255, 107, 107, 1)" : "rgba(216, 75, 58, 1)",
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" },
+              ticks: { color: isDark ? "#a4adbb" : "#5b6575", callback: (value) => value + "%" },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: isDark ? "#a4adbb" : "#5b6575" },
+            },
+          },
+        },
+      });
+    }
+
+    function renderScores(items) {
+      scoresEl.innerHTML = "";
+      items.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "score-item";
+        div.innerHTML = `<span>${item.label}</span><span>${item.percent.toFixed(1)}%</span>`;
+        scoresEl.appendChild(div);
+      });
+    }
+
+    async function analyze() {
+      const text = input.value.trim();
+      if (!text) return;
+      btn.disabled = true;
+      btn.textContent = "Analizzo...";
+      try {
+        const res = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        prediction.textContent = data.prediction;
+        const top = data.scores[0];
+        confidence.textContent = top ? `${top.percent.toFixed(1)}%` : "n/a";
+        const labels = data.scores.map((item) => item.label);
+        const percents = data.scores.map((item) => item.percent);
+        renderChart(labels, percents);
+        renderScores(data.scores);
+      } catch (err) {
+        prediction.textContent = "Errore";
+        confidence.textContent = "riprovare";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Analizza";
+      }
+    }
+
+    btn.addEventListener("click", analyze);
+    themeToggle.addEventListener("click", () => {
+      const next = currentTheme() === "auto" ? "light" : currentTheme() === "light" ? "dark" : "auto";
+      setTheme(next);
+      analyze();
+    });
+    input.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        analyze();
+      }
+    });
+
+    const savedTheme = localStorage.getItem("theme") || "auto";
+    setTheme(savedTheme);
+    analyze();
+  </script>
+</body>
+</html>

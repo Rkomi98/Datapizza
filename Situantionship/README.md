@@ -43,6 +43,13 @@ python relationship_energy.py "mi manchi 🥺"
 python relationship_energy.py
 ```
 
+## Frontend demo
+Avvia l'API locale e apri il browser su `http://localhost:8000`.
+```bash
+uv sync
+uv run uvicorn app:app --reload
+```
+
 ---
 
 ## Personalizza il dataset

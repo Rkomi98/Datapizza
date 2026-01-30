@@ -10,6 +10,8 @@ dependencies = [
   "sentence-transformers",
   "numpy",
   "emoji",
+  "fastapi",
+  "uvicorn",
 ]
 
 [build-system]
