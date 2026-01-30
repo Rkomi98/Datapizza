@@ -1,0 +1,17 @@
+[project]
+name = "situantionship"
+version = "0.1.0"
+description = "Classificatore ironico dell'energia dei messaggi in italiano."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+dependencies = [
+  "sentence-transformers",
+  "numpy",
+  "emoji",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
