@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 import numpy as np
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -15,6 +16,9 @@ from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer, util
 
 from relationship_energy import CONVERSATIONS, normalize_text
+
+# Carica le variabili d'ambiente dal file .env
+load_dotenv()
 
 MODEL_NAME = "nickprock/sentence-bert-base-italian-xxl-uncased"
 

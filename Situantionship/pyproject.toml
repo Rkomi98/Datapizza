@@ -12,6 +12,7 @@ dependencies = [
   "emoji",
   "fastapi",
   "uvicorn",
+  "python-dotenv>=1.2.1",
 ]
 
 [build-system]
