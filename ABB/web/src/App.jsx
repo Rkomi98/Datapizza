@@ -120,7 +120,7 @@ function CodeBlock({ children, style }) {
     <div style={{
       background: t.codeBg, borderRadius: 8, padding: "16px 20px", marginTop: 16,
       border: `1px solid ${t.borderSubtle}`, fontFamily: "'ABB Mono', 'JetBrains Mono', monospace",
-      fontSize: 14, color: t.codeText, ...style,
+      fontSize: 16, color: t.codeText, ...style,
     }}>{children}</div>
   );
 }
@@ -131,8 +131,59 @@ function Pill({ children, index = 0 }) {
     <span style={{
       display: "inline-block", background: t.tagBg[index % 5],
       color: t.tagColor[index % 5], padding: "3px 10px", borderRadius: 4,
-      fontSize: 12, fontWeight: 600, letterSpacing: "0.02em",
+      fontSize: 14, fontWeight: 600, letterSpacing: "0.02em",
     }}>{children}</span>
+  );
+}
+
+function InfoPopup({ title = "Info", children, width = 340 }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onMouseDown = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <span ref={ref} style={{ position: "relative", display: "inline-flex", alignItems: "center", marginLeft: 6, verticalAlign: "middle" }}>
+      <button
+        type="button"
+        aria-label={`Apri spiegazione: ${title}`}
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: 18, height: 18, borderRadius: "50%",
+          border: `1px solid ${open ? t.accent : t.border}`, background: open ? t.accentBg : t.surfaceAlt,
+          color: open ? t.accent : t.textSecondary, cursor: "pointer", fontSize: 11, fontWeight: 700,
+          display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 1,
+        }}
+      >
+        i
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", top: 24, right: 0, width,
+          maxWidth: "calc(100vw - 32px)",
+          background: t.surface, border: `1px solid ${t.border}`, borderRadius: 8,
+          boxShadow: t.cardShadow, padding: 12, zIndex: 200,
+        }}>
+          <div style={{ color: t.text, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{title}</div>
+          <div style={{ color: t.textSecondary, fontSize: 14, lineHeight: 1.6 }}>{children}</div>
+        </div>
+      )}
+    </span>
   );
 }
 
@@ -149,7 +200,7 @@ function TokenDemo() {
 
   return (
     <CodeBlock>
-      <div style={{ color: t.textSecondary, marginBottom: 10, fontSize: 13 }}>
+      <div style={{ color: t.textSecondary, marginBottom: 10, fontSize: 15 }}>
         Input: <span style={{ color: t.text }}>"Come funziona l'energia solare?"</span>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -158,13 +209,13 @@ function TokenDemo() {
             border: `1.5px solid ${i < step ? t.accent : t.border}`,
             background: i < step ? t.accentBg : "transparent",
             color: i < step ? t.accent : t.textTertiary,
-            padding: "5px 11px", borderRadius: 6, fontSize: 13,
+            padding: "5px 11px", borderRadius: 6, fontSize: 15,
             fontFamily: "'JetBrains Mono', monospace",
             transition: "all 0.25s ease", fontWeight: i < step ? 600 : 400,
           }}>{tk}</span>
         ))}
       </div>
-      <div style={{ color: t.textTertiary, fontSize: 12, marginTop: 10 }}>
+      <div style={{ color: t.textTertiary, fontSize: 14, marginTop: 10 }}>
         {step > 0 ? `${Math.min(step, tokens.length)} di ${tokens.length} token identificati` : "Analisi in corso..."}
       </div>
     </CodeBlock>
@@ -186,26 +237,26 @@ function EmbeddingViz() {
       <div style={{ display: "flex", gap: 4, marginBottom: 10, paddingLeft: 80 }}>
         {tokens.map((tk, i) => (
           <div key={i} style={{
-            width: 64, textAlign: "center", fontSize: 11, fontWeight: 600,
+            width: 64, textAlign: "center", fontSize: 13, fontWeight: 600,
             color: i === 0 ? t.accent : t.textSecondary, letterSpacing: "0.03em",
           }}>{tk}</div>
         ))}
       </div>
       {dims.map((d, di) => (
         <div key={di} style={{ display: "flex", alignItems: "center", marginBottom: 5 }}>
-          <div style={{ width: 76, fontSize: 11, color: t.textTertiary, textAlign: "right", paddingRight: 8 }}>
+          <div style={{ width: 76, fontSize: 13, color: t.textTertiary, textAlign: "right", paddingRight: 8 }}>
             {d.label}
           </div>
           {d.vals.map((v, vi) => (
             <div key={vi} style={{
               width: 64, height: 30, display: "flex", alignItems: "center", justifyContent: "center",
               background: v > 0 ? `rgba(5,150,105,${Math.abs(v) * 0.35})` : `rgba(255,0,15,${Math.abs(v) * 0.3})`,
-              borderRadius: 4, margin: "0 2px", fontSize: 11, color: t.text,
+              borderRadius: 4, margin: "0 2px", fontSize: 13, color: t.text,
             }}>{v > 0 ? "+" : ""}{v.toFixed(2)}</div>
           ))}
         </div>
       ))}
-      <div style={{ color: t.textTertiary, fontSize: 11, marginTop: 10, fontStyle: "italic" }}>
+      <div style={{ color: t.textTertiary, fontSize: 13, marginTop: 10, fontStyle: "italic" }}>
         Realtà: ~4.096 dimensioni per token. Qui ne mostriamo solo 4 per chiarezza.
       </div>
     </CodeBlock>
@@ -231,7 +282,7 @@ function AttentionMatrix() {
         <div style={{ display: "flex", gap: 2, marginBottom: 4, paddingLeft: 82 }}>
           {words.map((w, i) => (
             <div key={i} style={{
-              width: 66, textAlign: "center", fontSize: 11, fontWeight: hovC === i ? 700 : 500,
+              width: 66, textAlign: "center", fontSize: 13, fontWeight: hovC === i ? 700 : 500,
               color: hovC === i ? t.accent : t.textTertiary, transition: "all 0.15s",
             }}>{w}</div>
           ))}
@@ -239,7 +290,7 @@ function AttentionMatrix() {
         {matrix.map((row, ri) => (
           <div key={ri} style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
             <div style={{
-              width: 78, textAlign: "right", paddingRight: 6, fontSize: 12,
+              width: 78, textAlign: "right", paddingRight: 6, fontSize: 14,
               color: hovR === ri ? t.accent : t.textSecondary,
               fontWeight: hovR === ri ? 700 : 500, transition: "all 0.15s",
             }}>{words[ri]}</div>
@@ -250,7 +301,7 @@ function AttentionMatrix() {
                 style={{
                   width: 66, height: 34, display: "flex", alignItems: "center", justifyContent: "center",
                   background: `${t.matrixHigh}${v * 0.9})`,
-                  borderRadius: 4, cursor: "pointer", fontSize: 12,
+                  borderRadius: 4, cursor: "pointer", fontSize: 14,
                   color: v > 0.3 ? "#fff" : t.textSecondary, fontWeight: v > 0.3 ? 700 : 400,
                   border: (hovR === ri && hovC === ci) ? `2px solid ${t.accent}` : "2px solid transparent",
                   transition: "all 0.12s",
@@ -259,7 +310,7 @@ function AttentionMatrix() {
           </div>
         ))}
       </div>
-      <div style={{ marginTop: 12, fontSize: 13, color: t.textSecondary, minHeight: 20 }}>
+      <div style={{ marginTop: 12, fontSize: 15, color: t.textSecondary, minHeight: 20 }}>
         {hovR !== null && hovC !== null ? (
           <>
             <strong style={{ color: t.accent }}>"{words[hovR]}"</strong> presta il{" "}
@@ -291,7 +342,7 @@ function GenerationDemo() {
 
   return (
     <CodeBlock>
-      <div style={{ minHeight: 44, fontSize: 15, lineHeight: 1.6 }}>
+      <div style={{ minHeight: 44, fontSize: 17, lineHeight: 1.6 }}>
         {fullTokens.slice(0, count).map((tk, i) => (
           <span key={i} style={{
             color: i === count - 1 ? t.accent : t.text,
@@ -311,7 +362,7 @@ function GenerationDemo() {
           marginTop: 12, padding: "8px 12px", background: t.surfaceAlt, borderRadius: 6,
           display: "flex", alignItems: "center", gap: 12, border: `1px solid ${t.borderSubtle}`,
         }}>
-          <span style={{ fontSize: 11, color: t.textTertiary, whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 13, color: t.textTertiary, whiteSpace: "nowrap" }}>
             Token #{Math.min(count, fullTokens.length)}
           </span>
           <div style={{ flex: 1, height: 6, background: t.border, borderRadius: 3, overflow: "hidden" }}>
@@ -320,7 +371,7 @@ function GenerationDemo() {
               height: "100%", background: t.accent, borderRadius: 3, transition: "width 0.25s ease",
             }} />
           </div>
-          <span style={{ fontSize: 12, color: t.accent, fontWeight: 600, whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 14, color: t.accent, fontWeight: 600, whiteSpace: "nowrap" }}>
             {(fullTokens[Math.min(count, fullTokens.length) - 1].p * 100).toFixed(0)}%
           </span>
         </div>
@@ -347,17 +398,17 @@ function SamplingDemo() {
   return (
     <CodeBlock>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
-        <label style={{ color: t.textSecondary, fontSize: 13, whiteSpace: "nowrap" }}>Temperatura</label>
+        <label style={{ color: t.textSecondary, fontSize: 15, whiteSpace: "nowrap" }}>Temperatura</label>
         <input type="range" min="0.05" max="2" step="0.05" value={temp}
           onChange={(e) => setTemp(parseFloat(e.target.value))}
           style={{ flex: 1, accentColor: t.accent }} />
         <span style={{
-          fontWeight: 700, fontSize: 18, color: t.accent, minWidth: 44, textAlign: "right",
+          fontWeight: 700, fontSize: 20, color: t.accent, minWidth: 44, textAlign: "right",
         }}>{temp.toFixed(2)}</span>
       </div>
       {probs.map((c, i) => (
         <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 7 }}>
-          <div style={{ width: 110, textAlign: "right", fontSize: 12, color: i === 0 ? t.text : t.textSecondary }}>
+          <div style={{ width: 110, textAlign: "right", fontSize: 14, color: i === 0 ? t.text : t.textSecondary }}>
             {c.t}
           </div>
           <div style={{ flex: 1, height: 20, background: t.surfaceAlt, borderRadius: 4, overflow: "hidden", border: `1px solid ${t.borderSubtle}` }}>
@@ -369,7 +420,7 @@ function SamplingDemo() {
             }} />
           </div>
           <div style={{
-            width: 48, fontSize: 12, fontWeight: 600, textAlign: "right",
+            width: 48, fontSize: 14, fontWeight: 600, textAlign: "right",
             color: i === 0 ? t.accent : t.textSecondary,
           }}>{(c.prob * 100).toFixed(1)}%</div>
         </div>
@@ -377,7 +428,7 @@ function SamplingDemo() {
       <div style={{
         marginTop: 14, padding: "10px 14px", borderRadius: 6,
         background: t.surfaceAlt, border: `1px solid ${t.borderSubtle}`,
-        fontSize: 12, color: t.textSecondary, lineHeight: 1.5,
+        fontSize: 14, color: t.textSecondary, lineHeight: 1.5,
       }}>
         {temp < 0.3
           ? "Molto fredda — quasi deterministico. Ideale per task precisi e ripetibili."
@@ -395,7 +446,7 @@ function SamplingDemo() {
 
 function SectionContent({ id }) {
   const t = useTheme();
-  const P = ({ children }) => <p style={{ color: t.textSecondary, lineHeight: 1.8, fontSize: 14, marginBottom: 16 }}>{children}</p>;
+  const P = ({ children }) => <p style={{ color: t.textSecondary, lineHeight: 1.8, fontSize: 16, marginBottom: 16 }}>{children}</p>;
   const Strong = ({ children, accent }) => <strong style={{ color: accent ? t.accent : t.text }}>{children}</strong>;
   const InfoBox = ({ title, children, variant = "default" }) => {
     const colors = {
@@ -407,8 +458,8 @@ function SectionContent({ id }) {
     const c = colors[variant];
     return (
       <div style={{ padding: 16, background: c.bg, border: `1px solid ${c.border}`, borderRadius: 8, marginTop: 16 }}>
-        {title && <div style={{ color: c.title, fontWeight: 700, fontSize: 13, marginBottom: 6, letterSpacing: "0.02em" }}>{title}</div>}
-        <div style={{ color: t.textSecondary, fontSize: 13, lineHeight: 1.7 }}>{children}</div>
+        {title && <div style={{ color: c.title, fontWeight: 700, fontSize: 15, marginBottom: 6, letterSpacing: "0.02em" }}>{title}</div>}
+        <div style={{ color: t.textSecondary, fontSize: 15, lineHeight: 1.7 }}>{children}</div>
       </div>
     );
   };
@@ -419,8 +470,8 @@ function SectionContent({ id }) {
   );
   const GridCard = ({ title, children, index = 0 }) => (
     <div style={{ background: t.surfaceAlt, borderRadius: 8, padding: 14, border: `1px solid ${t.borderSubtle}` }}>
-      <div style={{ color: t.tagColor[index % 5], fontWeight: 700, fontSize: 13, marginBottom: 6 }}>{title}</div>
-      <div style={{ color: t.textSecondary, fontSize: 12, lineHeight: 1.6 }}>{children}</div>
+      <div style={{ color: t.tagColor[index % 5], fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{title}</div>
+      <div style={{ color: t.textSecondary, fontSize: 14, lineHeight: 1.6 }}>{children}</div>
     </div>
   );
 
@@ -445,17 +496,22 @@ function SectionContent({ id }) {
                 borderLeft: `3px solid ${i === 0 ? t.accent : t.border}`,
                 border: `1px solid ${t.borderSubtle}`,
               }}>
-                <div style={{ fontSize: 24, fontWeight: 800, color: i === 0 ? t.accent : t.text, fontFamily: "'JetBrains Mono', monospace" }}>
+                <div style={{ fontSize: 26, fontWeight: 800, color: i === 0 ? t.accent : t.text, fontFamily: "'JetBrains Mono', monospace" }}>
                   <AnimNum target={s.value} />
                 </div>
-                <div style={{ fontSize: 11, color: t.textTertiary }}>{s.unit}</div>
-                <div style={{ fontSize: 12, color: t.textSecondary, marginTop: 3 }}>{s.label}</div>
+                <div style={{ fontSize: 13, color: t.textTertiary }}>{s.unit}</div>
+                <div style={{ fontSize: 14, color: t.textSecondary, marginTop: 3 }}>{s.label}</div>
               </div>
             ))}
           </div>
           <InfoBox title="IL PIPELINE COMPLETO" variant="accent">
-            <div style={{ fontSize: 11, color: t.textTertiary, marginBottom: 8 }}>
+            <div style={{ fontSize: 13, color: t.textTertiary, marginBottom: 8 }}>
               *GPT-4 usa un'architettura Mixture of Experts (MoE) con ~1.8T parametri totali distribuiti su 16 esperti, ma solo ~280B sono attivi per ogni singola predizione. I 13T token di training includono ripetizioni (2 epoche per testo, 4 per codice).
+              <InfoPopup title="Come leggere questi numeri">
+                Mixture of Experts vuol dire che il modello ha molti sottoblocchi specializzati ("esperti"), ma a ogni token ne attiva solo alcuni.
+                Quindi 1.8T sono i parametri totali disponibili, mentre ~280B sono quelli davvero usati in quella singola predizione.
+                Le epoche indicano quante volte lo stesso dato viene rivisto: se il dataset viene ripassato più volte, i token "contati" aumentano.
+              </InfoPopup>
             </div>
             Testo → <Pill index={0}>Tokenizzazione</Pill> → <Pill index={1}>Embedding</Pill> → <Pill index={0}>Self-Attention</Pill>{" "}
             (×N layer) → <Pill index={2}>Feed-Forward</Pill> (×N layer) → <Pill index={3}>Predizione probabilità</Pill> → <Pill index={4}>Sampling</Pill>{" "}
@@ -470,6 +526,10 @@ function SectionContent({ id }) {
           <P>
             Il primo passo è la <Strong accent>tokenizzazione</Strong>: il testo viene spezzato in sotto-unità chiamate{" "}
             <Strong>token</Strong> usando algoritmi come <Strong>BPE</Strong> (Byte-Pair Encoding). Non parole intere, non singoli caratteri.
+            <InfoPopup title="BPE in parole semplici">
+              BPE parte dai caratteri e costruisce pezzi ricorrenti. Se una sequenza compare spesso (es. "zione"), la unisce in un token unico.
+              Così il vocabolario resta gestibile e il modello capisce anche parole nuove combinando pezzi noti.
+            </InfoPopup>
           </P>
           <TokenDemo />
           <Grid>
@@ -489,13 +549,21 @@ function SectionContent({ id }) {
           <P>
             Ogni token diventa un <Strong accent>vettore numerico</Strong> in uno spazio ad alta dimensionalità (es. 4.096 dimensioni).
             Questo è il <Strong>linguaggio interno</Strong> del modello: numeri che codificano relazioni semantiche, sintattiche e contestuali.
+            <InfoPopup title="Cosa vuol dire 4.096 dimensioni">
+              Ogni token viene rappresentato da 4.096 numeri. Non sono 4.096 significati separati, ma coordinate che insieme descrivono
+              il contesto del token. Più dimensioni danno più sfumature, ma aumentano costo e memoria.
+            </InfoPopup>
           </P>
           <EmbeddingViz />
           <InfoBox title="PERCHÉ 4.096 DIMENSIONI?" variant="accent">
             È un <Strong>iperparametro architetturale</Strong> — scelto dai progettisti, non appreso dal modello.
             Più dimensioni = più sfumature, ma costo computazionale quadratico nell'Attention. La scelta segue{" "}
             <Strong accent>scaling laws</Strong> empiriche. GPT-3: 12.288 dim. LLaMA-7B: 4.096. LLaMA-70B: 8.192. Modelli piccoli: 768.
-            <div style={{ marginTop: 8, color: t.textTertiary, fontSize: 12, fontStyle: "italic" }}>
+            <InfoPopup title="Cosa sono le scaling laws">
+              Sono regole empiriche: aumentando parametri, dati e calcolo, la qualità cresce in modo prevedibile.
+              Servono ai team per decidere quanto conviene scalare un modello prima che i costi superino i benefici.
+            </InfoPopup>
+            <div style={{ marginTop: 8, color: t.textTertiary, fontSize: 14, fontStyle: "italic" }}>
               Analogia ABB: come la risoluzione di un sensore industriale — più dettaglio catturato, più banda e calcolo richiesto.
             </div>
           </InfoBox>
@@ -508,16 +576,28 @@ function SectionContent({ id }) {
           <P>
             Il <Strong accent>Self-Attention</Strong> è il cuore dell'architettura Transformer. Ogni token "guarda" tutti gli altri
             nella sequenza e assegna un peso di attenzione per costruire una rappresentazione contestualizzata.
+            <InfoPopup title="Self-Attention spiegata semplice">
+              Ogni parola decide quanto contano le altre parole della frase in quel momento.
+              Il risultato è che lo stesso termine può cambiare significato in base al contesto.
+            </InfoPopup>
           </P>
           <AttentionMatrix />
           <Grid>
             <GridCard title="QUERY, KEY, VALUE" index={0}>
               Ogni token genera 3 vettori: <strong>Query</strong> (cosa cerco?), <strong>Key</strong> (cosa offro?),{" "}
               <strong>Value</strong> (il mio contenuto). L'attenzione = prodotto scalare Query × Key, normalizzato con softmax.
+              <InfoPopup title="Query, Key, Value in pratica">
+                Pensa a una ricerca interna: Query è la domanda, Key è l'etichetta, Value è l'informazione.
+                Se domanda ed etichetta combaciano, quel token pesa di più nella risposta finale.
+              </InfoPopup>
             </GridCard>
             <GridCard title="MULTI-HEAD ATTENTION" index={2}>
               Non una sola testa, ma <strong>32–128 teste parallele</strong> (es. 32 per LLaMA-7B, 96 per GPT-3): ognuna specializzata su relazioni diverse
               (sintattiche, semantiche, co-riferimento). I risultati vengono concatenati.
+              <InfoPopup title="Perché tante teste">
+                Ogni testa osserva la frase da un angolo diverso: grammatica, significato, riferimenti tra parole.
+                Unendo tutto, il modello ottiene una lettura più robusta del testo.
+              </InfoPopup>
             </GridCard>
           </Grid>
         </>
@@ -529,6 +609,10 @@ function SectionContent({ id }) {
           <P>
             Dopo l'Attention, ogni token attraversa una <Strong accent>rete Feed-Forward</Strong> — due layer lineari con
             attivazione non-lineare (GeLU/SwiGLU). Questa è la "memoria fattuale" del modello.
+            <InfoPopup title="FFN, GeLU e SwiGLU">
+              La FFN trasforma il segnale in modo non lineare: non fa solo somme, ma accentua pattern utili e attenua rumore.
+              GeLU e SwiGLU sono funzioni diverse per fare questa selezione.
+            </InfoPopup>
           </P>
           <CodeBlock>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap", padding: "8px 0" }}>
@@ -540,12 +624,12 @@ function SectionContent({ id }) {
                 { label: "Compressione\nd_model", h: 80 },
               ].map((b, i) =>
                 b.isArrow ? (
-                  <div key={i} style={{ color: t.textTertiary, fontSize: 13, fontWeight: 600 }}>{b.label}</div>
+                  <div key={i} style={{ color: t.textTertiary, fontSize: 15, fontWeight: 600 }}>{b.label}</div>
                 ) : (
                   <div key={i} style={{
                     width: 80, height: b.h, display: "flex", alignItems: "center", justifyContent: "center",
                     background: t.accentBg, border: `1.5px solid ${t.accent}40`, borderRadius: 6,
-                    fontSize: 11, color: t.text, textAlign: "center", whiteSpace: "pre-line", lineHeight: 1.4,
+                    fontSize: 13, color: t.text, textAlign: "center", whiteSpace: "pre-line", lineHeight: 1.4,
                   }}>{b.label}</div>
                 )
               )}
@@ -579,19 +663,27 @@ function SectionContent({ id }) {
                 background: `linear-gradient(90deg, ${t.accent}${(8 + i * 6).toString(16)} ${l.pct}%, transparent ${l.pct}%)`,
                 borderLeft: `3px solid ${t.accent}`,
               }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: t.accent, minWidth: 90, fontFamily: "'JetBrains Mono', monospace" }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: t.accent, minWidth: 90, fontFamily: "'JetBrains Mono', monospace" }}>
                   {l.layer}
                 </div>
-                <div style={{ fontSize: 12, color: t.textSecondary }}>{l.desc}</div>
+                <div style={{ fontSize: 14, color: t.textSecondary }}>{l.desc}</div>
               </div>
             ))}
           </CodeBlock>
           <Grid>
             <GridCard title="RESIDUAL CONNECTIONS" index={1}>
               Ogni layer somma il suo output all'input originale (skip connection), impedendo che il segnale si degradi attraverso 80+ layer.
+              <InfoPopup title="Perché serve la residual">
+                La scorciatoia mantiene vivo il segnale originale mentre il layer aggiunge una correzione.
+                Senza residual, i modelli profondi perderebbero informazione strada facendo.
+              </InfoPopup>
             </GridCard>
             <GridCard title="LAYER NORMALIZATION" index={3}>
               I valori vengono normalizzati ad ogni layer per stabilità numerica — senza questo, il training divergerebbe.
+              <InfoPopup title="Layer norm in pratica">
+                Riporta attivazioni su una scala controllata, evitando numeri troppo grandi o troppo piccoli.
+                In questo modo l'addestramento resta stabile e più veloce da convergere.
+              </InfoPopup>
             </GridCard>
           </Grid>
         </>
@@ -603,6 +695,10 @@ function SectionContent({ id }) {
           <P>
             La generazione è <Strong accent>autoregressiva</Strong>: il modello genera <Strong>un token alla volta</Strong>.
             Ad ogni passo, tutto il contesto (input + token già generati) viene riprocessato.
+            <InfoPopup title="Autoregressivo significa">
+              Il modello decide ogni token usando i token precedenti. È come scrivere una frase una parola per volta,
+              controllando ogni volta il contesto già scritto.
+            </InfoPopup>
           </P>
           <GenerationDemo />
           <InfoBox title="PERCHÉ È LENTA LA GENERAZIONE?" variant="default">
@@ -610,6 +706,10 @@ function SectionContent({ id }) {
             Per 500 token con un modello a 96 layer = <Strong>48.000 passaggi Attention+FFN</Strong>.
             Tecniche di ottimizzazione: <Strong accent>KV-cache</Strong> (memorizzare calcoli già fatti per non riprocessare token precedenti) e{" "}
             <Strong accent>speculative decoding</Strong> (predire più token in parallelo con un modello più piccolo).
+            <InfoPopup title="KV-cache e speculative decoding">
+              KV-cache evita di rifare calcoli già fatti sui token vecchi. Speculative decoding usa un modello veloce per proporre token
+              e uno grande per validarli, riducendo la latenza percepita.
+            </InfoPopup>
           </InfoBox>
         </>
       );
@@ -620,14 +720,25 @@ function SectionContent({ id }) {
           <P>
             Il modello non "sceglie" una parola: produce una <Strong accent>distribuzione di probabilità</Strong>{" "}
             su ~100K token. La <Strong>temperatura</Strong> controlla la concentrazione della scelta. Prova a muovere lo slider.
+            <InfoPopup title="Temperatura in parole umane">
+              Temperatura bassa: risposta più prevedibile e stabile. Temperatura alta: più variabilità e creatività,
+              ma aumenta il rischio di frasi meno precise.
+            </InfoPopup>
           </P>
           <SamplingDemo />
           <Grid>
             <GridCard title="TOP-K SAMPLING" index={1}>
               Si considerano solo i K token più probabili. Top-K=50 significa scegliere tra i 50 migliori candidati, scartando gli altri.
+              <InfoPopup title="Quando usare Top-K">
+                È utile quando vuoi limitare uscite strane: restringe il campo a un numero fisso di candidati forti.
+              </InfoPopup>
             </GridCard>
             <GridCard title="TOP-P (NUCLEUS)" index={2}>
               Si prendono token fino a raggiungere probabilità cumulativa P. Top-P=0.9 include i token che coprono il 90% della massa probabilistica.
+              <InfoPopup title="Quando usare Top-P">
+                Invece di un numero fisso, prende i token necessari per coprire una quota di probabilità.
+                Si adatta meglio a frasi semplici o complesse.
+              </InfoPopup>
             </GridCard>
           </Grid>
         </>
@@ -638,6 +749,10 @@ function SectionContent({ id }) {
         <>
           <P>
             Il training di un LLM avviene in <Strong accent>tre fasi distinte</Strong>, ciascuna con obiettivi, dati e costi diversi.
+            <InfoPopup title="RLHF e DPO, differenza rapida">
+              RLHF usa un modello di reward per stimare quali risposte piacciono di più agli umani. DPO ottimizza direttamente
+              su coppie di preferenze, con pipeline spesso più semplice da gestire.
+            </InfoPopup>
           </P>
           {[
             { phase: "1. PRE-TRAINING", desc: "Il modello legge trilioni di token dal web, libri, codice, paper scientifici. Obiettivo: predire il prossimo token. Costo: milioni di $ in GPU per settimane.", variant: 0 },
@@ -650,8 +765,8 @@ function SectionContent({ id }) {
               border: `1px solid ${t.borderSubtle}`,
             }}>
               <div>
-                <div style={{ color: t.tagColor[p.variant], fontWeight: 700, fontSize: 13, letterSpacing: "0.04em" }}>{p.phase}</div>
-                <div style={{ color: t.textSecondary, fontSize: 12, marginTop: 4, lineHeight: 1.6 }}>{p.desc}</div>
+                <div style={{ color: t.tagColor[p.variant], fontWeight: 700, fontSize: 15, letterSpacing: "0.04em" }}>{p.phase}</div>
+                <div style={{ color: t.textSecondary, fontSize: 14, marginTop: 4, lineHeight: 1.6 }}>{p.desc}</div>
               </div>
             </div>
           ))}
@@ -664,7 +779,7 @@ function SectionContent({ id }) {
           <P>Capire limiti e punti di forza è fondamentale per un'adozione consapevole in azienda.</P>
           <Grid>
             <div>
-              <div style={{ color: t.errorColor, fontWeight: 700, fontSize: 14, marginBottom: 10, letterSpacing: "0.04em" }}>LIMITI</div>
+              <div style={{ color: t.errorColor, fontWeight: 700, fontSize: 16, marginBottom: 10, letterSpacing: "0.04em" }}>LIMITI</div>
               {[
                 { t: "Allucinazioni", d: "Genera testo plausibile ma falso — non ha un \"database di fatti\"" },
                 { t: "No ragionamento causale", d: "Trova correlazioni statistiche, non comprende causa-effetto" },
@@ -676,13 +791,13 @@ function SectionContent({ id }) {
                   background: t.surfaceAlt, borderRadius: 6, padding: 10, marginBottom: 6,
                   borderLeft: `3px solid ${t.errorColor}`, border: `1px solid ${t.borderSubtle}`,
                 }}>
-                  <div style={{ color: t.errorColor, fontWeight: 600, fontSize: 12 }}>{l.t}</div>
-                  <div style={{ color: t.textTertiary, fontSize: 11, marginTop: 3 }}>{l.d}</div>
+                  <div style={{ color: t.errorColor, fontWeight: 600, fontSize: 14 }}>{l.t}</div>
+                  <div style={{ color: t.textTertiary, fontSize: 13, marginTop: 3 }}>{l.d}</div>
                 </div>
               ))}
             </div>
             <div>
-              <div style={{ color: t.successColor, fontWeight: 700, fontSize: 14, marginBottom: 10, letterSpacing: "0.04em" }}>PUNTI DI FORZA</div>
+              <div style={{ color: t.successColor, fontWeight: 700, fontSize: 16, marginBottom: 10, letterSpacing: "0.04em" }}>PUNTI DI FORZA</div>
               {[
                 { t: "Versatilità estrema", d: "Un solo modello per traduzione, analisi, coding, riassunti, brainstorming" },
                 { t: "Comprensione contesto", d: "Eccellente nel capire sfumature, tono, intent dell'utente" },
@@ -694,12 +809,23 @@ function SectionContent({ id }) {
                   background: t.surfaceAlt, borderRadius: 6, padding: 10, marginBottom: 6,
                   borderLeft: `3px solid ${t.successColor}`, border: `1px solid ${t.borderSubtle}`,
                 }}>
-                  <div style={{ color: t.successColor, fontWeight: 600, fontSize: 12 }}>{l.t}</div>
-                  <div style={{ color: t.textTertiary, fontSize: 11, marginTop: 3 }}>{l.d}</div>
+                  <div style={{ color: t.successColor, fontWeight: 600, fontSize: 14 }}>{l.t}</div>
+                  <div style={{ color: t.textTertiary, fontSize: 13, marginTop: 3 }}>{l.d}</div>
                 </div>
               ))}
             </div>
           </Grid>
+          <InfoBox title="NOTE SUI LIMITI" variant="warning">
+            Allucinazioni e context window finita sono due limiti spesso sottovalutati.
+            <InfoPopup title="Allucinazioni: cosa sono davvero">
+              Non sono bug casuali: il modello completa la frase in modo plausibile anche quando non ha evidenza sufficiente.
+              Per ridurle servono fonti esterne verificate, controlli e validazione umana.
+            </InfoPopup>
+            <InfoPopup title="Context window: perché conta">
+              È la memoria a breve termine del modello: oltre quel limite, parti del testo vengono tagliate o compresse.
+              Questo può ridurre coerenza e precisione su documenti molto lunghi.
+            </InfoPopup>
+          </InfoBox>
           <InfoBox title="TAKEAWAY PER ABB" variant="accent">
             Gli LLM non sono intelligenze artificiali generali — sono <Strong>motori statistici di linguaggio estremamente potenti</Strong>.
             Il valore emerge quando li si integra con guardrail, retrieval da fonti verificate (RAG), validazione umana e processi strutturati.
@@ -737,7 +863,7 @@ export default function App() {
           background: t.headerBg, borderBottom: `1px solid ${t.border}`,
           padding: "16px 24px", position: "sticky", top: 0, zIndex: 100,
         }}>
-          <div style={{ maxWidth: 920, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ maxWidth: 1120, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               {/* Datapizza Logo */}
               <img
@@ -746,10 +872,10 @@ export default function App() {
                 style={{ height: 28, width: "auto", display: "block" }}
               />
               <div>
-                <div style={{ color: t.text, fontSize: 16, fontWeight: 700, letterSpacing: "-0.01em" }}>
-                  Come Ragionano gli LLM
+                <div style={{ color: t.text, fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em" }}>
+                  Come funzionano gli LLM
                 </div>
-                <div style={{ color: t.textTertiary, fontSize: 11, letterSpacing: "0.04em" }}>
+                <div style={{ color: t.textTertiary, fontSize: 13, letterSpacing: "0.04em" }}>
                   GUIDA INTERATTIVA — DATAPIZZA × ABB
                 </div>
               </div>
@@ -757,7 +883,7 @@ export default function App() {
             {/* Theme toggle */}
             <button onClick={() => setMode(mode === "light" ? "dark" : "light")} style={{
               background: t.surfaceAlt, border: `1px solid ${t.border}`, borderRadius: 6,
-              padding: "6px 12px", cursor: "pointer", color: t.textSecondary, fontSize: 12,
+              padding: "6px 12px", cursor: "pointer", color: t.textSecondary, fontSize: 14,
               display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s",
             }}>
               {mode === "light" ? "◐" : "◑"}
@@ -769,18 +895,18 @@ export default function App() {
         {/* Nav */}
         <div style={{
           background: t.navBg, borderBottom: `1px solid ${t.border}`,
-          overflowX: "auto", position: "sticky", top: 60, zIndex: 99,
+          overflowX: "auto", position: "sticky", top: 64, zIndex: 99,
         }}>
-          <div style={{ maxWidth: 920, margin: "0 auto", display: "flex", padding: "0 24px" }}>
+          <div style={{ maxWidth: 1120, margin: "0 auto", display: "flex", padding: "0 24px" }}>
             {SECTIONS.map((s, i) => (
               <button key={s.id} onClick={() => setActive(s.id)} style={{
                 background: "transparent", border: "none",
                 borderBottom: active === s.id ? `2px solid ${t.accent}` : "2px solid transparent",
                 color: active === s.id ? t.accent : t.textTertiary,
-                padding: "10px 14px", cursor: "pointer", fontSize: 12, fontWeight: active === s.id ? 700 : 500,
+                padding: "10px 14px", cursor: "pointer", fontSize: 14, fontWeight: active === s.id ? 700 : 500,
                 whiteSpace: "nowrap", transition: "all 0.2s", letterSpacing: "0.02em",
               }}>
-                <span style={{ color: t.textTertiary, marginRight: 4, fontSize: 10 }}>{String(i + 1).padStart(2, "0")}</span>
+                <span style={{ color: t.textTertiary, marginRight: 4, fontSize: 12 }}>{String(i + 1).padStart(2, "0")}</span>
                 {s.label}
               </button>
             ))}
@@ -788,12 +914,12 @@ export default function App() {
         </div>
 
         {/* Content */}
-        <div style={{ maxWidth: 920, margin: "0 auto", padding: "28px 24px 40px" }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "32px 28px 44px" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4 }}>
-            <span style={{ color: t.accent, fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}>
+            <span style={{ color: t.accent, fontSize: 13, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}>
               {String(SECTIONS.findIndex((s) => s.id === active) + 1).padStart(2, "0")}
             </span>
-            <h2 style={{ color: t.text, fontSize: 20, fontWeight: 700, letterSpacing: "-0.01em" }}>
+            <h2 style={{ color: t.text, fontSize: 22, fontWeight: 700, letterSpacing: "-0.01em" }}>
               {SECTIONS.find((s) => s.id === active)?.label}
             </h2>
           </div>
@@ -809,14 +935,14 @@ export default function App() {
                   {idx > 0 ? (
                     <button onClick={() => setActive(SECTIONS[idx - 1].id)} style={{
                       background: t.surfaceAlt, border: `1px solid ${t.border}`, borderRadius: 6,
-                      color: t.textSecondary, padding: "8px 16px", cursor: "pointer", fontSize: 13, transition: "all 0.2s",
+                      color: t.textSecondary, padding: "8px 16px", cursor: "pointer", fontSize: 15, transition: "all 0.2s",
                     }}>← {SECTIONS[idx - 1].label}</button>
                   ) : <div />}
                   {idx < SECTIONS.length - 1 ? (
                     <button onClick={() => setActive(SECTIONS[idx + 1].id)} style={{
                       background: t.accent, border: "none", borderRadius: 6,
                       color: "#fff", padding: "8px 20px", cursor: "pointer",
-                      fontSize: 13, fontWeight: 700, letterSpacing: "0.02em", transition: "all 0.2s",
+                      fontSize: 15, fontWeight: 700, letterSpacing: "0.02em", transition: "all 0.2s",
                     }}>{SECTIONS[idx + 1].label} →</button>
                   ) : <div />}
                 </>
