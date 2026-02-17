@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// Relative base so static assets also resolve on GitHub Pages project URLs.
 export default defineConfig({
+  base: './',
   plugins: [react()],
 })

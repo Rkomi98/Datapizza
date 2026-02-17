@@ -26,13 +26,21 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: GSK/package-lock.json
+          cache-dependency-path: |
+            GSK/package-lock.json
+            ABB/web/package-lock.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Install dependencies and build GSK app
         working-directory: GSK
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install dependencies and build ABB app
+        working-directory: ABB/web
         run: |
           npm ci
           npm run build
@@ -58,6 +66,10 @@ jobs:
       - name: Copy GSK build into artifact
         run: |
           rsync -av --delete GSK/dist/GSK/ dist/GSK/
+
+      - name: Copy ABB build into artifact
+        run: |
+          rsync -av --delete ABB/web/dist/ dist/ABB/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4

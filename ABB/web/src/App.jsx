@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, createContext, useContext } from "react";
-import datapizzaLogo from "./Assets/datapizzaLogo.png";
 
 const ThemeContext = createContext();
 const useTheme = () => useContext(ThemeContext);
@@ -742,7 +741,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               {/* Datapizza Logo */}
               <img
-                src={datapizzaLogo}
+                src={`${import.meta.env.BASE_URL}datapizza_icon.png`}
                 alt="Datapizza logo"
                 style={{ height: 28, width: "auto", display: "block" }}
               />
