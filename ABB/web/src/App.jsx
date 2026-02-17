@@ -488,7 +488,7 @@ function SectionContent({ id }) {
             {[
               { label: "Parametri (GPT-4, MoE)", value: 1800, unit: "miliardi totali*" },
               { label: "Token di training", value: 13000, unit: "miliardi (con epoche)" },
-              { label: "Dimensioni embedding", value: 4096, unit: "–12.288" },
+              { label: "Dimensioni embedding", value: 4096, display: "4.096", unit: "range tipico: 4.096-12.288" },
               { label: "Vocabolario", value: 100000, unit: "token (BPE)" },
             ].map((s, i) => (
               <div key={i} style={{
@@ -497,14 +497,14 @@ function SectionContent({ id }) {
                 border: `1px solid ${t.borderSubtle}`,
               }}>
                 <div style={{ fontSize: 26, fontWeight: 800, color: i === 0 ? t.accent : t.text, fontFamily: "'JetBrains Mono', monospace" }}>
-                  <AnimNum target={s.value} />
+                  {s.display ?? <AnimNum target={s.value} />}
                 </div>
                 <div style={{ fontSize: 13, color: t.textTertiary }}>{s.unit}</div>
                 <div style={{ fontSize: 14, color: t.textSecondary, marginTop: 3 }}>{s.label}</div>
               </div>
             ))}
           </div>
-          <InfoBox title="IL PIPELINE COMPLETO" variant="accent">
+          <InfoBox title="LA PIPELINE COMPLETA" variant="accent">
             <div style={{ fontSize: 13, color: t.textTertiary, marginBottom: 8 }}>
               *GPT-4 usa un'architettura Mixture of Experts (MoE) con ~1.8T parametri totali distribuiti su 16 esperti, ma solo ~280B sono attivi per ogni singola predizione. I 13T token di training includono ripetizioni (2 epoche per testo, 4 per codice).
               <InfoPopup title="Come leggere questi numeri">
@@ -547,7 +547,7 @@ function SectionContent({ id }) {
       return (
         <>
           <P>
-            Ogni token diventa un <Strong accent>vettore numerico</Strong> in uno spazio ad alta dimensionalità (es. 4.096 dimensioni).
+            Ogni token diventa un <Strong accent>vettore numerico</Strong> in uno spazio ad alta dimensionalità (es. 4.096 dimensioni, con range tipico 4.096-12.288).
             Questo è il <Strong>linguaggio interno</Strong> del modello: numeri che codificano relazioni semantiche, sintattiche e contestuali.
             <InfoPopup title="Cosa vuol dire 4.096 dimensioni">
               Ogni token viene rappresentato da 4.096 numeri. Non sono 4.096 significati separati, ma coordinate che insieme descrivono
@@ -615,24 +615,34 @@ function SectionContent({ id }) {
             </InfoPopup>
           </P>
           <CodeBlock>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap", padding: "8px 0" }}>
-              {[
-                { label: "Input\nd_model", h: 80 },
-                { label: "→", isArrow: true },
-                { label: "Espansione\n~4× d_model", h: 120 },
-                { label: "→ GeLU →", isArrow: true },
-                { label: "Compressione\nd_model", h: 80 },
-              ].map((b, i) =>
-                b.isArrow ? (
-                  <div key={i} style={{ color: t.textTertiary, fontSize: 15, fontWeight: 600 }}>{b.label}</div>
-                ) : (
-                  <div key={i} style={{
-                    width: 80, height: b.h, display: "flex", alignItems: "center", justifyContent: "center",
-                    background: t.accentBg, border: `1.5px solid ${t.accent}40`, borderRadius: 6,
-                    fontSize: 13, color: t.text, textAlign: "center", whiteSpace: "pre-line", lineHeight: 1.4,
-                  }}>{b.label}</div>
-                )
-              )}
+            <div style={{ display: "flex", alignItems: "stretch", justifyContent: "center", gap: 12, flexWrap: "wrap", padding: "8px 0" }}>
+              <div style={{
+                width: 150, minHeight: 94, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                background: t.accentBg, border: `1.5px solid ${t.accent}40`, borderRadius: 8, padding: "8px 10px",
+              }}>
+                <div style={{ fontSize: 15, color: t.text, fontWeight: 700 }}>Input</div>
+                <div style={{ fontSize: 13, color: t.textSecondary, marginTop: 3 }}>d_model</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", color: t.textTertiary, fontSize: 18, fontWeight: 700 }}>→</div>
+              <div style={{
+                width: 190, minHeight: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                background: t.accentBg, border: `1.5px solid ${t.accent}40`, borderRadius: 8, padding: "10px 12px",
+              }}>
+                <div style={{ fontSize: 15, color: t.text, fontWeight: 700 }}>Espansione</div>
+                <div style={{ fontSize: 13, color: t.textSecondary, marginTop: 3 }}>~4× d_model</div>
+                <div style={{ fontSize: 12, color: t.textTertiary, marginTop: 7 }}>più capacità di rappresentazione</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", color: t.textTertiary, fontSize: 16, fontWeight: 700 }}>→ GeLU →</div>
+              <div style={{
+                width: 170, minHeight: 94, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                background: t.accentBg, border: `1.5px solid ${t.accent}40`, borderRadius: 8, padding: "8px 10px",
+              }}>
+                <div style={{ fontSize: 15, color: t.text, fontWeight: 700 }}>Compressione</div>
+                <div style={{ fontSize: 13, color: t.textSecondary, marginTop: 3 }}>d_model</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 8, color: t.textTertiary, fontSize: 13, textAlign: "center" }}>
+              In breve: espande lo spazio per calcolare relazioni non lineari, poi comprime di nuovo nella dimensione originale.
             </div>
           </CodeBlock>
           <InfoBox title="DOVE RISIEDE LA CONOSCENZA?" variant="default">
