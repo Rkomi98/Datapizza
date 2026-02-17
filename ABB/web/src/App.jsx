@@ -759,15 +759,15 @@ function SectionContent({ id }) {
         <>
           <P>
             Il training di un LLM avviene in <Strong accent>tre fasi distinte</Strong>, ciascuna con obiettivi, dati e costi diversi.
-            <InfoPopup title="RLHF e DPO, differenza rapida">
-              RLHF usa un modello di reward per stimare quali risposte piacciono di più agli umani. DPO ottimizza direttamente
-              su coppie di preferenze, con pipeline spesso più semplice da gestire.
+            <InfoPopup title="RLHF, DPO e RLAIF: differenza rapida">
+              RLHF usa un reward model addestrato su preferenze umane. DPO ottimizza direttamente su coppie di risposte preferita/scartata.
+              RLAIF usa feedback di un altro modello AI come "giudice", riducendo il carico di annotazione umana.
             </InfoPopup>
           </P>
           {[
             { phase: "1. PRE-TRAINING", desc: "Il modello legge trilioni di token dal web, libri, codice, paper scientifici. Obiettivo: predire il prossimo token. Costo: milioni di $ in GPU per settimane.", variant: 0 },
-            { phase: "2. FINE-TUNING (SFT)", desc: "Addestramento su conversazioni curate da umani — il modello impara a seguire istruzioni, rispondere utilmente, mantenere formato coerente.", variant: 2 },
-            { phase: "3. RLHF / DPO", desc: "Allineamento tramite feedback umano: con RLHF, un reward model valuta le risposte; con DPO (alternativa più recente) si ottimizza direttamente sulle preferenze umane senza reward model separato.", variant: 3 },
+            { phase: "2. FINE-TUNING (SFT)", desc: "Addestramento supervisionato su conversazioni curate: il modello impara il pattern domanda-risposta, quindi a 'conversare' completando il prompt con una risposta utile, coerente e nel formato atteso.", variant: 2 },
+            { phase: "3. ALLINEAMENTO (RLHF / DPO / RLAIF)", desc: "Fase successiva che accentua il comportamento desiderato: allineamento etico/sicurezza secondo linee guida, più perfezionamento del formato (cosa dire, cosa evitare, tono e struttura) in base agli obiettivi dello sviluppatore.", variant: 3 },
           ].map((p, i) => (
             <div key={i} style={{
               display: "flex", gap: 14, padding: 16, marginBottom: 8,
@@ -780,6 +780,17 @@ function SectionContent({ id }) {
               </div>
             </div>
           ))}
+          <InfoBox title="IN-CONTEXT LEARNING E RAG" variant="success">
+            <Strong>In-Context Learning</Strong>: il modello cambia comportamento in base a istruzioni ed esempi nel prompt (zero-shot / few-shot), senza fare nuovo training.
+            <InfoPopup title="Perché è fondamentale">
+              È il motivo per cui prompt ben scritti cambiano molto la qualità: stai guidando il modello nel contesto, non nei pesi.
+            </InfoPopup>
+            {" "}
+            <Strong>RAG</Strong>: prima di rispondere, il sistema recupera documenti esterni affidabili e li inserisce nel contesto.
+            <InfoPopup title="RAG in pratica">
+              Riduce allucinazioni e migliora l'aderenza a dati aziendali aggiornati, perché il modello risponde su fonti fornite al momento.
+            </InfoPopup>
+          </InfoBox>
         </>
       );
 
@@ -837,7 +848,7 @@ function SectionContent({ id }) {
             </InfoPopup>
           </InfoBox>
           <InfoBox title="TAKEAWAY PER ABB" variant="accent">
-            Gli LLM non sono intelligenze artificiali generali — sono <Strong>motori statistici di linguaggio estremamente potenti</Strong>.
+            Gli LLM non sono intelligenze artificiali generali — sono <Strong>motori stocastici di linguaggio estremamente potenti</Strong>.
             Il valore emerge quando li si integra con guardrail, retrieval da fonti verificate (RAG), validazione umana e processi strutturati.
             La domanda giusta non è "è intelligente?" ma <Strong accent>"dove crea valore nel nostro contesto?"</Strong>
           </InfoBox>
