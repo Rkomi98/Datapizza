@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diffusion Models — ABB AI Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+:root {
+  --abb-red: #FF000F;
+  --abb-red-dark: #CC000C;
+  --abb-black: #1A1A1A;
+  --abb-dark: #0D0D0D;
+  --abb-white: #FFFFFF;
+  --abb-gray-100: #F5F5F5;
+  --abb-gray-200: #E8E8E8;
+  --abb-gray-300: #CCCCCC;
+  --abb-gray-600: #666666;
+  --abb-gray-800: #333333;
+  --font-display: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-display);
+  background: var(--abb-dark);
+  color: var(--abb-white);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--abb-dark);
+}
+
+.hero-noise-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  animation: noiseShift 8s ease-in-out infinite alternate;
+}
+
+@keyframes noiseShift {
+  0% { transform: scale(1) translate(0,0); opacity: 0.5; }
+  50% { transform: scale(1.1) translate(-2%,-1%); opacity: 0.25; }
+  100% { transform: scale(1) translate(0,0); opacity: 0.05; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem;
+}
+
+.abb-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  color: var(--abb-red);
+  margin-bottom: 3rem;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.hero h1 .red { color: var(--abb-red); }
+
+.hero-sub {
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  color: var(--abb-gray-300);
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  font-weight: 400;
+}
+
+.scroll-cue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--abb-gray-600);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.scroll-cue .arrow {
+  width: 24px; height: 24px;
+  border-right: 2px solid var(--abb-red);
+  border-bottom: 2px solid var(--abb-red);
+  transform: rotate(45deg);
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+/* SECTIONS */
+section {
+  padding: 6rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--abb-red);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.section-text {
+  font-size: 1.05rem;
+  color: var(--abb-gray-300);
+  max-width: 720px;
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+
+/* RED DIVIDER */
+.red-divider {
+  width: 60px;
+  height: 3px;
+  background: var(--abb-red);
+  margin: 4rem auto;
+}
+
+/* ANIMATION CONTAINERS */
+.anim-container {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.anim-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--abb-red), transparent);
+}
+
+.anim-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--abb-gray-600);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.anim-title .dot {
+  width: 6px; height: 6px;
+  background: var(--abb-red);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* FORWARD DIFFUSION ANIMATION */
+.forward-diffusion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 0;
+}
+
+.diff-step {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.diff-step canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.diff-arrow {
+  color: var(--abb-gray-600);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.diff-label {
+  text-align: center;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--abb-gray-600);
+  margin-top: 0.4rem;
+}
+
+/* PIXEL GRID ANIMATION */
+.pixel-grid-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.pixel-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 2px;
+  width: min(320px, 100%);
+  aspect-ratio: 1;
+}
+
+.pixel {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.slider-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--abb-gray-600);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 200px;
+  height: 4px;
+  background: var(--abb-gray-800);
+  border-radius: 2px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--abb-red);
+  cursor: pointer;
+}
+
+.step-display {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--abb-white);
+  min-width: 80px;
+  text-align: center;
+}
+
+/* DENOISING LIVE ANIMATION */
+.denoise-live {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.denoise-canvas-wrap {
+  position: relative;
+  width: min(400px, 100%);
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #222;
+}
+
+.denoise-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.denoise-progress {
+  width: min(400px, 100%);
+  height: 4px;
+  background: #222;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.denoise-progress-fill {
+  height: 100%;
+  background: var(--abb-red);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.denoise-info {
+  display: flex;
+  gap: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--abb-gray-300);
+}
+
+.btn-abb {
+  background: var(--abb-red);
+  color: white;
+  border: none;
+  padding: 0.7rem 2rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.btn-abb:hover { background: var(--abb-red-dark); }
+
+.btn-abb:disabled {
+  background: var(--abb-gray-800);
+  cursor: not-allowed;
+}
+
+/* U-NET ARCHITECTURE ANIMATION */
+.unet-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.unet-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.unet-layer {
+  border-radius: 4px;
+  transition: all 0.5s ease;
+  position: relative;
+}
+
+.unet-layer.encoder { background: var(--abb-red); opacity: 0.8; }
+.unet-layer.bottleneck { background: var(--abb-white); }
+.unet-layer.decoder { background: #FF4444; opacity: 0.8; }
+
+.unet-label {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--abb-gray-600);
+  margin-top: 0.3rem;
+}
+
+.unet-arrow-down, .unet-arrow-up {
+  font-size: 0.8rem;
+  color: var(--abb-gray-600);
+}
+
+/* TEXT CONDITIONING VIS */
+.text-cond {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.prompt-box {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--abb-white);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  max-width: 500px;
+  width: 100%;
+}
+
+.prompt-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: var(--abb-red);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.token-flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.token {
+  background: rgba(255, 0, 15, 0.15);
+  border: 1px solid rgba(255, 0, 15, 0.3);
+  color: var(--abb-white);
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  animation: tokenAppear 0.5s ease-out both;
+}
+
+@keyframes tokenAppear {
+  from { opacity: 0; transform: translateY(10px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.flow-arrow {
+  color: var(--abb-red);
+  font-size: 1.2rem;
+  animation: flowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes flowPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.embedding-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  width: min(200px, 100%);
+}
+
+.embed-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  animation: embedPulse 3s ease-in-out infinite;
+}
+
+@keyframes embedPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* LATENT SPACE VIS */
+.latent-vis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  padding: 2rem 0;
+}
+
+.latent-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.latent-canvas {
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+
+.latent-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--abb-gray-600);
+}
+
+.latent-size {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--abb-gray-600);
+}
+
+/* SAMPLING METHODS COMPARISON */
+.sampling-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.sampling-card {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: border-color 0.3s;
+}
+
+.sampling-card:hover {
+  border-color: var(--abb-red);
+}
+
+.sampling-card h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.sampling-card p {
+  font-size: 0.8rem;
+  color: var(--abb-gray-300);
+  line-height: 1.5;
+}
+
+.sampling-steps {
+  display: flex;
+  gap: 3px;
+  margin-top: 0.8rem;
+}
+
+.sampling-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--abb-red);
+  animation: stepFade 2s ease-in-out infinite;
+}
+
+/* TECHNICAL POPUP */
+.tech-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--abb-red);
+  cursor: pointer;
+  font-weight: 500;
+  border-bottom: 1px dashed rgba(255, 0, 15, 0.4);
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.tech-trigger:hover {
+  border-bottom-color: var(--abb-red);
+}
+
+.tech-trigger .icon {
+  font-size: 0.7em;
+  opacity: 0.7;
+}
+
+.popup-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.popup-overlay.active { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.popup-content {
+  background: #1A1A1A;
+  border: 1px solid #333;
+  border-radius: 12px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 2.5rem;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.popup-content::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--abb-red);
+  border-radius: 12px 12px 0 0;
+}
+
+.popup-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: 1px solid #444;
+  color: var(--abb-gray-300);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.popup-close:hover {
+  border-color: var(--abb-red);
+  color: var(--abb-red);
+}
+
+.popup-tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--abb-red);
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.popup-content h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.popup-content p {
+  font-size: 0.9rem;
+  color: var(--abb-gray-300);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.popup-formula {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 1.2rem 1.5rem;
+  margin: 1.2rem 0;
+  overflow-x: auto;
+  line-height: 2.2;
+}
+
+.popup-formula .comment {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--abb-gray-600);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.popup-formula .katex-display {
+  margin: 0.6rem 0;
+}
+
+.popup-formula .katex {
+  font-size: 1.05rem;
+  color: var(--abb-white);
+}
+
+.popup-formula .formula-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.popup-formula .formula-row:last-child {
+  margin-bottom: 0;
+}
+
+.popup-code {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 1.2rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--abb-white);
+  margin: 1rem 0;
+  overflow-x: auto;
+  line-height: 1.8;
+}
+
+.popup-code .comment {
+  color: var(--abb-gray-600);
+}
+
+.popup-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.popup-content ul li {
+  font-size: 0.85rem;
+  color: var(--abb-gray-300);
+  padding: 0.4rem 0;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.popup-content ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  width: 4px;
+  height: 4px;
+  background: var(--abb-red);
+  border-radius: 50%;
+}
+
+/* FULL PIPELINE */
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 2rem 0;
+  overflow-x: auto;
+  padding: 1rem 0;
+}
+
+.pipe-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  padding: 1.5rem 1rem;
+  position: relative;
+  flex: 1;
+}
+
+.pipe-stage::after {
+  content: '→';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--abb-red);
+  font-size: 1.2rem;
+  z-index: 1;
+}
+
+.pipe-stage:last-child::after { display: none; }
+
+.pipe-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+  background: rgba(255, 0, 15, 0.1);
+  border: 1px solid rgba(255, 0, 15, 0.2);
+}
+
+.pipe-name {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--abb-white);
+  text-align: center;
+  font-weight: 600;
+}
+
+.pipe-detail {
+  font-size: 0.6rem;
+  color: var(--abb-gray-600);
+  text-align: center;
+  margin-top: 0.3rem;
+}
+
+/* TIMELINE */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin: 2rem 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--abb-red), transparent);
+}
+
+.timeline-item {
+  position: relative;
+  padding: 1.5rem 0;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 1.8rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--abb-red);
+  transform: translateX(-4px);
+}
+
+.timeline-year {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--abb-red);
+  margin-bottom: 0.3rem;
+}
+
+.timeline-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.timeline-desc {
+  font-size: 0.85rem;
+  color: var(--abb-gray-300);
+}
+
+/* COMPARISON TABLE */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.85rem;
+}
+
+.comparison-table th {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-bottom: 2px solid var(--abb-red);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--abb-gray-300);
+}
+
+.comparison-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #222;
+  color: var(--abb-gray-300);
+}
+
+.comparison-table tr:hover td {
+  background: rgba(255, 0, 15, 0.03);
+}
+
+/* FOOTER */
+.footer {
+  padding: 3rem 2rem;
+  text-align: center;
+  border-top: 1px solid #222;
+  margin-top: 4rem;
+}
+
+.footer-logo {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--abb-red);
+  letter-spacing: 0.15em;
+  margin-bottom: 0.5rem;
+}
+
+.footer-text {
+  font-size: 0.75rem;
+  color: var(--abb-gray-600);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  section { padding: 4rem 1.5rem; }
+  .pipeline { flex-direction: column; align-items: center; }
+  .pipe-stage::after { content: '↓'; right: auto; bottom: -4px; top: auto; transform: none; }
+  .forward-diffusion { gap: 0.3rem; }
+  .diff-step { width: 50px; height: 50px; }
+  .unet-visual { gap: 2px; }
+}
+
+/* NOISE PARTICLE ANIMATION */
+.noise-particles {
+  position: relative;
+  width: min(350px, 100%);
+  height: 200px;
+  margin: 2rem auto;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #222;
+}
+
+.noise-particles canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* SCHEDULE VISUALIZATION */
+.schedule-vis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+}
+
+.schedule-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 80px;
+  width: min(400px, 100%);
+}
+
+.schedule-bar {
+  flex: 1;
+  background: var(--abb-red);
+  border-radius: 2px 2px 0 0;
+  transition: height 0.5s ease;
+  min-width: 3px;
+}
+
+.schedule-labels {
+  display: flex;
+  justify-content: space-between;
+  width: min(400px, 100%);
+  font-size: 0.6rem;
+  color: var(--abb-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ANIMATED FLOW DIAGRAM */
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 0;
+  flex-wrap: wrap;
+}
+
+/* REFINEMENT SECTION STYLES */
+.refine-techniques {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.refine-card {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 1.8rem;
+  transition: border-color 0.3s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.refine-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--abb-red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.refine-card:hover::before { transform: scaleX(1); }
+.refine-card:hover { border-color: #444; transform: translateY(-2px); }
+
+.refine-card-icon {
+  font-size: 1.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.refine-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.refine-card p {
+  font-size: 0.85rem;
+  color: var(--abb-gray-300);
+  line-height: 1.6;
+}
+
+.refine-card .tag {
+  display: inline-block;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  background: rgba(255,0,15,0.12);
+  color: var(--abb-red);
+  margin-top: 0.8rem;
+}
+
+/* IMG2IMG INTERACTIVE DEMO */
+.img2img-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.img2img-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.img2img-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.img2img-canvas {
+  border-radius: 8px;
+  border: 1px solid #333;
+  image-rendering: pixelated;
+}
+
+.strength-vis {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.strength-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  max-width: 400px;
+}
+
+.strength-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: #222;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.strength-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.strength-marker {
+  position: absolute;
+  top: -20px;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: var(--abb-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* INPAINTING VIS */
+.inpaint-vis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 0;
+}
+
+.inpaint-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.inpaint-canvas {
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+
+/* CONTROLNET DIAGRAM */
+.controlnet-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 0;
+}
+
+.cn-box {
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  min-width: 90px;
+}
+
+.cn-box.input { background: #1a1a2e; border: 1px solid #333; color: var(--abb-gray-300); }
+.cn-box.process { background: rgba(255,0,15,0.15); border: 1px solid rgba(255,0,15,0.3); color: var(--abb-white); }
+.cn-box.output { background: #111; border: 1px solid var(--abb-red); color: var(--abb-white); }
+
+.cn-arrow {
+  color: var(--abb-gray-600);
+  font-size: 1.2rem;
+}
+
+.cn-plus {
+  color: var(--abb-red);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.flow-box {
+  padding: 0.8rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  min-width: 100px;
+}
+
+.flow-box.noise { background: #333; color: var(--abb-gray-300); }
+.flow-box.model { background: var(--abb-red); color: white; }
+.flow-box.output { background: #222; border: 1px solid var(--abb-red); color: var(--abb-white); }
+
+.flow-connector {
+  color: var(--abb-gray-600);
+  font-size: 1.5rem;
+  animation: connectorPulse 2s ease-in-out infinite;
+}
+
+@keyframes connectorPulse {
+  0%, 100% { opacity: 0.3; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(4px); }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-noise-bg"></div>
+  <div class="hero-content">
+    <div class="abb-logo">ABB · AI Academy</div>
+    <h1>Come funzionano i<br><span class="red">Diffusion Models</span></h1>
+    <p class="hero-sub">Dal rumore puro nascono immagini. Una guida visuale e interattiva alla tecnologia che alimenta DALL·E, Stable Diffusion e Midjourney.</p>
+    <div class="scroll-cue">
+      <span>Scorri per esplorare</span>
+      <div class="arrow"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 1. L'IDEA FONDAMENTALE -->
+<section id="idea">
+  <div class="section-label">01 — Il Concetto</div>
+  <h2 class="section-title">L'idea è semplice:<br>distruggi, poi ricostruisci.</h2>
+  <p class="section-text">
+    Un Diffusion Model impara a generare immagini attraverso due processi opposti. Prima, un'immagine reale viene progressivamente corrotta aggiungendo rumore gaussiano fino a diventare puro caos statistico. Poi, una rete neurale impara a <strong>invertire</strong> questo processo, rimuovendo il rumore passo dopo passo.
+    <span class="tech-trigger" data-popup="markov">Catena di Markov <span class="icon">⟶</span></span>
+  </p>
+
+  <!-- FORWARD PROCESS ANIMATION -->
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Forward Diffusion — Processo di corruzione</div>
+    <div class="forward-diffusion" id="forwardDiffusion"></div>
+    <div style="text-align: center; margin-top: 1rem;">
+      <span class="diff-label">t = 0 (immagine originale) ——→ t = T (rumore puro)</span>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE NOISE SLIDER -->
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Interattivo — Aggiungi rumore a una griglia di pixel</div>
+    <div class="pixel-grid-container">
+      <div class="pixel-grid" id="pixelGrid"></div>
+      <div class="controls-row">
+        <div class="slider-group">
+          <span class="slider-label">Livello di rumore (timestep t)</span>
+          <input type="range" id="noiseSlider" min="0" max="100" value="0">
+        </div>
+        <div class="step-display">t = <span id="stepValue">0</span>/T</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 2. IL NOISE SCHEDULE -->
+<section id="schedule">
+  <div class="section-label">02 — Noise Schedule</div>
+  <h2 class="section-title">Quanto rumore, e quando?</h2>
+  <p class="section-text">
+    Il <strong>noise schedule</strong> determina quanta varianza (rumore) viene aggiunta ad ogni step. Non è uniforme: i primi step aggiungono poco rumore, gli ultimi molto di più. Questo permette al modello di concentrarsi prima sui dettagli fini, poi sulla struttura globale.
+    <span class="tech-trigger" data-popup="schedule">Varianza β<sub>t</sub> e schedule <span class="icon">⟶</span></span>
+  </p>
+
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Visualizzazione — Noise Schedule (lineare vs coseno)</div>
+    <div class="schedule-vis">
+      <div class="schedule-bars" id="scheduleBars"></div>
+      <div class="schedule-labels">
+        <span>t = 0</span>
+        <span>t = T/2</span>
+        <span>t = T</span>
+      </div>
+      <div class="controls-row" style="margin-top:1rem">
+        <button class="btn-abb" id="scheduleLinear" style="font-size:0.7rem; padding: 0.5rem 1rem;">Lineare</button>
+        <button class="btn-abb" id="scheduleCosine" style="font-size:0.7rem; padding: 0.5rem 1rem; background: #333;">Coseno</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 3. REVERSE PROCESS -->
+<section id="reverse">
+  <div class="section-label">03 — Reverse Process</div>
+  <h2 class="section-title">Da rumore a immagine.<br>Un passo alla volta.</h2>
+  <p class="section-text">
+    Il cuore della generazione: partendo da rumore gaussiano puro, il modello predice e rimuove iterativamente una piccola quantità di rumore. Dopo centinaia di step, emerge un'immagine coerente. 
+    <span class="tech-trigger" data-popup="reverse">Matematica del reverse process <span class="icon">⟶</span></span>
+  </p>
+
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Live — Simulazione del processo di denoising</div>
+    <div class="denoise-live">
+      <div class="denoise-canvas-wrap">
+        <canvas id="denoiseCanvas" width="256" height="256"></canvas>
+      </div>
+      <div class="denoise-progress">
+        <div class="denoise-progress-fill" id="denoiseProgressFill" style="width: 0%"></div>
+      </div>
+      <div class="denoise-info">
+        <span>Step: <span id="denoiseStep">0</span>/50</span>
+        <span>Rumore: <span id="denoiseNoise">100</span>%</span>
+      </div>
+      <button class="btn-abb" id="startDenoise">▶ Avvia Denoising</button>
+    </div>
+  </div>
+
+  <!-- FLOW DIAGRAM -->
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Schema — Ogni singolo step di denoising</div>
+    <div class="flow-diagram">
+      <div class="flow-box noise">x<sub>t</sub><br><small>immagine rumorosa</small></div>
+      <div class="flow-connector">→</div>
+      <div class="flow-box model">U-Net<br><small>predice ε</small></div>
+      <div class="flow-connector">→</div>
+      <div class="flow-box output">x<sub>t-1</sub><br><small>meno rumorosa</small></div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 4. ARCHITETTURA U-NET -->
+<section id="unet">
+  <div class="section-label">04 — Architettura</div>
+  <h2 class="section-title">La U-Net:<br>il cervello del denoiser.</h2>
+  <p class="section-text">
+    La rete neurale al centro del Diffusion Model è una <strong>U-Net modificata</strong>: comprimi l'immagine (encoder), processa le feature compresse (bottleneck), e ricostruisci (decoder) con connessioni residue che preservano i dettagli.
+    <span class="tech-trigger" data-popup="unet">Architettura dettagliata <span class="icon">⟶</span></span>
+  </p>
+
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Animazione — Architettura U-Net con skip connections</div>
+    <div class="unet-visual" id="unetVisual"></div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 5. TEXT CONDITIONING -->
+<section id="conditioning">
+  <div class="section-label">05 — Condizionamento Testuale</div>
+  <h2 class="section-title">Le parole guidano<br>la creazione.</h2>
+  <p class="section-text">
+    I modelli text-to-image come DALL·E e Stable Diffusion usano un <strong>text encoder</strong> (es. CLIP) per trasformare il prompt testuale in un vettore numerico. Questo embedding viene iniettato nella U-Net tramite <strong>cross-attention</strong>, guidando il denoising verso l'immagine desiderata.
+    <span class="tech-trigger" data-popup="conditioning">Cross-Attention mechanism <span class="icon">⟶</span></span>
+  </p>
+
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Animazione — Dal testo ai token all'embedding</div>
+    <div class="text-cond">
+      <div class="prompt-box">
+        <span style="color: var(--abb-gray-600)">prompt:</span>
+        <span id="typingText"></span>
+        <span class="prompt-cursor"></span>
+      </div>
+      <div class="token-flow" id="tokenFlow"></div>
+      <div class="flow-connector">↓</div>
+      <div style="text-align:center">
+        <span class="diff-label">Text Embedding (768-d vector)</span>
+      </div>
+      <div class="embedding-grid" id="embeddingGrid"></div>
+      <div class="flow-connector">↓</div>
+      <div class="flow-box model" style="font-size:0.8rem;">Cross-Attention nella U-Net</div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 6. LATENT DIFFUSION -->
+<section id="latent">
+  <div class="section-label">06 — Latent Diffusion</div>
+  <h2 class="section-title">Diffusion nello spazio latente.<br>Veloce ed efficiente.</h2>
+  <p class="section-text">
+    Lavorare direttamente sui pixel è costoso. I <strong>Latent Diffusion Models</strong> (come Stable Diffusion) prima comprimono l'immagine con un <strong>VAE encoder</strong> in uno spazio latente molto più piccolo, eseguono la diffusion lì, e poi decodificano il risultato.
+    <span class="tech-trigger" data-popup="latent">VAE e spazio latente <span class="icon">⟶</span></span>
+  </p>
+
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Schema — Compressione nello spazio latente</div>
+    <div class="latent-vis">
+      <div class="latent-box">
+        <canvas class="latent-canvas" id="latentOrig" width="128" height="128"></canvas>
+        <span class="latent-label">Immagine</span>
+        <span class="latent-size">512 × 512 × 3</span>
+      </div>
+      <div class="flow-connector" style="font-size:2rem">→</div>
+      <div class="latent-box">
+        <canvas class="latent-canvas" id="latentVAE" width="48" height="48"></canvas>
+        <span class="latent-label">VAE Encoder</span>
+        <span class="latent-size" style="color: var(--abb-red);">64 × 64 × 4</span>
+      </div>
+      <div class="flow-connector" style="font-size:2rem">→</div>
+      <div class="latent-box" style="position:relative">
+        <canvas class="latent-canvas" id="latentDiff" width="48" height="48"></canvas>
+        <span class="latent-label" style="color: var(--abb-red);">Diffusion</span>
+        <span class="latent-size">64 × 64 × 4</span>
+      </div>
+      <div class="flow-connector" style="font-size:2rem">→</div>
+      <div class="latent-box">
+        <canvas class="latent-canvas" id="latentDec" width="128" height="128"></canvas>
+        <span class="latent-label">VAE Decoder</span>
+        <span class="latent-size">512 × 512 × 3</span>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:1rem;">
+      <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--abb-gray-600);">Riduzione: 48× meno dati da processare</span>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 7. PIPELINE COMPLETA -->
+<section id="pipeline">
+  <div class="section-label">07 — Pipeline Completa</div>
+  <h2 class="section-title">Dall'idea all'immagine.<br>In 5 stadi.</h2>
+
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Pipeline end-to-end di Stable Diffusion</div>
+    <div class="pipeline" id="pipeline">
+      <div class="pipe-stage">
+        <div class="pipe-icon">📝</div>
+        <div class="pipe-name">Prompt</div>
+        <div class="pipe-detail">"Un robot ABB in una fabbrica"</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon">🔤</div>
+        <div class="pipe-name">Text Encoder</div>
+        <div class="pipe-detail">CLIP / T5</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon">🎲</div>
+        <div class="pipe-name">Rumore Iniziale</div>
+        <div class="pipe-detail">z ~ N(0,1)</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon" style="background: rgba(255,0,15,0.25); border-color: var(--abb-red);">🧠</div>
+        <div class="pipe-name">Denoising Loop</div>
+        <div class="pipe-detail">U-Net × 50 steps</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon">🖼️</div>
+        <div class="pipe-name">VAE Decoder</div>
+        <div class="pipe-detail">Latent → Pixel</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 8. RAFFINAMENTO E DETTAGLI -->
+<section id="refinement">
+  <div class="section-label">08 — Raffinamento tramite Prompt</div>
+  <h2 class="section-title">Aggiungere dettagli<br>a un'immagine esistente.</h2>
+  <p class="section-text">
+    La vera potenza dei Diffusion Models non è solo generare da zero: è <strong>partire da un'immagine esistente</strong> e raffinarla, modificarla o arricchirla seguendo un prompt testuale. Questo avviene re-iniettando l'immagine nel processo di diffusion a un livello di rumore intermedio.
+    <span class="tech-trigger" data-popup="img2img">Matematica di img2img <span class="icon">⟶</span></span>
+  </p>
+
+  <!-- IMG2IMG INTERACTIVE -->
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Interattivo — Image-to-Image: il parametro Strength</div>
+    <div class="img2img-demo">
+      <div class="img2img-row">
+        <div class="img2img-box">
+          <canvas class="img2img-canvas" id="img2imgOrig" width="120" height="120"></canvas>
+          <span class="latent-label">Immagine originale</span>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0.3rem;">
+          <span class="flow-connector" style="font-size:1.5rem">→</span>
+          <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--abb-red);">+ rumore</span>
+        </div>
+        <div class="img2img-box">
+          <canvas class="img2img-canvas" id="img2imgNoisy" width="120" height="120"></canvas>
+          <span class="latent-label">Stato intermedio</span>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:0.3rem;">
+          <span class="flow-connector" style="font-size:1.5rem">→</span>
+          <span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--abb-red);">denoise</span>
+        </div>
+        <div class="img2img-box">
+          <canvas class="img2img-canvas" id="img2imgResult" width="120" height="120"></canvas>
+          <span class="latent-label">Risultato guidato</span>
+        </div>
+      </div>
+      <div class="controls-row">
+        <div class="slider-group">
+          <span class="slider-label">Strength (quanto cambiare)</span>
+          <input type="range" id="strengthSlider" min="0" max="100" value="50">
+        </div>
+        <div class="step-display" style="min-width:120px">
+          strength = <span id="strengthValue" style="color:var(--abb-red)">0.50</span>
+        </div>
+      </div>
+      <div class="strength-vis">
+        <div class="strength-bar-container">
+          <span style="font-size:0.6rem; color:var(--abb-gray-600); text-transform:uppercase; letter-spacing:0.08em;">Fedele</span>
+          <div class="strength-bar-bg">
+            <div class="strength-bar-fill" id="strengthBarFill" style="width:50%; background: linear-gradient(90deg, #444, var(--abb-red));"></div>
+          </div>
+          <span style="font-size:0.6rem; color:var(--abb-gray-600); text-transform:uppercase; letter-spacing:0.08em;">Creativo</span>
+        </div>
+      </div>
+      <p style="font-size:0.8rem; color:var(--abb-gray-600); text-align:center; max-width:500px; line-height:1.5;">
+        <strong style="color:var(--abb-gray-300)">Strength basso</strong> → pochi step di denoising → risultato simile all'originale<br>
+        <strong style="color:var(--abb-gray-300)">Strength alto</strong> → molti step di denoising → il prompt domina, l'originale sfuma
+      </p>
+    </div>
+  </div>
+
+  <!-- TECNICHE DI RAFFINAMENTO -->
+  <div class="refine-techniques">
+    <div class="refine-card">
+      <div class="refine-card-icon">🎨</div>
+      <h4>Image-to-Image (img2img)</h4>
+      <p>L'immagine di partenza viene codificata in latent space dal VAE, poi <strong>corrotta con rumore fino a un timestep intermedio t<sub>start</sub></strong>. Il denoising riparte da lì, guidato dal nuovo prompt. Più alto il parametro <em>strength</em> (0→1), più rumore si aggiunge, più il risultato si allontana dall'originale.</p>
+      <div class="tag">Caso d'uso: variazioni stilistiche, concept art</div>
+    </div>
+    <div class="refine-card">
+      <div class="refine-card-icon">🖌️</div>
+      <h4>Inpainting</h4>
+      <p>Si fornisce un'immagine + una <strong>maschera</strong> che indica quale area rigenerare. L'area mascherata viene riempita di rumore, il resto rimane intatto. Il modello esegue il denoising solo sulla regione indicata, mantenendo perfetta coerenza con i bordi grazie all'attenzione sul contesto circostante.</p>
+      <div class="tag">Caso d'uso: rimozione oggetti, aggiunta elementi</div>
+    </div>
+    <div class="refine-card">
+      <div class="refine-card-icon">🏗️</div>
+      <h4>ControlNet</h4>
+      <p>Una rete neurale parallela che <strong>inietta condizionamento strutturale</strong> nella U-Net. Estrae feature da immagini di controllo (bordi Canny, pose, depth map) e le somma alle feature interne del denoiser. Permette di controllare la composizione spaziale mantenendo libertà creativa nel contenuto.</p>
+      <div class="tag">Caso d'uso: mantenere layout, pose, struttura</div>
+    </div>
+    <div class="refine-card">
+      <div class="refine-card-icon">🔬</div>
+      <h4>Refiner / Upscaler</h4>
+      <p>Modelli specializzati (es. SDXL Refiner) che prendono un'immagine generata e la <strong>migliorano in un secondo passaggio di diffusion</strong>. Operano a risoluzione più alta o con focus sui dettagli fini come texture, pelle, riflessi. Spesso usano un noise schedule diverso ottimizzato per il raffinamento.</p>
+      <div class="tag">Caso d'uso: dettagli fini, super-resolution</div>
+    </div>
+  </div>
+
+  <!-- INPAINTING VISUAL -->
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Animazione — Inpainting: rigenerare una regione</div>
+    <div class="inpaint-vis">
+      <div class="inpaint-stage">
+        <canvas class="inpaint-canvas" id="inpaintOrig" width="100" height="100"></canvas>
+        <span class="latent-label">Originale</span>
+      </div>
+      <div class="cn-arrow">+</div>
+      <div class="inpaint-stage">
+        <canvas class="inpaint-canvas" id="inpaintMask" width="100" height="100"></canvas>
+        <span class="latent-label">Maschera</span>
+      </div>
+      <div class="cn-arrow">→</div>
+      <div class="inpaint-stage">
+        <canvas class="inpaint-canvas" id="inpaintNoisy" width="100" height="100"></canvas>
+        <span class="latent-label">Rumore locale</span>
+      </div>
+      <div class="cn-arrow">→</div>
+      <div class="inpaint-stage">
+        <canvas class="inpaint-canvas" id="inpaintResult" width="100" height="100"></canvas>
+        <span class="latent-label" style="color:var(--abb-red)">Risultato</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLNET FLOW -->
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Schema — Come ControlNet aggiunge controllo strutturale</div>
+    <div class="controlnet-flow">
+      <div class="cn-box input">
+        Immagine<br>Controllo<br><small style="opacity:0.6">(edge, pose, depth)</small>
+      </div>
+      <div class="cn-arrow">→</div>
+      <div class="cn-box process">
+        ControlNet<br>Encoder<br><small style="opacity:0.7">copia U-Net</small>
+      </div>
+      <div class="cn-plus">+</div>
+      <div class="cn-box process">
+        U-Net<br>Denoiser<br><small style="opacity:0.7">+ prompt</small>
+      </div>
+      <div class="cn-arrow">→</div>
+      <div class="cn-box output">
+        Output<br>Controllato
+      </div>
+    </div>
+    <p style="text-align:center; font-size:0.75rem; color:var(--abb-gray-600); margin-top:1rem; line-height:1.6;">
+      Le feature estratte da ControlNet vengono <strong style="color:var(--abb-gray-300)">sommate</strong> alle feature della U-Net ad ogni livello di risoluzione.<br>
+      Il denoiser "vede" sia il prompt testuale (via cross-attention) sia la struttura spaziale (via ControlNet).
+    </p>
+  </div>
+
+  <!-- PROMPT REFINEMENT PIPELINE -->
+  <div class="anim-container">
+    <div class="anim-title"><span class="dot"></span> Pipeline — Workflow completo di raffinamento iterativo</div>
+    <div class="pipeline" id="refinePipeline">
+      <div class="pipe-stage">
+        <div class="pipe-icon">🖼️</div>
+        <div class="pipe-name">Immagine Base</div>
+        <div class="pipe-detail">txt2img iniziale</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon">🎨</div>
+        <div class="pipe-name">img2img</div>
+        <div class="pipe-detail">"aggiungi dettagli industriali"</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon">🖌️</div>
+        <div class="pipe-name">Inpaint</div>
+        <div class="pipe-detail">"sostituisci sfondo"</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon">🏗️</div>
+        <div class="pipe-name">ControlNet</div>
+        <div class="pipe-detail">mantieni struttura</div>
+      </div>
+      <div class="pipe-stage">
+        <div class="pipe-icon">🔬</div>
+        <div class="pipe-name">Refiner</div>
+        <div class="pipe-detail">dettagli HD</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 9. SAMPLING METHODS -->
+<section id="sampling">
+  <div class="section-label">09 — Metodi di Sampling</div>
+  <h2 class="section-title">Non tutti i percorsi<br>sono uguali.</h2>
+  <p class="section-text">
+    Esistono diversi algoritmi per percorrere il reverse process. Alcuni sono più veloci, altri più precisi. La scelta impatta velocità e qualità.
+    <span class="tech-trigger" data-popup="sampling">Dettagli tecnici sui sampler <span class="icon">⟶</span></span>
+  </p>
+
+  <div class="sampling-grid">
+    <div class="sampling-card">
+      <h4>DDPM</h4>
+      <p>L'originale. ~1000 step, massima qualità ma lento. Ogni step è stocastico.</p>
+      <div class="sampling-steps" id="ddpmSteps"></div>
+    </div>
+    <div class="sampling-card">
+      <h4>DDIM</h4>
+      <p>Deterministico. Permette di saltare step (50-100), molto più veloce con qualità comparabile.</p>
+      <div class="sampling-steps" id="ddimSteps"></div>
+    </div>
+    <div class="sampling-card">
+      <h4>Euler / DPM++</h4>
+      <p>Solver ODE avanzati. 20-30 step sufficienti. Il gold standard moderno.</p>
+      <div class="sampling-steps" id="eulerSteps"></div>
+    </div>
+    <div class="sampling-card">
+      <h4>Distillation</h4>
+      <p>Modelli distillati (es. SDXL Turbo) generano in 1-4 step. Quasi real-time.</p>
+      <div class="sampling-steps" id="distillSteps"></div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 9. EVOLUZIONE -->
+<section id="evolution">
+  <div class="section-label">10 — Evoluzione</div>
+  <h2 class="section-title">La storia in breve.</h2>
+  
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">2015</div>
+      <div class="timeline-title">Deep Unsupervised Learning using Nonequilibrium Thermodynamics</div>
+      <div class="timeline-desc">Sohl-Dickstein et al. introducono il framework teorico dei diffusion models.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2020</div>
+      <div class="timeline-title">DDPM — Denoising Diffusion Probabilistic Models</div>
+      <div class="timeline-desc">Ho et al. rendono i diffusion models pratici e competitivi con i GAN.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2021</div>
+      <div class="timeline-title">CLIP + Guided Diffusion</div>
+      <div class="timeline-desc">Il condizionamento testuale apre la strada al text-to-image.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2022</div>
+      <div class="timeline-title">DALL·E 2, Stable Diffusion, Imagen</div>
+      <div class="timeline-desc">Esplosione commerciale. Latent Diffusion diventa lo standard.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2023-2025</div>
+      <div class="timeline-title">SDXL, Flux, DiT, Rectified Flow</div>
+      <div class="timeline-desc">Transformer-based architectures (DiT), flow matching e distillation portano la generazione quasi al real-time.</div>
+    </div>
+  </div>
+</section>
+
+<div class="red-divider"></div>
+
+<!-- 10. CONFRONTO -->
+<section id="comparison">
+  <div class="section-label">11 — Confronto</div>
+  <h2 class="section-title">Diffusion vs. altri approcci.</h2>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Modello</th>
+        <th>Qualità</th>
+        <th>Diversità</th>
+        <th>Velocità</th>
+        <th>Controllo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color: var(--abb-red); font-weight: 600;">Diffusion</td>
+        <td>★★★★★</td>
+        <td>★★★★★</td>
+        <td>★★★☆☆</td>
+        <td>★★★★★</td>
+      </tr>
+      <tr>
+        <td>GAN</td>
+        <td>★★★★☆</td>
+        <td>★★★☆☆</td>
+        <td>★★★★★</td>
+        <td>★★★☆☆</td>
+      </tr>
+      <tr>
+        <td>VAE</td>
+        <td>★★★☆☆</td>
+        <td>★★★★☆</td>
+        <td>★★★★☆</td>
+        <td>★★★☆☆</td>
+      </tr>
+      <tr>
+        <td>Autoregressive</td>
+        <td>★★★★☆</td>
+        <td>★★★★☆</td>
+        <td>★★☆☆☆</td>
+        <td>★★★★☆</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-logo">ABB</div>
+  <div class="footer-text">AI Academy — Formazione AI per l'innovazione industriale<br>Powered by Datapizza</div>
+</div>
+
+<!-- POPUP OVERLAYS -->
+<div class="popup-overlay" id="popup-markov">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('markov')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>Catena di Markov nel Forward Process</h3>
+    <p>Il forward process è definito come una catena di Markov: ogni stato dipende <em>solo</em> dallo stato precedente. Ad ogni timestep t, si aggiunge rumore gaussiano con varianza β<sub>t</sub>.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// Forward process — singolo step</span>
+        <span class="katex-render">q(\mathbf{x}_t \mid \mathbf{x}_{t-1}) = \mathcal{N}\!\left(\mathbf{x}_t;\; \sqrt{1-\beta_t}\;\mathbf{x}_{t-1},\; \beta_t \mathbf{I}\right)</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Proprietà chiave: salto diretto a qualsiasi t</span>
+        <span class="katex-render">q(\mathbf{x}_t \mid \mathbf{x}_0) = \mathcal{N}\!\left(\mathbf{x}_t;\; \sqrt{\bar{\alpha}_t}\;\mathbf{x}_0,\; (1-\bar{\alpha}_t)\mathbf{I}\right)</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Prodotto cumulativo</span>
+        <span class="katex-render">\bar{\alpha}_t = \prod_{i=1}^{t}(1-\beta_i)</span>
+      </div>
+    </div>
+    <p>Grazie alla <strong>reparametrization trick</strong>, possiamo campionare direttamente x<sub>t</sub> da x<sub>0</sub> senza calcolare tutti i passaggi intermedi. Questo è fondamentale per l'efficienza del training.</p>
+    <ul>
+      <li><strong>ᾱ<sub>t</sub></strong> — prodotto cumulativo di (1-β<sub>i</sub>), controlla quanta informazione originale rimane</li>
+      <li><strong>β<sub>t</sub></strong> — varianza del rumore allo step t, tipicamente tra 10⁻⁴ e 0.02</li>
+      <li><strong>T</strong> — numero totale di step (tipicamente 1000 nel training)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popup-schedule">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('schedule')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>Noise Schedule: Lineare vs Coseno</h3>
+    <p>Lo schedule definisce come β<sub>t</sub> varia da t=0 a t=T. La scelta influenza profondamente la qualità.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// Schedule lineare (DDPM originale)</span>
+        <span class="katex-render">\beta_t = \beta_{\text{start}} + \frac{t}{T}\left(\beta_{\text{end}} - \beta_{\text{start}}\right)</span>
+        <span class="comment">// β_start = 0.0001,  β_end = 0.02</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Schedule coseno (Improved DDPM)</span>
+        <span class="katex-render">\bar{\alpha}_t = \cos^2\!\left(\frac{\;t/T + s\;}{1+s}\cdot\frac{\pi}{2}\right)</span>
+        <span class="comment">// s = 0.008 (offset per evitare β troppo piccoli)</span>
+      </div>
+    </div>
+    <p>Lo schedule coseno è preferito perché mantiene più segnale negli step intermedi, evitando una distruzione troppo rapida dell'informazione.</p>
+    <ul>
+      <li><strong>Lineare</strong> — distrugge l'informazione troppo velocemente a t alti</li>
+      <li><strong>Coseno</strong> — transizione più graduale, migliore qualità generativa</li>
+      <li><strong>Scaled linear</strong> — usato in Stable Diffusion, adattato allo spazio latente</li>
+    </ul>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popup-reverse">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('reverse')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>Reverse Process e Loss Function</h3>
+    <p>Il modello impara a predire il rumore ε<sub>θ</sub> aggiunto ad ogni step. Il training minimizza la differenza tra il rumore reale e quello predetto.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// Loss function (simplified)</span>
+        <span class="katex-render">\mathcal{L} = \mathbb{E}_{t,\,\mathbf{x}_0,\,\boldsymbol{\epsilon}}\Big[\;\left\|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t,\, t)\right\|^2\;\Big]</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Reverse step (generazione)</span>
+        <span class="katex-render">\mathbf{x}_{t-1} = \frac{1}{\sqrt{\alpha_t}}\left(\mathbf{x}_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\;\boldsymbol{\epsilon}_\theta(\mathbf{x}_t,\, t)\right) + \sigma_t\,\mathbf{z}</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// dove</span>
+        <span class="katex-render">\mathbf{z} \sim \mathcal{N}(\mathbf{0},\,\mathbf{I}), \qquad \sigma_t = \sqrt{\beta_t}</span>
+      </div>
+    </div>
+    <p>La rete neurale ε<sub>θ</sub> riceve come input l'immagine rumorosa x<sub>t</sub> e il timestep t, e produce in output una stima del rumore. Sottraendo questo rumore (riscalato), otteniamo un'immagine leggermente più pulita.</p>
+    <ul>
+      <li><strong>ε<sub>θ</sub></strong> — rete neurale (U-Net) che predice il rumore</li>
+      <li><strong>x<sub>t</sub></strong> — immagine corrotta al timestep t</li>
+      <li><strong>σ<sub>t</sub> · z</strong> — rumore stocastico che mantiene la diversità</li>
+      <li>Varianti: predire x<sub>0</sub> direttamente, o v-prediction (velocity)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popup-unet">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('unet')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>Architettura U-Net per Diffusion</h3>
+    <p>La U-Net usata nei diffusion models è profondamente modificata rispetto all'originale di Ronneberger (2015). Include meccanismi di attenzione, condizionamento temporale e testuale.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// Time embedding sinusoidale</span>
+        <span class="katex-render">\text{TE}(t) = \Big[\sin\!\left(\frac{t}{10000^{2i/d}}\right),\;\cos\!\left(\frac{t}{10000^{2i/d}}\right)\Big]_{i=0}^{d/2}</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// ResNet Block con condizionamento temporale</span>
+        <span class="katex-render">h = \text{Conv}(\text{GN}(x)) + \text{MLP}(\text{TE}(t))</span>
+      </div>
+    </div>
+    <div class="popup-code">
+      <span class="comment">// Dimensioni tipiche (Stable Diffusion 1.5)</span><br>
+      Input:  64 × 64 × 4   <span class="comment">(latent)</span><br>
+      Down:   32→16→8        <span class="comment">(spatial)</span><br>
+              320→640→1280   <span class="comment">(channels)</span><br>
+      Mid:    8 × 8 × 1280<br>
+      Up:     8→16→32→64     <span class="comment">(spatial)</span><br>
+      Output: 64 × 64 × 4   <span class="comment">(predicted noise)</span>
+    </div>
+    <ul>
+      <li><strong>~860M parametri</strong> nella U-Net di Stable Diffusion 1.5</li>
+      <li>I <strong>DiT</strong> (Diffusion Transformer) sostituiscono la U-Net con un Transformer puro</li>
+      <li>La <strong>time embedding</strong> è un encoding sinusoidale simile ai positional encoding dei Transformer</li>
+      <li>Le <strong>skip connections</strong> collegano ogni livello encoder al corrispondente decoder</li>
+    </ul>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popup-conditioning">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('conditioning')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>Cross-Attention e Classifier-Free Guidance</h3>
+    <p>Il meccanismo di cross-attention permette ad ogni posizione spaziale dell'immagine di "consultare" il testo per decidere cosa generare.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// Cross-Attention</span>
+        <span class="katex-render">Q = W_Q \cdot \varphi(\mathbf{x}_t) \qquad \text{(Query: feature immagine)}</span>
+        <span class="katex-render">K = W_K \cdot \tau(\text{prompt}) \qquad \text{(Key: embedding testo)}</span>
+        <span class="katex-render">V = W_V \cdot \tau(\text{prompt}) \qquad \text{(Value: embedding testo)}</span>
+      </div>
+      <div class="formula-row">
+        <span class="katex-render">\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Classifier-Free Guidance (CFG)</span>
+        <span class="katex-render">\tilde{\boldsymbol{\epsilon}} = \boldsymbol{\epsilon}_{\text{uncond}} + w \cdot \left(\boldsymbol{\epsilon}_{\text{cond}} - \boldsymbol{\epsilon}_{\text{uncond}}\right)</span>
+        <span class="comment">// w = guidance scale (tipico: 7–12)</span>
+      </div>
+    </div>
+    <p>La <strong>Classifier-Free Guidance</strong> (CFG) è il trucco che rende le immagini fedeli al prompt. Il modello fa due predizioni: una con il testo e una senza. Amplificando la differenza, si "spinge" il risultato verso il significato del prompt.</p>
+    <ul>
+      <li><strong>w = 1</strong> → nessuna guida (immagini casuali)</li>
+      <li><strong>w = 7</strong> → buon bilanciamento qualità/fedeltà</li>
+      <li><strong>w > 15</strong> → immagini molto fedeli ma meno naturali e saturate</li>
+      <li><strong>Negative prompt</strong> → funziona sottraendo l'embedding del testo negativo</li>
+    </ul>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popup-latent">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('latent')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>VAE e Spazio Latente</h3>
+    <p>Il Variational Autoencoder (VAE) comprime l'immagine da pixel space a latent space, riducendo drasticamente il costo computazionale della diffusion.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// Compressione VAE</span>
+        <span class="katex-render">\mathbf{z} = \mathcal{E}(\mathbf{x}) \qquad \text{Encoder: } 512\!\times\!512\!\times\!3 \;\to\; 64\!\times\!64\!\times\!4</span>
+        <span class="katex-render">\hat{\mathbf{x}} = \mathcal{D}(\mathbf{z}) \qquad \text{Decoder: } 64\!\times\!64\!\times\!4 \;\to\; 512\!\times\!512\!\times\!3</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Riduzione dimensionale</span>
+        <span class="katex-render">\frac{512 \times 512 \times 3}{64 \times 64 \times 4} = \frac{786{,}432}{16{,}384} \approx 48\times \text{ meno dati}</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Pipeline completa nello spazio latente</span>
+        <span class="katex-render">\mathbf{z}_T \sim \mathcal{N}(\mathbf{0},\mathbf{I}) \;\xrightarrow{\text{denoise}}\; \mathbf{z}_0 \;\xrightarrow{\;\mathcal{D}\;}\; \hat{\mathbf{x}}</span>
+      </div>
+    </div>
+    <ul>
+      <li>Il VAE è <strong>pre-addestrato separatamente</strong> e congelato durante il training della diffusion</li>
+      <li>Il fattore di compressione è tipicamente <strong>8×</strong> per dimensione spaziale</li>
+      <li>Lo spazio latente preserva la struttura semantica dell'immagine</li>
+      <li>Il decoder VAE può introdurre piccoli artefatti (migliorabili con fine-tuning)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popup-sampling">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('sampling')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>Sampler: DDPM, DDIM, Euler, DPM++</h3>
+    <p>I sampler definiscono <em>come</em> si percorre il reverse process. La scelta è un trade-off tra velocità e qualità.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// DDPM (stocastico, ~1000 step)</span>
+        <span class="katex-render">\mathbf{x}_{t-1} = \boldsymbol{\mu}_\theta(\mathbf{x}_t,\,t) + \sigma_t\,\mathbf{z}</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// DDIM (deterministico, ~50 step)</span>
+        <span class="katex-render">\mathbf{x}_{t-1} = \sqrt{\bar{\alpha}_{t-1}}\;\hat{\mathbf{x}}_0 + \sqrt{1-\bar{\alpha}_{t-1}}\;\boldsymbol{\epsilon}_\theta(\mathbf{x}_t,\,t)</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// Euler (ODE solver, ~25 step)</span>
+        <span class="katex-render">\mathbf{x}_{t-\mathrm{d}t} = \mathbf{x}_t + f(\mathbf{x}_t,\,t)\,\mathrm{d}t</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// DPM++ 2M Karras — solver multi-step con schedule Karras</span>
+        <span class="katex-render">\sigma(t) = \left(\sigma_{\min}^{1/\rho} + \frac{t}{T-1}\left(\sigma_{\max}^{1/\rho} - \sigma_{\min}^{1/\rho}\right)\right)^\rho</span>
+      </div>
+    </div>
+    <ul>
+      <li><strong>DDPM</strong> — massima qualità, lentissimo (1000 step)</li>
+      <li><strong>DDIM</strong> — deterministico, stesso seed = stessa immagine</li>
+      <li><strong>Euler a</strong> — aggiunge stocasticità, buono per creatività</li>
+      <li><strong>DPM++ 2M Karras</strong> — il più usato, 20-30 step bastano</li>
+      <li><strong>LCM / Turbo</strong> — modelli distillati, 1-4 step sufficienti</li>
+    </ul>
+  </div>
+</div>
+
+<div class="popup-overlay" id="popup-img2img">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closePopup('img2img')">×</button>
+    <div class="popup-tag">Approfondimento Tecnico</div>
+    <h3>Image-to-Image: la matematica del raffinamento</h3>
+    <p>In img2img, l'immagine di partenza non viene scartata: viene usata come <strong>punto iniziale</strong> del reverse process. Il parametro <em>strength</em> controlla dove iniziare nella catena di denoising.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// 1. Encoding: immagine → spazio latente</span>
+        <span class="katex-render">\mathbf{z}_0 = \mathcal{E}(\mathbf{x}_{\text{input}})</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// 2. Aggiunta rumore fino al timestep t_start</span>
+        <span class="katex-render">t_{\text{start}} = \lfloor\, T \cdot \text{strength}\,\rfloor</span>
+        <span class="katex-render">\mathbf{z}_{t_{\text{start}}} = \sqrt{\bar{\alpha}_{t_{\text{start}}}}\;\mathbf{z}_0 + \sqrt{1-\bar{\alpha}_{t_{\text{start}}}}\;\boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon}\sim\mathcal{N}(\mathbf{0},\mathbf{I})</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// 3. Denoising guidato dal nuovo prompt</span>
+        <span class="katex-render">\mathbf{z}_{t_{\text{start}}} \;\xrightarrow[\text{prompt}]{\;\text{denoise}\;}\; \mathbf{z}_{t_{\text{start}}-1} \;\to\; \cdots \;\to\; \mathbf{z}_0' \;\xrightarrow{\;\mathcal{D}\;}\; \hat{\mathbf{x}}</span>
+      </div>
+    </div>
+    <p>Il meccanismo è elegante: con <strong>strength = 0</strong> non si aggiunge rumore e il risultato è identico all'originale. Con <strong>strength = 1</strong> si parte da rumore puro, come una generazione txt2img standard.</p>
+    <div class="popup-formula">
+      <div class="formula-row">
+        <span class="comment">// Inpainting: diffusion condizionata da maschera M</span>
+        <span class="katex-render">\mathbf{z}_t^{\text{inpaint}} = M \odot \mathbf{z}_t^{\text{denoise}} + (1-M) \odot \mathbf{z}_t^{\text{orig}}</span>
+      </div>
+      <div class="formula-row">
+        <span class="comment">// ControlNet: feature strutturali sommate alla U-Net</span>
+        <span class="katex-render">\mathbf{h}_{\text{dec}}^{(l)} = \mathbf{h}_{\text{unet}}^{(l)} + w_c \cdot \mathcal{F}_\theta^{(l)}(\mathbf{c}_{\text{control}}, t)</span>
+        <span class="comment">// c_control = edge map, depth, pose, etc.</span>
+      </div>
+    </div>
+    <ul>
+      <li><strong>strength = 0.3</strong> → piccole variazioni, mantiene struttura e colori</li>
+      <li><strong>strength = 0.5</strong> → buon equilibrio, cambia contenuto mantenendo composizione</li>
+      <li><strong>strength = 0.8</strong> → trasformazione profonda, solo tracce dell'originale</li>
+      <li><strong>Inpainting models</strong> → U-Net modificata con 9 canali input (latent + mask + masked-latent)</li>
+      <li><strong>ControlNet</strong> → copia congelata dell'encoder U-Net, addestrata separatamente per ogni tipo di controllo</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// ========== POPUP SYSTEM ==========
+document.querySelectorAll('.tech-trigger').forEach(trigger => {
+  trigger.addEventListener('click', () => {
+    const id = trigger.dataset.popup;
+    document.getElementById(`popup-${id}`).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  });
+});
+
+function closePopup(id) {
+  document.getElementById(`popup-${id}`).classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.querySelectorAll('.popup-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.popup-overlay.active').forEach(o => {
+      o.classList.remove('active');
+    });
+    document.body.style.overflow = '';
+  }
+});
+
+// ========== FORWARD DIFFUSION ANIMATION ==========
+function initForwardDiffusion() {
+  const container = document.getElementById('forwardDiffusion');
+  const steps = 7;
+  
+  for (let i = 0; i < steps; i++) {
+    if (i > 0) {
+      const arrow = document.createElement('span');
+      arrow.className = 'diff-arrow';
+      arrow.textContent = '→';
+      container.appendChild(arrow);
+    }
+    
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'diff-step';
+    const canvas = document.createElement('canvas');
+    canvas.width = 80;
+    canvas.height = 80;
+    stepDiv.appendChild(canvas);
+    container.appendChild(stepDiv);
+    
+    const ctx = canvas.getContext('2d');
+    const noiseLevel = i / (steps - 1);
+    drawNoisyPattern(ctx, 80, 80, noiseLevel);
+  }
+}
+
+function drawNoisyPattern(ctx, w, h, noiseLevel) {
+  const imageData = ctx.createImageData(w, h);
+  const data = imageData.data;
+  
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 4;
+      
+      // Create a simple pattern (circle-ish shape)
+      const cx = w/2, cy = h/2;
+      const dist = Math.sqrt((x-cx)**2 + (y-cy)**2) / (w/2);
+      const pattern = dist < 0.5 ? 200 : (dist < 0.7 ? 140 : 60);
+      const r = dist < 0.5 ? 220 : 40;
+      const g = dist < 0.5 ? 50 : 40;
+      const b = dist < 0.5 ? 60 : 45;
+      
+      // Add noise
+      const noise = (Math.random() - 0.5) * 255 * noiseLevel;
+      
+      data[idx] = Math.max(0, Math.min(255, r * (1-noiseLevel) + 128 * noiseLevel + noise));
+      data[idx+1] = Math.max(0, Math.min(255, g * (1-noiseLevel) + 128 * noiseLevel + noise));
+      data[idx+2] = Math.max(0, Math.min(255, b * (1-noiseLevel) + 128 * noiseLevel + noise));
+      data[idx+3] = 255;
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+// ========== INTERACTIVE PIXEL GRID ==========
+function initPixelGrid() {
+  const grid = document.getElementById('pixelGrid');
+  const size = 16;
+  const baseColors = [];
+  
+  // Create a simple ABB-like pattern
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const pixel = document.createElement('div');
+      pixel.className = 'pixel';
+      
+      // Simple geometric pattern
+      const inCircle = Math.sqrt((x-7.5)**2 + (y-7.5)**2) < 5;
+      const inRect = x >= 4 && x <= 11 && y >= 6 && y <= 9;
+      
+      let r, g, b;
+      if (inCircle) {
+        r = 255; g = 0; b = 15; // ABB Red
+      } else if (inRect) {
+        r = 200; g = 200; b = 200;
+      } else {
+        r = 26; g = 26; b = 26;
+      }
+      
+      baseColors.push({r, g, b});
+      pixel.style.backgroundColor = `rgb(${r},${g},${b})`;
+      grid.appendChild(pixel);
+    }
+  }
+  
+  const slider = document.getElementById('noiseSlider');
+  const stepVal = document.getElementById('stepValue');
+  
+  slider.addEventListener('input', () => {
+    const t = parseInt(slider.value);
+    stepVal.textContent = t;
+    const pixels = grid.querySelectorAll('.pixel');
+    const noiseLevel = t / 100;
+    
+    pixels.forEach((pixel, i) => {
+      const base = baseColors[i];
+      const noise = (Math.random() - 0.5) * 255 * noiseLevel;
+      const r = Math.max(0, Math.min(255, base.r * (1-noiseLevel) + 128 * noiseLevel + noise));
+      const g = Math.max(0, Math.min(255, base.g * (1-noiseLevel) + 128 * noiseLevel + noise));
+      const b = Math.max(0, Math.min(255, base.b * (1-noiseLevel) + 128 * noiseLevel + noise));
+      pixel.style.backgroundColor = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+    });
+  });
+}
+
+// ========== NOISE SCHEDULE VISUALIZATION ==========
+function initSchedule() {
+  const container = document.getElementById('scheduleBars');
+  const numBars = 50;
+  const bars = [];
+  
+  for (let i = 0; i < numBars; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'schedule-bar';
+    container.appendChild(bar);
+    bars.push(bar);
+  }
+  
+  function setSchedule(type) {
+    bars.forEach((bar, i) => {
+      const t = i / (numBars - 1);
+      let height;
+      if (type === 'linear') {
+        height = 5 + t * 75;
+      } else {
+        // Cosine schedule
+        const s = 0.008;
+        const alphaBar = Math.cos(((t + s) / (1 + s)) * Math.PI / 2) ** 2;
+        height = 5 + (1 - alphaBar) * 75;
+      }
+      bar.style.height = height + 'px';
+      bar.style.opacity = 0.4 + t * 0.6;
+    });
+  }
+  
+  setSchedule('linear');
+  
+  const linearBtn = document.getElementById('scheduleLinear');
+  const cosineBtn = document.getElementById('scheduleCosine');
+  
+  linearBtn.addEventListener('click', () => {
+    setSchedule('linear');
+    linearBtn.style.background = 'var(--abb-red)';
+    cosineBtn.style.background = '#333';
+  });
+  
+  cosineBtn.addEventListener('click', () => {
+    setSchedule('cosine');
+    cosineBtn.style.background = 'var(--abb-red)';
+    linearBtn.style.background = '#333';
+  });
+}
+
+// ========== DENOISING LIVE ANIMATION ==========
+function initDenoise() {
+  const canvas = document.getElementById('denoiseCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = 256, h = 256;
+  const btn = document.getElementById('startDenoise');
+  const progressFill = document.getElementById('denoiseProgressFill');
+  const stepEl = document.getElementById('denoiseStep');
+  const noiseEl = document.getElementById('denoiseNoise');
+  const totalSteps = 50;
+  
+  // Target pattern — ABB-inspired industrial scene
+  const targetData = new Float32Array(w * h * 3);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 3;
+      const ny = y / h, nx = x / w;
+      
+      // Sky gradient
+      let r = 40 + ny * 20;
+      let g = 50 + ny * 30;
+      let b = 80 + ny * 40;
+      
+      // Ground
+      if (ny > 0.6) {
+        r = 60; g = 55; b = 50;
+      }
+      
+      // Building shapes
+      if (nx > 0.2 && nx < 0.4 && ny > 0.25 && ny < 0.6) {
+        r = 100; g = 100; b = 110;
+      }
+      if (nx > 0.5 && nx < 0.8 && ny > 0.15 && ny < 0.6) {
+        r = 120; g = 120; b = 130;
+      }
+      
+      // ABB Red accent
+      if (nx > 0.55 && nx < 0.75 && ny > 0.2 && ny < 0.28) {
+        r = 255; g = 0; b = 15;
+      }
+      
+      // Windows
+      if (nx > 0.5 && nx < 0.8 && ny > 0.3 && ny < 0.55) {
+        const wx = (nx - 0.5) * 30;
+        const wy = (ny - 0.3) * 20;
+        if (wx % 3 > 0.5 && wx % 3 < 2.5 && wy % 3 > 0.5 && wy % 3 < 2) {
+          r = 220; g = 200; b = 120;
+        }
+      }
+      
+      // Chimney / tower
+      if (nx > 0.35 && nx < 0.38 && ny > 0.05 && ny < 0.25) {
+        r = 80; g = 80; b = 85;
+      }
+      
+      targetData[idx] = r;
+      targetData[idx+1] = g;
+      targetData[idx+2] = b;
+    }
+  }
+  
+  // Draw initial noise
+  function drawState(noiseLevel) {
+    const imageData = ctx.createImageData(w, h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const pIdx = (y * w + x) * 4;
+        const tIdx = (y * w + x) * 3;
+        const noise = () => (Math.random() - 0.5) * 255 * noiseLevel;
+        
+        imageData.data[pIdx] = Math.max(0, Math.min(255, targetData[tIdx] * (1-noiseLevel) + 128 * noiseLevel + noise()));
+        imageData.data[pIdx+1] = Math.max(0, Math.min(255, targetData[tIdx+1] * (1-noiseLevel) + 128 * noiseLevel + noise()));
+        imageData.data[pIdx+2] = Math.max(0, Math.min(255, targetData[tIdx+2] * (1-noiseLevel) + 128 * noiseLevel + noise()));
+        imageData.data[pIdx+3] = 255;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+  
+  drawState(1);
+  
+  let running = false;
+  btn.addEventListener('click', () => {
+    if (running) return;
+    running = true;
+    btn.disabled = true;
+    
+    let step = 0;
+    function animate() {
+      if (step > totalSteps) {
+        running = false;
+        btn.disabled = false;
+        btn.textContent = '↻ Riparti';
+        // Reset on next click
+        btn.onclick = () => {
+          drawState(1);
+          stepEl.textContent = '0';
+          noiseEl.textContent = '100';
+          progressFill.style.width = '0%';
+          btn.textContent = '▶ Avvia Denoising';
+          btn.onclick = null;
+          btn.addEventListener('click', arguments.callee);
+          running = false;
+        };
+        return;
+      }
+      
+      const noiseLevel = 1 - (step / totalSteps);
+      drawState(noiseLevel);
+      
+      stepEl.textContent = step;
+      noiseEl.textContent = Math.round(noiseLevel * 100);
+      progressFill.style.width = (step / totalSteps * 100) + '%';
+      
+      step++;
+      setTimeout(animate, 120);
+    }
+    animate();
+  });
+}
+
+// ========== U-NET VISUALIZATION ==========
+function initUNet() {
+  const container = document.getElementById('unetVisual');
+  
+  const layers = [
+    { type: 'encoder', h: 80, w: 20, label: '64×64' },
+    { type: 'encoder', h: 60, w: 20, label: '32×32' },
+    { type: 'encoder', h: 40, w: 20, label: '16×16' },
+    { type: 'encoder', h: 28, w: 20, label: '8×8' },
+    { type: 'bottleneck', h: 20, w: 24, label: 'Mid' },
+    { type: 'decoder', h: 28, w: 20, label: '8×8' },
+    { type: 'decoder', h: 40, w: 20, label: '16×16' },
+    { type: 'decoder', h: 60, w: 20, label: '32×32' },
+    { type: 'decoder', h: 80, w: 20, label: '64×64' },
+  ];
+  
+  layers.forEach((layer, i) => {
+    const block = document.createElement('div');
+    block.className = 'unet-block';
+    
+    const el = document.createElement('div');
+    el.className = `unet-layer ${layer.type}`;
+    el.style.width = layer.w + 'px';
+    el.style.height = layer.h + 'px';
+    
+    const label = document.createElement('span');
+    label.className = 'unet-label';
+    label.textContent = layer.label;
+    
+    block.appendChild(el);
+    block.appendChild(label);
+    container.appendChild(block);
+  });
+  
+  // Animate: pulsing flow
+  let currentLayer = 0;
+  setInterval(() => {
+    const allLayers = container.querySelectorAll('.unet-layer');
+    allLayers.forEach((l, i) => {
+      l.style.boxShadow = i === currentLayer ? '0 0 15px rgba(255,0,15,0.6)' : 'none';
+      l.style.transform = i === currentLayer ? 'scale(1.1)' : 'scale(1)';
+    });
+    currentLayer = (currentLayer + 1) % allLayers.length;
+  }, 500);
+}
+
+// ========== TEXT CONDITIONING ANIMATION ==========
+function initTextConditioning() {
+  const textEl = document.getElementById('typingText');
+  const tokenFlow = document.getElementById('tokenFlow');
+  const embedGrid = document.getElementById('embeddingGrid');
+  
+  const prompt = "Un robot industriale ABB al lavoro";
+  const tokens = ["Un", "robot", "industriale", "ABB", "al", "lavoro"];
+  
+  // Typing animation
+  let charIndex = 0;
+  function typeChar() {
+    if (charIndex <= prompt.length) {
+      textEl.textContent = prompt.substring(0, charIndex);
+      charIndex++;
+      setTimeout(typeChar, 60);
+    } else {
+      // Show tokens
+      setTimeout(showTokens, 500);
+    }
+  }
+  
+  function showTokens() {
+    tokens.forEach((token, i) => {
+      setTimeout(() => {
+        const el = document.createElement('span');
+        el.className = 'token';
+        el.textContent = token;
+        el.style.animationDelay = `${i * 0.1}s`;
+        tokenFlow.appendChild(el);
+      }, i * 200);
+    });
+    
+    // Show embedding grid
+    setTimeout(() => {
+      for (let i = 0; i < 64; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'embed-cell';
+        const hue = Math.random() > 0.5 ? 0 : 220;
+        const sat = 60 + Math.random() * 40;
+        const light = 20 + Math.random() * 40;
+        cell.style.background = `hsl(${hue}, ${sat}%, ${light}%)`;
+        cell.style.animationDelay = `${Math.random() * 2}s`;
+        embedGrid.appendChild(cell);
+      }
+    }, tokens.length * 200 + 500);
+  }
+  
+  // Start after a delay (IntersectionObserver would be better but keeping it simple)
+  setTimeout(typeChar, 2000);
+}
+
+// ========== LATENT SPACE VISUALIZATION ==========
+function initLatentVis() {
+  // Original image
+  const orig = document.getElementById('latentOrig').getContext('2d');
+  drawNoisyPattern(orig, 128, 128, 0);
+  
+  // VAE encoded (small, abstract)
+  const vae = document.getElementById('latentVAE').getContext('2d');
+  const vaeData = vae.createImageData(48, 48);
+  for (let i = 0; i < vaeData.data.length; i += 4) {
+    const x = (i/4) % 48, y = Math.floor((i/4) / 48);
+    const dist = Math.sqrt((x-24)**2 + (y-24)**2) / 24;
+    vaeData.data[i] = 100 + Math.sin(x*0.3) * 50;
+    vaeData.data[i+1] = 80 + Math.cos(y*0.3) * 40;
+    vaeData.data[i+2] = 120 + Math.sin((x+y)*0.2) * 60;
+    vaeData.data[i+3] = 255;
+  }
+  vae.putImageData(vaeData, 0, 0);
+  
+  // Diffusion in latent
+  const diff = document.getElementById('latentDiff').getContext('2d');
+  const diffData = diff.createImageData(48, 48);
+  for (let i = 0; i < diffData.data.length; i += 4) {
+    diffData.data[i] = 128 + (Math.random()-0.5) * 100;
+    diffData.data[i+1] = 128 + (Math.random()-0.5) * 100;
+    diffData.data[i+2] = 128 + (Math.random()-0.5) * 100;
+    diffData.data[i+3] = 255;
+  }
+  diff.putImageData(diffData, 0, 0);
+  
+  // Animate latent diffusion
+  let frame = 0;
+  setInterval(() => {
+    frame++;
+    const noiseLevel = (Math.sin(frame * 0.05) + 1) / 2;
+    for (let i = 0; i < diffData.data.length; i += 4) {
+      const x = (i/4) % 48, y = Math.floor((i/4) / 48);
+      const base_r = 100 + Math.sin(x*0.3) * 50;
+      const base_g = 80 + Math.cos(y*0.3) * 40;
+      const base_b = 120 + Math.sin((x+y)*0.2) * 60;
+      const noise = () => (Math.random()-0.5) * 200 * noiseLevel;
+      diffData.data[i] = Math.max(0, Math.min(255, base_r * (1-noiseLevel) + 128*noiseLevel + noise()));
+      diffData.data[i+1] = Math.max(0, Math.min(255, base_g * (1-noiseLevel) + 128*noiseLevel + noise()));
+      diffData.data[i+2] = Math.max(0, Math.min(255, base_b * (1-noiseLevel) + 128*noiseLevel + noise()));
+    }
+    diff.putImageData(diffData, 0, 0);
+  }, 100);
+  
+  // Decoded image
+  const dec = document.getElementById('latentDec').getContext('2d');
+  drawNoisyPattern(dec, 128, 128, 0.02);
+}
+
+// ========== SAMPLING METHODS DOTS ==========
+function initSamplingDots() {
+  const configs = [
+    { id: 'ddpmSteps', count: 20, speed: 400 },
+    { id: 'ddimSteps', count: 10, speed: 300 },
+    { id: 'eulerSteps', count: 6, speed: 200 },
+    { id: 'distillSteps', count: 3, speed: 150 },
+  ];
+  
+  configs.forEach(cfg => {
+    const container = document.getElementById(cfg.id);
+    for (let i = 0; i < cfg.count; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'sampling-dot';
+      dot.style.animationDelay = `${i * (cfg.speed / 1000)}s`;
+      dot.style.animationDuration = `${cfg.count * cfg.speed / 1000}s`;
+      container.appendChild(dot);
+    }
+  });
+}
+
+// ========== IMG2IMG INTERACTIVE DEMO ==========
+function initImg2Img() {
+  const origCanvas = document.getElementById('img2imgOrig');
+  const noisyCanvas = document.getElementById('img2imgNoisy');
+  const resultCanvas = document.getElementById('img2imgResult');
+  const slider = document.getElementById('strengthSlider');
+  const valDisplay = document.getElementById('strengthValue');
+  const barFill = document.getElementById('strengthBarFill');
+  
+  const w = 120, h = 120;
+  const origCtx = origCanvas.getContext('2d');
+  const noisyCtx = noisyCanvas.getContext('2d');
+  const resultCtx = resultCanvas.getContext('2d');
+  
+  // Create a base pattern (industrial scene)
+  const baseData = new Float32Array(w * h * 3);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 3;
+      const ny = y / h, nx = x / w;
+      let r = 55 + ny * 25, g = 65 + ny * 20, b = 90 + ny * 15;
+      if (ny > 0.55) { r = 70; g = 65; b = 58; }
+      // Building
+      if (nx > 0.15 && nx < 0.5 && ny > 0.2 && ny < 0.55) { r = 110; g = 115; b = 125; }
+      // ABB Red stripe
+      if (nx > 0.2 && nx < 0.45 && ny > 0.25 && ny < 0.32) { r = 255; g = 0; b = 15; }
+      // Windows
+      if (nx > 0.15 && nx < 0.5 && ny > 0.35 && ny < 0.53) {
+        const wx = (nx - 0.15) * 24, wy = (ny - 0.35) * 16;
+        if (wx % 4 > 0.8 && wx % 4 < 3.2 && wy % 4 > 0.8 && wy % 4 < 2.8) {
+          r = 200; g = 190; b = 120;
+        }
+      }
+      // Tower
+      if (nx > 0.6 && nx < 0.75 && ny > 0.1 && ny < 0.55) { r = 90; g = 95; b = 100; }
+      baseData[idx] = r; baseData[idx+1] = g; baseData[idx+2] = b;
+    }
+  }
+
+  // A slightly different "result" target (same scene, different mood)
+  const resultBase = new Float32Array(w * h * 3);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 3;
+      const ny = y / h, nx = x / w;
+      let r = 30 + ny * 40, g = 35 + ny * 30, b = 60 + ny * 50;
+      if (ny > 0.55) { r = 50; g = 50; b = 55; }
+      if (nx > 0.15 && nx < 0.5 && ny > 0.2 && ny < 0.55) { r = 80; g = 90; b = 120; }
+      if (nx > 0.2 && nx < 0.45 && ny > 0.25 && ny < 0.32) { r = 255; g = 40; b = 30; }
+      if (nx > 0.15 && nx < 0.5 && ny > 0.35 && ny < 0.53) {
+        const wx = (nx - 0.15) * 24, wy = (ny - 0.35) * 16;
+        if (wx % 4 > 0.8 && wx % 4 < 3.2 && wy % 4 > 0.8 && wy % 4 < 2.8) {
+          r = 120; g = 180; b = 255;
+        }
+      }
+      if (nx > 0.6 && nx < 0.75 && ny > 0.1 && ny < 0.55) { r = 70; g = 75; b = 90; }
+      // Extra detail: crane
+      if (nx > 0.7 && nx < 0.72 && ny > 0.02 && ny < 0.15) { r = 180; g = 50; b = 40; }
+      if (nx > 0.58 && nx < 0.82 && ny > 0.02 && ny < 0.04) { r = 180; g = 50; b = 40; }
+      resultBase[idx] = r; resultBase[idx+1] = g; resultBase[idx+2] = b;
+    }
+  }
+  
+  function drawImageData(ctx, data, w, h) {
+    const imgData = ctx.createImageData(w, h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const pi = (y * w + x) * 4;
+        const di = (y * w + x) * 3;
+        imgData.data[pi] = Math.max(0, Math.min(255, data[di]));
+        imgData.data[pi+1] = Math.max(0, Math.min(255, data[di+1]));
+        imgData.data[pi+2] = Math.max(0, Math.min(255, data[di+2]));
+        imgData.data[pi+3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+  
+  // Draw original
+  drawImageData(origCtx, baseData, w, h);
+  
+  function update() {
+    const strength = parseInt(slider.value) / 100;
+    valDisplay.textContent = strength.toFixed(2);
+    barFill.style.width = (strength * 100) + '%';
+    
+    // Noisy: original + noise proportional to strength
+    const noisyData = new Float32Array(w * h * 3);
+    for (let i = 0; i < noisyData.length; i++) {
+      const noise = (Math.random() - 0.5) * 255 * strength;
+      noisyData[i] = baseData[i] * (1 - strength) + 128 * strength + noise;
+    }
+    drawImageData(noisyCtx, noisyData, w, h);
+    
+    // Result: blend between original and new result based on strength
+    const resData = new Float32Array(w * h * 3);
+    for (let i = 0; i < resData.length; i++) {
+      resData[i] = baseData[i] * (1 - strength) + resultBase[i] * strength + (Math.random() - 0.5) * 8 * (1-strength);
+    }
+    drawImageData(resultCtx, resData, w, h);
+  }
+  
+  slider.addEventListener('input', update);
+  update();
+}
+
+// ========== INPAINTING VISUALIZATION ==========
+function initInpainting() {
+  const w = 100, h = 100;
+  
+  function getCtx(id) { return document.getElementById(id).getContext('2d'); }
+  const origCtx = getCtx('inpaintOrig');
+  const maskCtx = getCtx('inpaintMask');
+  const noisyCtx = getCtx('inpaintNoisy');
+  const resultCtx = getCtx('inpaintResult');
+  
+  // Base scene
+  const base = new Float32Array(w * h * 3);
+  const maskArr = new Float32Array(w * h); // 0=keep, 1=regenerate
+  
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 3;
+      const mi = y * w + x;
+      const ny = y / h, nx = x / w;
+      let r = 50 + ny * 30, g = 60 + ny * 20, b = 85 + ny * 20;
+      if (ny > 0.6) { r = 65; g = 60; b = 55; }
+      if (nx > 0.2 && nx < 0.55 && ny > 0.25 && ny < 0.6) { r = 100; g = 105; b = 115; }
+      if (nx > 0.25 && nx < 0.5 && ny > 0.3 && ny < 0.37) { r = 255; g = 0; b = 15; }
+      
+      // Mask: circular region in center
+      const cx = 0.55, cy = 0.45, rad = 0.18;
+      const dist = Math.sqrt((nx-cx)**2 + (ny-cy)**2);
+      if (dist < rad) { maskArr[mi] = 1; }
+      
+      base[idx] = r; base[idx+1] = g; base[idx+2] = b;
+    }
+  }
+  
+  function drawTo(ctx, dataFn) {
+    const img = ctx.createImageData(w, h);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const pi = (y * w + x) * 4;
+        const c = dataFn(x, y);
+        img.data[pi] = c[0]; img.data[pi+1] = c[1]; img.data[pi+2] = c[2]; img.data[pi+3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  
+  // Original
+  drawTo(origCtx, (x, y) => {
+    const i = (y * w + x) * 3;
+    return [base[i], base[i+1], base[i+2]];
+  });
+  
+  // Mask
+  drawTo(maskCtx, (x, y) => {
+    const m = maskArr[y * w + x];
+    return m > 0.5 ? [255, 255, 255] : [20, 20, 20];
+  });
+  
+  // Noisy (mask area = noise, rest = original)
+  drawTo(noisyCtx, (x, y) => {
+    const i = (y * w + x) * 3;
+    const m = maskArr[y * w + x];
+    if (m > 0.5) {
+      return [128 + (Math.random()-0.5)*200, 128 + (Math.random()-0.5)*200, 128 + (Math.random()-0.5)*200];
+    }
+    return [base[i], base[i+1], base[i+2]];
+  });
+  
+  // Result (mask area = new content, rest = original)
+  drawTo(resultCtx, (x, y) => {
+    const i = (y * w + x) * 3;
+    const m = maskArr[y * w + x];
+    const ny = y / h, nx = x / w;
+    if (m > 0.5) {
+      // New generated content: a green element (plant/nature)
+      const cx = 0.55, cy = 0.45;
+      const dist = Math.sqrt((nx-cx)**2 + (ny-cy)**2);
+      const t = dist / 0.18;
+      const r = 40 + t * 30 + Math.sin(nx*30) * 15;
+      const g = 120 - t * 40 + Math.cos(ny*25) * 20;
+      const b = 50 + t * 20;
+      return [Math.max(0,Math.min(255,r)), Math.max(0,Math.min(255,g)), Math.max(0,Math.min(255,b))];
+    }
+    return [base[i], base[i+1], base[i+2]];
+  });
+  
+  // Animate the noisy region
+  setInterval(() => {
+    drawTo(noisyCtx, (x, y) => {
+      const i = (y * w + x) * 3;
+      const m = maskArr[y * w + x];
+      if (m > 0.5) {
+        return [128 + (Math.random()-0.5)*200, 128 + (Math.random()-0.5)*200, 128 + (Math.random()-0.5)*200];
+      }
+      return [base[i], base[i+1], base[i+2]];
+    });
+  }, 200);
+}
+
+// ========== KATEX RENDERING ==========
+function renderAllKatex() {
+  document.querySelectorAll('.katex-render').forEach(el => {
+    try {
+      katex.render(el.textContent.trim(), el, {
+        displayMode: true,
+        throwOnError: false,
+        output: 'html',
+        strict: false
+      });
+    } catch(e) {
+      console.warn('KaTeX render error:', e);
+    }
+  });
+}
+
+// ========== INIT ALL ==========
+document.addEventListener('DOMContentLoaded', () => {
+  renderAllKatex();
+  initForwardDiffusion();
+  initPixelGrid();
+  initSchedule();
+  initDenoise();
+  initUNet();
+  initTextConditioning();
+  initLatentVis();
+  initSamplingDots();
+  initImg2Img();
+  initInpainting();
+});
+</script>
+
+</body>
+</html>

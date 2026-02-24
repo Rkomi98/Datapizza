@@ -901,15 +901,36 @@ export default function App() {
                 </div>
               </div>
             </div>
-            {/* Theme toggle */}
-            <button onClick={() => setMode(mode === "light" ? "dark" : "light")} style={{
-              background: t.surfaceAlt, border: `1px solid ${t.border}`, borderRadius: 6,
-              padding: "6px 12px", cursor: "pointer", color: t.textSecondary, fontSize: 14,
-              display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s",
-            }}>
-              {mode === "light" ? "◐" : "◑"}
-              <span>{mode === "light" ? "Dark" : "Light"}</span>
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <a
+                href={`${import.meta.env.BASE_URL}diffusion-abb.html`}
+                style={{
+                  background: t.accent,
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "6px 12px",
+                  color: "#fff",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  transition: "all 0.2s",
+                }}
+              >
+                Diffusion Models
+              </a>
+              {/* Theme toggle */}
+              <button onClick={() => setMode(mode === "light" ? "dark" : "light")} style={{
+                background: t.surfaceAlt, border: `1px solid ${t.border}`, borderRadius: 6,
+                padding: "6px 12px", cursor: "pointer", color: t.textSecondary, fontSize: 14,
+                display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s",
+              }}>
+                {mode === "light" ? "◐" : "◑"}
+                <span>{mode === "light" ? "Dark" : "Light"}</span>
+              </button>
+            </div>
           </div>
         </div>
 
