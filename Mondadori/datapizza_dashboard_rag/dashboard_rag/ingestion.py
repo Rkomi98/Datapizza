@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import socket
 import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -13,6 +14,29 @@ import pandas as pd
 
 from .catalog import DatasetEntry
 from .config import Settings
+from .local_qdrant import LocalQdrantVectorstore
+
+
+def _network_error_message(exc: Exception, phase: str) -> str:
+    text = str(exc).strip() or exc.__class__.__name__
+    return (
+        f"Errore durante l'indicizzazione del dataset nella fase `{phase}`. "
+        "Il processo non riesce a risolvere l'host remoto (DNS) necessario per completare l'operazione. "
+        "Verifica connessione internet, VPN/proxy aziendale e che nessuna variabile come "
+        "`OPENAI_BASE_URL`, `HTTP_PROXY` o `HTTPS_PROXY` punti a un host non valido. "
+        f"Dettaglio originale: {text}"
+    )
+
+
+def _is_network_error(exc: Exception) -> bool:
+    current: Exception | None = exc
+    while current is not None:
+        if isinstance(current, (OSError, socket.gaierror)):
+            return True
+        if current.__class__.__name__ == "APIConnectionError":
+            return True
+        current = current.__cause__ if isinstance(current.__cause__, Exception) else None
+    return False
 
 
 IT_MONTH_TO_NUM = {
@@ -295,14 +319,19 @@ def _embed_profile(chunks_text: List[str], settings: Settings, collection_name: 
         from datapizza.embedders import ChunkEmbedder
         from datapizza.embedders.openai import OpenAIEmbedder
         from datapizza.type import Chunk, EmbeddingFormat
-        from datapizza.vectorstores.qdrant import QdrantVectorstore
     except ImportError as exc:
         raise RuntimeError(
             "Dipendenze Datapizza non installate. Usa Python 3.10+ e installa requirements.txt."
         ) from exc
 
-    vectorstore = QdrantVectorstore(location=str(settings.qdrant_dir / "local_qdrant"))
-    collections = vectorstore.get_collections() or []
+    vectorstore = LocalQdrantVectorstore(path=str(settings.qdrant_dir / "local_qdrant"))
+    try:
+        collections = vectorstore.get_collections() or []
+    except Exception as exc:
+        if not _is_network_error(exc):
+            raise
+        raise RuntimeError(_network_error_message(exc, "qdrant_get_collections")) from exc
+
     collection_names = set()
     for item in collections:
         if isinstance(item, str):
@@ -313,17 +342,22 @@ def _embed_profile(chunks_text: List[str], settings: Settings, collection_name: 
             collection_names.add(str(item["name"]))
 
     if collection_name not in collection_names:
-        vectorstore.create_collection(
-            collection_name=collection_name,
-            vector_config=[
-                VectorConfig(
-                    name="text_embeddings",
-                    dimensions=settings.embedding_dimensions,
-                    format=EmbeddingFormat.DENSE,
-                    distance=Distance.COSINE,
-                )
-            ],
-        )
+        try:
+            vectorstore.create_collection(
+                collection_name=collection_name,
+                vector_config=[
+                    VectorConfig(
+                        name="text_embeddings",
+                        dimensions=settings.embedding_dimensions,
+                        format=EmbeddingFormat.DENSE,
+                        distance=Distance.COSINE,
+                    )
+                ],
+            )
+        except Exception as exc:
+            if not _is_network_error(exc):
+                raise
+            raise RuntimeError(_network_error_message(exc, "qdrant_create_collection")) from exc
 
     embedder_client = OpenAIEmbedder(api_key=settings.openai_api_key)
     chunk_embedder = ChunkEmbedder(
@@ -341,8 +375,19 @@ def _embed_profile(chunks_text: List[str], settings: Settings, collection_name: 
         for index, chunk_text in enumerate(chunks_text, start=1)
     ]
 
-    embedded_chunks = chunk_embedder.embed(chunks)
-    vectorstore.add(embedded_chunks, collection_name=collection_name)
+    try:
+        embedded_chunks = chunk_embedder.embed(chunks)
+    except Exception as exc:
+        if not _is_network_error(exc):
+            raise
+        raise RuntimeError(_network_error_message(exc, "openai_embed_chunks")) from exc
+
+    try:
+        vectorstore.add(embedded_chunks, collection_name=collection_name)
+    except Exception as exc:
+        if not _is_network_error(exc):
+            raise
+        raise RuntimeError(_network_error_message(exc, "qdrant_add_vectors")) from exc
 
 
 def ensure_dataset_assets(entry: DatasetEntry, settings: Settings) -> DatasetArtifacts:

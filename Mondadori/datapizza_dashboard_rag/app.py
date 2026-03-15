@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from pathlib import Path
 
 import plotly.express as px
 import streamlit as st
+from datapizza.memory import Memory
 
 from dashboard_rag.catalog import DatasetEntry, discover_datasets
 from dashboard_rag.charting import build_charts, build_insights, build_kpis
 from dashboard_rag.config import has_openai_key, load_settings
 from dashboard_rag.ingestion import DatasetArtifacts, build_dataset_frames, ensure_dataset_assets
 from dashboard_rag.monitoring import MonitoringStore, monitored_operation
-from dashboard_rag.rag import answer_question
+from dashboard_rag.rag import AnswerReference, answer_question
 
 
 def _dataset_lookup(entries: list[DatasetEntry]) -> dict[str, DatasetEntry]:
@@ -28,6 +31,58 @@ def _render_kpis(kpis: list[tuple[str, str]]) -> None:
     columns = st.columns(len(kpis))
     for column, (label, value) in zip(columns, kpis):
         column.metric(label, value)
+
+
+def _normalize_lookup(value: object) -> str:
+    text = unicodedata.normalize("NFKD", str(value))
+    text = "".join(char for char in text if not unicodedata.combining(char))
+    text = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+    return re.sub(r"\s+", " ", text)
+
+
+def _find_matching_column(columns: list[str], expected_column: str | None) -> str | None:
+    if not expected_column:
+        return None
+    expected = _normalize_lookup(expected_column)
+    for column in columns:
+        if _normalize_lookup(column) == expected:
+            return column
+    return None
+
+
+def _render_answer_references(raw_df, analysis_df, references: list[dict] | list[AnswerReference]) -> None:
+    if not references:
+        return
+
+    for index, raw_reference in enumerate(references, start=1):
+        reference = raw_reference if isinstance(raw_reference, AnswerReference) else AnswerReference(**raw_reference)
+        label = "* Fonte e anteprima CSV" if len(references) == 1 else f"* Fonte {index}"
+        with st.expander(label):
+            st.markdown(f"**Dataset:** `{reference.source_label}`")
+            st.markdown(f"**CSV sorgente:** `{reference.source_path}`")
+            st.markdown(f"**Tabelle:** `{reference.raw_table}` / `{reference.analysis_table}`")
+            if reference.note:
+                st.caption(reference.note)
+
+            filtered_raw = raw_df
+            filtered_analysis = analysis_df
+            if reference.matched_column and reference.matched_value:
+                st.markdown(f"**Match usato:** `{reference.matched_column} = {reference.matched_value}`")
+                raw_column = _find_matching_column(list(raw_df.columns), reference.matched_column)
+                analysis_column = _find_matching_column(list(analysis_df.columns), reference.matched_column)
+                if raw_column:
+                    filtered_raw = raw_df.loc[
+                        raw_df[raw_column].astype(str).map(_normalize_lookup) == _normalize_lookup(reference.matched_value)
+                    ].copy()
+                if analysis_column:
+                    filtered_analysis = analysis_df.loc[
+                        analysis_df[analysis_column].astype(str).map(_normalize_lookup) == _normalize_lookup(reference.matched_value)
+                    ].copy()
+
+            st.markdown("**Anteprima raw**")
+            st.dataframe(filtered_raw.head(12), use_container_width=True)
+            st.markdown("**Anteprima analysis**")
+            st.dataframe(filtered_analysis.head(12), use_container_width=True)
 
 
 def _render_monitoring(store: MonitoringStore, selected_dataset: DatasetEntry) -> None:
@@ -160,10 +215,15 @@ def main() -> None:
             st.caption(f"Dataset attivo per la chat: `{selected_dataset.name}`")
 
             history_key = f"chat::{selected_dataset.dataset_id}"
+            memory_key = f"memory::{selected_dataset.dataset_id}"
+            focus_key = f"focus::{selected_dataset.dataset_id}"
             history = st.session_state.setdefault(history_key, [])
+            memory = st.session_state.setdefault(memory_key, Memory())
             for item in history:
                 with st.chat_message(item["role"]):
                     st.markdown(item["content"])
+                    if item["role"] == "assistant":
+                        _render_answer_references(raw_df, analysis_df, item.get("references", []))
 
             user_question = st.chat_input("Fai una domanda sul dataset attivo")
             if user_question:
@@ -180,12 +240,29 @@ def main() -> None:
                             dataset_id=selected_dataset.dataset_id,
                             metadata={"question": user_question[:120]},
                         ):
-                            answer = answer_question(user_question, settings, assets)
+                            answer_payload = answer_question(
+                                user_question,
+                                settings,
+                                assets,
+                                analysis_df,
+                                memory=memory,
+                                conversation_focus=st.session_state.get(focus_key),
+                            )
                     except Exception as exc:
-                        answer = f"Errore durante l'esecuzione RAG: {exc}"
-                    st.markdown(answer)
+                        answer_payload = None
+                        answer_text = f"Errore durante l'esecuzione RAG: {exc}"
+                        references = []
+                    else:
+                        answer_text = answer_payload.text
+                        references = [reference.__dict__ for reference in answer_payload.references]
+                        st.session_state[memory_key] = answer_payload.memory or memory
+                        st.session_state[focus_key] = answer_payload.conversation_focus
 
-                history.append({"role": "assistant", "content": answer})
+                    rendered_answer = f"{answer_text}\n\n[*]" if references else answer_text
+                    st.markdown(rendered_answer)
+                    _render_answer_references(raw_df, analysis_df, references)
+
+                history.append({"role": "assistant", "content": rendered_answer, "references": references})
 
             if st.button("Indicizza ora il dataset attivo"):
                 try:
