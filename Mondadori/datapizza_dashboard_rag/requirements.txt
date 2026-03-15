@@ -1,0 +1,12 @@
+streamlit>=1.42,<2
+pandas>=2.2,<3
+plotly>=5.24,<6
+openpyxl>=3.1,<4
+python-dotenv>=1.0,<2
+sqlalchemy>=2.0,<3
+opentelemetry-api>=1.30,<2
+datapizza-ai==0.0.9
+datapizza-ai-clients-openai==0.0.9
+datapizza-ai-embedders-openai==0.0.5
+datapizza-ai-vectorstores-qdrant==0.0.7
+datapizza-ai-tools-sqldatabase==0.0.2
