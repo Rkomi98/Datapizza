@@ -438,6 +438,8 @@ datapizza_dashboard_rag/
 ├── README.md
 ├── requirements.txt
 ├── .env.example
+├── scripts/
+│   └── capture_screenshots.mjs
 ├── dashboard_rag/
 │   ├── __init__.py
 │   ├── catalog.py
@@ -489,27 +491,37 @@ Da leggere se vuoi capire:
 - quando il sistema usa il fast path
 - quando entra in gioco l'agente
 
-## Screenshot consigliati
+## Screenshot reali
 
-Il repository non include ancora screenshot versionati. Per documentare bene il progetto ti consiglio di salvare queste immagini in:
+Gli screenshot sotto sono stati generati dalla dashboard locale e salvati in:
 
 ```text
 datapizza_dashboard_rag/docs/screenshots/
 ```
 
-File consigliati:
+### 1. Dashboard overview
 
-- `01-dashboard-overview.png`
-- `02-rag-question-and-answer.png`
-- `03-source-reference-expanded.png`
-- `04-monitoring-tab.png`
+![Dashboard overview](docs/screenshots/01-dashboard-overview.png)
 
-Checklist di cattura:
+### 2. Domanda RAG e risposta
 
-1. panoramica tab Dashboard con KPI e grafici
-2. una domanda RAG con risposta e marker `[*]`
-3. box fonte aperto con anteprima raw/analysis
-4. tab Monitoring con tabella eventi
+![RAG question and answer](docs/screenshots/02-rag-question-and-answer.png)
+
+### 3. Fonte espansa con anteprima CSV
+
+![Source reference expanded](docs/screenshots/03-source-reference-expanded.png)
+
+### 4. Tab Monitoring
+
+![Monitoring tab](docs/screenshots/04-monitoring-tab.png)
+
+### Rigenerare gli screenshot
+
+Con la dashboard avviata su `http://127.0.0.1:8501`, puoi rigenerarli con:
+
+```bash
+node datapizza_dashboard_rag/scripts/capture_screenshots.mjs
+```
 
 ## Troubleshooting
 

@@ -1,6 +1,12 @@
 # Screenshots
 
-Questa cartella e` pensata per gli screenshot della dashboard.
+Questa cartella contiene gli screenshot della dashboard.
+
+Sono rigenerabili con:
+
+```bash
+node datapizza_dashboard_rag/scripts/capture_screenshots.mjs
+```
 
 File consigliati:
 
