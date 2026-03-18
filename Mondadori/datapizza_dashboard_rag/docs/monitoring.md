@@ -1,10 +1,16 @@
 # Monitoring
 
-## Livelli di osservabilità inclusi
+La panoramica completa e` nel [README principale](../README.md).
 
-### Eventi applicativi
+## Livelli di osservabilita`
 
-Persistiti in `storage/monitoring/events.jsonl`.
+### 1. Eventi applicativi
+
+Persistiti in:
+
+```text
+storage/monitoring/events.jsonl
+```
 
 Campi principali:
 
@@ -15,39 +21,31 @@ Campi principali:
 - `duration_ms`
 - `metadata`
 
-Eventi emessi:
+Eventi emessi oggi:
 
 - `dashboard_render`
 - `dataset_index`
 - `rag_query`
 
-### Trace Datapizza
+### 2. Tracing
 
-Le query RAG vengono eseguite dentro:
+Le query RAG sono eseguite dentro un contesto `ContextTracing`.
 
-```python
-with ContextTracing().trace("rag_<dataset_id>"):
-    ...
-```
+Questo consente di vedere:
 
-Questo permette di vedere:
-
-- durata complessiva
 - numero di span
-- utilizzo token per i client Datapizza
+- durata complessiva
+- token usage del client Datapizza, quando disponibile
 
-## Export esterno
+## Cosa mostra la tab Monitoring
 
-La base è pronta per collegare un exporter OpenTelemetry. Il codice applicativo usa già span manuali via `opentelemetry.trace`.
-
-Per una piattaforma esterna puoi aggiungere, ad esempio:
-
-- OTLP verso Grafana Tempo / Datadog
-- Zipkin
+- KPI su numero eventi ed errori
+- grafico conteggi per tipo evento
+- grafico durate nel tempo
+- tabella eventi recenti
 
 ## Note operative
 
-- `DATAPIZZA_TRACE_CLIENT_IO` è lasciato a `FALSE` di default per evitare logging eccessivo di prompt e output.
-- Se vuoi maggiore dettaglio in sviluppo, puoi impostarlo a `TRUE`.
-- Le metriche mostrate nella dashboard derivano dagli eventi JSONL e quindi non richiedono un backend aggiuntivo.
-
+- gli eventi applicativi non richiedono backend esterni
+- il tracing e` utile soprattutto in sviluppo e debug
+- se in futuro vuoi un exporter esterno, il codice usa gia` OpenTelemetry come base

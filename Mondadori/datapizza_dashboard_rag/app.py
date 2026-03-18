@@ -80,9 +80,9 @@ def _render_answer_references(raw_df, analysis_df, references: list[dict] | list
                     ].copy()
 
             st.markdown("**Anteprima raw**")
-            st.dataframe(filtered_raw.head(12), use_container_width=True)
+            st.dataframe(filtered_raw.head(12), width="stretch")
             st.markdown("**Anteprima analysis**")
-            st.dataframe(filtered_analysis.head(12), use_container_width=True)
+            st.dataframe(filtered_analysis.head(12), width="stretch")
 
 
 def _render_monitoring(store: MonitoringStore, selected_dataset: DatasetEntry) -> None:
@@ -108,15 +108,18 @@ def _render_monitoring(store: MonitoringStore, selected_dataset: DatasetEntry) -
     counts = dataset_events.groupby("event_type", as_index=False).size()
     counts_chart = px.bar(counts, x="event_type", y="size", color="event_type")
     counts_chart.update_layout(showlegend=False, xaxis_title="Evento", yaxis_title="Conteggio")
-    st.plotly_chart(counts_chart, use_container_width=True)
+    st.plotly_chart(counts_chart, width="stretch")
 
     timed = dataset_events.dropna(subset=["duration_ms"]).sort_values("timestamp")
     if not timed.empty:
         duration_chart = px.line(timed, x="timestamp", y="duration_ms", color="event_type", markers=True)
         duration_chart.update_layout(xaxis_title="Timestamp", yaxis_title="Durata (ms)")
-        st.plotly_chart(duration_chart, use_container_width=True)
+        st.plotly_chart(duration_chart, width="stretch")
 
-    st.dataframe(dataset_events[["timestamp", "event_type", "status", "dataset_id", "duration_ms", "metadata"]], use_container_width=True)
+    st.dataframe(
+        dataset_events[["timestamp", "event_type", "status", "dataset_id", "duration_ms", "metadata"]],
+        width="stretch",
+    )
 
 
 def _ensure_assets(
@@ -195,13 +198,13 @@ def main() -> None:
             for chart in build_charts(selected_dataset, analysis_df):
                 st.markdown(f"### {chart.title}")
                 st.caption(chart.caption)
-                st.plotly_chart(chart.figure, use_container_width=True)
+                st.plotly_chart(chart.figure, width="stretch")
 
             with st.expander("Anteprima dati"):
                 st.markdown("**Raw**")
-                st.dataframe(raw_df, use_container_width=True)
+                st.dataframe(raw_df, width="stretch")
                 st.markdown("**Analysis**")
-                st.dataframe(analysis_df, use_container_width=True)
+                st.dataframe(analysis_df, width="stretch")
 
     with rag_tab:
         st.subheader("Interroga il dataset attivo")

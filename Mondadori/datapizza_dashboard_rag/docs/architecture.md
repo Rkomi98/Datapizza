@@ -1,74 +1,84 @@
 # Architettura
 
+La documentazione principale del progetto vive in [README.md](../README.md).
+
+Questo file riassume i punti architetturali piu` importanti.
+
 ## Obiettivo
 
-Unire esplorazione visuale dei CSV e interrogazione in linguaggio naturale in un unico flusso, usando `datapizza-ai` come strato di orchestrazione LLM/RAG.
+Unire in un solo flusso:
+
+- esplorazione visuale del CSV
+- trasformazione analitica locale
+- interrogazione conversazionale sul dataset attivo
 
 ## Componenti
 
 ### 1. Discovery
 
-`dashboard_rag.catalog` cerca CSV in:
+`dashboard_rag.catalog`
 
-- root della repo
-- `datapizza_dashboard_rag/datasets/`
+Responsabilita`:
 
-Ogni dataset viene classificato in una delle famiglie:
+- trovare i CSV disponibili
+- inferire il tipo dataset
+- costruire un `dataset_id` stabile
 
-- `sankey`
-- `scatter`
-- `bar_chart_race`
-- `slope`
-- `generic`
+### 2. Ingestion
 
-### 2. Dashboard
+`dashboard_rag.ingestion`
 
-`dashboard_rag.charting` costruisce:
+Responsabilita`:
+
+- leggere il CSV
+- costruire `raw_df` e `analysis_df`
+- scrivere SQLite locale
+- generare profilo dataset e manifest
+- indicizzare il profilo in Qdrant locale
+
+### 3. Dashboard
+
+`dashboard_rag.charting` + `app.py`
+
+Responsabilita`:
 
 - KPI
-- grafici Plotly coerenti con il tipo dataset
-- insight sintetici da mostrare sopra ai grafici
-
-### 3. Ingestion
-
-`dashboard_rag.ingestion` crea due rappresentazioni:
-
-- `raw_<dataset_id>`: copia fedele del CSV
-- `analysis_<dataset_id>`: forma normalizzata utile per SQL e analytics
-
-Output persistiti:
-
-- SQLite locale
-- profilo markdown del dataset
-- manifest JSON
-- collection Qdrant locale
+- insight
+- grafici specifici per `kind`
+- rendering Streamlit
 
 ### 4. RAG
 
-`dashboard_rag.rag` usa:
+`dashboard_rag.rag`
 
-- `OpenAIClient` per generazione
-- `OpenAIEmbedder` per embedding
-- `QdrantVectorstore` per retrieval
-- `SQLDatabase` per interrogare SQLite
-- `Agent` Datapizza per orchestrare i tool
+Responsabilita`:
 
-L'approccio è ibrido:
+- fast path deterministico per richieste frequenti
+- memoria di chat per dataset
+- entity resolution e period matching
+- delta su serie cumulative
+- fallback agentico con Datapizza Agent, retrieval e SQL
 
-- retrieval per contesto, glossario e insight
-- SQL per risposte numeriche verificabili
+### 5. Persistence locale
 
-### 5. Monitoring
+Asset usati:
 
-`dashboard_rag.monitoring` scrive eventi JSONL applicativi.
+- SQLite locale
+- Qdrant locale su filesystem
+- profili markdown
+- manifest JSON
+- eventi monitoring in JSONL
 
-In parallelo il codice RAG avvolge le operazioni in `ContextTracing`, così è possibile collegare un exporter OpenTelemetry se servirà un backend esterno.
+## Flusso
 
-## Flusso end-to-end
+1. l'utente seleziona un dataset
+2. l'app costruisce `raw_df` e `analysis_df`
+3. la dashboard mostra i grafici
+4. alla prima domanda RAG vengono preparati gli asset locali
+5. `rag.py` prova prima il percorso deterministico
+6. se non basta, usa l'agente Datapizza con tool, retrieval e SQL
+7. la risposta torna con references e memoria aggiornata
 
-1. L'utente seleziona un CSV.
-2. La dashboard lo carica e produce grafici.
-3. Alla prima domanda RAG il dataset viene indicizzato.
-4. L'agente usa retrieval + SQL sui dati del dataset attivo.
-5. Gli eventi vengono registrati e visualizzati nella tab Monitoring.
+## Nota importante
 
+Per i dettagli operativi, setup e flusso UI, usa come riferimento canonico [README.md](../README.md).
