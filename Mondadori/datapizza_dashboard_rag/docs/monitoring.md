@@ -37,7 +37,7 @@ Questo consente di vedere:
 - durata complessiva
 - token usage del client Datapizza, quando disponibile
 
-## Cosa mostra la tab Monitoring
+## Cosa mostra la vista Monitoring
 
 - KPI su numero eventi ed errori
 - grafico conteggi per tipo evento
