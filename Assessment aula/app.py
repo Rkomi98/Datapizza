@@ -100,6 +100,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "insights_requests": "Richieste emerse",
         "insights_criticisms": "Criticità emerse",
         "insights_evidence": "Tracciabilità risposte",
+        "insights_expectations": "Aspettative emerse",
         "source_file_col": "File sorgente",
         "rows_merged": "Righe totali dopo il merge",
         "no_valid_pairs": "Nessuna coppia Before/After valida nel range 1–4.",
@@ -177,6 +178,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "insights_requests": "Requests raised",
         "insights_criticisms": "Criticisms raised",
         "insights_evidence": "Response traceability",
+        "insights_expectations": "Expectations raised",
         "source_file_col": "Source file",
         "rows_merged": "Total rows after merge",
         "no_valid_pairs": "No valid Before/After pairs found in range 1–4.",
@@ -685,9 +687,41 @@ def _build_open_question_records(df: pd.DataFrame, col: str) -> list[dict[str, s
     return records
 
 
+def _open_question_mode(col: str) -> str:
+    norm = normalize_col_name(col)
+    if "aspettative" in norm and not any(term in norm for term in ("soddisf", "superato", "deluso", "giustifica")):
+        return "expectations"
+    return "default"
+
+
 def _insight_prompt(col: str, records: list[dict[str, str]], lang: str) -> str:
     lang_instr = "Rispondi in italiano." if lang == "it" else "Respond in English."
     bullets = "\n".join(f"  - {record['context']} | text={record['text']}" for record in records[:300])
+    mode = _open_question_mode(col)
+
+    if mode == "expectations":
+        return f"""You are analysing open-text responses from a post-training feedback survey.
+Question: "{col}"
+
+Responses (context + text):
+{bullets}
+
+{lang_instr}
+
+Return a JSON object with keys:
+- "mode": "expectations"
+- "summary": short executive summary focused only on the expectations expressed by the class
+- "expectations": list of 4 to 8 concise expectation themes; each bullet must mention the relevant respondent_id values in parentheses
+
+Rules:
+- Do not include sentiment.
+- Do not include what worked, criticisms, requests, or traceability tables.
+- Focus only on the expectations that participants had before or at the start of the sessions.
+- Merge similar expectations into concise themes.
+- Base every claim only on the provided responses.
+
+Output only valid JSON, no markdown fences."""
+
     return f"""You are analysing open-text responses from a post-training feedback survey.
 Question: "{col}"
 
@@ -727,9 +761,12 @@ def generate_insights(
             continue
 
         prompt = _insight_prompt(col, records, lang)
+        mode = _open_question_mode(col)
         result: dict[str, Any] = {
             "question": col,
+            "mode": mode,
             "summary": None,
+            "expectations": [],
             "bullets": [],
             "sentiment": None,
             "worked": [],
@@ -753,7 +790,7 @@ def generate_insights(
 
         if ant_key and raw_text is None:
             try:
-                from datapizza.clients.antrophic import AnthropicClient
+                from datapizza.clients.anthropic import AnthropicClient
                 raw_text = AnthropicClient(api_key=ant_key).invoke(input=prompt, max_tokens=1024).text
             except Exception as exc:
                 result["error"] = f"Anthropic: {exc}"
@@ -763,7 +800,9 @@ def generate_insights(
                 m = re.search(r"\{.*\}", raw_text, re.DOTALL)
                 parsed = json.loads(m.group() if m else raw_text)
                 result.update(
+                    mode=parsed.get("mode", mode),
                     summary=parsed.get("summary"),
+                    expectations=parsed.get("expectations", []),
                     bullets=parsed.get("bullets", []),
                     sentiment=parsed.get("sentiment"),
                     worked=parsed.get("worked", []),
@@ -1163,6 +1202,12 @@ def main() -> None:
                 with st.expander(f"💬 {T('insights_open_question', lang)}: {ins['question']}"):
                     if ins.get("error"):   st.error(ins["error"])
                     if ins.get("summary"): st.markdown(f"**{T('insights_summary', lang)}:** {ins['summary']}")
+                    if ins.get("mode") == "expectations":
+                        if ins.get("expectations"):
+                            st.markdown(f"**{T('insights_expectations', lang)}:**")
+                            for item in ins["expectations"]:
+                                st.markdown(f"- {item}")
+                        continue
                     if ins.get("sentiment"):
                         emoji = {"positive": "😊", "mixed": "😐", "negative": "😟"}.get(ins["sentiment"], "❓")
                         st.markdown(f"**{T('insights_sentiment', lang)}:** {emoji} {ins['sentiment']}")
