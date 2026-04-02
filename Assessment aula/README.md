@@ -6,7 +6,8 @@
 [![Plotly](https://img.shields.io/badge/Plotly-239120?style=for-the-badge&logo=plotly&logoColor=white)](https://plotly.com/python/)
 [![RapidFuzz](https://img.shields.io/badge/RapidFuzz-5A67D8?style=for-the-badge)](https://github.com/maxbachmann/RapidFuzz)
 [![OpenPyXL](https://img.shields.io/badge/OpenPyXL-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white)](https://openpyxl.readthedocs.io/)
-[![Inputs](https://img.shields.io/badge/input-CSV%20%7C%20XLSX-00A4EF?style=for-the-badge)](https://github.com)
+![CSV · XLSX](https://img.shields.io/badge/input-CSV%20%7C%20XLSX-00A4EF?style=for-the-badge)
+![AI insights](https://img.shields.io/badge/AI-datapizza--ai%20%C2%B7%20OpenAI%20%C2%B7%20Anthropic-6366F1?style=for-the-badge)
 
 Production-ready Streamlit app for analysing post-training feedback surveys exported from Microsoft Forms or similar tools.
 
