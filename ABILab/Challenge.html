@@ -25,6 +25,7 @@ body {
   color: var(--navy);
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
+  padding-top: 64px; /* compensate fixed nav */
 }
 body::before {
   content:'';
@@ -36,14 +37,14 @@ body::before {
   pointer-events:none;
   z-index:0;
 }
-body > * { position:relative; z-index:1; }
+body > *:not(nav) { position:relative; z-index:1; }
 
 /* NAV */
 nav {
   background:var(--white); border-bottom:1px solid var(--border);
   padding:0 48px; height:64px;
   display:flex; align-items:center; justify-content:space-between;
-  position:sticky; top:0; z-index:100;
+  position:fixed; top:0; left:0; right:0; width:100%; z-index:100;
 }
 .logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; color:var(--navy); text-decoration:none; }
 .logo svg { width:32px; height:32px; flex-shrink:0; }
@@ -159,7 +160,7 @@ nav {
 .dc-g { background:rgba(110,231,183,.15); color:#6ee7b7; }
 .dc-o { background:rgba(252,211,77,.15); color:#fcd34d; }
 .dc-b { background:rgba(147,197,253,.15); color:#93c5fd; }
-.deq { flex:1; font-size:14px; color:#f1f5f9; min-width:220px; line-height:1.6; }
+.deq { flex:1; font-size:14px; color:#f1f5f9; min-width:0; line-height:1.6; }
 .dnote { font-size:11px; color:#475569; font-style:italic; width:190px; flex-shrink:0; text-align:right; line-height:1.5; }
 
 /* FLOW BLOCK */
@@ -192,7 +193,7 @@ tbody tr:last-child td { border-bottom:none; }
 tbody tr:hover td { background:var(--bg); }
 
 /* BOTTOM NAV */
-.bnav { background:var(--white); border-top:1px solid var(--border); padding:18px 48px; display:flex; align-items:center; justify-content:space-between; position:sticky; bottom:0; z-index:99; }
+.bnav { background:var(--white); border-top:1px solid var(--border); padding:18px 48px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
 .pinfo { font-size:13px; color:var(--muted); font-weight:500; display:flex; align-items:center; gap:12px; }
 .pbar { width:120px; height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
 .pfill { height:100%; background:var(--accent-red); border-radius:99px; transition:width .3s; }
@@ -245,7 +246,8 @@ tbody tr:hover td { background:var(--bg); }
 .hero-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
+  justify-content: space-between;
 }
 .hero-page.hidden { display: none; }
 
@@ -253,7 +255,7 @@ tbody tr:hover td { background:var(--bg); }
 .app-shell {
   display: none;
   flex-direction: column;
-  min-height: 100vh;
+  height: calc(100vh - 64px);
 }
 .app-shell.visible { display: flex; }
 
@@ -261,6 +263,7 @@ tbody tr:hover td { background:var(--bg); }
 .app-shell .main {
   flex: 1;
   overflow-y: auto;
+  min-height: 0; /* required for flex scroll */
 }
 
 /* Footer info bar */
@@ -286,35 +289,116 @@ tbody tr:hover td { background:var(--bg); }
 
 /* RESPONSIVE — mobile */
 @media(max-width:640px){
+  html, body { overflow-x: hidden; } /* no horizontal page scroll */
+
+  /* Nav */
   nav { padding: 0 16px; height: 56px; }
   .logo span { display: none; }
-  .hero { padding: 32px 16px 28px; }
-  .hero h1 { font-size: 32px; letter-spacing: -1px; }
-  .hero p { font-size: 14px; }
-  .hero-stats { flex-wrap: wrap; }
+  body { padding-top: 56px; }
+
+  /* Hero page height */
+  .hero-page { min-height: calc(100vh - 56px); }
+  .hero { padding: 28px 16px 20px; }
+  .hero h1 { font-size: 30px; letter-spacing: -1px; }
+  .hero p { font-size: 14px; margin-bottom: 24px; }
+  .hero-stats { flex-wrap: wrap; max-width: 100%; margin-bottom: 28px; }
   .stat { min-width: calc(50% - 1px); border-right: none; border-bottom: 1px solid var(--border); }
   .stat:nth-child(odd) { border-right: 1px solid var(--border); }
   .stat:last-child, .stat:nth-last-child(2):nth-child(odd) { border-bottom: none; }
   .info-bar { padding: 10px 16px; gap: 12px; font-size: 12px; }
-  .step-nav { padding: 0 12px; }
-  .step-tab { padding: 14px 12px; font-size: 12px; gap: 6px; }
-  .main { padding: 24px 16px 40px; }
-  .bnav { padding: 14px 16px; }
-  .btn-blue, .btn-dark { padding: 12px 18px; font-size: 14px; }
+
+  /* App shell height */
+  .app-shell.visible { height: calc(100vh - 56px); }
+
+  /* Step nav */
+  .step-nav { padding: 0 8px; }
+  .step-tab { padding: 12px 10px; font-size: 11.5px; gap: 5px; }
+
+  /* Main content */
+  .main { padding: 20px 14px 32px; max-width: 100%; }
+  .sh { margin-bottom: 20px; gap: 8px; flex-direction: column; align-items: flex-start; }
+  .sh .badge { margin-top: 0; }
+  .sh h2 { font-size: 22px; }
+
+  /* Bottom nav */
+  .bnav { padding: 10px 14px; gap: 8px; }
+  .btn-blue, .btn-dark { padding: 10px 14px; font-size: 13px; white-space: nowrap; }
+  .pinfo { gap: 8px; }
+  .pbar { width: 48px; }
+  .pinfo span { display: none; } /* hide "Passo X di 5" on mobile */
+
+  /* Grids → single column */
   .grid2, .grid3 { grid-template-columns: 1fr; }
-  .darkcard { padding: 20px 18px; }
-  .drow { gap: 10px; }
+
+  /* Cards */
+  .card { padding: 16px 14px; }
+  .darkcard { padding: 18px 14px; }
+  .drow { gap: 8px; flex-wrap: wrap; }
   .dnote { display: none; }
-  .card { padding: 18px 16px; }
-  .pbar { width: 80px; }
-  .pinfo span { font-size: 12px; }
-  .flow { padding: 16px; }
+  .dchip { width: 76px; font-size: 9px; }
+  .deq { font-size: 13px; }
+
+  /* Flow */
+  .flow { padding: 14px; }
+
+  /* Agenda */
   .agenda-row { gap: 10px; }
-  .agenda-time { width: 72px; font-size: 11px; }
-  table { font-size: 12px; }
-  thead th, tbody td { padding: 10px 12px; }
-  .hero-stats { max-width: 100%; }
-  .sh h2 { font-size: 24px; }
+  .agenda-time { width: 68px; font-size: 11px; }
+  .agenda-body strong { font-size: 13px; }
+
+  /* Tables — tcard scrolls, card contains overflow */
+  .grid2 > *, .grid3 > * { min-width: 0; } /* allow grid cells to shrink below content min-size */
+  .card { overflow: hidden; }              /* contain tcard overflow */
+  .tcard { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+  table { font-size: 11.5px; min-width: 460px; width: 100%; }
+  thead th, tbody td { padding: 9px 10px; }
+
+  /* Eval */
+  .eval-row { padding: 13px 0; gap: 10px; }
+  .eval-name { font-size: 13px; }
+  .eval-desc { font-size: 11.5px; }
+}
+
+/* RESPONSIVE — very small phones */
+@media(max-width:380px){
+  .hero h1 { font-size: 26px; }
+  .stat-num { font-size: 24px; }
+  .btn-blue, .btn-dark { padding: 9px 10px; font-size: 12px; }
+  .step-tab { padding: 11px 8px; font-size: 11px; }
+}
+
+/* ACRONYM TOOLTIPS */
+.abbr {
+  cursor: pointer;
+  border-bottom: 1.5px dashed var(--accent-blue);
+  font-weight: 700;
+  display: inline;
+  transition: color .12s;
+}
+.abbr:hover { color: var(--accent-blue); }
+#abbr-tip {
+  display: none;
+  position: fixed;
+  z-index: 600;
+  background: var(--navy);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: 16px 18px;
+  width: 264px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.04);
+  pointer-events: none;
+}
+#abbr-tip.vis { display: block; }
+.tip-abbr {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: #93c5fd; margin-bottom: 4px; font-family: 'DM Mono', monospace;
+}
+.tip-full { font-size: 14px; font-weight: 800; color: #f1f5f9; margin-bottom: 8px; line-height: 1.3; }
+.tip-desc { font-size: 12px; color: #94a3b8; line-height: 1.65; }
+@media(max-width:640px){
+  #abbr-tip { width: 240px; padding: 14px 15px; }
+  .tip-full { font-size: 13px; }
+  .tip-desc { font-size: 11.5px; }
 }
   </style>
 </head>
@@ -774,6 +858,13 @@ tbody tr:hover td { background:var(--bg); }
 
 </div><!-- /app-shell -->
 
+<!-- ACRONYM TOOLTIP -->
+<div id="abbr-tip">
+  <div class="tip-abbr" id="tip-abbr"></div>
+  <div class="tip-full" id="tip-full"></div>
+  <div class="tip-desc" id="tip-desc"></div>
+</div>
+
 <script>
 let cur = 0;
 const TOT = 5;
@@ -795,6 +886,8 @@ function goTo(idx) {
   document.getElementById('pfill').style.width = ((cur + 1) / TOT * 100) + '%';
   var mainEl = document.querySelector('.app-shell .main');
   if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+  // Scroll active tab into view on mobile
+  tabs[cur].scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
   window.scrollTo({ top: 0 });
 }
 
@@ -811,6 +904,200 @@ function startChallenge() {
 }
 
 document.getElementById('btn-prev').disabled = true;
+
+// ── SPECIFIC CODE TOOLTIPS (dai documenti ABI Lab) ───────────────
+var ABBR_DICT = {
+  // ── Mappa Applicativa ──
+  'MA A.1.5': {
+    section: 'Mappa Applicativa · A.1.5',
+    full: 'Internet Banking',
+    desc: 'Applicazioni a supporto del canale internet per la fruizione e la gestione dei servizi di internet banking. Canale esposto direttamente agli utenti finali — implica obblighi di sicurezza (API Security) e supervisione umana.'
+  },
+  'MA B.1.9': {
+    section: 'Mappa Applicativa · B.1.9',
+    full: 'Marketing Strategico',
+    desc: 'Applicazioni a supporto delle strategie di marketing: identificazione segmenti di clientela, definizione e gestione campagne. Sistemi AI qui spesso profilano i clienti — rilevante per GDPR e Checklist bias.'
+  },
+  'MA C.3.2': {
+    section: 'Mappa Applicativa · C.3.2',
+    full: 'Credito Ordinario',
+    desc: 'Applicazioni per mutui, prestiti, leasing e factoring, sovvenzioni, crediti di firma. L\'EU AI Act classifica i sistemi di credit scoring su questo canale come Alto Rischio (Annex III, punto 5b).'
+  },
+  // ── Mappa Informativa ──
+  'MI 2.1.1': {
+    section: 'Mappa Informativa · 2.1.1',
+    full: 'Tipologia Controparte',
+    desc: 'Classificazione qualitativa delle controparti (retail, corporate, privato, pubblica amministrazione...). Sottocategoria di MI 2.1. Può contenere attributi che diventano "caratteristiche protette" in contesti di credito — da monitorare per bias.'
+  },
+  'MI 2.1': {
+    section: 'Mappa Informativa · 2.1',
+    full: 'Informazioni Anagrafiche Controparte',
+    desc: 'Dati anagrafici della controparte: nome, codice fiscale, residenza, recapiti. L\'accesso a questi dati da parte di un sistema AI rende quasi sempre obbligatoria la DPIA (Checklist 3.1).'
+  },
+  // ── Mappa Infrastrutturale ──
+  'MInfra API Security': {
+    section: 'Mappa Infrastrutturale · Security',
+    full: 'API Security',
+    desc: 'Infrastruttura che funge da punto di accesso alle API bancarie. Gestisce autenticazione, autorizzazione e protezione degli endpoint. Un sistema AI esposto su internet (MA A.1.5) dipende criticamente da questo componente.'
+  },
+  'MInfra External Connectivity': {
+    section: 'Mappa Infrastrutturale · TLC · Networking',
+    full: 'External System Connectivity',
+    desc: 'Infrastrutture che abilitano la connettività sicura con reti esterne (internet, partner, cloud provider). Rilevante per sistemi AI che chiamano LLM o API esterne — ogni fornitore esterno va tracciato per la supply chain AI.'
+  },
+  // ── Mappa Servizi Business ──
+  'MSB 1.1.2.2': {
+    section: 'Mappa Servizi Business · 1.1.2.2',
+    full: 'Gestire il dialogo non telefonico',
+    desc: 'Servizi per l\'interazione tra contact center e cliente su canali non telefonici: e-mail, chat, chatbot. È il servizio business in cui si colloca tipicamente un assistente virtuale bancario — il KPI Self-Service Rate misura la sua efficacia.'
+  },
+  // ── Checklist AI Governance ──
+  'CL 2.8': {
+    section: 'Checklist · Struttura e Processi · Rischi',
+    full: 'Remediation plan per i danni',
+    desc: 'È stato predisposto un remediation plan per far fronte ad eventuali danni derivanti dall\'utilizzo del sistema intelligente?'
+  },
+  'CL 3.1': {
+    section: 'Checklist · Technical Execution · Privacy',
+    full: 'Documentazione conformità privacy',
+    desc: 'È definita, formalizzata e mantenuta aggiornata la documentazione necessaria per dimostrare la conformità del sistema AI alla normativa privacy applicabile (es. valutazioni di privacy by design, DPIA, pareri del DPO)?'
+  },
+  'CL 3.10': {
+    section: 'Checklist · Technical Execution · Governance dei dati',
+    full: 'Accesso limitato ai dati personali',
+    desc: 'L\'utilizzo e l\'accesso ai dati personali sono limitati se non strettamente necessari, in linea con i principi "Least privilege" e "Need to know"?'
+  },
+  'CL 3.14': {
+    section: 'Checklist · Technical Execution · Bias',
+    full: 'Campionamento rappresentativo dei dati',
+    desc: 'Sono implementate metodologie di campionamento in grado di garantire la rappresentatività di gruppi e sottogruppi rispetto alle caratteristiche della popolazione target?'
+  },
+  'CL 3.15': {
+    section: 'Checklist · Technical Execution · Bias',
+    full: 'Test anti-bias',
+    desc: 'Sono implementati test per individuare bias verso determinati gruppi o sottogruppi nell\'applicazione del sistema intelligente?'
+  },
+  'CL 3.21': {
+    section: 'Checklist · Technical Execution · Trasparenza',
+    full: 'Informativa interazione con AI',
+    desc: 'Se la regolamentazione lo prevede, gli utenti finali e della sperimentazione sono informati dell\'interazione con un sistema intelligente?'
+  },
+  // ── AI Act ──
+  'Annex III': {
+    section: 'EU AI Act · Allegato III',
+    full: 'Sistemi AI ad Alto Rischio',
+    desc: 'Elenco dei sistemi AI classificati ad Alto Rischio dall\'EU AI Act. Il punto 5b include esplicitamente i sistemi di credit scoring e valutazione del merito creditizio — obbligo di registrazione, conformità e supervisione umana.'
+  }
+};
+
+(function() {
+  var tip = document.getElementById('abbr-tip');
+  var tipAbbr = document.getElementById('tip-abbr');
+  var tipFull = document.getElementById('tip-full');
+  var tipDesc = document.getElementById('tip-desc');
+
+  // Build regex — longest terms first, escape dots and hyphens
+  var terms = Object.keys(ABBR_DICT).sort(function(a, b) { return b.length - a.length; });
+  var escaped = terms.map(function(t) { return t.replace(/[.\-]/g, '\\$&'); });
+  var reStr = '\\b(' + escaped.join('|') + ')\\b';
+  var re = new RegExp(reStr, 'g');
+
+  // Classes/tags to skip when walking the DOM
+  var SKIP_CLASSES = ['abbr','badge','snum','tag','ctag','dtag','ftag','dchip','step-tab','stat-label','hero-badge'];
+  var SKIP_TAGS = /^(SCRIPT|STYLE|BUTTON|NOSCRIPT|A)$/;
+
+  function wrapTextNode(node) {
+    var text = node.textContent;
+    re.lastIndex = 0;
+    if (!re.test(text)) return;
+    re.lastIndex = 0;
+    var frag = document.createDocumentFragment();
+    var last = 0, m;
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var s = document.createElement('span');
+      s.className = 'abbr';
+      s.dataset.term = m[1];
+      s.textContent = m[1];
+      frag.appendChild(s);
+      last = m.index + m[1].length;
+    }
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  }
+
+  function walk(root) {
+    if (!root) return;
+    if (root.nodeType === 3) { wrapTextNode(root); return; }
+    if (root.nodeType !== 1) return;
+    if (SKIP_TAGS.test(root.tagName)) return;
+    if (root.classList) {
+      for (var i = 0; i < SKIP_CLASSES.length; i++) {
+        if (root.classList.contains(SKIP_CLASSES[i])) return;
+      }
+    }
+    // snapshot children before modifying DOM
+    var kids = Array.prototype.slice.call(root.childNodes);
+    for (var j = 0; j < kids.length; j++) walk(kids[j]);
+  }
+
+  // Process all panels and hero paragraph
+  document.querySelectorAll('.panel, .hero > p').forEach(walk);
+
+  // ── Tooltip positioning ──
+  function showTip(el) {
+    var term = el.dataset.term;
+    var data = ABBR_DICT[term];
+    if (!data) return;
+    tipAbbr.textContent = data.section;
+    tipFull.textContent = data.full;
+    tipDesc.textContent = data.desc;
+    tip.classList.add('vis');
+
+    var rect = el.getBoundingClientRect();
+    var W = tip.offsetWidth || 264;
+    var H = tip.offsetHeight || 150;
+    var left = Math.min(rect.left, window.innerWidth - W - 12);
+    if (left < 8) left = 8;
+    var top = rect.bottom + 10;
+    if (top + H > window.innerHeight - 8) top = rect.top - H - 8;
+    if (top < 8) top = 8;
+    tip.style.left = left + 'px';
+    tip.style.top  = top  + 'px';
+  }
+
+  function hideTip() { tip.classList.remove('vis'); }
+
+  var hasHover = window.matchMedia('(hover: hover)').matches;
+
+  // Click: show/hide (works on both mobile and desktop)
+  document.addEventListener('click', function(e) {
+    var el = e.target;
+    while (el && el !== document) {
+      if (el.classList && el.classList.contains('abbr')) { showTip(el); return; }
+      el = el.parentElement;
+    }
+    hideTip();
+  }, false);
+
+  // Hover: show on mouseover, hide on mouseout (desktop only)
+  if (hasHover) {
+    document.addEventListener('mouseover', function(e) {
+      var el = e.target;
+      while (el && el !== document) {
+        if (el.classList && el.classList.contains('abbr')) { showTip(el); return; }
+        el = el.parentElement;
+      }
+    });
+    document.addEventListener('mouseout', function(e) {
+      var el = e.target;
+      while (el && el !== document) {
+        if (el.classList && el.classList.contains('abbr')) { hideTip(); return; }
+        el = el.parentElement;
+      }
+    });
+  }
+})();
 </script>
 
 </body>
