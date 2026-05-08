@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABI Lab Hackathon — AI Governance & Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #f7f8fa;
+  --white: #ffffff;
+  --navy: #0d1b2a;
+  --navy2: #1a2e42;
+  --accent-red: #e8412a;
+  --accent-orange: #f5a623;
+  --accent-blue: #2563eb;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --border2: #d1d5db;
+  --grid-color: #e5e7eb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events:none;
+  z-index:0;
+}
+body > * { position:relative; z-index:1; }
+
+/* NAV */
+nav {
+  background:var(--white); border-bottom:1px solid var(--border);
+  padding:0 48px; height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+}
+.logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; color:var(--navy); text-decoration:none; }
+.logo svg { width:32px; height:32px; flex-shrink:0; }
+.nav-right { display:flex; align-items:center; }
+
+/* HERO */
+.hero { padding:64px 48px 56px; text-align:center; max-width:860px; margin:0 auto; }
+.hero-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--white); border:1px solid var(--border2);
+  border-radius:20px; padding:6px 16px;
+  font-size:12px; font-weight:600; color:var(--muted);
+  margin-bottom:24px; letter-spacing:.05em; text-transform:uppercase;
+}
+.hero-badge em { color:var(--accent-red); font-style:normal; }
+.hero h1 { font-size:clamp(34px,5vw,58px); font-weight:900; letter-spacing:-1.5px; line-height:1.05; margin-bottom:18px; }
+.hero h1 span { color:var(--accent-red); }
+.hero p { font-size:16px; color:var(--muted); max-width:560px; margin:0 auto 36px; line-height:1.65; }
+.hero-stats {
+  display:flex; align-items:center; justify-content:center;
+  gap:0; background:var(--white); border:1px solid var(--border);
+  border-radius:14px; overflow:hidden; max-width:560px; margin:0 auto 40px;
+}
+.stat { flex:1; padding:20px 16px; text-align:center; border-right:1px solid var(--border); }
+.stat:last-child { border-right:none; }
+.stat-num { font-size:28px; font-weight:900; color:var(--navy); line-height:1; }
+.stat-num.r { color:var(--accent-red); }
+.stat-num.o { color:var(--accent-orange); }
+.stat-num.b { color:var(--accent-blue); }
+.stat-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-top:4px; }
+.hero-cta { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+/* BOTTONI */
+.btn-blue { background:var(--accent-blue); color:#fff; border:none; padding:14px 28px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-blue:hover { background:#1d4ed8; transform:translateY(-1px); }
+.btn-blue:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+.btn-dark { background:var(--navy); color:#fff; border:none; padding:14px 28px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-dark:hover { background:var(--navy2); transform:translateY(-1px); }
+.btn-dark:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+
+/* STEP TABS */
+.step-nav { background:var(--white); border-top:1px solid var(--border); border-bottom:1px solid var(--border); display:flex; overflow-x:auto; scrollbar-width:none; padding:0 48px; }
+.step-nav::-webkit-scrollbar { display:none; }
+.step-tab { padding:16px 18px; white-space:nowrap; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; gap:8px; border:none; background:none; font-family:'DM Sans',sans-serif; flex-shrink:0; }
+.step-tab:hover { color:var(--navy); }
+.step-tab.active { color:var(--accent-red); border-bottom:2px solid var(--accent-red); }
+.step-tab.done { color:var(--navy); }
+.snum { background:var(--bg); border:1px solid var(--border2); border-radius:5px; width:20px; height:20px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; color:var(--muted); flex-shrink:0; }
+.step-tab.active .snum { background:var(--accent-red); color:#fff; border-color:var(--accent-red); }
+.step-tab.done .snum { background:var(--navy); color:#fff; border-color:var(--navy); }
+
+/* MAIN */
+.main { max-width:1100px; margin:0 auto; padding:48px 48px 80px; }
+
+/* SECTION HEADER */
+.sh { margin-bottom:32px; display:flex; align-items:flex-start; gap:16px; }
+.badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; margin-top:6px; flex-shrink:0; }
+.b-r  { background:#fee2e2; color:#dc2626; }
+.b-g  { background:#d1fae5; color:#059669; }
+.b-o  { background:#fef3c7; color:#d97706; }
+.b-bl { background:#dbeafe; color:#2563eb; }
+.b-p  { background:#f3e8ff; color:#7c3aed; }
+.b-n  { background:var(--bg); color:var(--muted); border:1px solid var(--border2); }
+.sh h2 { font-size:clamp(22px,3vw,36px); font-weight:900; letter-spacing:-.5px; line-height:1.1; }
+.sh h2 .cr { color:var(--accent-red); }
+.sh h2 .cb { color:var(--accent-blue); }
+.sh h2 .co { color:#d97706; }
+
+/* CARD GRIDS */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid1 { margin-bottom:18px; }
+
+/* CARD */
+.card { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:24px 26px; transition:box-shadow .2s; }
+.card:hover { box-shadow:0 4px 24px rgba(13,27,42,.07); }
+.card.bl-r { border-left:3px solid var(--accent-red); }
+.card.bl-g { border-left:3px solid #059669; }
+.card.bl-o { border-left:3px solid #d97706; }
+.card.bl-b { border-left:3px solid var(--accent-blue); }
+.card.hl-r { background:#fff8f7; border-color:#fecaca; }
+.card.hl-g { background:#f0fdf4; border-color:#bbf7d0; }
+.card.hl-o { background:#fffbeb; border-color:#fde68a; }
+.card.hl-b { background:#eff6ff; border-color:#bfdbfe; }
+.ctag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px; color:var(--muted); }
+.ctag.r { color:var(--accent-red); }
+.ctag.g { color:#059669; }
+.ctag.o { color:#d97706; }
+.ctag.b { color:var(--accent-blue); }
+.card h3 { font-size:15px; font-weight:800; margin-bottom:9px; color:var(--navy); line-height:1.3; }
+.card p { font-size:13px; color:var(--muted); line-height:1.75; }
+.card p strong { color:var(--navy); font-weight:700; }
+.card ul { list-style:none; margin-top:8px; }
+.card ul li { font-size:13px; color:var(--muted); padding:3px 0 3px 16px; position:relative; line-height:1.6; }
+.card ul li::before { content:'→'; position:absolute; left:0; color:var(--accent-red); font-weight:700; }
+
+/* DARK CODE BOX */
+.codebox { background:var(--navy); border-radius:10px; padding:16px 20px; margin-top:14px; color:#e2e8f0; font-family:'DM Mono',monospace; font-size:12.5px; line-height:2; overflow-x:auto; }
+.codebox .cr { color:#f87171; font-weight:700; }
+.codebox .cg { color:#6ee7b7; font-weight:700; }
+.codebox .co { color:#fcd34d; font-weight:700; }
+.codebox .cb { color:#93c5fd; font-weight:700; }
+.codebox .cm { color:#475569; font-style:italic; font-size:11px; }
+.codebox .op { color:#94a3b8; }
+
+/* DARK SUMMARY CARD */
+.darkcard { background:var(--navy); border-radius:14px; padding:30px 36px; margin-bottom:18px; color:#e2e8f0; }
+.darkcard .dtag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#475569; margin-bottom:20px; }
+.drow { display:flex; align-items:center; gap:18px; padding:13px 0; border-bottom:1px solid rgba(255,255,255,.06); flex-wrap:wrap; }
+.drow:last-child { border-bottom:none; }
+.dchip { font-size:10px; font-weight:700; padding:3px 10px; border-radius:4px; text-transform:uppercase; letter-spacing:.07em; width:86px; text-align:center; flex-shrink:0; }
+.dc-r { background:rgba(248,113,113,.15); color:#f87171; }
+.dc-g { background:rgba(110,231,183,.15); color:#6ee7b7; }
+.dc-o { background:rgba(252,211,77,.15); color:#fcd34d; }
+.dc-b { background:rgba(147,197,253,.15); color:#93c5fd; }
+.deq { flex:1; font-size:14px; color:#f1f5f9; min-width:220px; line-height:1.6; }
+.dnote { font-size:11px; color:#475569; font-style:italic; width:190px; flex-shrink:0; text-align:right; line-height:1.5; }
+
+/* FLOW BLOCK */
+.flow { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:22px 26px; margin-bottom:18px; overflow-x:auto; }
+.ftag { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
+.frow { display:flex; align-items:center; gap:6px; min-width:max-content; }
+.fnode { background:var(--bg); border:1px solid var(--border2); border-radius:8px; padding:8px 13px; font-size:12px; font-family:'DM Mono',monospace; text-align:center; line-height:1.4; }
+.fnode .fnl { color:var(--muted); font-size:9px; display:block; margin-bottom:2px; font-family:'DM Sans',sans-serif; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+.fnode .fnv { color:var(--navy); font-weight:700; font-size:13px; }
+.fn-r { background:#fff8f7; border-color:#fca5a5; }
+.fn-g { background:#f0fdf4; border-color:#86efac; }
+.fn-o { background:#fffbeb; border-color:#fcd34d; }
+.fn-b { background:#eff6ff; border-color:#93c5fd; }
+.farr { color:var(--border2); font-size:18px; flex-shrink:0; }
+
+/* INLINE TAGS */
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-right:3px; }
+.tg-r { background:#fee2e2; color:#dc2626; }
+.tg-g { background:#d1fae5; color:#059669; }
+.tg-o { background:#fef3c7; color:#d97706; }
+.tg-b { background:#dbeafe; color:#2563eb; }
+
+/* TABLE */
+.tcard { background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:18px; }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+thead th { background:var(--bg); padding:12px 20px; text-align:left; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+tbody td { padding:13px 20px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:top; line-height:1.6; }
+tbody td:first-child { color:var(--navy); font-weight:700; font-size:13px; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:var(--bg); }
+
+/* BOTTOM NAV */
+.bnav { background:var(--white); border-top:1px solid var(--border); padding:18px 48px; display:flex; align-items:center; justify-content:space-between; position:sticky; bottom:0; z-index:99; }
+.pinfo { font-size:13px; color:var(--muted); font-weight:500; display:flex; align-items:center; gap:12px; }
+.pbar { width:120px; height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
+.pfill { height:100%; background:var(--accent-red); border-radius:99px; transition:width .3s; }
+
+/* PANEL */
+.panel { display:none; }
+.panel.active { display:block; animation:fadeUp .3s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* SCENARIO CARD */
+.sc-num {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px; border-radius:8px;
+  font-size:12px; font-weight:800; margin-bottom:10px;
+  font-family:'DM Mono', monospace;
+  background:#fee2e2; color:var(--accent-red);
+}
+
+/* AGENDA ROW */
+.agenda-row { display:flex; gap:16px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--border); }
+.agenda-row:last-child { border-bottom:none; }
+.agenda-time { font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:var(--accent-red); width:96px; flex-shrink:0; padding-top:2px; }
+.agenda-body { flex:1; }
+.agenda-body strong { font-size:14px; font-weight:700; color:var(--navy); display:block; margin-bottom:3px; }
+.agenda-body span { font-size:12px; color:var(--muted); line-height:1.6; }
+
+/* PROFILE CARD */
+.profile { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:20px 22px; }
+.profile:hover { box-shadow:0 4px 24px rgba(13,27,42,.07); }
+.profile-role { font-size:15px; font-weight:800; color:var(--navy); margin-bottom:6px; }
+.profile-desc { font-size:13px; color:var(--muted); line-height:1.65; margin-bottom:12px; }
+.skill-pills { display:flex; flex-wrap:wrap; gap:6px; }
+.sp { background:var(--bg); border:1px solid var(--border2); border-radius:6px; font-size:11px; font-weight:600; color:var(--muted); padding:3px 9px; font-family:'DM Mono',monospace; }
+
+/* EVAL BAR */
+.eval-row { display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); }
+.eval-row:last-child { border-bottom:none; }
+.eval-pct { font-family:'DM Mono',monospace; font-size:22px; font-weight:700; width:56px; flex-shrink:0; }
+.eval-pct.r { color:var(--accent-red); }
+.eval-pct.b { color:var(--accent-blue); }
+.eval-pct.o { color:var(--accent-orange); }
+.eval-pct.g { color:#059669; }
+.eval-bar-wrap { flex:1; }
+.eval-name { font-size:14px; font-weight:700; color:var(--navy); margin-bottom:5px; }
+.eval-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+.ebar { height:4px; border-radius:99px; background:var(--border); margin-top:8px; }
+.efill { height:100%; border-radius:99px; }
+
+/* HERO PAGE — standalone fullscreen */
+.hero-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.hero-page.hidden { display: none; }
+
+/* APP SHELL — hidden until CTA clicked */
+.app-shell {
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.app-shell.visible { display: flex; }
+
+/* Main panel area scrollable, fills space */
+.app-shell .main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Footer info bar */
+.info-bar {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+/* RESPONSIVE — tablet */
+@media(max-width:900px){
+  .grid2 { grid-template-columns: 1fr 1fr; }
+  .grid3 { grid-template-columns: 1fr 1fr; }
+}
+
+/* RESPONSIVE — mobile */
+@media(max-width:640px){
+  nav { padding: 0 16px; height: 56px; }
+  .logo span { display: none; }
+  .hero { padding: 32px 16px 28px; }
+  .hero h1 { font-size: 32px; letter-spacing: -1px; }
+  .hero p { font-size: 14px; }
+  .hero-stats { flex-wrap: wrap; }
+  .stat { min-width: calc(50% - 1px); border-right: none; border-bottom: 1px solid var(--border); }
+  .stat:nth-child(odd) { border-right: 1px solid var(--border); }
+  .stat:last-child, .stat:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+  .info-bar { padding: 10px 16px; gap: 12px; font-size: 12px; }
+  .step-nav { padding: 0 12px; }
+  .step-tab { padding: 14px 12px; font-size: 12px; gap: 6px; }
+  .main { padding: 24px 16px 40px; }
+  .bnav { padding: 14px 16px; }
+  .btn-blue, .btn-dark { padding: 12px 18px; font-size: 14px; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .darkcard { padding: 20px 18px; }
+  .drow { gap: 10px; }
+  .dnote { display: none; }
+  .card { padding: 18px 16px; }
+  .pbar { width: 80px; }
+  .pinfo span { font-size: 12px; }
+  .flow { padding: 16px; }
+  .agenda-row { gap: 10px; }
+  .agenda-time { width: 72px; font-size: 11px; }
+  table { font-size: 12px; }
+  thead th, tbody td { padding: 10px 12px; }
+  .hero-stats { max-width: 100%; }
+  .sh h2 { font-size: 24px; }
+}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <img src="https://salaries.datapizza.tech/logo-small.svg" alt="Datapizza" width="32" height="32" style="flex-shrink:0;">
+    <span>Datapizza</span>
+  </a>
+  <div class="nav-right">
+    <img src="https://forum.abilab.it/img/ABI_Lab_neg-2026-web-ready.svg" alt="ABI Lab" height="28" style="display:block;">
+  </div>
+</nav>
+
+<div class="hero-page" id="hero-page">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge"><em>Hackathon</em> ABI Lab × Datapizza</div>
+  <h1>AI Governance<br><span>meets</span> Enterprise Architecture</h1>
+  <p>Il Framework Architetturale ABI Lab e l'AI Governance Framework vivono in silos separati. Il tuo compito è collegarli con un sistema basato su AI generativa.</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num r">5</div>
+      <div class="stat-label">Tassonomie</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">99</div>
+      <div class="stat-label">Domande CL</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num o">157</div>
+      <div class="stat-label">KPI</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num b">8</div>
+      <div class="stat-label">Team</div>
+    </div>
+  </div>
+  <div class="hero-cta">
+    <button class="btn-dark" onclick="startChallenge()">Esplora la Challenge →</button>
+  </div>
+</div>
+
+<!-- FOOTER INFO -->
+<div class="info-bar">
+  <span><strong style="color:var(--navy);">16–17 Giugno 2025</strong></span>
+  <span style="color:var(--border2);">·</span>
+  <span>Officine Credem</span>
+  <span style="color:var(--border2);">·</span>
+  <span>8 team · 41 partecipanti</span>
+</div>
+
+</div><!-- /hero-page -->
+
+<div class="app-shell" id="app-shell">
+
+<!-- STEP NAV -->
+<div class="step-nav">
+  <button class="step-tab active" onclick="goTo(0)"><span class="snum">1</span> La Sfida</button>
+  <button class="step-tab" onclick="goTo(1)"><span class="snum">2</span> I Framework</button>
+  <button class="step-tab" onclick="goTo(2)"><span class="snum">3</span> Scenari</button>
+  <button class="step-tab" onclick="goTo(3)"><span class="snum">4</span> Team & Logistica</button>
+  <button class="step-tab" onclick="goTo(4)"><span class="snum">5</span> Valutazione</button>
+</div>
+
+<div class="main">
+
+  <!-- ── PANEL 0: LA SFIDA ── -->
+  <div class="panel active" id="panel-0">
+    <div class="sh">
+      <span class="badge b-r">La Sfida</span>
+      <h2>Il <span class="cr">problema</span> da risolvere</h2>
+    </div>
+
+    <div class="flow">
+      <div class="ftag">Il gap che devi colmare</div>
+      <div class="frow">
+        <div class="fnode fn-b">
+          <span class="fnl">Framework Architetturale</span>
+          <span class="fnv">DOVE sono i sistemi AI</span>
+        </div>
+        <span class="farr">→</span>
+        <div class="fnode fn-r" style="background:#fee2e2;border-color:#fca5a5;min-width:140px;">
+          <span class="fnl">Il tuo sistema</span>
+          <span class="fnv" style="color:var(--accent-red);">Il Ponte</span>
+        </div>
+        <span class="farr">→</span>
+        <div class="fnode fn-o">
+          <span class="fnl">AI Governance Framework</span>
+          <span class="fnv">COME valutarli</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card bl-r">
+        <div class="ctag r">Il problema oggi</div>
+        <h3>Due mondi separati</h3>
+        <p>Il Framework Architetturale <strong>non sa nulla di governance AI</strong>. La Checklist e i KPI <strong>non sanno nulla dell'architettura</strong> in cui i sistemi AI operano. Oggi questi due mondi non si parlano — il risultato è che le banche gestiscono la compliance AI manualmente su 8 file separati.</p>
+      </div>
+      <div class="card bl-b hl-b">
+        <div class="ctag b">La Missione</div>
+        <h3>Costruire il ponte</h3>
+        <p>Sviluppare un sistema basato su <strong>AI generativa</strong> che colleghi operativamente i due framework: dato un sistema AI e la sua posizione architetturale, il sistema deve sapere quali domande della Checklist compilare, quali KPI monitorare e qual è il suo profilo di rischio AI Act.</p>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card bl-o">
+        <div class="ctag o">Esempio concreto</div>
+        <h3>Chatbot su A.1.5 — Internet</h3>
+        <p>Classificato su <strong>MA A.1.5</strong> (canale Internet) e <strong>TP Gestione Internet Banking</strong>, il sistema capisce automaticamente che:</p>
+        <ul>
+          <li>CL 3.1 (DPIA) è obbligatoria → accede a dati anagrafici MI 2.1</li>
+          <li>CL 2.8 (supervisione umana) è critica → interagisce con clienti reali</li>
+          <li>KPI "Unauthorised Access" è prioritario → esposto su MInfra API Security</li>
+        </ul>
+      </div>
+      <div class="card bl-g">
+        <div class="ctag g">Esempio concreto</div>
+        <h3>Credit scoring su C.3.2</h3>
+        <p>Lo stesso sistema con <strong>MA C.3.2</strong> (credito ordinario) produce un assessment completamente diverso:</p>
+        <ul>
+          <li>Rischio AI Act: <strong>ALTO RISCHIO</strong> (Annex III, 5b)</li>
+          <li>CL 3.10 (bias) è CRITICA → MI 2.1.1 contiene attributi protetti</li>
+          <li>CL 3.14 (spiegabilità) è OBBLIGATORIA → GDPR art. 22</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="darkcard">
+      <div class="dtag">// Il vincolo fondamentale</div>
+      <div class="drow">
+        <span class="dchip dc-r">VINCOLO</span>
+        <span class="deq">Il sistema deve utilizzare <strong style="color:#f1f5f9;">contemporaneamente</strong> le tassonomie architetturali E gli strumenti di governance. Il valore deve emergere dal <strong style="color:#f1f5f9;">collegamento</strong>, non dall'uso isolato di uno solo dei due framework.</span>
+      </div>
+      <div class="drow">
+        <span class="dchip dc-b">DOMANDA</span>
+        <span class="deq">"Dove si trova questo sistema AI nell'architettura della banca?" + "È governato correttamente rispetto all'AI Act?"</span>
+        <span class="dnote">La risposta deve essere simultanea, non sequenziale</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 1: I FRAMEWORK ── -->
+  <div class="panel" id="panel-1">
+    <div class="sh">
+      <span class="badge b-bl">I Framework</span>
+      <h2>I dati a <span class="cb">disposizione</span></h2>
+    </div>
+
+    <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7;">Ricevi <strong style="color:var(--navy);">8 file</strong> che coprono entrambi i framework. Il tuo sistema deve saperli interrogare, collegare e rendere accessibili in modo intelligente.</p>
+
+    <div class="grid2">
+      <div class="card bl-b">
+        <div class="ctag b">Framework Architetturale ABI Lab · ~1.000 voci</div>
+        <h3>Cinque tassonomie gerarchiche</h3>
+        <p style="margin-bottom:14px;">Descrivono l'intera organizzazione bancaria: processi, servizi, informazioni, applicazioni e infrastruttura. Nato nel 2009, è il riferimento condiviso del settore bancario italiano.</p>
+        <div class="tcard" style="margin:0;">
+          <table>
+            <thead><tr><th>Sigla</th><th>Tassonomia</th><th>Dimensione</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tg-b">TP</span></td><td>Tassonomia dei Processi</td><td>~500 voci · 5 livelli</td></tr>
+              <tr><td><span class="tag tg-b">MSB</span></td><td>Mappa Servizi Business</td><td>~200 voci · 4 livelli</td></tr>
+              <tr><td><span class="tag tg-b">MI</span></td><td>Mappa Informativa</td><td>~130 voci · 3 livelli</td></tr>
+              <tr><td><span class="tag tg-b">MA</span></td><td>Mappa Applicativa</td><td>~100 voci · 3 livelli</td></tr>
+              <tr><td><span class="tag tg-b">MInfra</span></td><td>Mappa Infrastrutturale</td><td>~90 voci · 3 livelli</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card bl-o">
+        <div class="ctag o">AI Governance Framework · ABI Lab × Deloitte</div>
+        <h3>Checklist + KPI operativi</h3>
+        <p style="margin-bottom:14px;">Due strumenti per valutare e monitorare i sistemi AI in banca secondo le best practice e i requisiti del AI Act europeo. Sviluppato in collaborazione con Deloitte nell'ambito dell'AI Hub.</p>
+        <div class="tcard" style="margin:0;">
+          <table>
+            <thead><tr><th>Strumento</th><th>Contenuto</th><th>La domanda</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tg-o">Checklist</span></td><td>99 domande · 4 sezioni · AI Act ref.</td><td>Stiamo facendo le cose giuste?</td></tr>
+              <tr><td><span class="tag tg-o">KPI-B</span></td><td>56 KPI di Business</td><td rowspan="3" style="vertical-align:middle;">Quanto bene le stiamo facendo?</td></tr>
+              <tr><td><span class="tag tg-o">KPI-EG</span></td><td>41 KPI Etica e Governo</td></tr>
+              <tr><td><span class="tag tg-o">KPI-M</span></td><td>60 KPI di Modello + Decision Tree</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bl-r hl-r" style="margin-top:4px;">
+      <div class="ctag r">La regola d'oro</div>
+      <h3>Non filtrare — contestualizza</h3>
+      <p>Un chatbot bancario per il retail è un sistema AI molto diverso da un algoritmo di credit scoring o da un sistema di fraud detection. La Checklist ha un filtro per fase e rischio — ma <strong>questo non basta</strong>. Il tuo sistema deve contestualizzare: spiegare <em>perché</em> una domanda è rilevante citando il nodo tassonomico specifico, e suggerire <em>dove</em> trovare le evidenze nell'architettura.</p>
+    </div>
+
+  </div>
+
+  <!-- ── PANEL 2: SCENARI ── -->
+  <div class="panel" id="panel-2">
+    <div class="sh">
+      <span class="badge b-o">Scenari</span>
+      <h2>7 scenari da <span class="co">affrontare</span></h2>
+    </div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7;">Questi scenari mostrano il valore generato dal collegamento tra i due framework. Puoi affrontarne alcuni, combinarli, o proporne di completamente nuovi.</p>
+
+    <div class="grid2">
+      <div class="card bl-r">
+        <div class="sc-num">01</div>
+        <div class="ctag r">Contestualizzazione Checklist</div>
+        <h3>Ho un chatbot: quali domande mi riguardano e perché?</h3>
+        <p>Dato un sistema AI collocato nel Framework Architetturale, il sistema contestualizza le 99 domande: spiega <em>perché</em> una domanda è rilevante citando il nodo tassonomico specifico, e suggerisce <em>dove</em> trovare le evidenze nell'architettura.</p>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+          <span class="tag tg-b">MA</span><span class="tag tg-b">TP</span><span class="tag tg-b">MI</span><span class="tag tg-r">Checklist</span>
+        </div>
+      </div>
+
+      <div class="card bl-b">
+        <div class="sc-num" style="background:#dbeafe;color:var(--accent-blue);">02</div>
+        <div class="ctag b">Selezione KPI</div>
+        <h3>Stesso problema, sistema diverso: credit scoring</h3>
+        <p>La stessa Checklist con <strong>MA C.3.2</strong> (credito ordinario) produce un assessment completamente diverso: Alto Rischio AI Act, bias CRITICO su MI 2.1.1, spiegabilità obbligatoria per GDPR art. 22.</p>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+          <span class="tag tg-o">KPI-B</span><span class="tag tg-o">KPI-EG</span><span class="tag tg-r">AI Act</span>
+        </div>
+      </div>
+
+      <div class="card bl-o">
+        <div class="sc-num" style="background:#fef3c7;color:#d97706;">03</div>
+        <div class="ctag o">KPI per sistema specifico</div>
+        <h3>Quali KPI monitorare per il chatbot?</h3>
+        <p>La collocazione architetturale guida la selezione: <em>Self-Service Rate</em> (MSB 1.1.2.2), <em>Passaggio a operatore umano</em> (CL 2.8), <em>Unauthorised Access</em> (MInfra API Security). I KPI di classificatore (AUROC, F1) non si applicano ai sistemi GenAI.</p>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+          <span class="tag tg-o">157 KPI</span><span class="tag tg-b">Decision Tree</span>
+        </div>
+      </div>
+
+      <div class="card bl-g">
+        <div class="sc-num" style="background:#d1fae5;color:#059669;">04</div>
+        <div class="ctag g">Censimento AI</div>
+        <h3>Quali dei miei sistemi AI non hanno ancora una Checklist?</h3>
+        <p>Su 500 applicazioni nella Mappa Applicativa, quante hanno componenti AI? Il sistema censisce, prioritizza per rischio e identifica i gap: <em>"6 sistemi AI trovati. 3 senza governance. Priorità: B.1.9 Marketing AI, A.1.2 Voicebot."</em></p>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+          <span class="tag tg-b">MA</span><span class="tag tg-r">Checklist</span><span class="tag tg-g">Gap Analysis</span>
+        </div>
+      </div>
+
+      <div class="card bl-r">
+        <div class="sc-num">05</div>
+        <div class="ctag r">Maturità AI</div>
+        <h3>Quanto è matura la governance AI della mia banca?</h3>
+        <p>Dashboard per il Board: % applicazioni AI con Checklist compilata, % sistemi alto-rischio conformi AI Act, % processi AI-enabled con governance attiva. Questo assessment richiede obbligatoriamente entrambi i framework.</p>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+          <span class="tag tg-b">TP × CL</span><span class="tag tg-o">MA × KPI</span><span class="tag tg-r">AI Act</span>
+        </div>
+      </div>
+
+      <div class="card bl-b">
+        <div class="sc-num" style="background:#dbeafe;color:var(--accent-blue);">06</div>
+        <div class="ctag b">Compliance Roadmap</div>
+        <h3>L'AI Act entra in vigore: roadmap di compliance</h3>
+        <p>Per credit scoring C.3.2 (Alto Rischio): Checklist 87% completa, gap su CL 3.10/3.15/3.21, azioni sui dati MI 2.1.1, deadline certificazione 12 mesi. Il sistema genera la scheda integrata automaticamente.</p>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+          <span class="tag tg-r">AI Act</span><span class="tag tg-g">Roadmap</span><span class="tag tg-b">MInfra</span>
+        </div>
+      </div>
+
+      <div class="card bl-o" style="grid-column:1/-1;">
+        <div class="sc-num" style="background:#fef3c7;color:#d97706;">07</div>
+        <div class="ctag o">Aggiornamento Checklist</div>
+        <h3>ABI Lab rilascia una nuova versione della Checklist: cosa cambia?</h3>
+        <p>Nuove domande sulla GenAI → il sistema identifica automaticamente le applicazioni impattate: <em>"Il sistema è protetto da prompt injection?"</em> → impatta A.1.5, A.1.2 (sistemi GenAI esposti agli utenti). <em>"Sono noti i sub-fornitori della catena AI?"</em> → impatta tutti i sistemi con API esterne (MInfra External Connectivity).</p>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">
+          <span class="tag tg-b">MA</span><span class="tag tg-r">Checklist</span><span class="tag tg-b">MInfra</span><span class="tag tg-g">Change impact</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 3: TEAM & LOGISTICA ── -->
+  <div class="panel" id="panel-3">
+    <div class="sh">
+      <span class="badge b-n">Team & Logistica</span>
+      <h2>Chi partecipa e <span class="cr">quando</span></h2>
+    </div>
+
+    <div class="grid2" style="margin-bottom:28px;">
+      <div class="card bl-r">
+        <div class="ctag r">Evento</div>
+        <h3>16–17 Giugno 2025</h3>
+        <p><strong>Officine Credem</strong> — 2 giorni intensivi in presenza. 41 partecipanti organizzati in <strong>8 squadre multibanca</strong>. Ogni team include profili tech e di dominio da banche diverse.</p>
+      </div>
+      <div class="card bl-b hl-b">
+        <div class="ctag b">Formato squadre</div>
+        <h3>Team multibanca misti</h3>
+        <p>Ogni team è composto da <strong>4–5 persone</strong> provenienti da banche diverse e partner tecnologici. La composizione è già definita — profili tecnici (data scientist, AI engineer) e di dominio (compliance, AI governance) insieme.</p>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:0;">
+      <div class="card" style="padding-bottom:8px;">
+        <div class="ctag">Giorno 1 — Martedì 16 Giugno</div>
+        <div class="agenda-row">
+          <span class="agenda-time">10:30</span>
+          <div class="agenda-body"><strong>Arrivo partecipanti</strong><span>Registrazione, badge, welcome coffee</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">11:00</span>
+          <div class="agenda-body"><strong>Benvenuto & Kick-off</strong><span>Speech Datapizza · ABI/ABI Lab · Credem (Officine) · Talk motivazionale</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">12:30</span>
+          <div class="agenda-body"><strong>Pranzo</strong><span></span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">14:00</span>
+          <div class="agenda-body"><strong>Avvio Challenge</strong><span>Distribuzione materiali · Spiegazione challenge e criteri di valutazione (30 min)</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">14:30 – 19:30</span>
+          <div class="agenda-body"><strong>Prima sessione di lavoro</strong><span>Sviluppo prototipo · Sprint 1</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">19:30</span>
+          <div class="agenda-body"><strong>Apericena</strong><span></span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">19:30 – 22:00</span>
+          <div class="agenda-body"><strong>Sessione serale</strong><span>Sprint 2 · Mentoring disponibile</span></div>
+        </div>
+        <div class="agenda-row" style="border-bottom:none;">
+          <span class="agenda-time">22:00</span>
+          <div class="agenda-body"><strong>Chiusura Officine</strong><span>Pernottamento in hotel (autonomo)</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding-bottom:8px;">
+        <div class="ctag">Giorno 2 — Mercoledì 17 Giugno</div>
+        <div class="agenda-row">
+          <span class="agenda-time">09:00 – 12:30</span>
+          <div class="agenda-body"><strong>Sessione finale</strong><span>Sprint 3 · Finalizzazione prototipo · Preparazione presentazione</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">12:30</span>
+          <div class="agenda-body"><strong>⏹ Stop sviluppo</strong><span>Consegna materiali</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">12:30</span>
+          <div class="agenda-body"><strong>Pranzo</strong><span></span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">14:00 – 15:30</span>
+          <div class="agenda-body"><strong>Pitch alla giuria</strong><span>Ogni team: 15 min presentazione + 5 min Q&A · 8 team · max 3 giudici</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">15:30 – 16:00</span>
+          <div class="agenda-body"><strong>Delibera della giuria</strong><span></span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">16:00</span>
+          <div class="agenda-body"><strong>🏆 Premiazione</strong><span>Annuncio team vincitore</span></div>
+        </div>
+        <div class="agenda-row" style="border-bottom:none;">
+          <span class="agenda-time">16:30</span>
+          <div class="agenda-body"><strong>Chiusura ufficiale</strong><span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── PANEL 4: VALUTAZIONE ── -->
+  <div class="panel" id="panel-4">
+    <div class="sh">
+      <span class="badge b-g">Valutazione</span>
+      <h2>Come sarete <span class="cr">giudicati</span></h2>
+    </div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.7;">La giuria è composta da <strong style="color:var(--navy);">max 3 giudici</strong>. Ogni team ha <strong style="color:var(--navy);">15 minuti di pitch + 5 di Q&A</strong>. La valutazione avviene su 5 criteri.</p>
+
+    <div class="card" style="margin-bottom:18px;padding:28px 32px;">
+      <div class="eval-row">
+        <div class="eval-bar-wrap">
+          <div class="eval-name">Profondità di integrazione</div>
+          <div class="eval-desc">Il sistema ha compreso e collegato operativamente i due framework, non li ha semplicemente giustapposti.</div>
+        </div>
+      </div>
+      <div class="eval-row">
+        <div class="eval-bar-wrap">
+          <div class="eval-name">Capacità trasversale</div>
+          <div class="eval-desc">Sa navigare simultaneamente le 5 tassonomie architetturali E gli strumenti di governance (Checklist + KPI).</div>
+        </div>
+      </div>
+      <div class="eval-row">
+        <div class="eval-bar-wrap">
+          <div class="eval-name">Utilità concreta</div>
+          <div class="eval-desc">Risolve problemi reali di governance AI che oggi richiedono lavoro manuale su 8 file separati (5 tassonomie + Checklist + KPI + guida).</div>
+        </div>
+      </div>
+      <div class="eval-row">
+        <div class="eval-bar-wrap">
+          <div class="eval-name">Qualità del collegamento</div>
+          <div class="eval-desc">I ponti tra architettura e governance sono motivati, contestualizzati e verificabili — non casuali.</div>
+        </div>
+      </div>
+      <div class="eval-row">
+        <div class="eval-bar-wrap">
+          <div class="eval-name">Complessità tecnica</div>
+          <div class="eval-desc">Scelte architetturali non banali, funzionali allo scaling e alla manutenzione della soluzione.</div>
+        </div>
+      </div>
+      <div class="eval-row">
+        <div class="eval-bar-wrap">
+          <div class="eval-name">Uso degli strumenti di GenAI</div>
+          <div class="eval-desc">Uso efficace di strumenti quali chatbot (Gemini, Copilot, ChatGPT) e code assistant (Cursor, Claude Code) durante l'hackathon.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="darkcard">
+      <div class="dtag">// Deliverable richiesti</div>
+      <div class="drow">
+        <span class="dchip dc-r">OBBLIGATORIO</span>
+        <span class="deq"><strong style="color:#f1f5f9;">Pitch deck</strong> — max 10 slide · formato .pptx o .pdf · consegna entro le 12:30 del Giorno 2</span>
+      </div>
+      <div class="drow">
+        <span class="dchip dc-g">CONSIGLIATO</span>
+        <span class="deq"><strong style="color:#f1f5f9;">Demo funzionante</strong> — prototipo live da mostrare durante il pitch · incide significativamente sul punteggio</span>
+        <span class="dnote">Non serve production-ready — basta che funzioni</span>
+      </div>
+      <div class="drow">
+        <span class="dchip dc-b">OPZIONALE</span>
+        <span class="deq"><strong style="color:#f1f5f9;">Repository codice</strong> — GitHub/GitLab con README di installazione</span>
+      </div>
+    </div>
+
+    <div class="card bl-o hl-o" style="margin-top:4px;">
+      <div class="ctag o">Strumenti ammessi</div>
+      <h3>Qualsiasi tecnologia è ammessa — e incoraggiata</h3>
+      <p>LLM proprietari o open-source, RAG, vector database, agent framework, graph database. <strong>È consentito e incoraggiato</strong> l'uso di strumenti AI durante lo sviluppo: Cursor, Claude Code, GitHub Copilot, ChatGPT, Gemini. Il lavoro deve essere prodotto durante le due giornate dell'hackathon.</p>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="btn-dark" id="btn-prev" onclick="nav(-1)">← Precedente</button>
+  <div class="pinfo">
+    <div class="pbar"><div class="pfill" id="pfill" style="width:20%"></div></div>
+    <span id="ptxt">Passo 1 di 5</span>
+  </div>
+  <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
+</div>
+
+</div><!-- /app-shell -->
+
+<script>
+let cur = 0;
+const TOT = 5;
+
+function goTo(idx) {
+  document.getElementById('panel-' + cur).classList.remove('active');
+  const tabs = document.querySelectorAll('.step-tab');
+  tabs[cur].classList.remove('active');
+  cur = idx;
+  document.getElementById('panel-' + cur).classList.add('active');
+  tabs.forEach(function(t, i) {
+    t.classList.remove('active', 'done');
+    if (i < cur) t.classList.add('done');
+    if (i === cur) t.classList.add('active');
+  });
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === TOT - 1;
+  document.getElementById('ptxt').textContent = 'Passo ' + (cur + 1) + ' di ' + TOT;
+  document.getElementById('pfill').style.width = ((cur + 1) / TOT * 100) + '%';
+  var mainEl = document.querySelector('.app-shell .main');
+  if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0 });
+}
+
+function nav(dir) {
+  goTo(Math.max(0, Math.min(TOT - 1, cur + dir)));
+}
+
+function startChallenge() {
+  document.getElementById('hero-page').classList.add('hidden');
+  var shell = document.getElementById('app-shell');
+  shell.classList.add('visible');
+  goTo(0);
+  window.scrollTo({ top: 0 });
+}
+
+document.getElementById('btn-prev').disabled = true;
+</script>
+
+</body>
+</html>
