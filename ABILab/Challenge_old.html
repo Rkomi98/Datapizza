@@ -367,38 +367,6 @@ tbody tr:hover td { background:var(--bg); }
   .step-tab { padding: 11px 8px; font-size: 11px; }
 }
 
-/* DATASET INNER TABS */
-.ds-tabs {
-  display:flex; border-bottom:2px solid var(--border);
-  margin-bottom:24px; overflow-x:auto; scrollbar-width:none;
-}
-.ds-tabs::-webkit-scrollbar { display:none; }
-.ds-tab {
-  padding:10px 22px; font-size:13px; font-weight:700; color:var(--muted);
-  cursor:pointer; border:none; background:none;
-  font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0;
-  border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .15s;
-}
-.ds-tab:hover { color:var(--navy); }
-.ds-tab.active { color:var(--accent-red); border-bottom-color:var(--accent-red); }
-.ds-pane { display:none; }
-.ds-pane.active { display:block; animation:fadeUp .25s ease forwards; }
-.dl-btn {
-  display:inline-flex; align-items:center; gap:8px;
-  background:var(--navy); color:#fff; padding:12px 22px; border-radius:10px;
-  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700;
-  text-decoration:none; transition:all .15s; margin-top:8px;
-}
-.dl-btn:hover { background:var(--navy2); transform:translateY(-1px); }
-.sheet-list { list-style:none; margin-top:4px; }
-.sheet-list li { font-size:13px; color:var(--muted); padding:5px 0 5px 20px; position:relative; border-bottom:1px solid var(--border); line-height:1.5; }
-.sheet-list li:last-child { border-bottom:none; }
-.sheet-list li::before { content:'▸'; position:absolute; left:0; color:var(--accent-red); font-size:11px; top:7px; }
-.sheet-list li strong { color:var(--navy); font-family:'DM Mono',monospace; font-size:11.5px; }
-@media(max-width:640px){
-  .ds-tab { padding:10px 14px; font-size:12px; }
-}
-
 /* ACRONYM TOOLTIPS */
 .abbr {
   cursor: pointer;
@@ -497,7 +465,6 @@ tbody tr:hover td { background:var(--bg); }
   <button class="step-tab" onclick="goTo(2)"><span class="snum">3</span> Scenari</button>
   <button class="step-tab" onclick="goTo(3)"><span class="snum">4</span> Team & Logistica</button>
   <button class="step-tab" onclick="goTo(4)"><span class="snum">5</span> Valutazione</button>
-  <button class="step-tab" onclick="goTo(5)"><span class="snum">6</span> Dataset</button>
 </div>
 
 <div class="main">
@@ -794,14 +761,6 @@ tbody tr:hover td { background:var(--bg); }
       </div>
     </div>
 
-    <div class="darkcard" style="margin-top:28px;">
-      <div class="dtag">// Budget API</div>
-      <p style="color:#f1f5f9;font-size:15px;font-weight:700;margin-bottom:10px;">€100 di crediti OpenAI per ogni team</p>
-      <p style="color:#94a3b8;font-size:14px;line-height:1.75;">Ogni team parte con €100 di crediti.<br>
-      Mi raccomando, tenete da parte una cifra solo per la demo. Non toccateli. Per tutto il resto: usate il modello più economico mentre sviluppate, passate a quello buono solo quando state rifinendo l'output finale.<br><br>
-      Una cosa pratica: monitorate i costi. Ci vogliono cinque minuti e vi salva da brutte sorprese a fine challenge.</p>
-    </div>
-
   </div>
 
   <!-- ── PANEL 4: VALUTAZIONE ── -->
@@ -875,179 +834,14 @@ tbody tr:hover td { background:var(--bg); }
     </div>
   </div>
 
-
-  <!-- PANEL 5: DATASET -->
-  <div class="panel" id="panel-5">
-    <div class="sh">
-      <span class="badge b-b">Dataset</span>
-      <h2>Starter Kit <span class="cr">Dataset</span></h2>
-    </div>
-    <p style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.7;">
-      Tre dataset fittizi che rappresentano altrettanti profili di banca con sistemi AI operativi.
-      Ogni dataset è l'<strong style="color:var(--navy);">input</strong> per il sistema che il team costruirà durante l'hackathon —
-      le risposte in Checklist rappresentano lo stato attuale della banca (quello che sa già di sé stessa).
-    </p>
-
-    <!-- INNER SUB-TABS -->
-    <div class="ds-tabs">
-      <button class="ds-tab active" onclick="dsTab(0)">📘 Scenario A — BCC Consorzio</button>
-      <button class="ds-tab" onclick="dsTab(1)">📙 Scenario D — Vendor Esterno</button>
-      <button class="ds-tab" onclick="dsTab(2)">📗 Scenario P — Portfolio Banca</button>
-    </div>
-
-    <!-- SCENARIO A -->
-    <div class="ds-pane active">
-      <div class="card bl-b hl-b" style="margin-bottom:18px;">
-        <div class="ctag b">Scenario A</div>
-        <h3>Iccrea Banca S.p.A. — Gruppo BCC-CR</h3>
-        <p>Una holding bancaria gestisce centralmente <strong>2 sistemi AI</strong> distribuiti a <strong>200 affiliate BCC</strong>. Il problema: la Checklist AI Governance è stata compilata una sola volta dalla capogruppo — ma ogni affiliata è un soggetto giuridico autonomo.</p>
-        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> date le 5 tassonomie di CreditScore-BCC, quali domande della Checklist richiedono una risposta diversa tra chi controlla il modello (capogruppo) e chi esegue il processo (affiliata)? Quali KPI non sono calcolabili dall'affiliata per mancanza di dati nel suo perimetro infrastrutturale?</p>
-      </div>
-
-      <div class="tcard">
-        <table>
-          <thead>
-            <tr><th>Sistema</th><th>ID</th><th>Tipo</th><th>Rischio AI Act</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>CreditScore-BCC</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">CS-BCC-01</td><td>Credit scoring ML centralizzato</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">ALTO RISCHIO</span></td></tr>
-            <tr><td><strong>FraudGuard-BCC</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">FG-BCC-02</td><td>Fraud detection e AML monitoring</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">RISCHIO LIMITATO</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card" style="margin-top:18px;padding:24px 28px;">
-        <div class="ctag" style="background:#eff6ff;color:#1e40af;">5 sheet nel file</div>
-        <ul class="sheet-list" style="list-style:none;margin-top:12px;">
-          <li><strong>SCENARIO</strong> — Contesto narrativo: chi è la banca, qual è il problema, qual è la sfida operativa. Da leggere prima di tutto.</li>
-          <li><strong>SISTEMI_AI</strong> — Inventario dei sistemi AI con tipo di modello, classificazione AI Act e stato Checklist.</li>
-          <li><strong>MAPPING_ARCHITETTURALE</strong> — Mapping dei sistemi sulle 5 tassonomie ABI Lab (TP, MSB, MI, MA, MInfra). Cuore del dataset.</li>
-          <li><strong>CHECKLIST_GOVERNANCE</strong> — Stato attuale della governance: risposte banca, flag gap (🔴 critico / ⚠️ da verificare / ℹ️ informativo).</li>
-          <li><strong>KPI_SELEZIONATI</strong> — <em>Sheet vuoto da compilare.</em> Il sistema deve selezionare i KPI rilevanti dalla Long-list e motivare la scelta.</li>
-        </ul>
-      </div>
-
-      <a class="dl-btn" href="https://docs.google.com/spreadsheets/d/1omt5G1YeMX9B9YBdrko9jnuOunpDxXyE/edit?usp=sharing&ouid=113916780792634236249&rtpof=true&sd=true" target="_blank">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Apri Dataset Scenario A
-      </a>
-    </div>
-
-    <!-- SCENARIO D -->
-    <div class="ds-pane">
-      <div class="card bl-o hl-o" style="margin-bottom:18px;">
-        <div class="ctag o">Scenario D — Bonus</div>
-        <h3>Banca Meridiana S.p.A. — Retail, 2,4 mld € attivi</h3>
-        <p>Una banca di medie dimensioni ha acquistato <strong>2 sistemi AI-as-a-Service</strong> da vendor esterni. Il problema: la sezione Technical Execution della Checklist chiede dettagli tecnici che solo il vendor conosce. La banca invia dati e riceve uno score — non vede il modello, i dati di training, né le metriche interne.</p>
-        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> quali domande della Checklist non sono compilabili dalla banca senza accesso al modello interno del vendor? Quali KPI sono calcolabili sull'output ricevuto vs quelli che richiedono accesso al modello?</p>
-      </div>
-
-      <div class="tcard">
-        <table>
-          <thead>
-            <tr><th>Sistema</th><th>ID</th><th>Vendor</th><th>Rischio AI Act</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>ProximaScore</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">PS-MER-01</td><td>ProximaTech S.r.l. (Roma)</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">ALTO RISCHIO</span></td></tr>
-            <tr><td><strong>SentinelAI</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">SA-MER-02</td><td>GuardTech B.V. (Olanda)</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">RISCHIO LIMITATO</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card" style="margin-top:18px;padding:24px 28px;">
-        <div class="ctag" style="background:#fff7ed;color:#c2410c;">5 sheet nel file</div>
-        <ul class="sheet-list" style="list-style:none;margin-top:12px;">
-          <li><strong>SCENARIO</strong> — Contesto narrativo: chi è la banca, il problema del vendor black-box, la sfida operativa.</li>
-          <li><strong>SISTEMI_AI</strong> — Inventario dei sistemi AI-as-a-Service con metadati di governance e classificazione AI Act.</li>
-          <li><strong>MAPPING_ARCHITETTURALE</strong> — Mapping sulle 5 tassonomie: dove si inseriscono i sistemi vendor nell'architettura della banca.</li>
-          <li><strong>CHECKLIST_GOVERNANCE</strong> — Risposte con evidenza delle domande bloccate per assenza di accesso al modello vendor.</li>
-          <li><strong>KPI_SELEZIONATI</strong> — <em>Sheet vuoto da compilare.</em> Scegliere i KPI calcolabili sull'output vs quelli che richiedono il modello.</li>
-        </ul>
-      </div>
-
-      <a class="dl-btn" href="https://docs.google.com/spreadsheets/d/10drJinNTyD6dxI-1PaWTLwOjxp8Oaus3/edit?usp=sharing&ouid=113916780792634236249&rtpof=true&sd=true" target="_blank">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Apri Dataset Scenario D
-      </a>
-    </div>
-
-    <!-- SCENARIO P -->
-    <div class="ds-pane">
-      <div class="card bl-g hl-g" style="margin-bottom:18px;">
-        <div class="ctag g">Scenario P</div>
-        <h3>Banca Aurora S.p.A. — Retail-Commercial, 4,8 mld € attivi, 72 filiali</h3>
-        <p>Una banca di medie-grandi dimensioni ha adottato <strong>18 sistemi AI</strong> in 5 anni. La governance è cresciuta in modo <strong>disomogeneo</strong>: alcuni sistemi hanno copertura quasi completa (85–90%), altri zero (0%). Un sistema è Shadow AI adottato senza alcun processo di approvazione.</p>
-        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> dato il portfolio completo, quali sono i gap di governance trasversali a più sistemi (pattern sistemici vs gap isolati)? Come si costruisce una roadmap di compliance ordinata per rischio AI Act, urgenza e fattibilità?</p>
-      </div>
-
-      <div class="tcard">
-        <table>
-          <thead>
-            <tr><th>Sistema</th><th>ID</th><th>Categoria</th><th>Rischio AI Act</th><th>Copertura CL</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>CreditRisk-ML</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-001</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>85%</td></tr>
-            <tr><td><strong>CollectionScore</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-002</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>40%</td></tr>
-            <tr><td><strong>AML-Decisor</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-003</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>30%</td></tr>
-            <tr><td><strong>UnderwriteAI</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-004</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>15%</td></tr>
-            <tr><td><strong>FraudNet-Card</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-005</td><td>Rischio Limitato</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">LIMITATO</span></td><td>70%</td></tr>
-            <tr><td><strong>FraudNet-AML</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-006</td><td>Rischio Limitato</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">LIMITATO</span></td><td>50%</td></tr>
-            <tr style="background:#fef9ec;"><td><strong>ChurnPredictor</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-007</td><td>Rischio Limitato</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td><strong style="color:#b45309;">0% ⚠️ anomalia</strong></td></tr>
-            <tr><td><strong>CrossSellEngine</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-008</td><td>Rischio Limitato</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td>0%</td></tr>
-            <tr><td><strong>ChatBanca</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GC-010</td><td>GenAI Conversazionale</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">LIMITATO</span></td><td>80%</td></tr>
-            <tr style="background:#fef9ec;"><td><strong>AdvisorAI-WM</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GC-012</td><td>GenAI Conversazionale</td><td><span style="background:#ede9fe;color:#5b21b6;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">AMBIGUO ⚠️</span></td><td>20%</td></tr>
-            <tr><td><strong>RegTechGPT</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GI-014</td><td>GenAI Interno</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td>90%</td></tr>
-            <tr style="background:#fff0f0;"><td><strong>DataAnalyst-AI</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GI-016</td><td>GenAI Interno</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td><strong style="color:#dc2626;">0% 🚨 Shadow AI</strong></td></tr>
-            <tr><td><strong>ScoreMax-Ext</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">VB-017</td><td>Vendor-Based</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>35%</td></tr>
-            <tr><td colspan="5" style="text-align:center;font-size:11px;color:var(--muted);padding:6px;font-style:italic;">+ 4 ulteriori sistemi nel dataset (VoiceBanker, MortgageAssist, ContractAI, BehaviorSeg-Ext)</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card" style="margin-top:18px;padding:24px 28px;">
-        <div class="ctag g">6 sheet nel file</div>
-        <ul class="sheet-list" style="list-style:none;margin-top:12px;">
-          <li><strong>SCENARIO</strong> — Contesto del portfolio: 18 sistemi in 5 anni, governance disomogenea, anomalie intenzionali da scoprire.</li>
-          <li><strong>SISTEMI_AI</strong> — Inventario completo dei 18 sistemi con categoria, rischio AI Act e copertura Checklist.</li>
-          <li><strong>MAPPING_ARCHITETTURALE</strong> — Mapping completo sulle 5 tassonomie per tutti i 18 sistemi.</li>
-          <li><strong>CHECKLIST_GOVERNANCE</strong> — Stato governance per sistema, con gap critici evidenziati.</li>
-          <li><strong>KPI_STATUS</strong> — Stato misurazione KPI per ogni sistema: classe (Business/Etica/Modello), tipo PRE/POST-PROD, tool, owner e gap tecnico.</li>
-          <li><strong>CHANGE_IMPACT</strong> — 5 nuove domande GenAI-specific non ancora in Checklist v5.0 (prompt injection, hallucination, copyright, supply chain AI, energy consumption AI Act Art.97).</li>
-        </ul>
-      </div>
-
-      <div class="darkcard" style="margin-top:4px;">
-        <div class="dtag">// Anomalie intenzionali — da individuare</div>
-        <div class="drow">
-          <span class="dchip dc-r">RL-007</span>
-          <span class="deq"><strong style="color:#f1f5f9;">ChurnPredictor</strong> — 0% copertura Checklist ma KPI già definiti e misurati. Anomalia da analizzare.</span>
-        </div>
-        <div class="drow">
-          <span class="dchip dc-b">GC-012</span>
-          <span class="deq"><strong style="color:#f1f5f9;">AdvisorAI-WM</strong> — classificazione AI Act ambigua: potenzialmente Alto Rischio per consulenza patrimoniale.</span>
-        </div>
-        <div class="drow">
-          <span class="dchip dc-r">GI-016</span>
-          <span class="deq"><strong style="color:#f1f5f9;">DataAnalyst-AI</strong> — Shadow AI adottato senza alcun processo di approvazione. 0% governance.</span>
-        </div>
-      </div>
-
-      <a class="dl-btn" href="https://docs.google.com/spreadsheets/d/19Sx5Fcj5gOAQvFX7_8H6SDXhZztOMuKY/edit?usp=sharing&ouid=113916780792634236249&rtpof=true&sd=true" target="_blank" style="margin-top:18px;">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Apri Dataset Scenario P
-      </a>
-    </div>
-
-  </div><!-- /panel-5 -->
-
 </div><!-- /main -->
 
 <!-- BOTTOM NAV -->
 <div class="bnav">
   <button class="btn-dark" id="btn-prev" onclick="nav(-1)">← Precedente</button>
   <div class="pinfo">
-    <div class="pbar"><div class="pfill" id="pfill" style="width:16.67%"></div></div>
-    <span id="ptxt">Passo 1 di 6</span>
+    <div class="pbar"><div class="pfill" id="pfill" style="width:20%"></div></div>
+    <span id="ptxt">Passo 1 di 5</span>
   </div>
   <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
 </div>
@@ -1063,7 +857,7 @@ tbody tr:hover td { background:var(--bg); }
 
 <script>
 let cur = 0;
-const TOT = 6;
+const TOT = 5;
 
 function goTo(idx) {
   document.getElementById('panel-' + cur).classList.remove('active');
@@ -1089,15 +883,6 @@ function goTo(idx) {
 
 function nav(dir) {
   goTo(Math.max(0, Math.min(TOT - 1, cur + dir)));
-}
-
-function dsTab(n) {
-  document.querySelectorAll('.ds-tab').forEach(function(t, i) {
-    t.classList.toggle('active', i === n);
-  });
-  document.querySelectorAll('.ds-pane').forEach(function(p, i) {
-    p.classList.toggle('active', i === n);
-  });
 }
 
 function startChallenge() {
