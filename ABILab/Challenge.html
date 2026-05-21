@@ -577,6 +577,37 @@ tbody tr:hover td { background:var(--bg); }
         <span class="dnote">La risposta deve essere simultanea, non sequenziale</span>
       </div>
     </div>
+
+    <div class="card" style="margin-top:4px;padding:28px 32px;">
+      <div class="ctag" style="background:#f0fdf4;color:#166534;">Materiali</div>
+      <h3 style="margin-bottom:6px;">Scarica i framework e installa la libreria</h3>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:22px;line-height:1.65;">Tutto quello che ti serve per iniziare. I framework sono i file di riferimento ufficiali ABI Lab — tienili aperti mentre lavori.</p>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <a class="dl-btn" href="https://drive.google.com/drive/folders/1c9Bjzq_WXUc7cnmtBg4Fq6k7B9zWTLBM?usp=sharing" target="_blank">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Framework Architetturale ABI Lab
+        </a>
+        <a class="dl-btn" href="https://drive.google.com/drive/folders/1dPFPRk1aFdtedM-0ht_52YSXp2m6febf?usp=sharing" target="_blank">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          AI Governance Framework
+        </a>
+      </div>
+
+      <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px;">
+        <p style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;">Libreria consigliata — datapizza-ai</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.65;">Framework Python made in Italy per costruire agenti e pipeline RAG senza boilerplate. Supporta OpenAI, Google, Anthropic e modelli locali via Ollama. Richiede Python ≥ 3.10.</p>
+        <div style="background:var(--navy);border-radius:10px;padding:14px 18px;font-family:'DM Mono',monospace;font-size:13px;color:#93c5fd;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <span>pip install datapizza-ai</span>
+          <button onclick="navigator.clipboard.writeText('pip install datapizza-ai');this.textContent='✓ Copiato';setTimeout(()=>this.textContent='Copia',1800);" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#f1f5f9;border-radius:6px;padding:5px 12px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap;">Copia</button>
+        </div>
+        <a href="https://docs.datapizza.ai/latest/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Documentazione ufficiale
+        </a>
+      </div>
+    </div>
+
   </div>
 
   <!-- ── PANEL 1: I FRAMEWORK ── -->
@@ -846,7 +877,7 @@ tbody tr:hover td { background:var(--bg); }
       <div class="eval-row">
         <div class="eval-bar-wrap">
           <div class="eval-name">Uso degli strumenti di GenAI</div>
-          <div class="eval-desc">Uso efficace di strumenti quali chatbot (Gemini, Copilot, ChatGPT) e code assistant (Cursor, Claude Code) durante l'hackathon.</div>
+          <div class="eval-desc">Uso efficace di strumenti quali chatbot (Gemini, Copilot, ChatGPT) e code assistant (Cursor, Claude Code) durante l'hackathon. Rientra in questo criterio anche la capacità di gestire il budget API in modo consapevole: quante chiamate, con quale modello, con quale efficienza.</div>
         </div>
       </div>
     </div>
@@ -865,6 +896,10 @@ tbody tr:hover td { background:var(--bg); }
       <div class="drow">
         <span class="dchip dc-b">OPZIONALE</span>
         <span class="deq"><strong style="color:#f1f5f9;">Repository codice</strong> — GitHub/GitLab con README di installazione</span>
+      </div>
+      <div class="drow">
+        <span class="dchip dc-g">CONSIGLIATO</span>
+        <span class="deq"><strong style="color:#f1f5f9;">Rendiconto spesa API</strong> — quanto avete speso, su cosa, e se lo rifareste uguale. Un numero basta, non serve un documento formale.</span>
       </div>
     </div>
 
