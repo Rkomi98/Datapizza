@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ABI Lab Hackathon — AI Governance & Architecture</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <style>
 :root {
   --bg: #f7f8fa;
@@ -142,13 +143,26 @@ nav {
 .card ul li::before { content:'→'; position:absolute; left:0; color:var(--accent-red); font-weight:700; }
 
 /* DARK CODE BOX */
-.codebox { background:var(--navy); border-radius:10px; padding:16px 20px; margin-top:14px; color:#e2e8f0; font-family:'DM Mono',monospace; font-size:12.5px; line-height:2; overflow-x:auto; }
+.codebox { background:var(--navy); border-radius:10px; padding:16px 20px; margin-top:14px; color:#e2e8f0; font-family:'DM Mono',monospace; font-size:12.5px; line-height:2; overflow-x:auto; position:relative; }
+.copy-btn {
+  position:absolute; top:10px; right:10px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+  color:#94a3b8; border-radius:6px; padding:4px 11px;
+  font-size:11px; font-family:'DM Sans',sans-serif; font-weight:700;
+  cursor:pointer; transition:all .15s; opacity:0; white-space:nowrap;
+  line-height:1.4;
+}
+.codebox:hover .copy-btn { opacity:1; }
+.copy-btn:hover { background:rgba(255,255,255,.16); color:#f1f5f9; }
+.copy-btn.copied { color:#6ee7b7; border-color:rgba(110,231,183,.35); background:rgba(110,231,183,.08); opacity:1; }
 .codebox .cr { color:#f87171; font-weight:700; }
 .codebox .cg { color:#6ee7b7; font-weight:700; }
 .codebox .co { color:#fcd34d; font-weight:700; }
 .codebox .cb { color:#93c5fd; font-weight:700; }
 .codebox .cm { color:#475569; font-style:italic; font-size:11px; }
 .codebox .op { color:#94a3b8; }
+.codebox pre { margin:0; font-family:inherit; font-size:inherit; color:inherit; line-height:inherit; background:none; white-space:pre-wrap; word-break:break-word; }
+.codebox code, .codebox code.hljs { background:transparent; padding:0; font-family:inherit; font-size:inherit; line-height:inherit; color:#e2e8f0; white-space:pre-wrap; word-break:break-word; }
 
 /* DARK SUMMARY CARD */
 .darkcard { background:var(--navy); border-radius:14px; padding:30px 36px; margin-bottom:18px; color:#e2e8f0; }
@@ -399,6 +413,26 @@ tbody tr:hover td { background:var(--bg); }
   .ds-tab { padding:10px 14px; font-size:12px; }
 }
 
+/* API INNER TABS */
+.api-tabs {
+  display:flex; border-bottom:2px solid var(--border);
+  margin-bottom:24px; overflow-x:auto; scrollbar-width:none;
+}
+.api-tabs::-webkit-scrollbar { display:none; }
+.api-tab {
+  padding:10px 22px; font-size:13px; font-weight:700; color:var(--muted);
+  cursor:pointer; border:none; background:none;
+  font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0;
+  border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .15s;
+}
+.api-tab:hover { color:var(--navy); }
+.api-tab.active { color:var(--accent-blue); border-bottom-color:var(--accent-blue); }
+.api-pane { display:none; }
+.api-pane.active { display:block; animation:fadeUp .25s ease forwards; }
+@media(max-width:640px){
+  .api-tab { padding:10px 14px; font-size:12px; }
+}
+
 /* ACRONYM TOOLTIPS */
 .abbr {
   cursor: pointer;
@@ -493,11 +527,12 @@ tbody tr:hover td { background:var(--bg); }
 <!-- STEP NAV -->
 <div class="step-nav">
   <button class="step-tab active" onclick="goTo(0)"><span class="snum">1</span> La Sfida</button>
-  <button class="step-tab" onclick="goTo(1)"><span class="snum">2</span> I Framework</button>
-  <button class="step-tab" onclick="goTo(2)"><span class="snum">3</span> Scenari</button>
-  <button class="step-tab" onclick="goTo(3)"><span class="snum">4</span> Team & Logistica</button>
-  <button class="step-tab" onclick="goTo(4)"><span class="snum">5</span> Valutazione</button>
-  <button class="step-tab" onclick="goTo(5)"><span class="snum">6</span> Dataset</button>
+  <button class="step-tab" onclick="goTo(1)"><span class="snum">2</span> API Quickstart</button>
+  <button class="step-tab" onclick="goTo(2)"><span class="snum">3</span> I Framework</button>
+  <button class="step-tab" onclick="goTo(3)"><span class="snum">4</span> Scenari</button>
+  <button class="step-tab" onclick="goTo(4)"><span class="snum">5</span> Team & Logistica</button>
+  <button class="step-tab" onclick="goTo(5)"><span class="snum">6</span> Valutazione</button>
+  <button class="step-tab" onclick="goTo(6)"><span class="snum">7</span> Dataset</button>
 </div>
 
 <div class="main">
@@ -610,8 +645,397 @@ tbody tr:hover td { background:var(--bg); }
 
   </div>
 
-  <!-- ── PANEL 1: I FRAMEWORK ── -->
+  <!-- ── PANEL 1: API QUICKSTART ── -->
   <div class="panel" id="panel-1">
+    <div class="sh">
+      <span class="badge b-bl">Dev Quickstart</span>
+      <h2>Prima <span class="cb">chiamata API</span></h2>
+    </div>
+
+    <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7;">
+      Guida pratica per chi non ha mai fatto una chiamata a un LLM via codice. Scegli la libreria che preferisci, tutte leggono la stessa <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;">OPENAI_API_KEY</code> dall'ambiente.
+    </p>
+
+    <!-- STEP 0: API KEY -->
+    <div class="card bl-r" style="margin-bottom:8px;">
+      <div class="ctag r">Step 0 — Prima di tutto</div>
+      <h3>Non mettere mai la chiave nel codice</h3>
+      <p>Usa un file <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;">.env</code> nella root del progetto. Le librerie OpenAI, LangChain, LlamaIndex e Datapizza AI la leggono tutte dalla stessa variabile d'ambiente.</p>
+    </div>
+
+    <div class="grid3" style="margin-bottom:8px;">
+
+      <div class="card bl-r">
+        <div class="ctag r">1 — Installa dotenv</div>
+        <h3>pip install python-dotenv</h3>
+        <div class="codebox" style="margin-top:10px;"><pre><code class="language-bash">pip install python-dotenv</code></pre></div>
+        <p style="margin-top:12px;font-size:13px;">Libreria standard per caricare variabili da file <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">.env</code> nell'ambiente Python. Un solo comando, nessuna dipendenza pesante.</p>
+      </div>
+
+      <div class="card bl-o">
+        <div class="ctag o">2 — Crea il file .env</div>
+        <h3>Nella root del progetto</h3>
+        <div class="codebox" style="margin-top:10px;"><pre><code class="language-bash"># file: .env  (nella stessa cartella del tuo script)
+
+OPENAI_API_KEY=sk-proj-XXXXXXXXXXXX
+
+# il nome della variabile è esatto — non cambiarlo
+# niente virgolette, niente spazi attorno all'=</code></pre></div>
+        <p style="margin-top:12px;font-size:12px;color:var(--muted);">La chiave ti viene consegnata all'avvio della challenge. Budget: <strong style="color:var(--navy);">€80 per team</strong>.</p>
+      </div>
+
+      <div class="card bl-g">
+        <div class="ctag g">3 — Aggiungi .env al .gitignore</div>
+        <h3>Mai committare la chiave</h3>
+        <div class="codebox" style="margin-top:10px;"><pre># file: .gitignore
+
+.env
+__pycache__/
+*.pyc</pre></div>
+        <p style="margin-top:12px;font-size:13px;">Se la chiave finisce su GitHub, potrebbe essere un bel problema, aggiungi un file .gitgnore così formattato.</p>
+      </div>
+
+    </div>
+
+    <div class="card bl-b hl-b" style="margin-bottom:24px;">
+      <div class="ctag b">4 — Carica le variabili in Python</div>
+      <h3>Chiama <code style="font-family:'DM Mono',monospace;font-size:14px;color:var(--accent-blue);">load_dotenv()</code> all'inizio di ogni script</h3>
+      <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+
+load_dotenv()  # legge il file .env e carica le variabili nell'ambiente
+
+# leggi la chiave in una variabile da passare ai client delle librerie
+key = os.getenv("OPENAI_API_KEY")
+print(f"Chiave caricata: {key[:8]}...")  # stampa solo i primi 8 caratteri per verifica</code></pre></div>
+      <p style="margin-top:14px;font-size:13px;color:var(--muted);">
+        <strong style="color:var(--navy);">Struttura file consigliata:</strong>
+      </p>
+      <div class="codebox" style="margin-top:8px;"><pre>my-project/
+├── .env              ← chiave API (NON committare)
+├── .gitignore        ← contiene ".env"
+├── main.py           ← il tuo codice (load_dotenv() in cima)
+└── requirements.txt  ← openai  python-dotenv  ...</pre></div>
+      <div style="margin-top:14px;">
+        <a href="https://saurabh-kumar.com/python-dotenv/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Documentazione python-dotenv
+        </a>
+      </div>
+    </div>
+
+    <!-- SUB-TABS -->
+    <div id="api-tabs-container">
+      <div class="api-tabs">
+        <button class="api-tab active" onclick="apiTab(0)">OpenAI SDK</button>
+        <button class="api-tab" onclick="apiTab(1)">LangChain</button>
+        <button class="api-tab" onclick="apiTab(2)">LlamaIndex</button>
+        <button class="api-tab" onclick="apiTab(3)">Datapizza AI</button>
+      </div>
+
+      <!-- PANE 0: OpenAI SDK -->
+      <div class="api-pane active">
+        <div class="grid1">
+          <div class="card bl-b">
+            <div class="ctag b">Installazione</div>
+            <h3>La libreria ufficiale</h3>
+            <div class="codebox" style="margin-top:10px;"><pre><code class="language-bash">pip install openai python-dotenv</code></pre></div>
+            <p style="margin-top:12px;font-size:13px;">Zero dipendenze extra. Aggiornamenti rapidi al rilascio di nuovi modelli. La scelta più diretta per iniziare.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="ctag b">Chiamata base — Responses API</div>
+          <h3>Il pattern essenziale</h3>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from openai import OpenAI
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=key)
+
+response = client.responses.create(
+    model="gpt-5.4-mini",  # usa il modello economico durante lo sviluppo
+    input="La tua domanda qui"
+)
+
+print(response.output_text)</code></pre></div>
+        </div>
+
+        <div class="card bl-o hl-o" style="margin-bottom:16px;">
+          <div class="ctag o">Esempio hackathon</div>
+          <h3>Contestualizza la Checklist per un sistema AI bancario</h3>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from openai import OpenAI
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=key)
+
+sistema_ai = """
+ Nome: ChatBanca
+ Tipo: Chatbot GenAI per clienti retail
+ Posizione architetturale: MA A.1.5 (Internet Banking)
+ Processo: TP Gestione Internet Banking
+ Dati utilizzati: MI 2.1 (Anagrafiche), MI 4.2 (Transazioni)
+"""
+
+response = client.responses.create(
+    model="gpt-5.4-mini",
+    input=f"Dato questo sistema AI bancario:\n{sistema_ai}\n"
+          "Quali sono le 5 domande più critiche della Checklist AI Governance? Motiva citando i nodi tassonomici."
+)
+
+print(response.output_text)
+# Monitoraggio token consumati
+print(f"Token usati: {response.usage.total_tokens}")</code></pre></div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;padding:16px 22px;">
+          <div class="ctag">Alternativa — Chat Completions API (stile classico)</div>
+          <div class="codebox" style="margin-top:8px;"><pre><code class="language-python"># Il vecchio endpoint, ancora molto usato — stessa chiave API
+from dotenv import load_dotenv
+import os
+from openai import OpenAI
+
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+response = client.chat.completions.create(
+    model="gpt-5.4-mini",
+    messages=[{"role": "user", "content": "La tua domanda"}]
+)
+print(response.choices[0].message.content)</code></pre></div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:4px;">
+          <a href="https://platform.openai.com/docs/quickstart" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Quickstart OpenAI
+          </a>
+          <a href="https://platform.openai.com/docs/api-reference/responses" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Responses API Reference
+          </a>
+          <a href="https://platform.openai.com/docs/api-reference/chat" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Chat Completions Reference
+          </a>
+        </div>
+      </div>
+
+      <!-- PANE 1: LangChain -->
+      <div class="api-pane">
+        <div class="grid1">
+          <div class="card bl-b">
+            <div class="ctag b">Installazione</div>
+            <h3>Framework modulare per LLM</h3>
+            <div class="codebox" style="margin-top:10px;"><pre><code class="language-bash">pip install langchain langchain-openai python-dotenv</code></pre></div>
+            <p style="margin-top:12px;font-size:13px;">Astrae il provider: cambi da OpenAI ad Anthropic modificando una sola riga. Ottimo per pipeline con più step.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="ctag b">Chiamata base</div>
+          <h3>ChatOpenAI + invoke</h3>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+llm = ChatOpenAI(model="gpt-5.4-mini", api_key=key)
+
+messages = [
+    SystemMessage(content="Sei un esperto di AI Governance bancaria. Rispondi in italiano."),
+    HumanMessage(content="La tua domanda qui")
+]
+
+response = llm.invoke(messages)
+print(response.content)</code></pre></div>
+        </div>
+
+        <div class="card bl-o hl-o" style="margin-bottom:16px;">
+          <div class="ctag o">Esempio hackathon — Chain con prompt template</div>
+          <h3>Pipeline: sistema AI → domande Checklist contestualizzate</h3>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+llm = ChatOpenAI(model="gpt-5.4-mini", api_key=key)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Sei un esperto AI Governance bancaria. Cita sempre i nodi tassonomici ABI Lab."),
+    ("human", "Sistema AI:\n{sistema}\n\nDomande Checklist più critiche e perché:")
+])
+
+chain = prompt | llm
+
+result = chain.invoke({
+    "sistema": "ChatBanca su MA A.1.5, dati MI 2.1 — chatbot retail Internet Banking"
+})
+print(result.content)</code></pre></div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:4px;">
+          <a href="https://python.langchain.com/docs/integrations/chat/openai/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            LangChain + OpenAI
+          </a>
+          <a href="https://python.langchain.com/docs/concepts/lcel/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            LCEL — pipe operator
+          </a>
+          <a href="https://python.langchain.com/api_reference/core/prompts/langchain_core.prompts.chat.ChatPromptTemplate.html" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            ChatPromptTemplate API
+          </a>
+        </div>
+      </div>
+
+      <!-- PANE 2: LlamaIndex -->
+      <div class="api-pane">
+        <div class="grid1">
+          <div class="card bl-b">
+            <div class="ctag b">Installazione</div>
+            <h3>Specializzato per RAG</h3>
+            <div class="codebox" style="margin-top:10px;"><pre><code class="language-bash">pip install llama-index-llms-openai python-dotenv</code></pre></div>
+            <p style="margin-top:12px;font-size:13px;">Per la sola chiamata all'LLM basta il pacchetto OpenAI. Per costruire una pipeline RAG completa (chunking, embedding, retrieval) aggiungi <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">llama-index</code> e <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">llama-index-embeddings-openai</code>.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="ctag b">Chiamata base — LLM diretto</div>
+          <h3>OpenAI tramite LlamaIndex</h3>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from llama_index.llms.openai import OpenAI
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+llm = OpenAI(model="gpt-5.4-mini", api_key=key)
+
+response = llm.complete("La tua domanda qui")
+print(response.text)</code></pre></div>
+        </div>
+
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:4px;">
+          <a href="https://docs.llamaindex.ai/en/stable/getting_started/installation/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Installazione LlamaIndex
+          </a>
+          <a href="https://docs.llamaindex.ai/en/stable/examples/llm/openai/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            OpenAI LLM su LlamaIndex
+          </a>
+        </div>
+      </div>
+
+      <!-- PANE 3: Datapizza AI -->
+      <div class="api-pane">
+        <div class="grid1">
+          <div class="card bl-r">
+            <div class="ctag r">Installazione</div>
+            <h3>Made in Italy, zero boilerplate</h3>
+            <div class="codebox" style="margin-top:10px;"><pre><code class="language-bash">pip install datapizza-ai python-dotenv</code></pre></div>
+            <p style="margin-top:12px;font-size:13px;">Framework Python italiano. Supporta OpenAI, Anthropic, Google e modelli locali via Ollama con un'API unificata. Richiede Python ≥ 3.10.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="ctag r">Step 1 — Chiamata base</div>
+          <h3>Client diretto in poche righe</h3>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from datapizza.clients.openai import OpenAIClient
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAIClient(
+    api_key=key,
+    model="gpt-5.4-mini",
+    system_prompt="Sei un esperto di AI Governance bancaria. Rispondi in italiano."
+)
+
+response = client.invoke("La tua domanda qui")
+print(response.text)</code></pre></div>
+        </div>
+
+        <div class="card bl-o hl-o" style="margin-bottom:16px;">
+          <div class="ctag o">Step 2 — Agent contestuale per la challenge</div>
+          <h3>Agent che conosce i framework ABI Lab</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:4px;line-height:1.6;">L'<code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">Agent</code> aggiunge memoria, tool e ragionamento multi-step sopra al client. Riceve un <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">OpenAIClient</code> già istanziato.</p>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from datapizza.agents import Agent
+from datapizza.clients.openai import OpenAIClient
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAIClient(api_key=key, model="gpt-5.4-mini")
+
+agent = Agent(
+    name="esperto_ai_governance",
+    client=client,
+    system_prompt="""Sei un esperto di AI Governance bancaria.
+        Conosci il Framework Architetturale ABI Lab (TP, MSB, MI, MA, MInfra)
+        e la Checklist AI Governance ABI Lab x Deloitte (99 domande, 4 sezioni).
+        Cita sempre i nodi tassonomici nelle risposte."""
+)
+
+# Domanda contestuale alla challenge
+result = agent.run(
+    "Per un credit scoring su MA C.3.2, quali KPI di modello devo monitorare "
+    "e quali domande Checklist sono critiche per l'AI Act?"
+)
+print(result.text)</code></pre></div>
+        </div>
+
+        <a href="https://docs.datapizza.ai/latest/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;margin-bottom:4px;">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Documentazione completa datapizza-ai
+        </a>
+      </div>
+
+    </div><!-- /api-tabs-container -->
+
+    <!-- TIPS -->
+    <div class="darkcard" style="margin-top:24px;">
+      <div class="dtag">// Consigli pratici per l'hackathon</div>
+      <div class="drow">
+        <span class="dchip dc-o">BUDGET</span>
+        <span class="deq">Sviluppa sempre con <strong style="color:#f1f5f9;">gpt-5.4-mini</strong> — costa ~5× meno di gpt-5.5. Passa al modello potente solo per rifinire l'output finale e la demo.</span>
+        <span class="dnote">€80 bastano se li gestisci bene</span>
+      </div>
+      <div class="drow">
+        <span class="dchip dc-b">DEBUG</span>
+        <span class="deq">Stampa sempre il token usage dopo ogni chiamata — così sai quanti token consumi per request e puoi ottimizzare il prompt prima di scalare.</span>
+      </div>
+      <div class="drow">
+        <span class="dchip dc-g">PROMPT</span>
+        <span class="deq">Includi sempre il contesto tassonomico nel prompt: <em style="color:#6ee7b7;">"Il sistema è su MA X.Y.Z — analizza rispetto a questo nodo architetturale"</em>. Le risposte sono molto più precise e citabili.</span>
+      </div>
+      <div class="drow">
+        <span class="dchip dc-r">SICUREZZA</span>
+        <span class="deq">Non committare mai la API key su Git. Usa <strong style="color:#f1f5f9;">.env</strong> + <strong style="color:#f1f5f9;">python-dotenv</strong> e aggiungi <code style="color:#f87171;font-family:'DM Mono',monospace;font-size:11px;">.env</code> al .gitignore prima del primo commit.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── PANEL 2: I FRAMEWORK ── -->
+  <div class="panel" id="panel-2">
     <div class="sh">
       <span class="badge b-bl">I Framework</span>
       <h2>I dati a <span class="cb">disposizione</span></h2>
@@ -664,8 +1088,8 @@ tbody tr:hover td { background:var(--bg); }
 
   </div>
 
-  <!-- ── PANEL 2: SCENARI ── -->
-  <div class="panel" id="panel-2">
+  <!-- ── PANEL 3: SCENARI ── -->
+  <div class="panel" id="panel-3">
     <div class="sh">
       <span class="badge b-o">Scenari</span>
       <h2>Possibili scenari da <span class="co">affrontare</span></h2>
@@ -735,8 +1159,8 @@ tbody tr:hover td { background:var(--bg); }
     </div>
   </div>
 
-  <!-- ── PANEL 3: TEAM & LOGISTICA ── -->
-  <div class="panel" id="panel-3">
+  <!-- ── PANEL 4: TEAM & LOGISTICA ── -->
+  <div class="panel" id="panel-4">
     <div class="sh">
       <span class="badge b-n">Team & Logistica</span>
       <h2>Chi partecipa e <span class="cr">quando</span></h2>
@@ -827,16 +1251,16 @@ tbody tr:hover td { background:var(--bg); }
 
     <div class="darkcard" style="margin-top:28px;">
       <div class="dtag">// Budget API</div>
-      <p style="color:#f1f5f9;font-size:15px;font-weight:700;margin-bottom:10px;">€100 di crediti OpenAI per ogni team</p>
-      <p style="color:#94a3b8;font-size:14px;line-height:1.75;">Ogni team parte con €100 di crediti.<br>
+      <p style="color:#f1f5f9;font-size:15px;font-weight:700;margin-bottom:10px;">€80 di crediti OpenAI per ogni team</p>
+      <p style="color:#94a3b8;font-size:14px;line-height:1.75;">Ogni team parte con €80 di crediti.<br>
       Mi raccomando, tenete da parte una cifra solo per la demo. Non toccateli. Per tutto il resto: usate il modello più economico mentre sviluppate, passate a quello buono solo quando state rifinendo l'output finale.<br><br>
       Una cosa pratica: monitorate i costi. Ci vogliono cinque minuti e vi salva da brutte sorprese a fine challenge.</p>
     </div>
 
   </div>
 
-  <!-- ── PANEL 4: VALUTAZIONE ── -->
-  <div class="panel" id="panel-4">
+  <!-- ── PANEL 5: VALUTAZIONE ── -->
+  <div class="panel" id="panel-5">
     <div class="sh">
       <span class="badge b-g">Valutazione</span>
       <h2>Come sarete <span class="cr">giudicati</span></h2>
@@ -911,8 +1335,8 @@ tbody tr:hover td { background:var(--bg); }
   </div>
 
 
-  <!-- PANEL 5: DATASET -->
-  <div class="panel" id="panel-5">
+  <!-- PANEL 6: DATASET -->
+  <div class="panel" id="panel-6">
     <div class="sh">
       <span class="badge b-b">Dataset</span>
       <h2>Starter Kit <span class="cr">Dataset</span></h2>
@@ -1073,7 +1497,7 @@ tbody tr:hover td { background:var(--bg); }
       </a>
     </div>
 
-  </div><!-- /panel-5 -->
+  </div><!-- /panel-6 -->
 
 </div><!-- /main -->
 
@@ -1081,8 +1505,8 @@ tbody tr:hover td { background:var(--bg); }
 <div class="bnav">
   <button class="btn-dark" id="btn-prev" onclick="nav(-1)">← Precedente</button>
   <div class="pinfo">
-    <div class="pbar"><div class="pfill" id="pfill" style="width:16.67%"></div></div>
-    <span id="ptxt">Passo 1 di 6</span>
+    <div class="pbar"><div class="pfill" id="pfill" style="width:14.28%"></div></div>
+    <span id="ptxt">Passo 1 di 7</span>
   </div>
   <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
 </div>
@@ -1096,9 +1520,10 @@ tbody tr:hover td { background:var(--bg); }
   <div class="tip-desc" id="tip-desc"></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
 let cur = 0;
-const TOT = 6;
+const TOT = 7;
 
 function goTo(idx) {
   document.getElementById('panel-' + cur).classList.remove('active');
@@ -1135,6 +1560,16 @@ function dsTab(n) {
   });
 }
 
+function apiTab(n) {
+  var container = document.getElementById('api-tabs-container');
+  container.querySelectorAll('.api-tab').forEach(function(t, i) {
+    t.classList.toggle('active', i === n);
+  });
+  container.querySelectorAll('.api-pane').forEach(function(p, i) {
+    p.classList.toggle('active', i === n);
+  });
+}
+
 function startChallenge() {
   document.getElementById('hero-page').classList.add('hidden');
   var shell = document.getElementById('app-shell');
@@ -1144,6 +1579,33 @@ function startChallenge() {
 }
 
 document.getElementById('btn-prev').disabled = true;
+
+// ── SYNTAX HIGHLIGHTING — evidenzia i blocchi <pre><code> ──
+if (window.hljs) {
+  document.querySelectorAll('.codebox code').forEach(function(block) {
+    hljs.highlightElement(block);
+  });
+}
+
+// ── COPY BUTTONS — inietta un pulsante in ogni .codebox ──
+document.querySelectorAll('.codebox').forEach(function(box) {
+  var btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copia';
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var text = box.innerText.replace(/\s*(Copia|✓ Copiato)\s*$/, '').trim();
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = '✓ Copiato';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copia';
+        btn.classList.remove('copied');
+      }, 1800);
+    });
+  });
+  box.appendChild(btn);
+});
 
 // ── SPECIFIC CODE TOOLTIPS (dai documenti ABI Lab) ───────────────
 var ABBR_DICT = {
