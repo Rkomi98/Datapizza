@@ -495,7 +495,7 @@ tbody tr:hover td { background:var(--bg); }
     </div>
     <div class="stat">
       <div class="stat-num">99</div>
-      <div class="stat-label">Domande CL</div>
+      <div class="stat-label">Domande Checklist</div>
     </div>
     <div class="stat">
       <div class="stat-num o">157</div>
@@ -517,7 +517,7 @@ tbody tr:hover td { background:var(--bg); }
   <span style="color:var(--border2);">·</span>
   <span>Officine Credem</span>
   <span style="color:var(--border2);">·</span>
-  <span>8 team · 41 partecipanti</span>
+  <span>8 team · 40 partecipanti</span>
 </div>
 
 </div><!-- /hero-page -->
@@ -527,9 +527,9 @@ tbody tr:hover td { background:var(--bg); }
 <!-- STEP NAV -->
 <div class="step-nav">
   <button class="step-tab active" onclick="goTo(0)"><span class="snum">1</span> La Sfida</button>
-  <button class="step-tab" onclick="goTo(1)"><span class="snum">2</span> API Quickstart</button>
-  <button class="step-tab" onclick="goTo(2)"><span class="snum">3</span> I Framework</button>
-  <button class="step-tab" onclick="goTo(3)"><span class="snum">4</span> Scenari</button>
+  <button class="step-tab" onclick="goTo(1)"><span class="snum">2</span> I Framework</button>
+  <button class="step-tab" onclick="goTo(2)"><span class="snum">3</span> Scenari</button>
+  <button class="step-tab" onclick="goTo(3)"><span class="snum">4</span> API Quickstart</button>
   <button class="step-tab" onclick="goTo(4)"><span class="snum">5</span> Team & Logistica</button>
   <button class="step-tab" onclick="goTo(5)"><span class="snum">6</span> Valutazione</button>
   <button class="step-tab" onclick="goTo(6)"><span class="snum">7</span> Dataset</button>
@@ -583,8 +583,8 @@ tbody tr:hover td { background:var(--bg); }
         <h3>Chatbot su A.1.5 — Internet</h3>
         <p>Classificato su <strong>MA A.1.5</strong> (canale Internet) e <strong>TP Gestione Internet Banking</strong>, il sistema capisce automaticamente che:</p>
         <ul>
-          <li>CL 3.1 (DPIA) è obbligatoria → accede a dati anagrafici MI 2.1</li>
-          <li>CL 2.8 (supervisione umana) è critica → interagisce con clienti reali</li>
+          <li>Checklist 3.1 (DPIA) è obbligatoria → accede a dati anagrafici MI 2.1</li>
+          <li>Checklist 2.8 (supervisione umana) è critica → interagisce con clienti reali</li>
           <li>KPI "Unauthorised Access" è prioritario → esposto su MInfra API Security</li>
         </ul>
       </div>
@@ -594,8 +594,8 @@ tbody tr:hover td { background:var(--bg); }
         <p>Lo stesso sistema con <strong>MA C.3.2</strong> (credito ordinario) produce un assessment completamente diverso:</p>
         <ul>
           <li>Rischio AI Act: <strong>ALTO RISCHIO</strong> (Annex III, 5b)</li>
-          <li>CL 3.10 (bias) è CRITICA → MI 2.1.1 contiene attributi protetti</li>
-          <li>CL 3.14 (spiegabilità) è OBBLIGATORIA → GDPR art. 22</li>
+          <li>Checklist 3.10 (bias) è CRITICA → MI 2.1.1 contiene attributi protetti</li>
+          <li>Checklist 3.14 (spiegabilità) è OBBLIGATORIA → GDPR art. 22</li>
         </ul>
       </div>
     </div>
@@ -645,8 +645,8 @@ tbody tr:hover td { background:var(--bg); }
 
   </div>
 
-  <!-- ── PANEL 1: API QUICKSTART ── -->
-  <div class="panel" id="panel-1">
+  <!-- ── PANEL 3: API QUICKSTART ── -->
+  <div class="panel" id="panel-3">
     <div class="sh">
       <span class="badge b-bl">Dev Quickstart</span>
       <h2>Prima <span class="cb">chiamata API</span></h2>
@@ -765,8 +765,8 @@ print(response.output_text)</code></pre></div>
         </div>
 
         <div class="card bl-o hl-o" style="margin-bottom:16px;">
-          <div class="ctag o">Esempio hackathon</div>
-          <h3>Contestualizza la Checklist per un sistema AI bancario</h3>
+        <div class="ctag o">Scheletro hackathon</div>
+        <h3>Scheletro per contestualizzare la Checklist</h3>
           <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
 import os
 from openai import OpenAI
@@ -861,8 +861,8 @@ print(response.content)</code></pre></div>
         </div>
 
         <div class="card bl-o hl-o" style="margin-bottom:16px;">
-          <div class="ctag o">Esempio hackathon — Chain con prompt template</div>
-          <h3>Pipeline: sistema AI → domande Checklist contestualizzate</h3>
+        <div class="ctag o">Scheletro hackathon — Chain con prompt template</div>
+        <h3>Scheletro: sistema AI → domande Checklist contestualizzate</h3>
           <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
 import os
 from langchain_openai import ChatOpenAI
@@ -972,11 +972,12 @@ print(response.text)</code></pre></div>
         </div>
 
         <div class="card bl-o hl-o" style="margin-bottom:16px;">
-          <div class="ctag o">Step 2 — Agent contestuale per la challenge</div>
-          <h3>Agent che conosce i framework ABI Lab</h3>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:4px;line-height:1.6;">L'<code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">Agent</code> aggiunge memoria, tool e ragionamento multi-step sopra al client. Riceve un <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">OpenAIClient</code> già istanziato.</p>
+          <div class="ctag o">Step 2 — Scheletro challenge</div>
+          <h3>Scheletro di agente con framework da fornire in input</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:4px;line-height:1.6;">Qui l'agente <strong>non</strong> conosce i framework in automatico: prima devi caricare i materiali della challenge, selezionare i passaggi rilevanti e passarli nel prompt o in un retriever. Questo blocco è uno <em>scheletro</em>, non un agente già pronto.</p>
           <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
 import os
+from pathlib import Path
 from datapizza.agents import Agent
 from datapizza.clients.openai import OpenAIClient
 
@@ -985,20 +986,42 @@ key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAIClient(api_key=key, model="gpt-5.4-mini")
 
+# 1) Percorsi ai materiali della challenge
+framework_arch_dir = Path("FRAMEWORK ARCHITETTURALE ABI LAB")
+governance_dir = Path("AI GOVERNANCE FRAMEWORK")
+dataset_dir = Path("New dataset")
+
+# 2) TODO: qui devi leggere davvero i file, oppure costruire un retriever
+contesto_framework = """
+[Inserisci qui i nodi TP / MSB / MI / MA / MInfra rilevanti]
+[Inserisci qui le domande di checklist e i KPI rilevanti]
+[Inserisci qui gli estratti del dataset su cui stai lavorando]
+"""
+
 agent = Agent(
-    name="esperto_ai_governance",
+    name="scheletro_ai_governance",
     client=client,
-    system_prompt="""Sei un esperto di AI Governance bancaria.
-        Conosci il Framework Architetturale ABI Lab (TP, MSB, MI, MA, MInfra)
-        e la Checklist AI Governance ABI Lab x Deloitte (99 domande, 4 sezioni).
-        Cita sempre i nodi tassonomici nelle risposte."""
+    system_prompt="""Sei un assistente di AI Governance bancaria.
+        Lavora solo sul contesto che ricevi in input.
+        Se i framework o il dataset non sono presenti nel contesto, dillo esplicitamente.
+        Quando rispondi, cita sempre i nodi tassonomici e le domande di checklist
+        solo se compaiono nei materiali forniti."""
 )
 
-# Domanda contestuale alla challenge
-result = agent.run(
+# 3) Query della challenge + contesto recuperato dai file
+user_query = (
     "Per un credit scoring su MA C.3.2, quali KPI di modello devo monitorare "
     "e quali domande Checklist sono critiche per l'AI Act?"
 )
+
+result = agent.run(f"""
+Materiali disponibili:
+{contesto_framework}
+
+Richiesta:
+{user_query}
+""")
+
 print(result.text)</code></pre></div>
         </div>
 
@@ -1034,8 +1057,8 @@ print(result.text)</code></pre></div>
 
   </div>
 
-  <!-- ── PANEL 2: I FRAMEWORK ── -->
-  <div class="panel" id="panel-2">
+  <!-- ── PANEL 1: I FRAMEWORK ── -->
+  <div class="panel" id="panel-1">
     <div class="sh">
       <span class="badge b-bl">I Framework</span>
       <h2>I dati a <span class="cb">disposizione</span></h2>
@@ -1088,8 +1111,8 @@ print(result.text)</code></pre></div>
 
   </div>
 
-  <!-- ── PANEL 3: SCENARI ── -->
-  <div class="panel" id="panel-3">
+  <!-- ── PANEL 2: SCENARI ── -->
+  <div class="panel" id="panel-2">
     <div class="sh">
       <span class="badge b-o">Scenari</span>
       <h2>Possibili scenari da <span class="co">affrontare</span></h2>
@@ -1170,12 +1193,12 @@ print(result.text)</code></pre></div>
       <div class="card bl-r">
         <div class="ctag r">Evento</div>
         <h3>16–17 Giugno 2026</h3>
-        <p><strong>Officine Credem</strong> — 2 giorni intensivi in presenza. Circa 50 partecipanti organizzati in <strong>8 squadre multibanca</strong>. Ogni team include profili tech e di dominio da banche diverse.</p>
+        <p><strong>Officine Credem</strong> — 2 giorni intensivi in presenza. <strong>40 partecipanti</strong> organizzati in <strong>8 team multibanca</strong>. Ogni team include profili tech e di dominio da banche diverse.</p>
       </div>
       <div class="card bl-b hl-b">
         <div class="ctag b">Formato squadre</div>
         <h3>Team multibanca misti</h3>
-        <p>Ogni team è composto da <strong>4–5 persone</strong> provenienti da banche diverse e partner tecnologici. La composizione è già definita — profili tecnici (data scientist, AI engineer) e di dominio (compliance, AI governance) insieme.</p>
+        <p>Ogni team è composto da <strong>5 persone</strong> provenienti da banche diverse e partner tecnologici. La composizione è già definita — profili tecnici (data scientist, AI engineer) e di dominio (compliance, AI governance) insieme.</p>
       </div>
     </div>
 
@@ -1184,34 +1207,42 @@ print(result.text)</code></pre></div>
         <div class="ctag">Giorno 1 — Martedì 16 Giugno</div>
         <div class="agenda-row">
           <span class="agenda-time">10:30</span>
-          <div class="agenda-body"><strong>Arrivo partecipanti</strong><span>Registrazione, badge, welcome coffee</span></div>
+          <div class="agenda-body"><strong>Arrivo partecipanti</strong><span>Accoglienza a Officine Credem · coffee & drink station</span></div>
         </div>
         <div class="agenda-row">
           <span class="agenda-time">11:00</span>
-          <div class="agenda-body"><strong>Benvenuto & Kick-off</strong><span>Speech Datapizza · ABI/ABI Lab · Credem (Officine) · Talk motivazionale</span></div>
+          <div class="agenda-body"><strong>Benvenuto & Kick-off</strong><span>Presentazione del programma e delle challenge</span></div>
         </div>
         <div class="agenda-row">
-          <span class="agenda-time">12:30</span>
+          <span class="agenda-time">12:30 circa</span>
           <div class="agenda-body"><strong>Pranzo</strong><span></span></div>
         </div>
         <div class="agenda-row">
           <span class="agenda-time">14:00</span>
-          <div class="agenda-body"><strong>Avvio Challenge</strong><span>Distribuzione materiali · Spiegazione challenge e criteri di valutazione (30 min)</span></div>
+          <div class="agenda-body"><strong>Avvio Challenge</strong><span>Distribuzione materiali di lavoro</span></div>
         </div>
         <div class="agenda-row">
           <span class="agenda-time">14:30 – 19:30</span>
-          <div class="agenda-body"><strong>Prima sessione di lavoro</strong><span>Sviluppo prototipo · Sprint 1</span></div>
+          <div class="agenda-body"><strong>Prima sessione di lavoro</strong><span>Sviluppo prototipo</span></div>
         </div>
         <div class="agenda-row">
           <span class="agenda-time">19:30</span>
-          <div class="agenda-body"><strong>Apericena</strong><span></span></div>
+          <div class="agenda-body"><strong>Cena</strong><span>Pizza a domicilio (mezzi metri) e birra alla spina</span></div>
         </div>
         <div class="agenda-row">
-          <span class="agenda-time">19:30 – 22:00</span>
-          <div class="agenda-body"><strong>Sessione serale</strong><span>Sprint 2 · Mentoring disponibile</span></div>
+          <span class="agenda-time">19:30 – 21:30</span>
+          <div class="agenda-body"><strong>Sessione serale</strong><span>Per chi vuole continuare a lavorare fino alle 23</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">21:30</span>
+          <div class="agenda-body"><strong>Dj Set di networking</strong><span>Soft clubbing</span></div>
+        </div>
+        <div class="agenda-row">
+          <span class="agenda-time">22:30</span>
+          <div class="agenda-body"><strong>Bomboloni serali</strong><span></span></div>
         </div>
         <div class="agenda-row" style="border-bottom:none;">
-          <span class="agenda-time">22:00</span>
+          <span class="agenda-time">23:00</span>
           <div class="agenda-body"><strong>Chiusura Officine</strong><span>Pernottamento in hotel (autonomo)</span></div>
         </div>
       </div>
@@ -1220,31 +1251,31 @@ print(result.text)</code></pre></div>
         <div class="ctag">Giorno 2 — Mercoledì 17 Giugno</div>
         <div class="agenda-row">
           <span class="agenda-time">09:00 – 12:30</span>
-          <div class="agenda-body"><strong>Sessione finale</strong><span>Sprint 3 · Finalizzazione prototipo · Preparazione presentazione</span></div>
+          <div class="agenda-body"><strong>Seconda sessione di lavoro</strong><span>Finalizzazione prototipi · coffee & drink station</span></div>
         </div>
         <div class="agenda-row">
           <span class="agenda-time">12:30</span>
-          <div class="agenda-body"><strong>⏹ Stop sviluppo</strong><span>Consegna materiali</span></div>
+          <div class="agenda-body"><strong>Chiusura challenge</strong><span>Consegna materiali</span></div>
         </div>
         <div class="agenda-row">
-          <span class="agenda-time">12:30</span>
+          <span class="agenda-time">12:30 circa</span>
           <div class="agenda-body"><strong>Pranzo</strong><span></span></div>
         </div>
         <div class="agenda-row">
-          <span class="agenda-time">14:00 – 15:30</span>
-          <div class="agenda-body"><strong>Pitch alla giuria</strong><span>Ogni team: 15 min presentazione + 5 min Q&A · 8 team · max 3 giudici</span></div>
+          <span class="agenda-time">14:30 – 16:00</span>
+          <div class="agenda-body"><strong>Presentazioni finali</strong><span>Pitch dei team alla giuria, con possibile apertura della platea a spettatori esterni</span></div>
         </div>
         <div class="agenda-row">
-          <span class="agenda-time">15:30 – 16:00</span>
+          <span class="agenda-time">16:00 – 16:30</span>
           <div class="agenda-body"><strong>Delibera della giuria</strong><span></span></div>
         </div>
         <div class="agenda-row">
-          <span class="agenda-time">16:00</span>
+          <span class="agenda-time">16:30</span>
           <div class="agenda-body"><strong>🏆 Premiazione</strong><span>Annuncio team vincitore</span></div>
         </div>
         <div class="agenda-row" style="border-bottom:none;">
-          <span class="agenda-time">16:30</span>
-          <div class="agenda-body"><strong>Chiusura ufficiale</strong><span></span></div>
+          <span class="agenda-time">17:00</span>
+          <div class="agenda-body"><strong>Aperitivo di chiusura</strong><span></span></div>
         </div>
       </div>
     </div>
@@ -1265,43 +1296,43 @@ print(result.text)</code></pre></div>
       <span class="badge b-g">Valutazione</span>
       <h2>Come sarete <span class="cr">giudicati</span></h2>
     </div>
-    <p style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.7;">La giuria è composta da <strong style="color:var(--navy);">max 3 giudici</strong>. Ogni team ha <strong style="color:var(--navy);">15 minuti di pitch + 5 di Q&A</strong>. La valutazione avviene su 5 criteri.</p>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.7;">La giuria è composta da <strong style="color:var(--navy);">max 3 giudici</strong>. Ogni team ha <strong style="color:var(--navy);">15 minuti di pitch + 5 di Q&A</strong>. La valutazione avviene su 6 criteri.</p>
 
     <div class="card" style="margin-bottom:18px;padding:28px 32px;">
       <div class="eval-row">
         <div class="eval-bar-wrap">
           <div class="eval-name">Profondità di integrazione</div>
-          <div class="eval-desc">Il sistema ha compreso e collegato operativamente i due framework, non li ha semplicemente giustapposti.</div>
+          <div class="eval-desc">Il team sa dimostrare che il sistema ha correttamente compreso i framework.</div>
         </div>
       </div>
       <div class="eval-row">
         <div class="eval-bar-wrap">
           <div class="eval-name">Capacità trasversale</div>
-          <div class="eval-desc">Sa navigare simultaneamente le 5 tassonomie architetturali E gli strumenti di governance (Checklist + KPI).</div>
+          <div class="eval-desc">Il team sa dimostrare che il sistema ha correttamente compreso i legami tra i framework e sa usarli congiuntamente.</div>
         </div>
       </div>
       <div class="eval-row">
         <div class="eval-bar-wrap">
           <div class="eval-name">Utilità concreta</div>
-          <div class="eval-desc">Risolve problemi reali di governance AI che oggi richiedono lavoro manuale su 8 file separati (5 tassonomie + Checklist + KPI + guida).</div>
+          <div class="eval-desc">Il sistema risolve efficacemente un problema reale di Governance AI.</div>
         </div>
       </div>
       <div class="eval-row">
         <div class="eval-bar-wrap">
-          <div class="eval-name">Qualità del collegamento</div>
-          <div class="eval-desc">I ponti tra architettura e governance sono motivati, contestualizzati e verificabili — non casuali.</div>
+          <div class="eval-name">Qualità della documentazione dei framework</div>
+          <div class="eval-desc">Il team ha prodotto e controllato documentazione di qualità per permettere al sistema di capire i framework e i loro collegamenti.</div>
         </div>
       </div>
       <div class="eval-row">
         <div class="eval-bar-wrap">
-          <div class="eval-name">Complessità tecnica</div>
-          <div class="eval-desc">Scelte architetturali non banali, funzionali allo scaling e alla manutenzione della soluzione.</div>
+          <div class="eval-name">Code shareability</div>
+          <div class="eval-desc">L'implementazione ha un design ben studiato, documentato, che permette una semplice comprensione per chi vorrà continuare a svilupparlo in futuro.</div>
         </div>
       </div>
       <div class="eval-row">
         <div class="eval-bar-wrap">
-          <div class="eval-name">Uso degli strumenti di GenAI</div>
-          <div class="eval-desc">Uso efficace di strumenti quali chatbot (Gemini, Copilot, ChatGPT) e code assistant (Cursor, Claude Code) durante l'hackathon. Rientra in questo criterio anche la capacità di gestire il budget API in modo consapevole: quante chiamate, con quale modello, con quale efficienza.</div>
+          <div class="eval-name">Competenze nell'uso degli strumenti di GenAI durante l'hackathon</div>
+          <div class="eval-desc">Il team ha dimostrato di saper operare un uso efficace di strumenti quali chatbot (Gemini, Copilot, ChatGPT) e code assistant (Cursor, Claude Code) durante l'hackathon. Rientra in questo criterio anche la capacità di gestire il budget API in modo consapevole: quante chiamate, con quale modello, con quale efficienza.</div>
         </div>
       </div>
     </div>
