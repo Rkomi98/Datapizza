@@ -1342,159 +1342,273 @@ print(result.text)</code></pre></div>
       <h2>Starter Kit <span class="cr">Dataset</span></h2>
     </div>
     <p style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.7;">
-      Tre dataset fittizi che rappresentano altrettanti profili di banca con sistemi AI operativi.
-      Ogni dataset è l'<strong style="color:var(--navy);">input</strong> per il sistema che il team costruirà durante l'hackathon —
-      le risposte in Checklist rappresentano lo stato attuale della banca (quello che sa già di sé stessa).
+      Sette dataset fittizi rappresentano altrettanti profili di banca e costituiscono lo
+      <strong style="color:var(--navy);">starter kit ufficiale</strong> della challenge.
+      Ogni file descrive un problema concreto di governance AI e offre al team un punto di partenza
+      strutturato per analisi, contestualizzazione, gap analysis e viste di sintesi.
     </p>
+
+    <div class="card bl-b hl-b" style="margin-bottom:24px;">
+      <div class="ctag b">Pacchetto Unico</div>
+      <h3>Dataset Starter Kit 2026</h3>
+      <p>
+        La cartella include i <strong>7 workbook scenario</strong>, il documento guida degli scenari e il
+        README introduttivo. Tutti i dataset condividono una struttura comune e aggiungono sheet
+        specifici in base al problema da affrontare.
+      </p>
+      <a class="dl-btn" href="https://drive.google.com/drive/folders/1Mt7qSamZOer8hxdRBIXike133m30iXJ4?usp=sharing" target="_blank" style="margin-top:16px;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Apri cartella Dataset Starter Kit
+      </a>
+    </div>
 
     <!-- INNER SUB-TABS -->
     <div class="ds-tabs">
-      <button class="ds-tab active" onclick="dsTab(0)">📘 Scenario A — BCC Consorzio</button>
-      <button class="ds-tab" onclick="dsTab(1)">📙 Scenario D — Vendor Esterno</button>
-      <button class="ds-tab" onclick="dsTab(2)">📗 Scenario P — Portfolio Banca</button>
+      <button class="ds-tab active" onclick="dsTab(0)">📘 A — Consorzio</button>
+      <button class="ds-tab" onclick="dsTab(1)">📙 B — Fusione</button>
+      <button class="ds-tab" onclick="dsTab(2)">📗 C — Neobank</button>
+      <button class="ds-tab" onclick="dsTab(3)">📕 E — Ispezione</button>
+      <button class="ds-tab" onclick="dsTab(4)">📒 F — Pre-deploy</button>
+      <button class="ds-tab" onclick="dsTab(5)">📓 G — Fasi miste</button>
+      <button class="ds-tab" onclick="dsTab(6)">📔 P — Portfolio</button>
     </div>
 
     <!-- SCENARIO A -->
     <div class="ds-pane active">
       <div class="card bl-b hl-b" style="margin-bottom:18px;">
         <div class="ctag b">Scenario A</div>
-        <h3>Iccrea Banca S.p.A. — Gruppo BCC-CR</h3>
-        <p>Una holding bancaria gestisce centralmente <strong>2 sistemi AI</strong> distribuiti a <strong>200 affiliate BCC</strong>. Il problema: la Checklist AI Governance è stata compilata una sola volta dalla capogruppo — ma ogni affiliata è un soggetto giuridico autonomo.</p>
-        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> date le 5 tassonomie di CreditScore-BCC, quali domande della Checklist richiedono una risposta diversa tra chi controlla il modello (capogruppo) e chi esegue il processo (affiliata)? Quali KPI non sono calcolabili dall'affiliata per mancanza di dati nel suo perimetro infrastrutturale?</p>
+        <h3>Consorzio di banche — Capogruppo BancaCoop S.p.A.</h3>
+        <p><strong>File:</strong> <span style="font-family:'DM Mono',monospace;font-size:12px;">Dataset_ScenarioA_Consorzio.xlsx</span></p>
+        <p style="margin-top:10px;">Un capogruppo di gruppo bancario cooperativo gestisce centralmente <strong>2 sistemi AI</strong> distribuiti a circa <strong>200 affiliate</strong>. La governance è stata formalizzata una sola volta a livello centrale, ma ogni affiliata mantiene operatività e responsabilità proprie.</p>
+        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> quali responsabilità restano in capo alla capogruppo, quali ricadono sulle affiliate e quali KPI non sono calcolabili localmente per limiti di perimetro informativo?</p>
       </div>
 
-      <div class="tcard">
-        <table>
-          <thead>
-            <tr><th>Sistema</th><th>ID</th><th>Tipo</th><th>Rischio AI Act</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>CreditScore-BCC</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">CS-BCC-01</td><td>Credit scoring ML centralizzato</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">ALTO RISCHIO</span></td></tr>
-            <tr><td><strong>FraudGuard-BCC</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">FG-BCC-02</td><td>Fraud detection e AML monitoring</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">RISCHIO LIMITATO</span></td></tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="grid2" style="margin-bottom:0;">
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag" style="background:#eff6ff;color:#1e40af;">5 sheet nel file</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li><strong>SCENARIO</strong> — contesto della banca fittizia e sfida operativa.</li>
+            <li><strong>SISTEMI_AI</strong> — inventario dei sistemi con rischio e stato della governance.</li>
+            <li><strong>MAPPING_ARCHITETTURALE</strong> — collocazione dei sistemi nelle 5 tassonomie.</li>
+            <li><strong>CHECKLIST_GOVERNANCE</strong> — stato corrente delle risposte e gap rilevati.</li>
+            <li><strong>KPI_SELEZIONATI</strong> — foglio da completare con i KPI pertinenti.</li>
+          </ul>
+        </div>
 
-      <div class="card" style="margin-top:18px;padding:24px 28px;">
-        <div class="ctag" style="background:#eff6ff;color:#1e40af;">5 sheet nel file</div>
-        <ul class="sheet-list" style="list-style:none;margin-top:12px;">
-          <li><strong>SCENARIO</strong> — Contesto narrativo: chi è la banca, qual è il problema, qual è la sfida operativa. Da leggere prima di tutto.</li>
-          <li><strong>SISTEMI_AI</strong> — Inventario dei sistemi AI con tipo di modello, classificazione AI Act e stato Checklist.</li>
-          <li><strong>MAPPING_ARCHITETTURALE</strong> — Mapping dei sistemi sulle 5 tassonomie ABI Lab (TP, MSB, MI, MA, MInfra). Cuore del dataset.</li>
-          <li><strong>CHECKLIST_GOVERNANCE</strong> — Stato attuale della governance: risposte banca, flag gap (🔴 critico / ⚠️ da verificare / ℹ️ informativo).</li>
-          <li><strong>KPI_SELEZIONATI</strong> — <em>Sheet vuoto da compilare.</em> Il sistema deve selezionare i KPI rilevanti dalla Long-list e motivare la scelta.</li>
-        </ul>
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag b">Cosa il team può produrre</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li>Disaggregazione delle responsabilità tra capogruppo, affiliata o entrambi.</li>
+            <li>Valutazione della calcolabilità dei KPI a livello locale o aggregato.</li>
+            <li>Lettura dei nodi condivisi e dei nodi locali nell'architettura.</li>
+            <li>Raccomandazioni operative per colmare la zona grigia di responsabilità.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>Vista attesa:</strong> matrice RACI capogruppo↔affiliata per ogni sezione della checklist, con evidenza dei KPI non calcolabili dall'affiliata.</p>
+        </div>
       </div>
-
-      <a class="dl-btn" href="https://docs.google.com/spreadsheets/d/1omt5G1YeMX9B9YBdrko9jnuOunpDxXyE/edit?usp=sharing&ouid=113916780792634236249&rtpof=true&sd=true" target="_blank">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Apri Dataset Scenario A
-      </a>
     </div>
 
-    <!-- SCENARIO D -->
+    <!-- SCENARIO B -->
     <div class="ds-pane">
       <div class="card bl-o hl-o" style="margin-bottom:18px;">
-        <div class="ctag o">Scenario D — Bonus</div>
-        <h3>Banca Meridiana S.p.A. — Retail, 2,4 mld € attivi</h3>
-        <p>Una banca di medie dimensioni ha acquistato <strong>2 sistemi AI-as-a-Service</strong> da vendor esterni. Il problema: la sezione Technical Execution della Checklist chiede dettagli tecnici che solo il vendor conosce. La banca invia dati e riceve uno score — non vede il modello, i dati di training, né le metriche interne.</p>
-        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> quali domande della Checklist non sono compilabili dalla banca senza accesso al modello interno del vendor? Quali KPI sono calcolabili sull'output ricevuto vs quelli che richiedono accesso al modello?</p>
+        <div class="ctag o">Scenario B</div>
+        <h3>Fusione bancaria — BancaAlfa S.p.A. + BancaBeta S.p.A.</h3>
+        <p><strong>File:</strong> <span style="font-family:'DM Mono',monospace;font-size:12px;">Dataset_ScenarioB_Fusione.xlsx</span></p>
+        <p style="margin-top:10px;">Due banche di pari taglia entrano in fusione con portfolio AI diversi, livelli di governance differenti e più sistemi che svolgono funzioni analoghe su architetture distinte.</p>
+        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> come confrontare i due portfolio sulle stesse tassonomie, identificare sistemi equivalenti o orfani e costruire una raccomandazione di integrazione per il nuovo gruppo?</p>
       </div>
 
-      <div class="tcard">
-        <table>
-          <thead>
-            <tr><th>Sistema</th><th>ID</th><th>Vendor</th><th>Rischio AI Act</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>ProximaScore</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">PS-MER-01</td><td>ProximaTech S.r.l. (Roma)</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">ALTO RISCHIO</span></td></tr>
-            <tr><td><strong>SentinelAI</strong></td><td style="font-family:'DM Mono',monospace;font-size:11.5px;">SA-MER-02</td><td>GuardTech B.V. (Olanda)</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">RISCHIO LIMITATO</span></td></tr>
-          </tbody>
-        </table>
+      <div class="grid2" style="margin-bottom:0;">
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag" style="background:#fff7ed;color:#c2410c;">9 sheet nel file</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li><strong>SCENARIO</strong> — contesto della fusione e vincoli di integrazione.</li>
+            <li><strong>SISTEMI_AI_BancaA / _BancaB</strong> — inventario dei due portfolio.</li>
+            <li><strong>MAPPING_ARCHITETTURALE_BancaA / _BancaB</strong> — confronto sulle tassonomie.</li>
+            <li><strong>CHECKLIST_GOVERNANCE_BancaA / _BancaB</strong> — stato della governance per ciascuna banca.</li>
+            <li><strong>EQUIVALENZE_DA_DERIVARE</strong> e <strong>CONSOLIDAMENTO</strong> — supporto alla mappa di integrazione.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag o">Cosa il team può produrre</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li>Derivazione delle coppie di sistemi equivalenti e dei sistemi orfani.</li>
+            <li>Raccomandazioni tenere/dismettere con motivazione architetturale.</li>
+            <li>Lettura dei gap ereditati dal portfolio post-fusione.</li>
+            <li>Proposta di governance unificata per il nuovo gruppo.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>Vista attesa:</strong> confronto A↔B tra sistemi equivalenti, con delta di governance e raccomandazione di consolidamento.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO C -->
+    <div class="ds-pane">
+      <div class="card bl-g hl-g" style="margin-bottom:18px;">
+        <div class="ctag g">Scenario C</div>
+        <h3>Neobank — NeoBanca Quantum S.p.A.</h3>
+        <p><strong>File:</strong> <span style="font-family:'DM Mono',monospace;font-size:12px;">Dataset_ScenarioC_Neobank.xlsx</span></p>
+        <p style="margin-top:10px;">Una banca 100% digitale, cloud-native e nata nel 2022 ha l'AI al centro del prodotto ma una governance quasi inesistente. Il contesto non replica i modelli tradizionali di banca e richiede un vero onboarding al framework.</p>
+        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> come mappare sistemi AI cloud-native, nodi infrastrutturali e requisiti di governance per costruire un percorso di onboarding credibile e prioritizzato?</p>
       </div>
 
-      <div class="card" style="margin-top:18px;padding:24px 28px;">
-        <div class="ctag" style="background:#fff7ed;color:#c2410c;">5 sheet nel file</div>
-        <ul class="sheet-list" style="list-style:none;margin-top:12px;">
-          <li><strong>SCENARIO</strong> — Contesto narrativo: chi è la banca, il problema del vendor black-box, la sfida operativa.</li>
-          <li><strong>SISTEMI_AI</strong> — Inventario dei sistemi AI-as-a-Service con metadati di governance e classificazione AI Act.</li>
-          <li><strong>MAPPING_ARCHITETTURALE</strong> — Mapping sulle 5 tassonomie: dove si inseriscono i sistemi vendor nell'architettura della banca.</li>
-          <li><strong>CHECKLIST_GOVERNANCE</strong> — Risposte con evidenza delle domande bloccate per assenza di accesso al modello vendor.</li>
-          <li><strong>KPI_SELEZIONATI</strong> — <em>Sheet vuoto da compilare.</em> Scegliere i KPI calcolabili sull'output vs quelli che richiedono il modello.</li>
-        </ul>
+      <div class="grid2" style="margin-bottom:0;">
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag g">7 sheet nel file</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li><strong>SCENARIO</strong>, <strong>SISTEMI_AI</strong>, <strong>MAPPING_ARCHITETTURALE</strong>, <strong>CHECKLIST_GOVERNANCE</strong>.</li>
+            <li><strong>ONBOARDING_MAP</strong> — struttura di output per il percorso di onboarding.</li>
+            <li><strong>PIANO_GAP_12M</strong> — struttura di output per la roadmap a 12 mesi.</li>
+            <li><strong>KPI_SELEZIONATI</strong> — struttura preimpostata con esempio compilato.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag g">Cosa il team può produrre</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li>Mappatura dei sistemi cloud-native sul framework architetturale.</li>
+            <li>Attivazione motivata delle domande di governance in base alla collocazione cloud.</li>
+            <li>Selezione dei KPI per sistemi real-time e streaming.</li>
+            <li>Roadmap a 12 mesi con priorità, owner e milestone.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>Vista attesa:</strong> onboarding map dai sistemi AI ai nodi cloud fino alle domande di governance attivate.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO E -->
+    <div class="ds-pane">
+      <div class="card bl-r hl-r" style="margin-bottom:18px;">
+        <div class="ctag r">Scenario E</div>
+        <h3>Ispezione regolamentare — Banca Polaris S.p.A.</h3>
+        <p><strong>File:</strong> <span style="font-family:'DM Mono',monospace;font-size:12px;">Dataset_ScenarioE_Ispezione.xlsx</span></p>
+        <p style="margin-top:10px;">Una banca commerciale con <strong>12 sistemi AI in produzione</strong> ha ricevuto rilievi formali da vigilanza su specifici sistemi, con scadenze a 30, 60 e 90 giorni e rischio sanzionatorio in caso di mancato adeguamento.</p>
+        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> come tradurre i rilievi in azioni architetturali concrete, valutarne la fattibilità nei tempi e costruire una roadmap di remediation con priorità forzata?</p>
       </div>
 
-      <a class="dl-btn" href="https://docs.google.com/spreadsheets/d/10drJinNTyD6dxI-1PaWTLwOjxp8Oaus3/edit?usp=sharing&ouid=113916780792634236249&rtpof=true&sd=true" target="_blank">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Apri Dataset Scenario D
-      </a>
+      <div class="grid2" style="margin-bottom:0;">
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag" style="background:#fee2e2;color:#b91c1c;">7 sheet nel file</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li><strong>SCENARIO</strong>, <strong>SISTEMI_AI</strong>, <strong>MAPPING_ARCHITETTURALE</strong>, <strong>CHECKLIST_GOVERNANCE</strong>.</li>
+            <li><strong>RILIEVI</strong> — verbale ispettivo con input e colonne di output da completare.</li>
+            <li><strong>ROADMAP_REMEDIATION</strong> — sprint 30/60/90 giorni da strutturare.</li>
+            <li><strong>KPI_SELEZIONATI</strong> — monitoraggio della remediation per sistema.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag r">Cosa il team può produrre</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li>Traduzione dei rilievi in azioni architetturali puntuali.</li>
+            <li>Stima di effort, sistemi correlati impattati e fattibilità entro deadline.</li>
+            <li>Sequenziamento dei rilievi in sprint con dipendenze esplicite.</li>
+            <li>Reporting esecutivo per regolatore e comitati interni.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>Vista attesa:</strong> roadmap di remediation per deadline, severità e rischio sanzionatorio.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO F -->
+    <div class="ds-pane">
+      <div class="card bl-o hl-o" style="margin-bottom:18px;">
+        <div class="ctag o">Scenario F</div>
+        <h3>Pre-deploy — Banca Helios S.p.A.</h3>
+        <p><strong>File:</strong> <span style="font-family:'DM Mono',monospace;font-size:12px;">Dataset_ScenarioF_PreDeploy.xlsx</span></p>
+        <p style="margin-top:10px;">Una banca commerciale media ha in pipeline <strong>5 nuovi sistemi AI</strong> in fase di progetto, con architettura definita ma governance ancora da costruire. Due sistemi già in produzione fungono da benchmark.</p>
+        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> come applicare una logica di governance by design, pre-popolare la checklist sui nuovi sistemi e definire i KPI necessari prima del go-live?</p>
+      </div>
+
+      <div class="grid2" style="margin-bottom:0;">
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag" style="background:#fff7ed;color:#c2410c;">6 sheet nel file</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li><strong>SCENARIO</strong>, <strong>SISTEMI_AI</strong>, <strong>MAPPING_ARCHITETTURALE</strong>, <strong>CHECKLIST_GOVERNANCE</strong>.</li>
+            <li><strong>GO_LIVE_READINESS</strong> — Definition of Done governance e semaforo di prontezza.</li>
+            <li><strong>KPI_SELEZIONATI</strong> — struttura preimpostata per i KPI Day-1.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag o">Cosa il team può produrre</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li>Checklist pre-popolata sui nuovi sistemi a partire dal mapping architetturale.</li>
+            <li>Selezione dei KPI Day-1 necessari al go-live.</li>
+            <li>Riutilizzo dei benchmark di governance dove trasferibili.</li>
+            <li>Valutazione di prontezza per ciascun nuovo sistema.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>Vista attesa:</strong> checklist pre-popolata e KPI da costruire prima del go-live per ciascun nuovo sistema.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO G -->
+    <div class="ds-pane">
+      <div class="card bl-b hl-b" style="margin-bottom:18px;">
+        <div class="ctag b">Scenario G</div>
+        <h3>Fasi miste — Banca Vetta S.p.A.</h3>
+        <p><strong>File:</strong> <span style="font-family:'DM Mono',monospace;font-size:12px;">Dataset_ScenarioG_FasiMiste.xlsx</span></p>
+        <p style="margin-top:10px;">Il portfolio include <strong>10 sistemi AI</strong> distribuiti tra sperimentazione, progetto, produzione e dismissione. La banca ha applicato la stessa governance a tutti, ignorando la fase del ciclo di vita e le condivisioni infrastrutturali.</p>
+        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> come verificare la coerenza tra fase e domande applicate, riconoscere i sistemi fuori perimetro e leggere i rischi generati dai nodi condivisi?</p>
+      </div>
+
+      <div class="grid2" style="margin-bottom:0;">
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag" style="background:#eff6ff;color:#1e40af;">7 sheet nel file</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li><strong>SCENARIO</strong>, <strong>SISTEMI_AI</strong>, <strong>MAPPING_ARCHITETTURALE</strong>, <strong>CHECKLIST_GOVERNANCE</strong>.</li>
+            <li><strong>AUDIT_COERENZA</strong> — struttura di output per il giudizio fase×domanda.</li>
+            <li><strong>MAPPA_RISCHI_PERIMETRO</strong> — struttura di output sui nodi condivisi.</li>
+            <li><strong>KPI_SELEZIONATI</strong> — KPI da modulare in funzione della fase.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag b">Cosa il team può produrre</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li>Audit di coerenza tra fase del ciclo di vita e domande applicate.</li>
+            <li>Identificazione dei nodi condivisi tra sistemi in fasi diverse.</li>
+            <li>Riconoscimento dei sistemi fantasma o in dismissione incompleta.</li>
+            <li>Razionalizzazione del portfolio e ri-targeting della governance per fase.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>Vista attesa:</strong> audit di coerenza fase/domanda e mappa dei rischi di perimetro sui nodi condivisi.</p>
+        </div>
+      </div>
     </div>
 
     <!-- SCENARIO P -->
     <div class="ds-pane">
       <div class="card bl-g hl-g" style="margin-bottom:18px;">
         <div class="ctag g">Scenario P</div>
-        <h3>Banca Aurora S.p.A. — Retail-Commercial, 4,8 mld € attivi, 72 filiali</h3>
-        <p>Una banca di medie-grandi dimensioni ha adottato <strong>18 sistemi AI</strong> in 5 anni. La governance è cresciuta in modo <strong>disomogeneo</strong>: alcuni sistemi hanno copertura quasi completa (85–90%), altri zero (0%). Un sistema è Shadow AI adottato senza alcun processo di approvazione.</p>
-        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> dato il portfolio completo, quali sono i gap di governance trasversali a più sistemi (pattern sistemici vs gap isolati)? Come si costruisce una roadmap di compliance ordinata per rischio AI Act, urgenza e fattibilità?</p>
+        <h3>Portfolio AI — Banca Aurora S.p.A.</h3>
+        <p><strong>File:</strong> <span style="font-family:'DM Mono',monospace;font-size:12px;">Dataset_ScenarioP_Portfolio.xlsx</span></p>
+        <p style="margin-top:10px;">Una banca retail-commercial di medie dimensioni gestisce <strong>18 sistemi AI</strong> con copertura di governance molto eterogenea. Nel portfolio sono presenti casi critici come Shadow AI, sistemi GenAI e anomalie distribuite su più aree.</p>
+        <p style="margin-top:10px;"><strong>Domanda operativa:</strong> come distinguere pattern sistemici da gap isolati, costruire una roadmap di compliance sul portfolio e leggere correttamente gli impatti delle nuove domande GenAI?</p>
       </div>
 
-      <div class="tcard">
-        <table>
-          <thead>
-            <tr><th>Sistema</th><th>ID</th><th>Categoria</th><th>Rischio AI Act</th><th>Copertura CL</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>CreditRisk-ML</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-001</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>85%</td></tr>
-            <tr><td><strong>CollectionScore</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-002</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>40%</td></tr>
-            <tr><td><strong>AML-Decisor</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-003</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>30%</td></tr>
-            <tr><td><strong>UnderwriteAI</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">AR-004</td><td>Alto Rischio</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>15%</td></tr>
-            <tr><td><strong>FraudNet-Card</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-005</td><td>Rischio Limitato</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">LIMITATO</span></td><td>70%</td></tr>
-            <tr><td><strong>FraudNet-AML</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-006</td><td>Rischio Limitato</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">LIMITATO</span></td><td>50%</td></tr>
-            <tr style="background:#fef9ec;"><td><strong>ChurnPredictor</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-007</td><td>Rischio Limitato</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td><strong style="color:#b45309;">0% ⚠️ anomalia</strong></td></tr>
-            <tr><td><strong>CrossSellEngine</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">RL-008</td><td>Rischio Limitato</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td>0%</td></tr>
-            <tr><td><strong>ChatBanca</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GC-010</td><td>GenAI Conversazionale</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">LIMITATO</span></td><td>80%</td></tr>
-            <tr style="background:#fef9ec;"><td><strong>AdvisorAI-WM</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GC-012</td><td>GenAI Conversazionale</td><td><span style="background:#ede9fe;color:#5b21b6;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">AMBIGUO ⚠️</span></td><td>20%</td></tr>
-            <tr><td><strong>RegTechGPT</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GI-014</td><td>GenAI Interno</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td>90%</td></tr>
-            <tr style="background:#fff0f0;"><td><strong>DataAnalyst-AI</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">GI-016</td><td>GenAI Interno</td><td><span style="background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">MINIMO</span></td><td><strong style="color:#dc2626;">0% 🚨 Shadow AI</strong></td></tr>
-            <tr><td><strong>ScoreMax-Ext</strong></td><td style="font-family:'DM Mono',monospace;font-size:11px;">VB-017</td><td>Vendor-Based</td><td><span style="background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ALTO</span></td><td>35%</td></tr>
-            <tr><td colspan="5" style="text-align:center;font-size:11px;color:var(--muted);padding:6px;font-style:italic;">+ 4 ulteriori sistemi nel dataset (VoiceBanker, MortgageAssist, ContractAI, BehaviorSeg-Ext)</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card" style="margin-top:18px;padding:24px 28px;">
-        <div class="ctag g">6 sheet nel file</div>
-        <ul class="sheet-list" style="list-style:none;margin-top:12px;">
-          <li><strong>SCENARIO</strong> — Contesto del portfolio: 18 sistemi in 5 anni, governance disomogenea, anomalie intenzionali da scoprire.</li>
-          <li><strong>SISTEMI_AI</strong> — Inventario completo dei 18 sistemi con categoria, rischio AI Act e copertura Checklist.</li>
-          <li><strong>MAPPING_ARCHITETTURALE</strong> — Mapping completo sulle 5 tassonomie per tutti i 18 sistemi.</li>
-          <li><strong>CHECKLIST_GOVERNANCE</strong> — Stato governance per sistema, con gap critici evidenziati.</li>
-          <li><strong>KPI_STATUS</strong> — Stato misurazione KPI per ogni sistema: classe (Business/Etica/Modello), tipo PRE/POST-PROD, tool, owner e gap tecnico.</li>
-          <li><strong>CHANGE_IMPACT</strong> — 5 nuove domande GenAI-specific non ancora in Checklist v5.0 (prompt injection, hallucination, copyright, supply chain AI, energy consumption AI Act Art.97).</li>
-        </ul>
-      </div>
-
-      <div class="darkcard" style="margin-top:4px;">
-        <div class="dtag">// Anomalie intenzionali — da individuare</div>
-        <div class="drow">
-          <span class="dchip dc-r">RL-007</span>
-          <span class="deq"><strong style="color:#f1f5f9;">ChurnPredictor</strong> — 0% copertura Checklist ma KPI già definiti e misurati. Anomalia da analizzare.</span>
+      <div class="grid2" style="margin-bottom:0;">
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag g">6 sheet nel file</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li><strong>SCENARIO</strong>, <strong>SISTEMI_AI</strong>, <strong>MAPPING_ARCHITETTURALE</strong>, <strong>CHECKLIST_GOVERNANCE</strong>.</li>
+            <li><strong>KPI_STATUS</strong> — stato effettivo di definizione e misurazione dei KPI.</li>
+            <li><strong>CHANGE_IMPACT</strong> — 5 domande GenAI-specific con colonne di output da completare.</li>
+          </ul>
         </div>
-        <div class="drow">
-          <span class="dchip dc-b">GC-012</span>
-          <span class="deq"><strong style="color:#f1f5f9;">AdvisorAI-WM</strong> — classificazione AI Act ambigua: potenzialmente Alto Rischio per consulenza patrimoniale.</span>
-        </div>
-        <div class="drow">
-          <span class="dchip dc-r">GI-016</span>
-          <span class="deq"><strong style="color:#f1f5f9;">DataAnalyst-AI</strong> — Shadow AI adottato senza alcun processo di approvazione. 0% governance.</span>
+
+        <div class="card" style="padding:24px 28px;">
+          <div class="ctag g">Cosa il team può produrre</div>
+          <ul class="sheet-list" style="list-style:none;margin-top:12px;">
+            <li>Identificazione dei gap di governance trasversali al portfolio.</li>
+            <li>Roadmap di compliance ordinata per rischio, urgenza e fattibilità.</li>
+            <li>Validazione ed estensione dei sistemi impattati dalle nuove domande GenAI.</li>
+            <li>Riconoscimento delle anomalie e priorità di remediation.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>Vista attesa:</strong> dashboard board-level con maturità per sistema, evidenza Shadow AI e gap GenAI.</p>
         </div>
       </div>
-
-      <a class="dl-btn" href="https://docs.google.com/spreadsheets/d/19Sx5Fcj5gOAQvFX7_8H6SDXhZztOMuKY/edit?usp=sharing&ouid=113916780792634236249&rtpof=true&sd=true" target="_blank" style="margin-top:18px;">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Apri Dataset Scenario P
-      </a>
     </div>
 
   </div><!-- /panel-6 -->
