@@ -915,12 +915,45 @@ response = llm.complete("La tua domanda qui")
 print(response.text)</code></pre></div>
         </div>
 
+        <div class="card bl-o hl-o" style="margin-bottom:16px;">
+        <div class="ctag o">Scheletro hackathon — Chat con system prompt</div>
+        <h3>Scheletro: sistema AI → domande Checklist contestualizzate</h3>
+          <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
+import os
+from llama_index.llms.openai import OpenAI
+from llama_index.core.llms import ChatMessage
+
+load_dotenv()
+key = os.getenv("OPENAI_API_KEY")
+
+llm = OpenAI(model="gpt-5.4-mini", api_key=key)
+
+messages = [
+    ChatMessage(
+        role="system",
+        content="Sei un esperto AI Governance bancaria. Cita sempre i nodi tassonomici ABI Lab."
+    ),
+    ChatMessage(
+        role="user",
+        content="Sistema AI:\n"
+                "ChatBanca su MA A.1.5, dati MI 2.1 — chatbot retail Internet Banking\n\n"
+                "Domande Checklist più critiche e perché:"
+    ),
+]
+
+resp = llm.chat(messages)
+print(resp.message.content)
+
+# Monitoraggio token consumati
+print(f"Token usati: {resp.raw.usage.total_tokens}")</code></pre></div>
+        </div>
+
         <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:4px;">
-          <a href="https://docs.llamaindex.ai/en/stable/getting_started/installation/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+          <a href="https://developers.llamaindex.ai/python/framework/getting_started/installation/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Installazione LlamaIndex
           </a>
-          <a href="https://docs.llamaindex.ai/en/stable/examples/llm/openai/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
+          <a href="https://developers.llamaindex.ai/python/examples/llm/openai/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             OpenAI LLM su LlamaIndex
           </a>
