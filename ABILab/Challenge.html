@@ -405,9 +405,156 @@ tbody tr:hover td { background:var(--bg); }
   display:inline-flex; align-items:center; gap:8px;
   background:var(--navy); color:#fff; padding:12px 22px; border-radius:10px;
   font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700;
-  text-decoration:none; transition:all .15s; margin-top:8px;
+  text-decoration:none; transition:all .15s; margin-top:8px; border:none; cursor:pointer;
 }
 .dl-btn:hover { background:var(--navy2); transform:translateY(-1px); }
+.dl-note {
+  font-size:12px;
+  color:var(--muted);
+  margin-top:14px;
+  line-height:1.6;
+}
+.source-modal {
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(13,27,42,.55);
+  backdrop-filter:blur(4px);
+  z-index:300;
+}
+.source-modal.open { display:flex; }
+.source-modal-card {
+  width:min(520px, 100%);
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:28px 28px 24px;
+  box-shadow:0 24px 60px rgba(13,27,42,.18);
+}
+.source-modal-top {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:18px;
+}
+.source-modal-tag {
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#fee2e2;
+  color:var(--accent-red);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.source-modal h3 {
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-.03em;
+  color:var(--navy);
+  line-height:1.1;
+}
+.source-modal p {
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.65;
+}
+.source-close {
+  width:38px;
+  height:38px;
+  border-radius:999px;
+  border:1px solid var(--border2);
+  background:var(--white);
+  color:var(--navy);
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.source-options {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin:22px 0 14px;
+}
+.source-option {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-height:170px;
+  padding:18px 18px 16px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:var(--bg);
+  text-decoration:none;
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.source-option:hover {
+  transform:translateY(-2px);
+  border-color:var(--accent-blue);
+  box-shadow:0 10px 28px rgba(13,27,42,.08);
+}
+.source-option-head {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.source-option-logo {
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.source-option-logo.drive {
+  background:#eef4ff;
+}
+.source-option-logo.swiss {
+  background:#fff3f0;
+}
+.source-option-logo img {
+  width:28px;
+  height:28px;
+  object-fit:contain;
+  display:block;
+}
+.source-option-title {
+  font-size:15px;
+  font-weight:800;
+  color:var(--navy);
+}
+.source-option-sub {
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.55;
+}
+.source-option-cta {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:auto;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--accent-blue);
+}
+.source-option-cta img {
+  width:16px;
+  height:16px;
+  object-fit:contain;
+  display:block;
+}
 .sheet-list { list-style:none; margin-top:4px; }
 .sheet-list li { font-size:13px; color:var(--muted); padding:5px 0 5px 20px; position:relative; border-bottom:1px solid var(--border); line-height:1.5; }
 .sheet-list li:last-child { border-bottom:none; }
@@ -415,6 +562,9 @@ tbody tr:hover td { background:var(--bg); }
 .sheet-list li strong { color:var(--navy); font-family:'DM Mono',monospace; font-size:11.5px; }
 @media(max-width:640px){
   .ds-tab { padding:10px 14px; font-size:12px; }
+  .source-modal-card { padding:22px 18px 18px; }
+  .source-options { grid-template-columns:1fr; }
+  .source-modal h3 { font-size:20px; }
 }
 
 /* API INNER TABS */
@@ -599,15 +749,16 @@ tbody tr:hover td { background:var(--bg); }
       <p style="font-size:14px;color:var(--muted);margin-bottom:22px;line-height:1.65;">Tutto quello che ti serve per iniziare. I framework sono i file di riferimento ufficiali ABI Lab — tienili aperti mentre lavori.</p>
 
       <div style="display:flex;flex-direction:column;gap:12px;">
-        <a class="dl-btn" href="https://drive.google.com/drive/folders/1c9Bjzq_WXUc7cnmtBg4Fq6k7B9zWTLBM?usp=sharing" target="_blank">
+        <button class="dl-btn" type="button" onclick="openDownloadModal('framework-abi')">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Framework Architetturale ABI Lab
-        </a>
-        <a class="dl-btn" href="https://drive.google.com/drive/folders/1dPFPRk1aFdtedM-0ht_52YSXp2m6febf?usp=sharing" target="_blank">
+        </button>
+        <button class="dl-btn" type="button" onclick="openDownloadModal('ai-gov-framework')">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           AI Governance Framework
-        </a>
+        </button>
       </div>
+      <p class="dl-note">Ogni materiale può essere aperto da Google Drive oppure scaricato da SwissTransfer, così chi ha problemi di accesso può scegliere subito l'alternativa migliore.</p>
     </div>
 
   </div>
@@ -1361,10 +1512,11 @@ print(f"Token usati: {token_usati}")</code></pre></div>
         README introduttivo. Tutti i dataset condividono una struttura comune e aggiungono sheet
         specifici in base al problema da affrontare.
       </p>
-      <a class="dl-btn" href="https://drive.google.com/drive/folders/1Mt7qSamZOer8hxdRBIXike133m30iXJ4?usp=sharing" target="_blank" style="margin-top:16px;">
+      <button class="dl-btn" type="button" onclick="openDownloadModal('dataset-starter-kit')" style="margin-top:16px;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Apri cartella Dataset Starter Kit
-      </a>
+      </button>
+      <p class="dl-note">Puoi scegliere tra Google Drive e SwissTransfer anche per il pacchetto dataset.</p>
     </div>
 
     <div class="card bl-b" style="margin-bottom:16px;">
@@ -1644,6 +1796,54 @@ print(f"Token usati: {token_usati}")</code></pre></div>
 
 </div><!-- /app-shell -->
 
+<!-- DOWNLOAD SOURCE MODAL -->
+<div class="source-modal" id="source-modal" aria-hidden="true">
+  <div class="source-modal-card" role="dialog" aria-modal="true" aria-labelledby="source-modal-title">
+    <div class="source-modal-top">
+      <div>
+        <div class="source-modal-tag">Scegli la sorgente</div>
+        <h3 id="source-modal-title">Scarica il materiale</h3>
+        <p id="source-modal-desc">Scegli se aprire il contenuto da Google Drive oppure, se hai problemi con Drive, usare SwissTransfer.</p>
+      </div>
+      <button class="source-close" type="button" onclick="closeDownloadModal()" aria-label="Chiudi">×</button>
+    </div>
+
+    <div class="source-options">
+      <a class="source-option" id="source-drive-link" href="#" target="_blank" rel="noopener noreferrer">
+        <div class="source-option-head">
+          <div class="source-option-logo drive" aria-hidden="true">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_Drive_logo.png" alt="">
+          </div>
+          <div>
+            <div class="source-option-title">Google Drive</div>
+            <div class="source-option-sub">Cartella condivisa ufficiale.</div>
+          </div>
+        </div>
+        <div class="source-option-cta">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_Drive_logo.png" alt="">
+          <span>Apri su Drive</span>
+        </div>
+      </a>
+
+      <a class="source-option" id="source-swiss-link" href="#" target="_blank" rel="noopener noreferrer">
+        <div class="source-option-head">
+          <div class="source-option-logo swiss" aria-hidden="true">
+            <img src="https://cdn-1.webcatalog.io/catalog/swisstransfer/swisstransfer-icon-filled-256.png" alt="">
+          </div>
+          <div>
+            <div class="source-option-title">SwissTransfer</div>
+            <div class="source-option-sub">Scarica il materiale da qui.</div>
+          </div>
+        </div>
+        <div class="source-option-cta">
+          <img src="https://cdn-1.webcatalog.io/catalog/swisstransfer/swisstransfer-icon-filled-256.png" alt="">
+          <span>Apri su SwissTransfer</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
 <!-- ACRONYM TOOLTIP -->
 <div id="abbr-tip">
   <div class="tip-abbr" id="tip-abbr"></div>
@@ -1709,7 +1909,55 @@ function startChallenge() {
   window.scrollTo({ top: 0 });
 }
 
+var DOWNLOAD_SOURCES = {
+  'framework-abi': {
+    title: 'Framework Architetturale ABI Lab',
+    description: 'Apri il framework architetturale da Google Drive oppure, se hai problemi con Drive, scaricalo da SwissTransfer.',
+    drive: 'https://drive.google.com/drive/folders/1c9Bjzq_WXUc7cnmtBg4Fq6k7B9zWTLBM?usp=sharing',
+    swiss: 'https://www.swisstransfer.com/d/421c29c0-e234-4b7e-8c7e-8fb0505dc7c4'
+  },
+  'ai-gov-framework': {
+    title: 'AI Governance Framework',
+    description: 'Apri il materiale di governance da Google Drive oppure, se hai problemi con Drive, scaricalo da SwissTransfer.',
+    drive: 'https://drive.google.com/drive/folders/1dPFPRk1aFdtedM-0ht_52YSXp2m6febf?usp=sharing',
+    swiss: 'https://www.swisstransfer.com/d/fa6c67a6-ce92-4e98-9e55-85b73fe92deb'
+  },
+  'dataset-starter-kit': {
+    title: 'Dataset Starter Kit 2026',
+    description: 'Sette workbook scenario, guida e README: puoi aprirli da Google Drive oppure, se hai problemi con Drive, scaricarli da SwissTransfer.',
+    drive: 'https://drive.google.com/drive/folders/1Mt7qSamZOer8hxdRBIXike133m30iXJ4?usp=sharing',
+    swiss: 'https://www.swisstransfer.com/d/23d81c6d-2146-41af-b04b-186c98f3cd23'
+  }
+};
+
+function openDownloadModal(key) {
+  var data = DOWNLOAD_SOURCES[key];
+  if (!data) return;
+  document.getElementById('source-modal-title').textContent = data.title;
+  document.getElementById('source-modal-desc').textContent = data.description;
+  document.getElementById('source-drive-link').href = data.drive;
+  document.getElementById('source-swiss-link').href = data.swiss;
+  document.getElementById('source-modal').classList.add('open');
+  document.getElementById('source-modal').setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDownloadModal() {
+  var modal = document.getElementById('source-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
 document.getElementById('btn-prev').disabled = true;
+
+document.getElementById('source-modal').addEventListener('click', function(e) {
+  if (e.target.id === 'source-modal') closeDownloadModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDownloadModal();
+});
 
 // ── SYNTAX HIGHLIGHTING — evidenzia i blocchi <pre><code> ──
 if (window.hljs) {
