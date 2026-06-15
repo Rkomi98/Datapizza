@@ -47,8 +47,12 @@ nav {
   display:flex; align-items:center; justify-content:space-between;
   position:fixed; top:0; left:0; right:0; width:100%; z-index:100;
 }
-.logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; color:var(--navy); text-decoration:none; }
-.logo svg { width:32px; height:32px; flex-shrink:0; }
+.logo {
+  display:flex; align-items:center; justify-content:center;
+  padding:0;
+  text-decoration:none;
+}
+.logo img { height:33px; width:auto; display:block; }
 .nav-right { display:flex; align-items:center; }
 
 /* HERO */
@@ -472,12 +476,13 @@ tbody tr:hover td { background:var(--bg); }
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="#">
-    <img src="https://salaries.datapizza.tech/logo-small.svg" alt="Datapizza" width="32" height="32" style="flex-shrink:0;">
-    <span>Datapizza</span>
+  <a class="logo" href="https://datapizza.tech/" target="_blank" rel="noopener noreferrer">
+    <img src="Asset/logotipo-primary.png" alt="Datapizza">
   </a>
   <div class="nav-right">
-    <img src="https://forum.abilab.it/img/ABI_Lab_neg-2026-web-ready.svg" alt="ABI Lab" height="28" style="display:block;">
+    <a href="https://www.abilab.it/it" target="_blank" rel="noopener noreferrer">
+      <img src="https://forum.abilab.it/img/ABI_Lab_neg-2026-web-ready.svg" alt="ABI Lab" height="28" style="display:block;">
+    </a>
   </div>
 </nav>
 
@@ -486,7 +491,7 @@ tbody tr:hover td { background:var(--bg); }
 <!-- HERO -->
 <div class="hero">
   <div class="hero-badge"><em>Hackathon</em> ABI Lab × Datapizza</div>
-  <h1>AI Governance<br><span>meets</span> Enterprise Architecture</h1>
+  <h1>Hackathon Multibanca</h1>
   <p>Il Framework Architetturale ABI Lab e l'AI Governance Framework vivono in silos separati. Il tuo compito è collegarli con un sistema basato su AI generativa.</p>
   <div class="hero-stats">
     <div class="stat">
@@ -514,8 +519,6 @@ tbody tr:hover td { background:var(--bg); }
 <!-- FOOTER INFO -->
 <div class="info-bar">
   <span><strong style="color:var(--navy);">16–17 Giugno 2026</strong></span>
-  <span style="color:var(--border2);">·</span>
-  <span>Officine Credem</span>
   <span style="color:var(--border2);">·</span>
   <span>8 team · 40 partecipanti</span>
 </div>
