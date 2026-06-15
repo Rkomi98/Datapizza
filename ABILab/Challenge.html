@@ -972,57 +972,31 @@ print(response.text)</code></pre></div>
         </div>
 
         <div class="card bl-o hl-o" style="margin-bottom:16px;">
-          <div class="ctag o">Step 2 — Scheletro challenge</div>
-          <h3>Scheletro di agente con framework da fornire in input</h3>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:4px;line-height:1.6;">Qui l'agente <strong>non</strong> conosce i framework in automatico: prima devi caricare i materiali della challenge, selezionare i passaggi rilevanti e passarli nel prompt o in un retriever. Questo blocco è uno <em>scheletro</em>, non un agente già pronto.</p>
+        <div class="ctag o">Scheletro hackathon — Client con system prompt</div>
+        <h3>Scheletro: sistema AI → domande Checklist contestualizzate</h3>
           <div class="codebox"><pre><code class="language-python">from dotenv import load_dotenv
 import os
-from pathlib import Path
-from datapizza.agents import Agent
 from datapizza.clients.openai import OpenAIClient
 
 load_dotenv()
 key = os.getenv("OPENAI_API_KEY")
 
-client = OpenAIClient(api_key=key, model="gpt-5.4-mini")
-
-# 1) Percorsi ai materiali della challenge
-framework_arch_dir = Path("FRAMEWORK ARCHITETTURALE ABI LAB")
-governance_dir = Path("AI GOVERNANCE FRAMEWORK")
-dataset_dir = Path("New dataset")
-
-# 2) TODO: qui devi leggere davvero i file, oppure costruire un retriever
-contesto_framework = """
-[Inserisci qui i nodi TP / MSB / MI / MA / MInfra rilevanti]
-[Inserisci qui le domande di checklist e i KPI rilevanti]
-[Inserisci qui gli estratti del dataset su cui stai lavorando]
-"""
-
-agent = Agent(
-    name="scheletro_ai_governance",
-    client=client,
-    system_prompt="""Sei un assistente di AI Governance bancaria.
-        Lavora solo sul contesto che ricevi in input.
-        Se i framework o il dataset non sono presenti nel contesto, dillo esplicitamente.
-        Quando rispondi, cita sempre i nodi tassonomici e le domande di checklist
-        solo se compaiono nei materiali forniti."""
+client = OpenAIClient(
+    api_key=key,
+    model="gpt-5.4-mini",
+    system_prompt="Sei un esperto AI Governance bancaria. Cita sempre i nodi tassonomici ABI Lab."
 )
 
-# 3) Query della challenge + contesto recuperato dai file
-user_query = (
-    "Per un credit scoring su MA C.3.2, quali KPI di modello devo monitorare "
-    "e quali domande Checklist sono critiche per l'AI Act?"
+response = client.invoke(
+    "Sistema AI:\n"
+    "ChatBanca su MA A.1.5, dati MI 2.1 — chatbot retail Internet Banking\n\n"
+    "Domande Checklist più critiche e perché:"
 )
+print(response.text)
 
-result = agent.run(f"""
-Materiali disponibili:
-{contesto_framework}
-
-Richiesta:
-{user_query}
-""")
-
-print(result.text)</code></pre></div>
+# Monitoraggio token consumati
+token_usati = response.prompt_tokens_used + response.completion_tokens_used
+print(f"Token usati: {token_usati}")</code></pre></div>
         </div>
 
         <a href="https://docs.datapizza.ai/latest/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-blue);text-decoration:none;margin-bottom:4px;">
@@ -1064,7 +1038,7 @@ print(result.text)</code></pre></div>
       <h2>I dati a <span class="cb">disposizione</span></h2>
     </div>
 
-    <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7;">Ricevi <strong style="color:var(--navy);">8 file</strong> che coprono entrambi i framework. Il tuo sistema deve saperli interrogare, collegare e rendere accessibili in modo intelligente.</p>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.7;">Hai ricevuto <strong style="color:var(--navy);">2 cartelle</strong> che coprono entrambi i framework. Il tuo sistema deve saperli interrogare, collegare e rendere accessibili in modo intelligente.</p>
 
     <div class="card bl-g" style="margin-bottom:24px;">
       <div class="ctag g">Libertà progettuale</div>
@@ -1076,7 +1050,7 @@ print(result.text)</code></pre></div>
       <div class="card bl-b">
         <div class="ctag b">Framework Architetturale ABI Lab · ~1.000 voci</div>
         <h3>Cinque tassonomie gerarchiche</h3>
-        <p style="margin-bottom:14px;">Descrivono l'intera organizzazione bancaria: processi, servizi, informazioni, applicazioni e infrastruttura. Nato nel 2009, è il riferimento condiviso del settore bancario italiano.</p>
+        <p style="margin-bottom:14px;">Descrivono l'intera organizzazione bancaria: processi, servizi, informazioni, applicazioni e infrastruttura. Nato nel 2009, è il riferimento condiviso del settore bancario italiano. Hai ricevuto un file excel per ogni tassonomia e un pdf che spiega il framework.</p>
         <div class="tcard" style="margin:0;">
           <table>
             <thead><tr><th>Sigla</th><th>Tassonomia</th><th>Dimensione</th></tr></thead>
@@ -1094,7 +1068,7 @@ print(result.text)</code></pre></div>
       <div class="card bl-o">
         <div class="ctag o">AI Governance Framework · ABI Lab × Deloitte</div>
         <h3>Checklist + KPI operativi</h3>
-        <p style="margin-bottom:14px;">Due strumenti per valutare e monitorare i sistemi AI in banca secondo le best practice e i requisiti del AI Act europeo. Sviluppato in collaborazione con Deloitte nell'ambito dell'AI Hub.</p>
+        <p style="margin-bottom:14px;">Due strumenti per valutare e monitorare i sistemi AI in banca secondo le best practice e i requisiti del AI Act europeo. Sviluppato in collaborazione con Deloitte nell'ambito dell'AI Hub. Hai ricevuto un file excel per ogni strumento e un pdf che spiega il framework.</p>
         <div class="tcard" style="margin:0;">
           <table>
             <thead><tr><th>Strumento</th><th>Contenuto</th><th>La domanda</th></tr></thead>
@@ -1107,12 +1081,6 @@ print(result.text)</code></pre></div>
           </table>
         </div>
       </div>
-    </div>
-
-    <div class="card bl-r hl-r" style="margin-top:4px;">
-      <div class="ctag r">La regola d'oro</div>
-      <h3>Non filtrare — contestualizza</h3>
-      <p>Un chatbot bancario per il retail è un sistema AI molto diverso da un algoritmo di credit scoring o da un sistema di fraud detection. La Checklist ha un filtro per fase e rischio — ma <strong>questo non basta</strong>. Il tuo sistema deve contestualizzare: spiegare <em>perché</em> una domanda è rilevante citando il nodo tassonomico specifico, e suggerire <em>dove</em> trovare le evidenze nell'architettura.</p>
     </div>
 
   </div>
