@@ -551,12 +551,12 @@ tbody tr:hover td { background:var(--bg); }
           <span class="fnl">Framework Architetturale</span>
           <span class="fnv">DOVE sono i sistemi AI</span>
         </div>
-        <span class="farr">→</span>
+        <span class="farr">↔</span>
         <div class="fnode fn-r" style="background:#fee2e2;border-color:#fca5a5;min-width:140px;">
           <span class="fnl">Il tuo sistema</span>
           <span class="fnv" style="color:var(--accent-red);">Il Ponte</span>
         </div>
-        <span class="farr">→</span>
+        <span class="farr">↔</span>
         <div class="fnode fn-o">
           <span class="fnl">AI Governance Framework</span>
           <span class="fnv">COME valutarli</span>
@@ -588,6 +588,12 @@ tbody tr:hover td { background:var(--bg); }
         <span class="deq">"Dove si trova questo sistema AI nell'architettura della banca?" + "È governato correttamente rispetto all'AI Act?"</span>
         <span class="dnote">La risposta deve essere simultanea, non sequenziale</span>
       </div>
+    </div>
+
+    <div class="card bl-b hl-b" style="margin-top:4px;">
+      <div class="ctag b">In pratica</div>
+      <h3>Ok, ma quindi cosa dobbiamo fare?</h3>
+      <p>Questa mappatura — da nodo architetturale alle domande di Checklist applicabili e ai KPI da monitorare — non la trovate pronta in nessun file: Checklist e KPI stanno in workbook separati dalle tassonomie. Costruire questo ponte è esattamente la sfida. Nei dataset il sistema è già collegato al suo nodo e al suo rischio; quali delle 99 domande valgano per quel nodo è ciò che dovete dedurre e motivare voi. Se ci arrivate con una mappatura ben ragionata, è proprio quello che cerchiamo.</p>
     </div>
 
     <div class="card" style="margin-top:4px;padding:28px 32px;">
@@ -1352,8 +1358,8 @@ print(result.text)</code></pre></div>
         <span class="dnote">Non serve production-ready — basta che funzioni</span>
       </div>
       <div class="drow">
-        <span class="dchip dc-b">OPZIONALE</span>
-        <span class="deq"><strong style="color:#f1f5f9;">Repository codice</strong> — GitHub/GitLab con README di installazione</span>
+        <span class="dchip dc-r">OBBLIGATORIO</span>
+        <span class="deq"><strong style="color:#f1f5f9;">Repository codice</strong> — GitHub/GitLab con README di installazione · la consegna del codice via Git è obbligatoria</span>
       </div>
       <div class="drow">
         <span class="dchip dc-g">CONSIGLIATO</span>
@@ -1394,6 +1400,18 @@ print(result.text)</code></pre></div>
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Apri cartella Dataset Starter Kit
       </a>
+    </div>
+
+    <div class="card bl-b" style="margin-bottom:16px;">
+      <div class="ctag b">Come leggerli</div>
+      <h3>Come è fatto ogni dataset</h3>
+      <p>Ci sono fogli di input (i sistemi, il loro nodo architetturale, parte della Checklist già compilata) e fogli di output da completare — per esempio <code>GO_LIVE_READINESS</code> e <code>KPI_SELEZIONATI</code>, con le celle marcate <code>← OUTPUT</code>. Il vostro sistema deve completare automaticamente i fogli di output; in valutazione guardiamo se la classificazione prodotta è coerente con i framework.</p>
+    </div>
+
+    <div class="card bl-r" style="margin-bottom:24px;">
+      <div class="ctag r">Valutazione</div>
+      <h3>Niente soluzione "giusta" di riferimento</h3>
+      <p>Non pubblichiamo una mappatura ufficiale: valutiamo la qualità del ragionamento e delle citazioni, non la corrispondenza a una risposta esatta.</p>
     </div>
 
     <!-- INNER SUB-TABS -->
