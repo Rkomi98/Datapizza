@@ -276,6 +276,112 @@ tbody tr:hover td { background:var(--bg); }
   border:1px solid #fcd34d;
 }
 
+/* PITCH SCHEDULE */
+.schedule-shell {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px 26px;
+}
+.schedule-intro {
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.75;
+  margin-bottom:20px;
+}
+.schedule-intro strong {
+  color:var(--navy);
+}
+.schedule-list {
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.schedule-item {
+  display:grid;
+  grid-template-columns:88px minmax(0, 1fr) auto;
+  gap:12px;
+  align-items:center;
+  padding:14px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:14px;
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.schedule-item:hover {
+  transform:translateY(-1px);
+  border-color:var(--border2);
+  box-shadow:0 4px 24px rgba(13,27,42,.07);
+}
+.schedule-rank {
+  min-height:60px;
+  border-radius:12px;
+  background:#fff8f7;
+  color:var(--accent-red);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #fecaca;
+}
+.schedule-rank span {
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  opacity:.8;
+}
+.schedule-rank strong {
+  font-family:'DM Mono', monospace;
+  font-size:17px;
+  line-height:1;
+  margin-top:6px;
+}
+.schedule-content {
+  min-width:0;
+}
+.schedule-label {
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--accent-blue);
+  margin-bottom:6px;
+}
+.schedule-team {
+  font-size:clamp(20px, 2vw, 24px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-.04em;
+  color:var(--navy);
+  margin-bottom:0;
+}
+.schedule-controls {
+  display:flex;
+  gap:8px;
+}
+.schedule-btn {
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid var(--border2);
+  background:var(--white);
+  color:var(--navy);
+  font-size:18px;
+  font-weight:800;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.schedule-btn:hover:not(:disabled) {
+  background:var(--navy);
+  color:#fff;
+  border-color:var(--navy);
+  transform:translateY(-1px);
+}
+.schedule-btn:disabled {
+  opacity:.35;
+  cursor:not-allowed;
+}
 /* PROFILE CARD */
 .profile { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:20px 22px; }
 .profile:hover { box-shadow:0 4px 24px rgba(13,27,42,.07); }
@@ -401,6 +507,16 @@ tbody tr:hover td { background:var(--bg); }
   .agenda-row { gap: 10px; }
   .agenda-time { width: 68px; font-size: 11px; }
   .agenda-body strong { font-size: 13px; }
+
+  /* Schedule */
+  .schedule-shell { padding: 18px 14px; }
+  .schedule-intro { font-size: 13px; margin-bottom: 16px; }
+  .schedule-list { grid-template-columns: 1fr; }
+  .schedule-item { grid-template-columns: 1fr; gap: 12px; padding: 16px 14px; }
+  .schedule-rank { min-height: 58px; width: 88px; }
+  .schedule-rank strong { font-size: 16px; }
+  .schedule-team { font-size: 22px; }
+  .schedule-controls { justify-content: flex-end; }
 
   /* Tables — tcard scrolls, card contains overflow */
   .grid2 > *, .grid3 > * { min-width: 0; } /* allow grid cells to shrink below content min-size */
@@ -695,7 +811,7 @@ tbody tr:hover td { background:var(--bg); }
       <div class="stat-label">KPI</div>
     </div>
     <div class="stat">
-      <div class="stat-num b">7</div>
+      <div class="stat-num b">8</div>
       <div class="stat-label">Team</div>
     </div>
   </div>
@@ -708,7 +824,7 @@ tbody tr:hover td { background:var(--bg); }
 <div class="info-bar">
   <span><strong style="color:var(--navy);">16–17 Giugno 2026</strong></span>
   <span style="color:var(--border2);">·</span>
-  <span>7 team · 34 partecipanti</span>
+  <span>8 team · 34 partecipanti</span>
 </div>
 
 </div><!-- /hero-page -->
@@ -722,8 +838,9 @@ tbody tr:hover td { background:var(--bg); }
   <button class="step-tab" onclick="goTo(2)"><span class="snum">3</span> Scenari</button>
   <button class="step-tab" onclick="goTo(3)"><span class="snum">4</span> API Quickstart</button>
   <button class="step-tab" onclick="goTo(4)"><span class="snum">5</span> Team & Logistica</button>
-  <button class="step-tab" onclick="goTo(5)"><span class="snum">6</span> Valutazione</button>
-  <button class="step-tab" onclick="goTo(6)"><span class="snum">7</span> Dataset</button>
+  <button class="step-tab" onclick="goTo(5)"><span class="snum">6</span> Scaletta</button>
+  <button class="step-tab" onclick="goTo(6)"><span class="snum">7</span> Valutazione</button>
+  <button class="step-tab" onclick="goTo(7)"><span class="snum">8</span> Dataset</button>
 </div>
 
 <div class="main">
@@ -1356,7 +1473,7 @@ print(f"Token usati: {token_usati}")</code></pre></div>
       <div class="card bl-r">
         <div class="ctag r">Evento</div>
         <h3>16–17 Giugno 2026</h3>
-        <p><strong>Officine Credem</strong> — 2 giorni intensivi in presenza. <strong>34 partecipanti</strong> organizzati in <strong>7 team multibanca</strong>. Ogni team include profili tech e di dominio da banche diverse.</p>
+        <p><strong>Officine Credem</strong> — 2 giorni intensivi in presenza. <strong>34 partecipanti</strong> organizzati in <strong>8 team multibanca</strong>. Ogni team include profili tech e di dominio da banche diverse.</p>
       </div>
       <div class="card bl-b hl-b">
         <div class="ctag b">Formato squadre</div>
@@ -1453,8 +1570,25 @@ print(f"Token usati: {token_usati}")</code></pre></div>
 
   </div>
 
-  <!-- ── PANEL 5: VALUTAZIONE ── -->
+  <!-- ── PANEL 5: SCALETTA ── -->
   <div class="panel" id="panel-5">
+    <div class="sh">
+      <span class="badge b-o">Scaletta</span>
+      <h2>Ordine dei <span class="co">pitch</span></h2>
+    </div>
+
+    <div class="schedule-shell">
+      <p class="schedule-intro">
+        <strong>Scaletta provvisoria.</strong> I pitch iniziano alle <strong>14:00</strong>.
+        Ogni team ha <strong>8 minuti</strong> per presentare, ma contiamo <strong>15 minuti a gruppo</strong> per avere un orario approssimativo.
+      </p>
+      <div class="schedule-list" id="schedule-list" aria-live="polite"></div>
+    </div>
+
+  </div>
+
+  <!-- ── PANEL 6: VALUTAZIONE ── -->
+  <div class="panel" id="panel-6">
     <div class="sh">
       <span class="badge b-g">Valutazione</span>
       <h2>Come sarete <span class="cr">giudicati</span></h2>
@@ -1529,8 +1663,8 @@ print(f"Token usati: {token_usati}")</code></pre></div>
   </div>
 
 
-  <!-- PANEL 6: DATASET -->
-  <div class="panel" id="panel-6">
+  <!-- PANEL 7: DATASET -->
+  <div class="panel" id="panel-7">
     <div class="sh">
       <span class="badge b-b">Dataset</span>
       <h2>Starter Kit <span class="cr">Dataset</span></h2>
@@ -1818,7 +1952,7 @@ print(f"Token usati: {token_usati}")</code></pre></div>
       </div>
     </div>
 
-  </div><!-- /panel-6 -->
+  </div><!-- /panel-7 -->
 
 </div><!-- /main -->
 
@@ -1826,8 +1960,8 @@ print(f"Token usati: {token_usati}")</code></pre></div>
 <div class="bnav">
   <button class="btn-dark" id="btn-prev" onclick="nav(-1)">← Precedente</button>
   <div class="pinfo">
-    <div class="pbar"><div class="pfill" id="pfill" style="width:14.28%"></div></div>
-    <span id="ptxt">Passo 1 di 7</span>
+    <div class="pbar"><div class="pfill" id="pfill" style="width:12.5%"></div></div>
+    <span id="ptxt">Passo 1 di 8</span>
   </div>
   <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
 </div>
@@ -1892,7 +2026,93 @@ print(f"Token usati: {token_usati}")</code></pre></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
 let cur = 0;
-const TOT = 7;
+const TOT = 8;
+const DEFAULT_PITCH_TEAMS = [
+  { team: 'I Tech Ronin', budget_usd: 80 },
+  { team: 'PizzaExp(ress)', budget_usd: 80 },
+  { team: 'L(A)I-team', budget_usd: 80 },
+  { team: 'Fable 5', budget_usd: 80 },
+  { team: 'Lambrusco Language Models', budget_usd: 80 },
+  { team: 'Puff.AI', budget_usd: 80 },
+  { team: 'AI caramba', budget_usd: 80 },
+  { team: 'VocamLabs', budget_usd: 80 }
+];
+let pitchTeams = cloneDefaultPitchTeams();
+
+function cloneDefaultPitchTeams() {
+  return DEFAULT_PITCH_TEAMS.map(function(item) {
+    return { team: item.team, budget_usd: item.budget_usd };
+  });
+}
+
+function renderPitchSchedule() {
+  var list = document.getElementById('schedule-list');
+  if (!list) return;
+  list.innerHTML = '';
+
+  pitchTeams.forEach(function(item, index) {
+    var row = document.createElement('div');
+    row.className = 'schedule-item' + (index === 0 ? ' lead' : '');
+
+    var rank = document.createElement('div');
+    rank.className = 'schedule-rank';
+    rank.innerHTML = '<span>Ordine</span><strong>' + String(index + 1).padStart(2, '0') + '</strong>';
+
+    var content = document.createElement('div');
+    content.className = 'schedule-content';
+
+    var label = document.createElement('div');
+    label.className = 'schedule-label';
+    label.textContent = 'Team ' + String(index + 1).padStart(2, '0');
+
+    var name = document.createElement('div');
+    name.className = 'schedule-team';
+    name.textContent = item.team;
+
+    content.appendChild(label);
+    content.appendChild(name);
+
+    var controls = document.createElement('div');
+    controls.className = 'schedule-controls';
+
+    var upBtn = document.createElement('button');
+    upBtn.className = 'schedule-btn';
+    upBtn.type = 'button';
+    upBtn.innerHTML = '&#8593;';
+    upBtn.title = 'Sposta in alto';
+    upBtn.disabled = index === 0;
+    upBtn.addEventListener('click', function() {
+      movePitchTeam(index, -1);
+    });
+
+    var downBtn = document.createElement('button');
+    downBtn.className = 'schedule-btn';
+    downBtn.type = 'button';
+    downBtn.innerHTML = '&#8595;';
+    downBtn.title = 'Sposta in basso';
+    downBtn.disabled = index === pitchTeams.length - 1;
+    downBtn.addEventListener('click', function() {
+      movePitchTeam(index, 1);
+    });
+
+    controls.appendChild(upBtn);
+    controls.appendChild(downBtn);
+
+    row.appendChild(rank);
+    row.appendChild(content);
+    row.appendChild(controls);
+    list.appendChild(row);
+  });
+}
+
+function movePitchTeam(index, delta) {
+  var targetIndex = index + delta;
+  if (targetIndex < 0 || targetIndex >= pitchTeams.length) return;
+  var moved = pitchTeams[index];
+  pitchTeams.splice(index, 1);
+  pitchTeams.splice(targetIndex, 0, moved);
+  renderPitchSchedule();
+}
 
 function goTo(idx) {
   document.getElementById('panel-' + cur).classList.remove('active');
@@ -1988,6 +2208,7 @@ function closeDownloadModal() {
 }
 
 document.getElementById('btn-prev').disabled = true;
+renderPitchSchedule();
 
 document.getElementById('source-modal').addEventListener('click', function(e) {
   if (e.target.id === 'source-modal') closeDownloadModal();
