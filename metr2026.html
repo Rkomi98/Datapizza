@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>METR Horizon — Datapizza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f8fa;
+  --white: #ffffff;
+  --navy: #0d1b2a;
+  --navy2: #1a2e42;
+  --accent-red: #e8412a;
+  --accent-orange: #f5a623;
+  --accent-blue: #2563eb;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --border2: #d1d5db;
+  --grid-color: #e5e7eb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events:none;
+  z-index:0;
+}
+body > * { position:relative; z-index:1; }
+
+.main { max-width:1100px; margin:0 auto; padding:48px 48px 80px; }
+
+.top-brand { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+.top-brand svg { width:26px; height:26px; }
+.top-brand span { font-weight:800; font-size:15px; letter-spacing:-.2px; color:var(--navy); }
+
+.sh { margin-bottom:28px; display:flex; align-items:flex-start; gap:16px; }
+.badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; margin-top:6px; flex-shrink:0; }
+.b-r  { background:#fee2e2; color:#dc2626; }
+.b-g  { background:#d1fae5; color:#059669; }
+.b-o  { background:#fef3c7; color:#d97706; }
+.b-bl { background:#dbeafe; color:#2563eb; }
+.b-p  { background:#f3e8ff; color:#7c3aed; }
+.b-n  { background:var(--bg); color:var(--muted); border:1px solid var(--border2); }
+.sh h2 { font-size:clamp(22px,3vw,36px); font-weight:900; letter-spacing:-.5px; line-height:1.15; }
+.sh h2 .cr { color:var(--accent-red); }
+
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:18px; }
+
+.card { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:24px 26px; transition:box-shadow .2s; }
+.card:hover { box-shadow:0 4px 24px rgba(13,27,42,.07); }
+.card.bl-r { border-left:3px solid var(--accent-red); }
+.card.bl-g { border-left:3px solid #059669; }
+.card.bl-o { border-left:3px solid #d97706; }
+.card.bl-b { border-left:3px solid var(--accent-blue); }
+.ctag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px; color:var(--muted); }
+.ctag.r { color:var(--accent-red); }
+.ctag.g { color:#059669; }
+.ctag.o { color:#d97706; }
+.ctag.b { color:var(--accent-blue); }
+.card h3 { font-size:22px; font-weight:900; margin-bottom:8px; color:var(--navy); line-height:1.2; }
+.card p { font-size:13px; color:var(--muted); line-height:1.75; }
+.card p strong { color:var(--navy); font-weight:700; }
+
+.intro-card { margin-bottom:22px; }
+.intro-card p { font-size:14.5px; color:var(--navy); line-height:1.85; }
+.intro-card p + p { margin-top:12px; }
+.intro-card .src { margin-top:14px; font-size:11.5px; color:var(--muted); font-family:'DM Mono',monospace; }
+
+.darkcard { background:var(--navy); border-radius:14px; padding:26px 30px; margin-bottom:26px; color:#e2e8f0; }
+.darkcard .dtag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#64748b; margin-bottom:16px; }
+.drow { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+.dchip { font-size:10px; font-weight:700; padding:4px 11px; border-radius:5px; text-transform:uppercase; letter-spacing:.07em; flex-shrink:0; }
+.dc-r { background:rgba(248,113,113,.16); color:#f87171; }
+.deq { flex:1; font-size:15px; color:#f1f5f9; min-width:220px; line-height:1.6; }
+.dnote { font-size:11.5px; color:#64748b; font-style:italic; flex-shrink:0; line-height:1.5; }
+
+/* CHART CARD */
+.chart-card { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:28px 30px; margin-bottom:22px; }
+.chart-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:4px; }
+.chart-card-head .ctag { margin-bottom:6px; }
+.chart-card-head h3 { font-size:18px; font-weight:800; color:var(--navy); }
+.chart-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:4px; }
+.pin-count { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; white-space:nowrap; }
+.tbtn { border:1px solid var(--border2); background:var(--white); color:var(--navy); font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:700; padding:8px 15px; border-radius:8px; cursor:pointer; transition:all .15s; }
+.tbtn:hover { border-color:var(--navy); background:var(--bg); }
+.tbtn-dark { background:var(--navy); color:#fff; border-color:var(--navy); }
+.tbtn-dark:hover { background:var(--navy2); }
+.chart-hint { font-size:12px; color:var(--muted); margin:10px 0 18px; }
+.chart-wrap { position:relative; height:430px; }
+.chart-wrap canvas { cursor:pointer; }
+
+/* PIN */
+.chart-pin { position:absolute; z-index:30; transform:translate(-50%,-50%); pointer-events:none; }
+.chart-pin .pin-dot { width:11px; height:11px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 2px rgba(13,27,42,.25); pointer-events:none; }
+.pin-connector { position:absolute; height:2px; background:rgba(13,27,42,.32); transform-origin:0 50%; pointer-events:none; opacity:0; z-index:1; }
+.chart-pin .pin-card {
+  position:absolute; bottom:calc(100% + 12px); left:50%; transform:translate(-50%,0);
+  width:225px; background:#fff; border:1px solid var(--border); border-radius:11px;
+  box-shadow:0 10px 30px rgba(13,27,42,.18); padding:13px 15px;
+  font-family:'DM Sans',sans-serif; text-align:left; pointer-events:auto; z-index:2;
+}
+.chart-pin .pin-card.dragging { box-shadow:0 16px 40px rgba(13,27,42,.3); }
+.pin-close { position:absolute; top:7px; right:9px; border:none; background:none; font-size:16px; line-height:1; color:#9ca3af; cursor:pointer; padding:2px; }
+.pin-close:hover { color:var(--navy); }
+.pin-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:-13px -15px 9px; padding:9px 30px 9px 15px; border-radius:11px 11px 0 0; background:var(--bg); cursor:grab; user-select:none; touch-action:none; }
+.pin-head:active { cursor:grabbing; }
+.pin-family { font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.pin-sota { font-size:9px; font-weight:800; background:#fee2e2; color:#dc2626; padding:2px 6px; border-radius:4px; letter-spacing:.05em; flex-shrink:0; }
+.pin-title { font-size:14px; font-weight:800; color:var(--navy); margin-bottom:9px; line-height:1.3; }
+.pin-row { display:flex; justify-content:space-between; gap:10px; font-size:11px; color:var(--muted); padding:4px 0; border-top:1px solid #f1f2f4; }
+.pin-row:first-of-type { border-top:none; }
+.pin-row b { color:var(--navy); font-family:'DM Mono',monospace; font-weight:600; font-size:11px; text-align:right; }
+
+/* TABLE */
+.tcard { background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:18px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead th { background:var(--bg); padding:12px 18px; text-align:left; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+tbody td { padding:11px 18px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:middle; }
+tbody td:first-child { color:var(--navy); font-weight:700; font-size:13px; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:var(--bg); }
+.fam-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:7px; }
+.sota-tag { font-size:9.5px; font-weight:800; background:#fee2e2; color:#dc2626; padding:2px 7px; border-radius:4px; letter-spacing:.05em; }
+
+.footnote { font-size:12px; color:var(--muted); line-height:1.75; margin-top:6px; }
+.footnote a { color:var(--accent-blue); }
+
+@media(max-width:800px){
+  .main { padding-left:20px; padding-right:20px; }
+  .grid2, .grid3 { grid-template-columns:1fr; }
+  .darkcard { padding:22px 20px; }
+  .drow { gap:10px; }
+  .dnote { display:none; }
+  .chart-wrap { height:360px; }
+  .chart-card { padding:22px 18px; }
+  .chart-card-head { flex-direction:column; }
+  .pin-card { width:190px; }
+}
+</style>
+</head>
+<body>
+<div class="main">
+
+  <div class="top-brand">
+    <svg viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg"><path d="M127.24 107.052L117.61 79.7398C117.243 78.6967 117.737 77.5226 118.747 77.0665C120.457 76.2894 122.197 75.5588 123.962 74.8788C124.195 74.7902 124.418 74.6972 124.651 74.6128C126.18 74.0384 127.721 73.5063 129.267 73.0164C130.331 72.6785 131.459 73.2487 131.83 74.3003L160.042 154.319L166.296 172.061C166.922 173.83 165.11 175.516 163.425 174.73L15.8926 105.937C14.8748 105.464 14.4229 104.256 14.8664 103.2C15.597 101.452 16.3657 99.7075 17.1681 97.9718C17.2737 97.7395 17.375 97.5072 17.4848 97.2707C18.4731 95.1464 19.512 93.0601 20.5805 91.0033C23.0004 86.3535 25.6231 81.8684 28.4316 77.5564C29.8675 75.3561 31.3541 73.2022 32.8829 71.0906C34.4329 68.9536 36.0293 66.8715 37.6721 64.8274C53.6826 44.94 73.9882 29.6686 96.4814 19.8114C98.8126 18.7936 101.161 17.8265 103.534 16.9269C105.266 16.2681 107.01 15.6388 108.763 15.0391C109.84 14.6717 111.001 15.2334 111.381 16.3061L115.82 28.8873L120.938 43.4027L125.314 55.8234C125.715 56.9552 125.09 58.2095 123.95 58.5812C122.476 59.0627 121.006 59.5737 119.541 60.1227C119.308 60.2114 119.089 60.3043 118.856 60.3888C116.47 61.301 114.126 62.2935 111.833 63.3577C97.2711 70.1277 84.5337 79.9426 74.326 92.1436C73.0928 93.6176 71.8934 95.1295 70.7362 96.671C70.0352 97.6044 68.7386 97.8071 67.8179 97.1229L58.9617 90.5219C58.0326 89.8293 57.8468 88.4863 58.5563 87.5403C59.705 86.0072 60.8875 84.5079 62.0996 83.034C73.7221 68.9029 88.2797 57.5211 104.957 49.6447C105.95 49.1759 106.427 48.0188 106.064 46.9883L102.348 36.4469C101.938 35.2898 100.637 34.745 99.5221 35.2602C80.1288 44.2558 63.2399 57.4536 49.8732 73.9159C48.2219 75.9473 46.617 78.0336 45.0755 80.1664C43.5467 82.2865 42.077 84.453 40.6538 86.6618C38.8251 89.5125 37.0851 92.4308 35.4465 95.4251C34.8552 96.5063 35.2817 97.8535 36.3756 98.3645L136.89 145.235C138.575 146.02 140.387 144.335 139.762 142.565L138.968 140.314L127.235 107.043L127.24 107.052Z" fill="#D7342B"/></svg>
+    <span>Datapizza</span>
+  </div>
+
+  <div class="sh">
+    <span class="badge b-r">Benchmark</span>
+    <h2>Fino a dove riescono ad arrivare i modelli prima di perdere il filo: la <span class="cr">durata dei compiti</span> secondo METR Horizon</h2>
+  </div>
+
+  <div class="card intro-card">
+    <p>METR Horizon misura la lunghezza di un compito, espressa come il tempo che impiegherebbe una persona esperta a portarlo a termine, in corrispondenza della quale un modello mantiene una determinata soglia di affidabilità. Il valore <strong>p50</strong> indica la durata del compito che il modello risolve correttamente circa nella metà dei tentativi; <strong>p80</strong> restringe l'asticella a un'affidabilità dell'ottanta per cento, ed è quindi sistematicamente più basso.</p>
+    <p>Riportando questa soglia lungo l'asse del tempo, per ciascun modello rilasciato dal 2019 a oggi, emerge una traiettoria sorprendentemente regolare: la lunghezza dei compiti che i modelli di frontiera riescono a sostenere <strong>raddoppia a intervalli pressoché costanti</strong>. I due box qui sotto quantificano proprio questo "tempo di raddoppio", su due finestre temporali diverse.</p>
+    <div class="src">Fonte dati: <span id="src-benchmark"></span> (file benchmark_results_1_1.yaml) · <a href="https://metr.org/blog/2026-1-29-time-horizon-1-1/" target="_blank" rel="noopener">annuncio ufficiale Time Horizon 1.1</a> · <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener">metodologia e dashboard METR</a></div>
+  </div>
+
+  <div class="grid3">
+    <div class="card bl-r">
+      <div class="ctag r">Tempo di raddoppio (dal 2023)</div>
+      <h3 id="stat-doubling-recent">—</h3>
+      <p id="stat-doubling-recent-note">Ogni quanti giorni raddoppia il tempo di completamento p50 dei modelli di frontiera, stimato sui modelli rilasciati dal 2023 in poi.</p>
+    </div>
+    <div class="card bl-b">
+      <div class="ctag b">Tempo di raddoppio (serie 2019–2026)</div>
+      <h3 id="stat-doubling-all">—</h3>
+      <p>Stessa grandezza, stimata sull'intera serie storica: una traiettoria "ibrida" che per i modelli precedenti al 2023 recupera le misurazioni della versione 1.0 del benchmark.</p>
+    </div>
+    <div class="card bl-o">
+      <div class="ctag o">Modelli osservati</div>
+      <h3 id="stat-models-count">—</h3>
+      <p id="stat-models-range">Intervallo temporale coperto dal file.</p>
+    </div>
+  </div>
+
+  <div class="darkcard" id="highlight-card">
+    <div class="dtag">// ultimo salto di frontiera</div>
+    <div class="drow">
+      <span class="dchip dc-r">SOTA</span>
+      <span class="deq" id="highlight-text">—</span>
+      <span class="dnote" id="highlight-note">—</span>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div>
+        <div class="ctag r">Grafico 1</div>
+        <h3>Tempo di completamento al 50% di affidabilità (p50)</h3>
+      </div>
+      <div class="chart-tools">
+        <span class="pin-count" id="pin-count-p50">0 punti fissati</span>
+        <button class="tbtn" onclick="clearPins('p50')">Rimuovi pin</button>
+        <button class="tbtn tbtn-dark" onclick="downloadChart('p50')">Scarica PNG</button>
+      </div>
+    </div>
+    <p class="chart-hint">Clicca un punto per fissare la scheda con i dettagli del modello, clicca di nuovo per toglierla. Trascina l'intestazione della scheda per spostarla dove preferisci: resterà collegata al punto d'origine con una sottile linea guida. La linea tratteggiata più marcata, invece, collega i modelli che hanno segnato lo stato dell'arte al momento del rilascio.</p>
+    <div class="chart-wrap" id="wrap-p50">
+      <canvas id="canvas-p50"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div>
+        <div class="ctag b">Grafico 2</div>
+        <h3>Tempo di completamento all'80% di affidabilità (p80)</h3>
+      </div>
+      <div class="chart-tools">
+        <span class="pin-count" id="pin-count-p80">0 punti fissati</span>
+        <button class="tbtn" onclick="clearPins('p80')">Rimuovi pin</button>
+        <button class="tbtn tbtn-dark" onclick="downloadChart('p80')">Scarica PNG</button>
+      </div>
+    </div>
+    <p class="chart-hint">Stessa lettura del grafico precedente, con una soglia di affidabilità più esigente: i valori sono quindi più bassi a parità di modello.</p>
+    <div class="chart-wrap" id="wrap-p80">
+      <canvas id="canvas-p80"></canvas>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <table>
+      <thead>
+        <tr>
+          <th>Modello</th>
+          <th>Famiglia</th>
+          <th>Rilascio</th>
+          <th>p50</th>
+          <th>p80</th>
+          <th>Punteggio medio</th>
+          <th>Stato dell'arte</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <p class="footnote">I punteggi e le stime di durata provengono dalle valutazioni Inspect di METR sul benchmark Horizon; gli intervalli di confidenza al 90 per cento non sono mostrati nei grafici per non appesantire la lettura, ma compaiono nella scheda che si apre fissando un punto. Le stime del tempo di raddoppio escludono i punti con p50 centrale superiore alle 16 ore, la soglia oltre la quale <a href="https://metr.org/blog/2026-1-29-time-horizon-1-1/" target="_blank" rel="noopener">METR considera le misurazioni inaffidabili</a> con l'attuale suite di task. I modelli più vecchi (fino a GPT-4-1106) sono stati misurati con la versione precedente del benchmark, METR-Horizon-v1.0, e potrebbero non essere perfettamente comparabili con quelli successivi; per approfondire i limiti della metrica, METR ha pubblicato <a href="https://metr.org/notes/2026-01-22-time-horizon-limitations/" target="_blank" rel="noopener">una nota dedicata</a>.</p>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/4.1.0/cdn.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.min.js"></script>
+<script>
+const DATA = {"benchmark_name": "METR-Horizon-v1.1", "doubling_time": {"all_time_stitched": {"point_estimate": 187.778}, "from_2023_on": {"ci_high": 158.012, "ci_low": 104.428, "point_estimate": 128.744}}, "models": [{"key": "gpt2", "name": "GPT-2", "family": "OpenAI", "release_date": "2019-02-14", "p50": 0.053778, "p50_lo": 0.009994, "p50_hi": 0.141825, "p80": 0.0128, "p80_lo": 0.001589, "p80_hi": 0.068612, "avg_score": 0.101046, "is_sota": true, "benchmark": "METR-Horizon-v1.0"}, {"key": "davinci_002", "name": "davinci-002", "family": "OpenAI", "release_date": "2020-05-28", "p50": 0.144057, "p50_lo": 0.093319, "p50_hi": 0.221209, "p80": 0.056238, "p80_lo": 0.034813, "p80_hi": 0.105813, "avg_score": 0.161869, "is_sota": true, "benchmark": "METR-Horizon-v1.0"}, {"key": "gpt_3_5_turbo_instruct", "name": "GPT-3.5 Turbo Instruct", "family": "OpenAI", "release_date": "2022-03-15", "p50": 0.599247, "p50_lo": 0.255148, "p50_hi": 1.115905, "p80": 0.25538, "p80_lo": 0.141649, "p80_hi": 0.492933, "avg_score": 0.214611, "is_sota": true, "benchmark": "METR-Horizon-v1.0"}, {"key": "gpt_4", "name": "GPT-4", "family": "OpenAI", "release_date": "2023-03-14", "p50": 3.987428, "p50_lo": 1.93292, "p50_hi": 7.995283, "p80": 0.889561, "p80_lo": 0.342984, "p80_hi": 2.523746, "avg_score": 0.293044, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_4_1106_inspect", "name": "GPT-4-1106", "family": "OpenAI", "release_date": "2023-11-06", "p50": 4.044959, "p50_lo": 1.866859, "p50_hi": 8.443226, "p80": 0.783032, "p80_lo": 0.276599, "p80_hi": 2.358414, "avg_score": 0.28905, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_3_opus_inspect", "name": "Claude 3 Opus", "family": "Anthropic", "release_date": "2024-03-04", "p50": 3.952262, "p50_lo": 1.706313, "p50_hi": 8.76484, "p80": 0.638973, "p80_lo": 0.190491, "p80_hi": 2.118276, "avg_score": 0.294753, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_4_turbo_inspect", "name": "GPT-4 Turbo", "family": "OpenAI", "release_date": "2024-04-09", "p50": 3.732787, "p50_lo": 1.980046, "p50_hi": 6.736613, "p80": 0.927933, "p80_lo": 0.428277, "p80_hi": 2.196806, "avg_score": 0.271786, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_4o_inspect", "name": "GPT-4o", "family": "OpenAI", "release_date": "2024-05-13", "p50": 6.991195, "p50_lo": 4.001482, "p50_hi": 12.905741, "p80": 1.267009, "p80_lo": 0.562997, "p80_hi": 3.01517, "avg_score": 0.338424, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_3_5_sonnet_20240620_inspect", "name": "Claude 3.5 Sonnet (giugno)", "family": "Anthropic", "release_date": "2024-06-20", "p50": 11.395377, "p50_lo": 5.489734, "p50_hi": 22.384214, "p80": 1.671757, "p80_lo": 0.57927, "p80_hi": 4.573519, "avg_score": 0.401502, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "o1_preview", "name": "o1-preview", "family": "OpenAI", "release_date": "2024-09-12", "p50": 20.326586, "p50_lo": 11.716193, "p50_hi": 33.379877, "p80": 4.420545, "p80_lo": 2.012646, "p80_hi": 8.912444, "avg_score": 0.451441, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_3_5_sonnet_20241022_inspect", "name": "Claude 3.5 Sonnet (ottobre)", "family": "Anthropic", "release_date": "2024-10-22", "p50": 20.522872, "p50_lo": 10.144026, "p50_hi": 40.82028, "p80": 2.595677, "p80_lo": 0.89379, "p80_hi": 7.363864, "avg_score": 0.452356, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "o1_inspect", "name": "o1", "family": "OpenAI", "release_date": "2024-12-05", "p50": 38.831588, "p50_lo": 21.164512, "p50_hi": 64.95249, "p80": 7.090121, "p80_lo": 3.036033, "p80_hi": 16.640636, "avg_score": 0.510512, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_3_7_sonnet_inspect", "name": "Claude 3.7 Sonnet", "family": "Anthropic", "release_date": "2025-02-24", "p50": 60.388937, "p50_lo": 33.006168, "p50_hi": 104.226017, "p80": 12.09179, "p80_lo": 4.575608, "p80_hi": 28.889879, "avg_score": 0.558217, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "o3_inspect", "name": "o3", "family": "OpenAI", "release_date": "2025-04-16", "p50": 119.732634, "p50_lo": 74.615398, "p50_hi": 190.943818, "p80": 29.981603, "p80_lo": 15.127348, "p80_hi": 57.823511, "avg_score": 0.636235, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_4_opus_inspect", "name": "Claude 4 Opus", "family": "Anthropic", "release_date": "2025-05-22", "p50": 100.366123, "p50_lo": 59.994073, "p50_hi": 163.454074, "p80": 20.429752, "p80_lo": 8.483125, "p80_hi": 41.937268, "avg_score": 0.615452, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_4_1_opus_inspect", "name": "Claude 4.1 Opus", "family": "Anthropic", "release_date": "2025-08-05", "p50": 100.472004, "p50_lo": 59.272391, "p50_hi": 159.451918, "p80": 23.455761, "p80_lo": 10.538456, "p80_hi": 47.785951, "avg_score": 0.615713, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_5_2025_08_07_inspect", "name": "GPT-5", "family": "OpenAI", "release_date": "2025-08-07", "p50": 203.012577, "p50_lo": 112.641357, "p50_hi": 405.551565, "p80": 38.312431, "p80_lo": 19.184874, "p80_hi": 70.093125, "avg_score": 0.693697, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "gemini_3_pro", "name": "Gemini 3 Pro", "family": "Google", "release_date": "2025-11-18", "p50": 224.325884, "p50_lo": 139.565157, "p50_hi": 379.235434, "p80": 54.142849, "p80_lo": 25.650451, "p80_hi": 103.295501, "avg_score": 0.709822, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_5_1_codex_max_inspect", "name": "GPT-5.1 Codex Max", "family": "OpenAI", "release_date": "2025-11-19", "p50": 223.714694, "p50_lo": 134.31077, "p50_hi": 396.206723, "p80": 50.632499, "p80_lo": 27.30204, "p80_hi": 88.365435, "avg_score": 0.708301, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_opus_4_5_inspect", "name": "Claude Opus 4.5", "family": "Anthropic", "release_date": "2025-11-24", "p50": 292.994594, "p50_lo": 161.717714, "p50_hi": 623.704698, "p80": 49.430584, "p80_lo": 20.660485, "p80_hi": 104.641318, "avg_score": 0.73007, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_5_2", "name": "GPT-5.2", "family": "OpenAI", "release_date": "2025-12-11", "p50": 352.249302, "p50_lo": 198.067494, "p50_hi": 815.177445, "p80": 66.002649, "p80_lo": 31.665111, "p80_hi": 131.730719, "avg_score": 0.752875, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_opus_4_6_inspect", "name": "Claude Opus 4.6", "family": "Anthropic", "release_date": "2026-02-05", "p50": 718.80683, "p50_lo": 316.685725, "p50_hi": 3633.786163, "p80": 69.874587, "p80_lo": 27.026521, "p80_hi": 170.437873, "avg_score": 0.788644, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_5_3_codex", "name": "GPT-5.3 Codex", "family": "OpenAI", "release_date": "2026-02-05", "p50": 349.530732, "p50_lo": 194.913134, "p50_hi": 816.351994, "p80": 54.739407, "p80_lo": 22.361504, "p80_hi": 122.058963, "avg_score": 0.745439, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "gemini_3_1_pro", "name": "Gemini 3.1 Pro", "family": "Google", "release_date": "2026-02-19", "p50": 384.147435, "p50_lo": 233.50073, "p50_hi": 694.750898, "p80": 89.801503, "p80_lo": 52.025934, "p80_hi": 158.618017, "avg_score": 0.77035, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "gpt_5_4", "name": "GPT-5.4", "family": "OpenAI", "release_date": "2026-03-05", "p50": 341.735276, "p50_lo": 186.581591, "p50_hi": 768.779526, "p80": 53.877851, "p80_lo": 23.957027, "p80_hi": 108.679232, "avg_score": 0.743443, "is_sota": false, "benchmark": "METR-Horizon-v1.1"}, {"key": "claude_mythos_preview_early_inspect", "name": "Claude Mythos Preview (early)", "family": "Anthropic", "release_date": "2026-04-07", "p50": 1044.780145, "p50_lo": 508.876789, "p50_hi": 3304.261235, "p80": 185.911829, "p80_lo": 97.30292, "p80_hi": 398.514614, "avg_score": 0.85205, "is_sota": true, "benchmark": "METR-Horizon-v1.1"}]};
+const MODELS = DATA.models;
+const DOUBLING = DATA.doubling_time;
+
+const FAMILY_COLORS = { Anthropic: '#e8412a', OpenAI: '#2563eb', Google: '#f5a623' };
+const FAMILY_ORDER = ['Anthropic', 'OpenAI', 'Google'];
+
+function itNum(x, decimals) {
+  if (x === null || x === undefined || isNaN(x)) return '—';
+  const s = parseFloat(x.toFixed(decimals)).toString();
+  return s.replace('.', ',');
+}
+
+// i valori p50/p80_horizon_length nel file sono espressi in MINUTI (unità ufficiale METR,
+// confermata anche dal confronto con i valori pubblicati: es. Claude 3.7 Sonnet ~59 min)
+function fmtDuration(min) {
+  if (min === null || min === undefined || isNaN(min)) return '—';
+  if (min < 1) return itNum(min * 60, 0) + ' s';
+  if (min < 60) return itNum(min, 1) + ' min';
+  if (min < 60 * 24) return itNum(min / 60, 1) + ' h';
+  if (min < 60 * 24 * 30) return itNum(min / 60 / 24, 1) + ' giorni';
+  return itNum(min / 60 / 24 / 30, 1) + ' mesi';
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function fmtDateShort(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function fmtPct(x) {
+  if (x === null || x === undefined) return '—';
+  return itNum(x*100, 1) + '%';
+}
+
+// --- popolamento testi statici ---
+document.getElementById('src-benchmark').textContent = DATA.benchmark_name;
+document.getElementById('stat-doubling-recent').textContent = 'ogni ~' + itNum(DOUBLING.from_2023_on.point_estimate, 0) + ' giorni';
+document.getElementById('stat-doubling-recent-note').textContent = 'Ogni quanti giorni raddoppia il tempo di completamento p50 dei modelli di frontiera, stimato sui rilasci dal 2023 in poi (intervallo di confidenza al 90%: da ' + itNum(DOUBLING.from_2023_on.ci_low,0) + ' a ' + itNum(DOUBLING.from_2023_on.ci_high,0) + ' giorni).';
+document.getElementById('stat-doubling-all').textContent = 'ogni ~' + itNum(DOUBLING.all_time_stitched.point_estimate, 0) + ' giorni';
+document.getElementById('stat-models-count').textContent = MODELS.length + ' modelli';
+document.getElementById('stat-models-range').textContent = 'Dal ' + fmtDateShort(MODELS[0].release_date) + ' al ' + fmtDateShort(MODELS[MODELS.length-1].release_date) + '.';
+
+const lastSota = [...MODELS].reverse().find(m => m.is_sota) || MODELS[MODELS.length-1];
+const overCeiling = lastSota.p50 > 16 * 60;
+document.getElementById('highlight-text').textContent = lastSota.name + ' porta il tempo di completamento p50 a circa ' + fmtDuration(lastSota.p50) + ' di lavoro continuo, il valore più alto osservato finora' + (overCeiling ? ' (oltre la soglia delle 16 ore, dove METR considera le misurazioni inaffidabili con l\u2019attuale suite di task)' : '') + '.';
+document.getElementById('highlight-note').textContent = 'rilasciato il ' + fmtDate(lastSota.release_date) + ', punteggio medio ' + fmtPct(lastSota.avg_score);
+
+// --- tabella ---
+const tbody = document.getElementById('table-body');
+MODELS.forEach(m => {
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td>' + m.name + '</td>' +
+    '<td><span class="fam-dot" style="background:' + FAMILY_COLORS[m.family] + '"></span>' + m.family + '</td>' +
+    '<td>' + fmtDateShort(m.release_date) + '</td>' +
+    '<td>' + fmtDuration(m.p50) + '</td>' +
+    '<td>' + fmtDuration(m.p80) + '</td>' +
+    '<td>' + fmtPct(m.avg_score) + '</td>' +
+    '<td>' + (m.is_sota ? '<span class="sota-tag">SOTA</span>' : '—') + '</td>';
+  tbody.appendChild(tr);
+});
+
+// --- plugin sfondo bianco per l'esportazione PNG ---
+const whiteBgPlugin = {
+  id: 'whiteBg',
+  beforeDraw: (chart) => {
+    const { ctx, width, height } = chart;
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  }
+};
+Chart.register(whiteBgPlugin);
+
+// --- costruzione dataset ---
+function buildDatasets(metric) {
+  const datasets = FAMILY_ORDER.map(fam => ({
+    label: fam,
+    showLine: false,
+    pointRadius: 6,
+    pointHoverRadius: 8,
+    pointBackgroundColor: FAMILY_COLORS[fam],
+    pointBorderColor: '#ffffff',
+    pointBorderWidth: 1.5,
+    data: MODELS
+      .map((m, idx) => ({ m, idx }))
+      .filter(o => o.m.family === fam)
+      .map(o => ({ x: o.m.release_date, y: o.m[metric], _idx: o.idx }))
+  }));
+
+  const frontier = MODELS
+    .map((m, idx) => ({ m, idx }))
+    .filter(o => o.m.is_sota)
+    .sort((a, b) => new Date(a.m.release_date) - new Date(b.m.release_date));
+
+  datasets.push({
+    label: 'Frontiera SOTA',
+    showLine: true,
+    borderDash: [6, 4],
+    borderColor: '#0d1b2a',
+    borderWidth: 1.5,
+    pointRadius: 0,
+    pointHitRadius: 0,
+    fill: false,
+    tension: 0,
+    order: 10,
+    data: frontier.map(o => ({ x: o.m.release_date, y: o.m[metric], _idx: o.idx }))
+  });
+
+  return datasets;
+}
+
+const LOG_TICKS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+
+function padDate(iso, months) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().slice(0, 10);
+}
+
+function createChart(canvasId, metric) {
+  const ctx = document.getElementById(canvasId);
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: { datasets: buildDatasets(metric) },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 350 },
+      interaction: { mode: 'nearest', intersect: true },
+      layout: { padding: { top: 10 } },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'start',
+          labels: {
+            filter: (item) => item.text !== 'Frontiera SOTA',
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: 8,
+            font: { family: "'DM Sans', sans-serif", size: 12, weight: '600' },
+            color: '#0d1b2a',
+            padding: 18
+          }
+        },
+        tooltip: {
+          backgroundColor: '#0d1b2a',
+          titleFont: { family: "'DM Sans', sans-serif", weight: '700', size: 12.5 },
+          bodyFont: { family: "'DM Mono', monospace", size: 11 },
+          padding: 10,
+          cornerRadius: 8,
+          displayColors: false,
+          callbacks: {
+            title: (items) => MODELS[items[0].raw._idx].name,
+            label: (item) => {
+              const m = MODELS[item.raw._idx];
+              return [
+                'Rilascio: ' + fmtDateShort(m.release_date),
+                (metric === 'p50' ? 'p50: ' : 'p80: ') + fmtDuration(m[metric])
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'year', tooltipFormat: 'MMM yyyy' },
+          min: padDate(MODELS[0].release_date, -5),
+          max: padDate(MODELS[MODELS.length - 1].release_date, 5),
+          grid: { color: '#e5e7eb' },
+          ticks: { color: '#6b7280', font: { family: "'DM Sans', sans-serif", size: 11 } },
+          title: { display: true, text: 'Data di rilascio', color: '#6b7280', font: { family: "'DM Sans', sans-serif", size: 11, weight: '600' } }
+        },
+        y: {
+          type: 'logarithmic',
+          grid: { color: '#e5e7eb' },
+          afterBuildTicks: (axis) => {
+            axis.ticks = LOG_TICKS.filter(v => v >= axis.min * 0.999 && v <= axis.max * 1.001).map(v => ({ value: v }));
+          },
+          ticks: {
+            color: '#6b7280',
+            font: { family: "'DM Mono', monospace", size: 10 },
+            callback: (val) => fmtDuration(val)
+          },
+          title: { display: true, text: 'Tempo di completamento (scala log)', color: '#6b7280', font: { family: "'DM Sans', sans-serif", size: 11, weight: '600' } }
+        }
+      },
+      onClick: (evt, elements) => handleChartClick(elements, chart, metric)
+    }
+  });
+  return chart;
+}
+
+// --- gestione dei pin ---
+const charts = {};
+const pinStore = { p50: [], p80: [] };
+
+function handleChartClick(elements, chart, metric) {
+  if (!elements || !elements.length) return;
+  const el = elements[0];
+  const dataset = chart.data.datasets[el.datasetIndex];
+  if (dataset.label === 'Frontiera SOTA') return;
+  const raw = dataset.data[el.index];
+  addPin(metric, chart, el.datasetIndex, el.index, raw._idx);
+}
+
+function addPin(metric, chart, datasetIndex, index, modelIdx) {
+  const existing = pinStore[metric].find(p => p.modelIdx === modelIdx);
+  if (existing) { removePin(metric, existing.id); return; }
+  const id = metric + '-' + modelIdx + '-' + Date.now();
+  const pin = { id, datasetIndex, index, modelIdx, dragDX: 0, dragDY: 0 };
+  pinStore[metric].push(pin);
+  renderPin(metric, chart, pin);
+  updatePinCount(metric);
+}
+
+function removePin(metric, id) {
+  pinStore[metric] = pinStore[metric].filter(p => p.id !== id);
+  const el = document.getElementById('pin-' + id);
+  if (el) el.remove();
+  const line = document.getElementById('pin-connector-' + id);
+  if (line) line.remove();
+  updatePinCount(metric);
+}
+
+function clearPins(metric) {
+  pinStore[metric].forEach(p => {
+    const el = document.getElementById('pin-' + p.id);
+    if (el) el.remove();
+    const line = document.getElementById('pin-connector-' + p.id);
+    if (line) line.remove();
+  });
+  pinStore[metric] = [];
+  updatePinCount(metric);
+}
+
+function updatePinCount(metric) {
+  const n = pinStore[metric].length;
+  document.getElementById('pin-count-' + metric).textContent = n === 1 ? '1 punto fissato' : n + ' punti fissati';
+}
+
+function renderPin(metric, chart, pin) {
+  const model = MODELS[pin.modelIdx];
+  const meta = chart.getDatasetMeta(pin.datasetIndex);
+  const pt = meta.data[pin.index];
+  const wrap = chart.canvas.parentElement;
+
+  // la linea di collegamento vive come elemento a parte, figlio diretto del wrap:
+  // così le coordinate calcolate in updateConnector (relative al wrap) sono corrette
+  const line = document.createElement('div');
+  line.className = 'pin-connector';
+  line.id = 'pin-connector-' + pin.id;
+  wrap.appendChild(line);
+
+  const div = document.createElement('div');
+  div.className = 'chart-pin';
+  div.id = 'pin-' + pin.id;
+  div.style.left = pt.x + 'px';
+  div.style.top = pt.y + 'px';
+  div.innerHTML =
+    '<div class="pin-dot" style="background:' + FAMILY_COLORS[model.family] + '"></div>' +
+    '<div class="pin-card">' +
+      '<button class="pin-close" aria-label="Rimuovi pin">\u00d7</button>' +
+      '<div class="pin-head" title="Trascina per spostare la scheda">' +
+        '<span class="pin-family" style="color:' + FAMILY_COLORS[model.family] + '">' + model.family + '</span>' +
+        (model.is_sota ? '<span class="pin-sota">SOTA</span>' : '') +
+      '</div>' +
+      '<div class="pin-title">' + model.name + '</div>' +
+      '<div class="pin-row"><span>Rilascio</span><b>' + fmtDateShort(model.release_date) + '</b></div>' +
+      '<div class="pin-row"><span>' + (metric === 'p50' ? 'p50' : 'p80') + '</span><b>' + fmtDuration(model[metric]) + '</b></div>' +
+      '<div class="pin-row"><span>Intervallo (90% CI)</span><b>da ' + fmtDuration(model[metric + '_lo']) + ' a ' + fmtDuration(model[metric + '_hi']) + '</b></div>' +
+      '<div class="pin-row"><span>Punteggio medio</span><b>' + fmtPct(model.avg_score) + '</b></div>' +
+    '</div>';
+
+  div.querySelector('.pin-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    removePin(metric, pin.id);
+  });
+
+  wrap.appendChild(div);
+  makeDraggable(pin, div);
+  updateConnector(pin);
+}
+
+// --- trascinamento delle schede pin ---
+function applyCardOffset(cardEl, pin) {
+  cardEl.style.transform = 'translate(calc(-50% + ' + pin.dragDX + 'px), ' + pin.dragDY + 'px)';
+}
+
+function makeDraggable(pin, containerEl) {
+  const head = containerEl.querySelector('.pin-head');
+  const card = containerEl.querySelector('.pin-card');
+  let dragging = false;
+  let startX = 0, startY = 0, baseDX = 0, baseDY = 0;
+
+  function start(clientX, clientY) {
+    dragging = true;
+    startX = clientX; startY = clientY;
+    baseDX = pin.dragDX; baseDY = pin.dragDY;
+    card.classList.add('dragging');
+  }
+  function move(clientX, clientY) {
+    if (!dragging) return;
+    pin.dragDX = baseDX + (clientX - startX);
+    pin.dragDY = baseDY + (clientY - startY);
+    applyCardOffset(card, pin);
+    updateConnector(pin);
+  }
+  function end() {
+    if (!dragging) return;
+    dragging = false;
+    card.classList.remove('dragging');
+  }
+
+  head.addEventListener('mousedown', (e) => { e.preventDefault(); start(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+  window.addEventListener('mouseup', end);
+
+  head.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    start(t.clientX, t.clientY);
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    move(t.clientX, t.clientY);
+  }, { passive: false });
+  window.addEventListener('touchend', end);
+}
+
+// disegna la sottile linea che collega la scheda spostata al punto di origine sul grafico
+function updateConnector(pin) {
+  const line = document.getElementById('pin-connector-' + pin.id);
+  const container = document.getElementById('pin-' + pin.id);
+  if (!line || !container) return;
+  if (!pin.dragDX && !pin.dragDY) { line.style.opacity = '0'; return; }
+
+  const dot = container.querySelector('.pin-dot');
+  const card = container.querySelector('.pin-card');
+  const wrap = container.parentElement;
+  const wrapRect = wrap.getBoundingClientRect();
+  const dotRect = dot.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+
+  const dotX = dotRect.left + dotRect.width / 2 - wrapRect.left;
+  const dotY = dotRect.top + dotRect.height / 2 - wrapRect.top;
+  const cardX = cardRect.left + cardRect.width / 2 - wrapRect.left;
+  const cardY = cardRect.top + cardRect.height / 2 - wrapRect.top;
+
+  const dx = dotX - cardX;
+  const dy = dotY - cardY;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+  line.style.opacity = '1';
+  line.style.width = len + 'px';
+  line.style.left = cardX + 'px';
+  line.style.top = cardY + 'px';
+  line.style.transform = 'rotate(' + angle + 'deg)';
+}
+
+function repositionPins(metric, chart) {
+  pinStore[metric].forEach(pin => {
+    const meta = chart.getDatasetMeta(pin.datasetIndex);
+    const pt = meta.data[pin.index];
+    const el = document.getElementById('pin-' + pin.id);
+    if (el && pt) {
+      el.style.left = pt.x + 'px';
+      el.style.top = pt.y + 'px';
+      updateConnector(pin);
+    }
+  });
+}
+
+// esporta solo il contenuto del canvas: le schede pin sono elementi HTML a parte e
+// vengono comunque nascoste durante lo scatto, per sicurezza, così non compaiono mai nel PNG
+function downloadChart(metric) {
+  const chart = charts[metric];
+  if (!chart) return;
+  const wrap = chart.canvas.parentElement;
+  const overlays = wrap.querySelectorAll('.chart-pin, .pin-connector');
+  overlays.forEach(el => { el.style.visibility = 'hidden'; });
+
+  const link = document.createElement('a');
+  link.download = 'metr-horizon-' + metric + '.png';
+  link.href = chart.toBase64Image('image/png', 1);
+  link.click();
+
+  overlays.forEach(el => { el.style.visibility = 'visible'; });
+}
+
+function debounce(fn, delay) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+
+charts.p50 = createChart('canvas-p50', 'p50');
+charts.p80 = createChart('canvas-p80', 'p80');
+
+window.addEventListener('resize', debounce(() => {
+  repositionPins('p50', charts.p50);
+  repositionPins('p80', charts.p80);
+}, 150));
+</script>
+</body>
+</html>
