@@ -29,6 +29,7 @@
       <div class="panel-head"><img class="brand dp" src="assets/logos/datapizza-official.png" alt="Datapizza"><span class="divider"></span><h1>Generatore attestati</h1><span class="tag">AI Literacy · Corepla</span></div>
       <div class="panel-body">
         <div class="ctrl"><span class="lab">Nome e cognome sull'attestato</span><div class="row"><input id="nameInput" type="text" value="Pier Marco Filippi" placeholder="Es. Mario Rossi" autocomplete="off"><button class="btn primary" id="printOne">Stampa / salva PDF</button></div></div>
+        <div class="ctrl"><span class="lab">Data del corso</span><div class="row"><input id="dateInput" type="date" value="2026-06-10"><span class="hint">Puoi modificarla qui o farla leggere dall'Excel.</span></div></div>
         <div class="rule"></div>
         <div class="ctrl"><span class="lab">Genera in blocco da Excel / CSV</span><p class="hint">Carica un file con una colonna <b>Nome</b> (oppure <b>Nome</b> + <b>Cognome</b>). Verrà creato un attestato per ogni riga.</p><div class="row"><label class="file-label" for="fileInput">Carica file</label><input id="fileInput" type="file" accept=".xlsx,.xls,.csv"><span id="batchStatus" class="muted">Nessun file caricato.</span></div><div id="batchNav" class="row hidden"><button class="btn ghost" id="prev">‹</button><select id="nameSelect"></select><button class="btn ghost" id="next">›</button><button class="btn ghost" id="clear">Rimuovi elenco</button><button class="btn primary" id="printAll">Stampa tutti</button></div></div>
       </div>
@@ -36,7 +37,7 @@
     <div class="cert-view"><div class="cert-scaler" id="certScaler"><div class="cert" id="preview"></div></div></div>
   </main>
   <div id="printRoot"></div>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="assets/xlsx.full.min.js"></script>
   <script>
     const CONFIG={course:'AI Literacy',eyebrow:'Attestato di partecipazione',date:'10 Giugno 2026',duration:'4 ore',organizer:'Datapizza',partner:'Corepla',signature:"Pierpaolo D’Odorico",pathwayTitle:"Percorso introduttivo all'Intelligenza Artificiale Generativa",pathwayDesc:'Fondamenti di AI, prompt engineering, utilizzo responsabile degli strumenti generativi e applicazioni pratiche in ambito aziendale.',topics:[['brain','Fondamenti di Intelligenza Artificiale e Machine Learning'],['screen','Strumenti di AI Generativa e tecniche di prompt engineering'],['shield',"Principi di utilizzo responsabile ed etico dell'AI"]],disclaimer:'Questo attestato ha valore di partecipazione e non costituisce certificazione delle competenze acquisite.'};
     const icons={cap:'<path d="M3 10.5 12 6l9 4.5-9 4.5-9-4.5Z"/><path d="M7 12.5V17c0 1.5 2.2 2.7 5 2.7s5-1.2 5-2.7v-4.5M21 10.5v4"/>',brain:'<path d="M12 5.5a2.6 2.6 0 0 0-5-.9A2.5 2.5 0 0 0 4.3 8 2.6 2.6 0 0 0 4 12.8 2.6 2.6 0 0 0 6.6 17 2.4 2.4 0 0 0 12 18.2Z"/><path d="M12 5.5a2.6 2.6 0 0 1 5-.9A2.5 2.5 0 0 1 19.7 8 2.6 2.6 0 0 1 20 12.8 2.6 2.6 0 0 1 17.4 17 2.4 2.4 0 0 1 12 18.2Z"/><path d="M12 5.5v12.7"/>',screen:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8.5 21h7M12 17v4M8.5 9l-1.6 1.7 1.6 1.8M14 9l1.6 1.7-1.6 1.8"/>',shield:'<path d="M12 3.2 5 6v5c0 4.4 3 7.4 7 8.8 4-1.4 7-4.4 7-8.8V6Z"/><path d="m9.3 11.5 2 2 3.4-3.9"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v4M16 3v4"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7.2V12l3.2 2"/>',badge:'<path d="M12 3.2 5 6v5c0 4.4 3 7.4 7 8.8 4-1.4 7-4.4 7-8.8V6Z"/><path d="M12 8.5v4M12 15.6h.01"/>'};
@@ -48,6 +49,54 @@
     function certificate(name){const topics=CONFIG.topics.map(([i,t])=>`<div class="content"><span class="icon-ring">${icon(i)}</span><p>${esc(t)}</p></div>`).join('');return `<div class="cert-frame"></div><svg class="watermark" viewBox="0 0 100 100"><path fill="currentColor" d="M10 50 50 10l40 40-40 40z"/><path fill="#fff" d="m35 53 15-22 15 22-15 15z"/></svg><div class="cert-body"><div class="cert-head">${dpLogo}${cpLogo}</div><div class="cert-eyebrow"><span class="dash"></span>${CONFIG.eyebrow}<span class="dash"></span></div><div class="course">${CONFIG.course}</div><div class="under"></div><div class="attests">Si attesta che</div><div class="name" style="font-size:${sizeFor(name)}px">${esc(name)}</div><p class="statement">ha partecipato al corso <b>${CONFIG.course}</b> in data <b>${CONFIG.date}</b>, organizzato da <b>${CONFIG.organizer}</b>, in collaborazione con <b>${CONFIG.partner}</b>.</p><div class="highlight"><span class="icon-ring">${icon('cap')}</span><div><div class="hl-title">${CONFIG.pathwayTitle}</div><div class="hl-desc">${CONFIG.pathwayDesc}</div></div></div><div class="contents-label">Contenuti del percorso</div><div class="contents">${topics}</div><div class="cert-rule"></div><div class="foot"><div class="meta"><div class="meta-item"><span class="icon-ring">${icon('calendar')}</span><span><i class="meta-label">Data</i><b class="meta-value">${CONFIG.date}</b></span></div><span class="meta-divider"></span><div class="meta-item"><span class="icon-ring">${icon('clock')}</span><span><i class="meta-label">Durata del corso</i><b class="meta-value">${CONFIG.duration}</b></span></div></div><div class="signature">${CONFIG.signature}</div></div><div class="disclaimer">${icon('badge')}<span>${CONFIG.disclaimer}</span></div></div>`}
     const $=id=>document.getElementById(id),preview=$('preview'),input=$('nameInput');let batch=[],current=0;function draw(name){preview.innerHTML=certificate(name)}function fit(){const s=Math.min(1,$('cert-view')?.clientWidth/1000||1);$('certScaler').style.transform=`scale(${s})`;$('cert-view').style.height=`${707*s}px`}function show(i){current=Math.max(0,Math.min(batch.length-1,i));$('nameSelect').value=current;draw(batch[current]);$('prev').disabled=current===0;$('next').disabled=current===batch.length-1}function print(names){$('printRoot').innerHTML=names.map(n=>`<section class="print-page"><div class="cert">${certificate(n)}</div></section>`).join('');requestAnimationFrame(()=>window.print())}
     input.addEventListener('input',()=>!batch.length&&draw(input.value.trim()));$('printOne').onclick=()=>print([input.value.trim()||'—']);$('printAll').onclick=()=>batch.length&&print(batch);$('prev').onclick=()=>show(current-1);$('next').onclick=()=>show(current+1);$('nameSelect').onchange=e=>show(+e.target.value);$('clear').onclick=()=>{batch=[];$('batchNav').classList.add('hidden');$('batchStatus').textContent='Nessun file caricato.';draw(input.value.trim())};$('fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const read=rows=>{const h=rows[0].map(x=>String(x??'').toLowerCase().trim()),n=h.findIndex(x=>x.includes('nome')||x.includes('name')||x.includes('partecipante')),c=h.findIndex(x=>x.includes('cognome')||x.includes('surname')||x.includes('last'));batch=(n>=0||c>=0?rows.slice(1):rows).map(r=>n>=0&&c>=0?[r[n],r[c]].filter(Boolean).join(' '):(r[n>=0?n:0]||'')).map(x=>String(x).trim()).filter(Boolean);if(!batch.length){$('batchStatus').textContent='Nessun nominativo valido trovato.';return}$('batchStatus').textContent=`${batch.length} attestati pronti.`;$('nameSelect').innerHTML=batch.map((x,i)=>`<option value="${i}">${esc(x)}</option>`).join('');$('batchNav').classList.remove('hidden');show(0)};const r=new FileReader();r.onload=ev=>{try{if(window.XLSX){const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});read(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,blankrows:false}))}else{read(new TextDecoder().decode(ev.target.result).split(/\r?\n/).map(x=>x.split(/[;,]/)))}}catch{$('batchStatus').textContent='Impossibile leggere il file.'}};r.readAsArrayBuffer(f)};window.addEventListener('resize',fit);draw(input.value);fit();
+  </script>
+  <script>
+    /* Data modificabile e import Excel: supporta sia intestazioni standard,
+       sia l'elenco Corepla (nomi in colonna B e data nella prima riga). */
+    (() => {
+      const dateInput = document.getElementById('dateInput');
+      const formatDate = value => new Intl.DateTimeFormat('it-IT', {day:'numeric', month:'long', year:'numeric'}).format(new Date(`${value}T12:00:00`));
+      const toISODate = value => {
+        if (value instanceof Date && !Number.isNaN(value)) return `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,'0')}-${String(value.getDate()).padStart(2,'0')}`;
+        const m = String(value ?? '').trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+        return m ? `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}` : '';
+      };
+      const setDate = value => { if (value) { dateInput.value = value; CONFIG.date = formatDate(value); } };
+      const refresh = () => draw(batch.length ? batch[current] : input.value.trim());
+      setDate(dateInput.value);
+      dateInput.addEventListener('input', () => { setDate(dateInput.value); refresh(); });
+
+      document.getElementById('fileInput').onchange = event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const readRows = rows => {
+          const header = rows[0].map(v => String(v ?? '').toLowerCase().trim());
+          const firstNameCol = header.findIndex(v => v.includes('nome') || v.includes('name') || v.includes('partecipante'));
+          const lastNameCol = header.findIndex(v => v.includes('cognome') || v.includes('surname') || v.includes('last'));
+          const hasHeader = firstNameCol >= 0 || lastNameCol >= 0;
+          const data = hasHeader ? rows.slice(1) : rows;
+          const maxCols = Math.max(...data.map(row => row.length));
+          const bestNameCol = hasHeader ? firstNameCol : Array.from({length:maxCols}, (_, col) => data.filter(row => typeof row[col] === 'string' && /[A-Za-zÀ-ÿ]/.test(row[col])).length).reduce((best, score, col, scores) => score > scores[best] ? col : best, 0);
+          batch = data.map(row => firstNameCol >= 0 && lastNameCol >= 0 ? [row[firstNameCol], row[lastNameCol]].filter(Boolean).join(' ') : row[bestNameCol] || '').map(value => String(value).trim()).filter(value => value && /[A-Za-zÀ-ÿ]/.test(value));
+          const importedDate = rows.flatMap(row => row.map(toISODate)).find(Boolean);
+          if (importedDate) setDate(importedDate);
+          if (!batch.length) { document.getElementById('batchStatus').textContent = 'Nessun nominativo valido trovato.'; return; }
+          document.getElementById('batchStatus').textContent = `${batch.length} attestati pronti · data ${CONFIG.date}.`;
+          document.getElementById('nameSelect').innerHTML = batch.map((name, index) => `<option value="${index}">${esc(name)}</option>`).join('');
+          document.getElementById('batchNav').classList.remove('hidden');
+          show(0);
+        };
+        const reader = new FileReader();
+        reader.onload = load => {
+          try {
+            if (!window.XLSX) throw Error('Libreria Excel non disponibile');
+            const workbook = XLSX.read(new Uint8Array(load.target.result), {type:'array', cellDates:true});
+            readRows(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header:1, blankrows:false}));
+          } catch { document.getElementById('batchStatus').textContent = 'Impossibile leggere il file.'; }
+        };
+        reader.readAsArrayBuffer(file);
+      };
+    })();
   </script>
 </body>
 </html>
