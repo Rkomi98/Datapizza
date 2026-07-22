@@ -28,18 +28,23 @@
     <section class="panel">
       <div class="panel-head"><img class="brand dp" src="assets/logos/datapizza-official.png" alt="Datapizza"><span class="divider"></span><h1>Generatore attestati</h1><span class="tag">AI Literacy · Corepla</span></div>
       <div class="panel-body">
-        <div class="ctrl"><span class="lab">Nome e cognome sull'attestato</span><div class="row"><input id="nameInput" type="text" value="Pier Marco Filippi" placeholder="Es. Mario Rossi" autocomplete="off"><button class="btn primary" id="printOne">Stampa / salva PDF</button></div></div>
-        <div class="ctrl"><span class="lab">Data del corso</span><div class="row"><input id="dateInput" type="date" value="2026-06-10"><span class="hint">Puoi modificarla qui o farla leggere dall'Excel.</span></div></div>
+        <div class="ctrl"><span class="lab">Titolo del corso</span><div class="row"><input id="courseInput" type="text" value="AI Literacy" autocomplete="off"></div></div>
+        <div class="ctrl"><span class="lab">Nome e cognome sull'attestato</span><div class="row"><input id="nameInput" type="text" value="Pier Marco Filippi" placeholder="Es. Mario Rossi" autocomplete="off"><button class="btn primary" id="printOne">Scarica PDF</button></div></div>
+        <div class="ctrl"><span class="lab">Data del corso</span><div class="row"><input id="dateInput" type="date" value="2026-07-15"><span class="hint">Viene aggiornata automaticamente per ogni partecipante dal file Excel.</span></div></div>
         <div class="rule"></div>
-        <div class="ctrl"><span class="lab">Genera in blocco da Excel / CSV</span><p class="hint">Carica un file con una colonna <b>Nome</b> (oppure <b>Nome</b> + <b>Cognome</b>). Verrà creato un attestato per ogni riga.</p><div class="row"><label class="file-label" for="fileInput">Carica file</label><input id="fileInput" type="file" accept=".xlsx,.xls,.csv"><span id="batchStatus" class="muted">Nessun file caricato.</span></div><div id="batchNav" class="row hidden"><button class="btn ghost" id="prev">‹</button><select id="nameSelect"></select><button class="btn ghost" id="next">›</button><button class="btn ghost" id="clear">Rimuovi elenco</button><button class="btn primary" id="printAll">Stampa tutti</button></div></div>
+        <div class="ctrl"><span class="lab">Genera in blocco da Excel / CSV</span><p class="hint">Carica il file: genero un PDF per persona e li raccolgo in un unico file ZIP.</p><div class="row"><label class="file-label" for="fileInput">Carica file</label><input id="fileInput" type="file" accept=".xlsx,.xls,.csv"><span id="batchStatus" class="muted">Nessun file caricato.</span></div><div id="batchNav" class="row hidden"><button class="btn ghost" id="prev">‹</button><select id="nameSelect"></select><button class="btn ghost" id="next">›</button><button class="btn ghost" id="clear">Rimuovi elenco</button><button class="btn primary" id="printAll">Scarica ZIP (PDF singoli)</button></div></div>
       </div>
     </section>
-    <div class="cert-view"><div class="cert-scaler" id="certScaler"><div class="cert" id="preview"></div></div></div>
+    <div class="cert-view" id="cert-view"><div class="cert-scaler" id="certScaler"><div class="cert" id="preview"></div></div></div>
   </main>
   <div id="printRoot"></div>
   <script src="assets/xlsx.full.min.js"></script>
+  <script src="assets/html2canvas.min.js"></script>
+  <script src="assets/pdf-official-logos.js"></script>
+  <script src="assets/jspdf.umd.min.js"></script>
+  <script src="assets/jszip.min.js"></script>
   <script>
-    const CONFIG={course:'AI Literacy',eyebrow:'Attestato di partecipazione',date:'10 Giugno 2026',duration:'4 ore',organizer:'Datapizza',partner:'Corepla',signature:"Pierpaolo D’Odorico",pathwayTitle:"Percorso introduttivo all'Intelligenza Artificiale Generativa",pathwayDesc:'Fondamenti di AI, prompt engineering, utilizzo responsabile degli strumenti generativi e applicazioni pratiche in ambito aziendale.',topics:[['brain','Fondamenti di Intelligenza Artificiale e Machine Learning'],['screen','Strumenti di AI Generativa e tecniche di prompt engineering'],['shield',"Principi di utilizzo responsabile ed etico dell'AI"]],disclaimer:'Questo attestato ha valore di partecipazione e non costituisce certificazione delle competenze acquisite.'};
+    const CONFIG={course:'AI Literacy',eyebrow:'Attestato di partecipazione',date:'15 Luglio 2026',duration:'4 ore',organizer:'Datapizza',partner:'Corepla',signature:"Pierpaolo D’Odorico",pathwayTitle:"Percorso introduttivo all'Intelligenza Artificiale Generativa",pathwayDesc:'Fondamenti di AI, prompt engineering, utilizzo responsabile degli strumenti generativi e applicazioni pratiche in ambito aziendale.',topics:[['brain','Fondamenti di Intelligenza Artificiale e Machine Learning'],['screen','Strumenti di AI Generativa e tecniche di prompt engineering'],['shield',"Principi di utilizzo responsabile ed etico dell'AI"]],disclaimer:'Questo attestato ha valore di partecipazione e non costituisce certificazione delle competenze acquisite.'};
     const icons={cap:'<path d="M3 10.5 12 6l9 4.5-9 4.5-9-4.5Z"/><path d="M7 12.5V17c0 1.5 2.2 2.7 5 2.7s5-1.2 5-2.7v-4.5M21 10.5v4"/>',brain:'<path d="M12 5.5a2.6 2.6 0 0 0-5-.9A2.5 2.5 0 0 0 4.3 8 2.6 2.6 0 0 0 4 12.8 2.6 2.6 0 0 0 6.6 17 2.4 2.4 0 0 0 12 18.2Z"/><path d="M12 5.5a2.6 2.6 0 0 1 5-.9A2.5 2.5 0 0 1 19.7 8 2.6 2.6 0 0 1 20 12.8 2.6 2.6 0 0 1 17.4 17 2.4 2.4 0 0 1 12 18.2Z"/><path d="M12 5.5v12.7"/>',screen:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8.5 21h7M12 17v4M8.5 9l-1.6 1.7 1.6 1.8M14 9l1.6 1.7-1.6 1.8"/>',shield:'<path d="M12 3.2 5 6v5c0 4.4 3 7.4 7 8.8 4-1.4 7-4.4 7-8.8V6Z"/><path d="m9.3 11.5 2 2 3.4-3.9"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v4M16 3v4"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7.2V12l3.2 2"/>',badge:'<path d="M12 3.2 5 6v5c0 4.4 3 7.4 7 8.8 4-1.4 7-4.4 7-8.8V6Z"/><path d="M12 8.5v4M12 15.6h.01"/>'};
     const icon=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icons[k]}</svg>`;
     const dpLogo='<img class="brand dp" src="assets/logos/datapizza-official.png" alt="Datapizza">';
@@ -95,6 +100,160 @@
           } catch { document.getElementById('batchStatus').textContent = 'Impossibile leggere il file.'; }
         };
         reader.readAsArrayBuffer(file);
+      };
+    })();
+  </script>
+  <script>
+    /* Import per blocchi + un PDF per partecipante in un unico ZIP. */
+    (() => {
+      let participantMeta = [];
+      const fileInput = document.getElementById('fileInput');
+      const courseInput = document.getElementById('courseInput');
+      const dateInput = document.getElementById('dateInput');
+      const formatDate = iso => new Intl.DateTimeFormat('it-IT', {day:'numeric', month:'long', year:'numeric'}).format(new Date(`${iso}T12:00:00`));
+      const asISO = value => {
+        if (value instanceof Date && !Number.isNaN(value)) return `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,'0')}-${String(value.getDate()).padStart(2,'0')}`;
+        const match = String(value ?? '').trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+        return match ? `${match[3]}-${match[2].padStart(2,'0')}-${match[1].padStart(2,'0')}` : '';
+      };
+      const setMeta = meta => {
+        if (!meta) return;
+        CONFIG.course = meta.course || CONFIG.course;
+        CONFIG.organizer = meta.organizer || CONFIG.organizer;
+        if (meta.date) { CONFIG.date = formatDate(meta.date); dateInput.value = meta.date; }
+        courseInput.value = CONFIG.course;
+      };
+      const tuneCertificate = (cert, meta) => {
+        const course = cert.querySelector('.course');
+        const long = (meta.course || '').length > 30;
+        course.style.fontSize = long ? '27px' : '54px';
+        course.style.whiteSpace = 'nowrap';
+        if (long) { const statement = cert.querySelector('.statement'); statement.style.fontSize = '14px'; statement.style.maxWidth = '760px'; }
+      };
+      show = index => {
+        current = Math.max(0, Math.min(batch.length - 1, index));
+        setMeta(participantMeta[current]);
+        document.getElementById('nameSelect').value = current;
+        draw(batch[current]);
+        tuneCertificate(preview, participantMeta[current] || {});
+        document.getElementById('prev').disabled = current === 0;
+        document.getElementById('next').disabled = current === batch.length - 1;
+      };
+      courseInput.addEventListener('input', () => { if (participantMeta[current]) participantMeta[current].course = courseInput.value; CONFIG.course = courseInput.value; draw(batch.length ? batch[current] : input.value.trim()); tuneCertificate(preview, {course:CONFIG.course}); });
+      dateInput.addEventListener('input', () => { if (participantMeta[current]) participantMeta[current].date = dateInput.value; CONFIG.date = formatDate(dateInput.value); draw(batch.length ? batch[current] : input.value.trim()); tuneCertificate(preview, participantMeta[current] || {}); });
+      fileInput.onchange = event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = load => {
+          try {
+            const workbook = XLSX.read(new Uint8Array(load.target.result), {type:'array', cellDates:true});
+            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header:1, blankrows:false});
+            const context = {course:courseInput.value, date:dateInput.value, organizer:CONFIG.organizer};
+            batch = [];
+            participantMeta = [];
+            rows.forEach(row => {
+              if (typeof row[2] === 'string' && row[2].trim()) context.organizer = row[2].trim();
+              const rowDate = asISO(row[3]);
+              if (rowDate) context.date = rowDate;
+              const name = typeof row[1] === 'string' ? row[1].trim() : '';
+              if (name && /[A-Za-zÀ-ÿ]/.test(name)) { batch.push(name); participantMeta.push({...context}); }
+            });
+            if (!batch.length) throw Error('Nessun nominativo');
+            const dates = new Set(participantMeta.map(meta => meta.date));
+            document.getElementById('batchStatus').textContent = `${batch.length} attestati pronti · ${dates.size} date rilevate.`;
+            document.getElementById('nameSelect').innerHTML = batch.map((name, index) => `<option value="${index}">${esc(name)}</option>`).join('');
+            document.getElementById('batchNav').classList.remove('hidden');
+            show(0);
+          } catch { document.getElementById('batchStatus').textContent = 'Impossibile leggere il file.'; }
+        };
+        reader.readAsArrayBuffer(file);
+      };
+      document.getElementById('clear').addEventListener('click', () => { participantMeta = []; });
+      const safeFileName = name => name.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+      const vectorizeLogosForPdf = cert => {
+        const logos = cert.querySelectorAll('.cert-head .brand');
+        if (logos.length !== 2) return;
+        logos[0].src = window.PDF_OFFICIAL_LOGOS.datapizza;
+        logos[1].src = window.PDF_OFFICIAL_LOGOS.corepla;
+      };
+      const exportSinglePdf = async (name, meta) => {
+        setMeta(meta);
+        const staging = document.createElement('div');
+        staging.style.cssText = 'position:fixed;left:-12000px;top:0;width:1000px;pointer-events:none';
+        staging.innerHTML = `<div class="cert" id="cert-view"><span id="certScaler" style="display:none"></span>${certificate(name)}</div>`;
+        document.body.appendChild(staging);
+        try {
+          const cert = staging.firstElementChild;
+          vectorizeLogosForPdf(cert);
+          tuneCertificate(cert, meta);
+          const canvas = await html2canvas(cert, {scale:2, backgroundColor:'#ffffff', useCORS:true, logging:false});
+          const pdf = new jspdf.jsPDF({orientation:'landscape', unit:'mm', format:'a4', compress:true});
+          pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 297, 210);
+          pdf.save(`Attestato - ${safeFileName(name)}.pdf`);
+          canvas.width = 0; canvas.height = 0;
+        } finally { staging.remove(); }
+      };
+      document.getElementById('printOne').onclick = async () => {
+        const button = document.getElementById('printOne');
+        const name = batch.length ? batch[current] : (input.value.trim() || 'Attestato');
+        const meta = batch.length ? participantMeta[current] : {course:courseInput.value, date:dateInput.value, organizer:CONFIG.organizer};
+        button.disabled = true;
+        const previous = button.textContent;
+        button.textContent = 'Creo il PDF…';
+        try {
+          await exportSinglePdf(name, meta);
+          document.getElementById('batchStatus').textContent = 'PDF scaricato.';
+        } catch (error) {
+          console.error(error);
+          document.getElementById('batchStatus').textContent = 'Impossibile creare il PDF.';
+        } finally {
+          button.disabled = false;
+          button.textContent = previous;
+          if (batch.length) show(current); else draw(input.value.trim());
+        }
+      };
+      document.getElementById('printAll').onclick = async () => {
+        if (!batch.length) return;
+        const button = document.getElementById('printAll');
+        button.disabled = true;
+        const previous = button.textContent;
+        const staging = document.createElement('div');
+        staging.style.cssText = 'position:fixed;left:-12000px;top:0;width:1000px;pointer-events:none';
+        document.body.appendChild(staging);
+        const zip = new JSZip();
+        try {
+          for (let index = 0; index < batch.length; index++) {
+            button.textContent = `Creo ${index + 1}/${batch.length}…`;
+            const meta = participantMeta[index];
+            setMeta(meta);
+            staging.innerHTML = `<div class="cert" id="cert-view"><span id="certScaler" style="display:none"></span>${certificate(batch[index])}</div>`;
+            const cert = staging.firstElementChild;
+            vectorizeLogosForPdf(cert);
+            tuneCertificate(cert, meta);
+            const canvas = await html2canvas(cert, {scale:2, backgroundColor:'#ffffff', useCORS:true, logging:false});
+            const pdf = new jspdf.jsPDF({orientation:'landscape', unit:'mm', format:'a4', compress:true});
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 297, 210);
+            const safeName = batch[index].replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+            zip.file(`Attestato - ${safeName}.pdf`, pdf.output('arraybuffer'));
+            canvas.width = 0; canvas.height = 0;
+          }
+          button.textContent = 'Comprimo lo ZIP…';
+          const archive = await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}});
+          const url = URL.createObjectURL(archive);
+          const link = document.createElement('a');
+          link.href = url; link.download = 'Attestati AI Adoption Plan.zip'; link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 3000);
+          document.getElementById('batchStatus').textContent = `${batch.length} PDF creati nello ZIP.`;
+        } catch (error) {
+          console.error(error);
+          document.getElementById('batchStatus').textContent = 'Si è verificato un errore durante la creazione dello ZIP.';
+        } finally {
+          staging.remove();
+          button.disabled = false;
+          button.textContent = previous;
+          show(current);
+        }
       };
     })();
   </script>
