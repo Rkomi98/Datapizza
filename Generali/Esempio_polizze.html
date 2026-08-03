@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Come si calcola il ranking — esempio interattivo su 10 polizze</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f8fa;--white:#fff;--navy:#0d1b2a;--navy2:#1a2e42;--accent-red:#e8412a;
+--accent-orange:#f5a623;--accent-blue:#2563eb;--green:#059669;--muted:#6b7280;
+--border:#e5e7eb;--border2:#d1d5db;--grid-color:#e5e7eb}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--navy);font-family:'DM Sans',sans-serif}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+body>*{position:relative;z-index:1}
+.hero{max-width:980px;margin:0 auto;padding:56px 40px 8px}
+.kick{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:clamp(28px,4.4vw,46px);font-weight:900;letter-spacing:-1.2px;line-height:1.08;margin-bottom:14px}
+.hero h1 span{color:var(--accent-red)}
+.hero .sub{font-size:15.5px;color:var(--muted);line-height:1.75;max-width:740px}
+.hero .sub strong{color:var(--navy);font-weight:700}
+.main{max-width:980px;margin:0 auto;padding:20px 40px 90px}
+.sec{margin-top:46px}
+.sec>h2{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-red);padding-bottom:9px;border-bottom:1px solid var(--border);margin-bottom:8px;display:flex;align-items:baseline;gap:10px}
+.sec>h2 .n{font-family:'DM Mono',monospace;background:var(--accent-red);color:#fff;border-radius:5px;width:21px;height:21px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.sec>h2 .live{margin-left:auto;background:#dbeafe;color:#2563eb;border-radius:5px;padding:2px 9px;font-size:9.5px;letter-spacing:.1em}
+.sec>h3{font-size:21px;font-weight:800;letter-spacing:-.3px;margin:12px 0 14px;line-height:1.25}
+p{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:13px;max-width:830px}
+p strong{color:var(--navy);font-weight:700}
+code{font-family:'DM Mono',monospace;font-size:12.5px;background:var(--white);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
+.tcard{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:16px 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--bg);padding:11px 14px;text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);line-height:1.5}
+tbody td:first-child{color:var(--navy);font-weight:700;font-family:'DM Mono',monospace;font-size:12.5px}
+tbody tr:last-child td{border-bottom:none}
+th.r,td.r{text-align:right}
+td.m{font-family:'DM Mono',monospace;font-size:12.5px;text-align:right;color:var(--navy)}
+tr.tot td{background:var(--bg);font-weight:800;color:var(--navy);border-top:2px solid var(--border2)}
+tr.ch td{background:#fff8f7}
+.neg{color:#dc2626;font-weight:700}
+.codebox{background:var(--navy);border-radius:10px;padding:17px 22px;margin:16px 0;color:#e2e8f0;font-family:'DM Mono',monospace;font-size:12.5px;line-height:1.95;overflow-x:auto}
+.codebox .cm{color:#94a3b8;font-style:italic}.codebox .cr{color:#f87171;font-weight:700}
+.codebox .cg{color:#6ee7b7;font-weight:700}.codebox .co{color:#fcd34d;font-weight:700}
+.codebox .cb{color:#93c5fd;font-weight:700}.codebox .op{color:#94a3b8}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:16px 0}
+.card.bl-r{border-left:3px solid var(--accent-red)}.card.bl-g{border-left:3px solid var(--green)}
+.card.bl-o{border-left:3px solid #d97706}.card.bl-b{border-left:3px solid var(--accent-blue)}
+.card.hl-r{background:#fff8f7;border-color:#fecaca}.card.hl-g{background:#f0fdf4;border-color:#bbf7d0}
+.card.hl-o{background:#fffbeb;border-color:#fde68a}.card.hl-b{background:#eff6ff;border-color:#bfdbfe}
+.card .ct{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.card.bl-r .ct{color:var(--accent-red)}.card.bl-g .ct{color:var(--green)}
+.card.bl-o .ct{color:#d97706}.card.bl-b .ct{color:var(--accent-blue)}
+.card h4{font-size:15px;font-weight:800;margin-bottom:9px;line-height:1.35}
+.card p:last-child{margin-bottom:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+/* ---- widget interattivi ---- */
+.wid{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin:18px 0}
+.wid .wt{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-blue);margin-bottom:16px}
+.ctrl{display:flex;align-items:center;gap:14px;margin-bottom:11px;flex-wrap:wrap}
+.ctrl label{font-size:12px;font-weight:700;color:var(--navy);width:132px;flex-shrink:0}
+.ctrl input[type=range]{flex:1;min-width:180px;height:4px;accent-color:var(--accent-red)}
+.ctrl .v{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--accent-red);width:96px;text-align:right;flex-shrink:0}
+.ctrl .hint{font-size:11px;color:var(--muted);width:100%;margin-top:-4px}
+.ctrl select{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--white);color:var(--navy)}
+.ro3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.ro{border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--bg)}
+.ro.a{background:#fff8f7;border-color:#fecaca}.ro.b{background:#fffbeb;border-color:#fde68a}
+.ro.c{background:#f0fdf4;border-color:#bbf7d0}
+.ro .l{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.ro .v{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;line-height:1.15}
+.ro.a .v{color:#dc2626}.ro.b .v{color:#d97706}.ro.c .v{color:var(--green)}
+.ro .n{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+canvas{width:100%;height:auto;display:block;margin-top:16px}
+.rank{margin:6px 0}
+.rk{display:flex;align-items:flex-start;gap:14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:8px;transition:all .18s}
+.rk.win{background:#f0fdf4;border-color:#bbf7d0;border-left:3px solid var(--green)}
+.rk.out{background:#fff8f7;border-color:#fecaca;border-left:3px solid var(--accent-red)}
+.rk .pos{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--muted);width:22px;flex-shrink:0}
+.rk.win .pos{color:var(--green)}
+.rk .nm{font-size:14px;font-weight:800;margin-bottom:3px}
+.rk .st{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--navy)}
+.rk .wy{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.55}
+/* ---- matrice AUC ---- */
+.amat{overflow-x:auto;margin-top:16px}
+.amat table{font-size:12px;min-width:580px}
+.amat th{background:none;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;text-transform:none;letter-spacing:0;text-align:center;padding:8px 6px;color:var(--muted)}
+.amat th.rh{text-align:left}
+.amat td{text-align:center;padding:8px 6px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;transition:background .15s}
+.amat td.rh{text-align:left;color:var(--navy);font-weight:700;white-space:nowrap}
+.amat td.ok{background:#f0fdf4;color:var(--green);font-weight:700}
+.amat td.no{background:#fff1f0;color:#dc2626;font-weight:700}
+.amat td.tie{background:#fffbeb;color:#d97706;font-weight:700}
+.amat td.tl{background:var(--bg);color:var(--navy);font-weight:800}
+.foot{font-size:12px;color:var(--muted);line-height:1.7;margin-top:42px;padding-top:18px;border-top:1px solid var(--border)}
+@media(max-width:860px){.hero,.main{padding-left:20px;padding-right:20px}.grid2,.ro3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="kick">Hackathon Datapizza × Generali — Challenge 1, pricing</div>
+  <h1>Come si calcola il ranking:<br>esempio interattivo su <span>10 polizze</span></h1>
+  <p class="sub">La regola da spiegare è: <strong>si ordina per errore relativo crescente sul profitto totale; a parità entro una banda di ±0,5% vince l'AUC di retention più alta.</strong> Qui sotto la stessa regola su un test set giocattolo di dieci polizze, con i passaggi in chiaro e i pannelli che si muovono. I blocchi marcati <em>interattivo</em> si possono manipolare: servono a far vedere l'idea, non solo a leggerla.</p>
+</div>
+
+<div class="main">
+
+<!-- 1 -->
+<div class="sec">
+  <h2><span class="n">1</span> Il test set e la verità nascosta</h2>
+  <h3>Dieci polizze, di cui tre escono durante l'anno</h3>
+  <p>I partecipanti vedono le prime tre colonne. Le ultime tre restano sul server. Il lifetime factor è <code>1</code> se la polizza non esce, altrimenti <code>churn_days / 365</code>.</p>
+  <div class="tcard">
+    <table>
+      <thead><tr><th>id</th><th class="r">proposed</th><th class="r">technical</th><th class="r">margine</th><th class="r">churn</th><th class="r">giorni</th><th class="r">lf</th><th class="r">profitto</th></tr></thead>
+      <tbody>
+        <tr><td>P01</td><td class="m">1.450</td><td class="m">1.010</td><td class="m">+440</td><td class="m">0</td><td class="m">—</td><td class="m">1,000</td><td class="m">440,00</td></tr>
+        <tr class="ch"><td>P02</td><td class="m">630</td><td class="m">945</td><td class="m neg">−315</td><td class="m">1</td><td class="m">146</td><td class="m">0,400</td><td class="m neg">−126,00</td></tr>
+        <tr><td>P03</td><td class="m">890</td><td class="m">700</td><td class="m">+190</td><td class="m">0</td><td class="m">—</td><td class="m">1,000</td><td class="m">190,00</td></tr>
+        <tr><td>P04</td><td class="m">1.120</td><td class="m">980</td><td class="m">+140</td><td class="m">0</td><td class="m">—</td><td class="m">1,000</td><td class="m">140,00</td></tr>
+        <tr class="ch"><td>P05</td><td class="m">540</td><td class="m">620</td><td class="m neg">−80</td><td class="m">1</td><td class="m">73</td><td class="m">0,200</td><td class="m neg">−16,00</td></tr>
+        <tr><td>P06</td><td class="m">1.100</td><td class="m">860</td><td class="m">+240</td><td class="m">0</td><td class="m">—</td><td class="m">1,000</td><td class="m">240,00</td></tr>
+        <tr><td>P07</td><td class="m">760</td><td class="m">690</td><td class="m">+70</td><td class="m">0</td><td class="m">—</td><td class="m">1,000</td><td class="m">70,00</td></tr>
+        <tr class="ch"><td>P08</td><td class="m">980</td><td class="m">730</td><td class="m">+250</td><td class="m">1</td><td class="m">292</td><td class="m">0,800</td><td class="m">200,00</td></tr>
+        <tr><td>P09</td><td class="m">1.250</td><td class="m">1.100</td><td class="m">+150</td><td class="m">0</td><td class="m">—</td><td class="m">1,000</td><td class="m">150,00</td></tr>
+        <tr><td>P10</td><td class="m">820</td><td class="m">640</td><td class="m">+180</td><td class="m">0</td><td class="m">—</td><td class="m">1,000</td><td class="m">180,00</td></tr>
+        <tr class="tot"><td>TOTALE</td><td class="m"></td><td class="m"></td><td class="m">+1.265</td><td class="m">3</td><td class="m"></td><td class="m"></td><td class="m">1.468,00</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card bl-o hl-o">
+    <div class="ct">Da notare, perché non è un dettaglio</div>
+    <h4>La somma dei margini è 1.265, il profitto vero è 1.468 — più alto</h4>
+    <p>Due delle tre polizze che escono (P02 e P05) hanno <strong>margine negativo</strong>. Uscendo riducono la perdita, quindi su quelle il churn <strong>aumenta</strong> il profitto. Ecco perché il predittore ingenuo «non esce nessuno» dà 1.265 e sbaglia del <strong>−13,83%</strong>, e perché massimizzare la retention non è la strategia ottima. Nel dataset reale il 18,4% delle polizze ha margine negativo.</p>
+  </div>
+</div>
+
+<!-- 2 -->
+<div class="sec">
+  <h2><span class="n">2</span> Passo 1 — errore aggregato e banda<span class="live">interattivo</span></h2>
+  <h3>Muovi i totali dei tre team e guarda chi entra nella banda</h3>
+  <p>La metrica primaria confronta due numeri: <code>errore = |predetto − vero| / vero</code>. La banda di ±0,5% attorno al vero decide chi viene considerato a pari merito.</p>
+
+  <div class="wid">
+    <div class="wt">Profitto totale dichiarato da ciascun team</div>
+    <div class="ctrl"><label>Team A</label><input type="range" id="sA" min="1300" max="1650" step="1" value="1473"><span class="v" id="vA">1.473</span></div>
+    <div class="ctrl"><label>Team B</label><input type="range" id="sB" min="1300" max="1650" step="1" value="1462"><span class="v" id="vB">1.462</span></div>
+    <div class="ctrl"><label>Team C</label><input type="range" id="sC" min="1300" max="1650" step="1" value="1410"><span class="v" id="vC">1.410</span></div>
+    <canvas id="cband" width="900" height="190"></canvas>
+    <div class="ro3" id="bandOut"></div>
+  </div>
+  <p id="bandNote"></p>
+</div>
+
+<!-- 3 -->
+<div class="sec">
+  <h2><span class="n">3</span> Passo 2 — l'AUC, coppia per coppia<span class="live">interattivo</span></h2>
+  <h3>Su dieci polizze le coppie si contano a mano: 21</h3>
+  <p>L'AUC risponde a una domanda sola: <strong>preso un churner a caso e un rimasto a caso, il modello ha dato al churner una retention più bassa?</strong> La frazione di coppie in cui la risposta è sì <em>è</em> l'AUC. Tre churner × sette rimasti = 21 coppie. Muovi le retention dei tre churner e guarda le caselle cambiare colore.</p>
+
+  <div class="wid">
+    <div class="wt">Retention assegnata ai tre churner — <span id="teamLbl">Team A</span></div>
+    <div class="ctrl"><label>Team</label>
+      <select id="teamSel"><option value="A">Team A</option><option value="B">Team B</option><option value="C">Team C</option></select>
+      <span class="hint">cambiando team si ricaricano anche le retention dei sette rimasti</span>
+    </div>
+    <div class="ctrl"><label>P02 (churner)</label><input type="range" id="r02" min="0" max="100" value="30"><span class="v" id="v02">0,30</span></div>
+    <div class="ctrl"><label>P05 (churner)</label><input type="range" id="r05" min="0" max="100" value="45"><span class="v" id="v05">0,45</span></div>
+    <div class="ctrl"><label>P08 (churner)</label><input type="range" id="r08" min="0" max="100" value="89"><span class="v" id="v08">0,89</span></div>
+    <div class="amat" id="amat"></div>
+    <div class="ro3">
+      <div class="ro c"><div class="l">Coppie concordi</div><div class="v" id="aucConc">19 / 21</div><div class="n">il churner ha retention più bassa del rimasto</div></div>
+      <div class="ro b"><div class="l">Coppie a pari merito</div><div class="v" id="aucTie">0</div><div class="n">contano mezzo punto ciascuna</div></div>
+      <div class="ro a"><div class="l">AUC</div><div class="v" id="aucVal">0,9048</div><div class="n">concordi + mezze parità, diviso 21</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 -->
+<div class="sec">
+  <h2><span class="n">4</span> Classifica secondo la regola attuale<span class="live">interattivo</span></h2>
+  <h3>Si aggiorna con i pannelli sopra</h3>
+  <div class="rank" id="finalRank"></div>
+  <div class="card bl-b hl-b">
+    <div class="ct">La regola in due righe</div>
+    <p><strong>Dentro la banda comanda l'AUC</strong>, e un errore sul profitto migliore non vale niente. <strong>Fuori banda l'AUC non esiste</strong>, e un modello per polizza perfetto non recupera. La banda decide quale delle due metriche stai realmente usando.</p>
+  </div>
+</div>
+
+<!-- 5 -->
+<div class="sec">
+  <h2><span class="n">5</span> Il difetto: gli errori si compensano<span class="live">interattivo</span></h2>
+  <h3>Sbaglia quanto vuoi per polizza, purché a media zero</h3>
+  <p>Qui si parte dalla verità e si inietta errore. Il primo cursore sposta l'errore <strong>per polizza</strong> mantenendone la media a zero; il secondo sposta il <strong>totale</strong>. Guarda cosa fa il primo cursore alle tre metriche: <em>l'errore aggregato non si muove</em>, gli altri due esplodono.</p>
+
+  <div class="wid">
+    <div class="wt">Errore iniettato sulle dieci polizze</div>
+    <div class="ctrl"><label>Dispersione</label><input type="range" id="sSig" min="0" max="100" value="45"><span class="v" id="vSig">0,45</span>
+      <span class="hint">errori positivi e negativi che si annullano nella somma</span></div>
+    <div class="ctrl"><label>Bias sul totale</label><input type="range" id="sBias" min="-60" max="60" value="0"><span class="v" id="vBias">0,00%</span>
+      <span class="hint">sposta tutte le polizze nella stessa direzione</span></div>
+    <canvas id="cbars" width="900" height="260"></canvas>
+    <div class="ro3">
+      <div class="ro a"><div class="l">Errore aggregato — metrica attuale</div><div class="v" id="mAgg">0,00%</div><div class="n" id="nAgg">dipende solo dal bias</div></div>
+      <div class="ro b"><div class="l">Somma dei valori assoluti</div><div class="v" id="mAbs">0 €</div><div class="n">non si compensa, ma premia «non esce nessuno»</div></div>
+      <div class="ro c"><div class="l">Somma dei quadrati</div><div class="v" id="mSq">0</div><div class="n">non si compensa e non degenera</div></div>
+    </div>
+  </div>
+  <div class="card bl-r hl-r">
+    <div class="ct">Cosa hai appena visto</div>
+    <p>Con il bias a zero, l'errore aggregato resta <strong>fisso a 0,00%</strong> qualunque sia la dispersione: la metrica primaria è cieca a tutto ciò che si compensa. Un team può sbagliare ogni singola polizza di centinaia di euro e apparire perfetto.</p>
+  </div>
+</div>
+
+<!-- 6 -->
+<div class="sec">
+  <h2><span class="n">6</span> Team D, il caso che rompe la metrica da sola</h2>
+  <h3>Azzecca il totale al centesimo, sbaglia tutto il resto</h3>
+  <p>Costruiamo un quarto team che predice il lifetime factor per polizza in modo da <strong>centrare esattamente</strong> il profitto totale, mettendo errori grandi che si cancellano fra loro. Poi confrontiamo le tre regole possibili.</p>
+
+  <div class="tcard">
+    <table>
+      <thead><tr><th>Team</th><th class="r">Profitto derivato</th><th class="r">Errore aggregato</th><th class="r">AUC</th><th class="r">Somma quadrati</th></tr></thead>
+      <tbody>
+        <tr><td>Team B ottimo</td><td class="m">1.467,50</td><td class="m">0,0341%</td><td class="m">1,0000</td><td class="m">94</td></tr>
+        <tr><td>Team A buono</td><td class="m">1.452,30</td><td class="m">1,0695%</td><td class="m">1,0000</td><td class="m">602</td></tr>
+        <tr><td>Team C mediocre</td><td class="m">1.255,00</td><td class="m">14,5095%</td><td class="m">1,0000</td><td class="m">11.841</td></tr>
+        <tr class="ch"><td>Team D furbo</td><td class="m">1.468,00</td><td class="m">0,0000%</td><td class="m">0,7619</td><td class="m">39.314</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card bl-r">
+      <div class="ct">Se scori solo il profitto</div>
+      <h4>Vince Team D</h4>
+      <p>Errore <strong>0,0000%</strong>, il migliore possibile. Ed è il team peggiore del gruppo per qualità delle previsioni: somma dei quadrati 39.314 contro 94 di Team B, quattrocento volte tanto.</p>
+    </div>
+    <div class="card bl-g">
+      <div class="ct">Se scori la somma dei quadrati</div>
+      <h4>Vince Team B, e D finisce ultimo</h4>
+      <p>Nessuna banda, nessuno spareggio, nessuna seconda metrica da pesare. Una sola quantità che vede sia il totale che le singole polizze.</p>
+    </div>
+  </div>
+  <p>È il motivo per cui togliere la retention dalla valutazione peggiora le cose invece di migliorarle: resta scorato solo il numero che Team D sa centrare senza modellare niente.</p>
+</div>
+
+<!-- 7 -->
+<div class="sec">
+  <h2><span class="n">7</span> La metrica che tiene insieme entrambe<span class="live">interattivo</span></h2>
+  <h3>Non va inventata: la somma dei quadrati <em>è già</em> la combinazione</h3>
+  <p>Chiamiamo <code>eᵢ</code> l'errore di profitto sulla polizza <em>i</em>. Vale questa identità, esatta, non approssimata:</p>
+  <div class="codebox">
+<span class="co">SOMMA e²</span>  <span class="op">=</span>  <span class="cr">(SOMMA e)² / N</span>  <span class="op">+</span>  <span class="cg">SOMMA (e − e medio)²</span><br>
+<span class="cm">    totale         calibrazione          dispersione</span><br>
+<span class="cm">                   ^ e esattamente l'errore sul profitto TOTALE, al quadrato e diviso per N</span>
+  </div>
+  <p>Il primo termine <strong>è la metrica attuale</strong>: la somma degli errori per polizza è, per definizione, l'errore sul totale. Il secondo è quanto le previsioni sbagliano <em>polizza per polizza</em> al netto del totale. Quindi la somma dei quadrati non è un compromesso fra due metriche: le <strong>contiene entrambe</strong>, e con il peso naturale.</p>
+
+  <p>Su 200.000 polizze simulate la calibrazione pesa fra lo 0,002% e il 2,3% del totale, perché entra divisa per N. Se il business vuole che il profitto totale conti di più, si mette un moltiplicatore λ davanti — un solo parametro leggibile, invece di mescolare due metriche con unità diverse. Il cursore mostra fin dove si può spingere.</p>
+
+  <div class="wid">
+    <div class="wt">Peso λ sulla componente di calibrazione (profitto totale)</div>
+    <div class="ctrl"><label>λ</label><input type="range" id="sLam" min="0" max="70" value="0"><span class="v" id="vLam">1</span>
+      <span class="hint">λ = 1 è la decomposizione naturale. Alzandolo, il profitto totale pesa di più</span></div>
+    <div class="rank" id="lamRank"></div>
+    <div id="lamNote"></div>
+  </div>
+</div>
+
+<!-- 8 -->
+<div class="sec">
+  <h2><span class="n">8</span> Due punti che l'esempio costringe a chiarire</h2>
+  <h3>Ambiguità nella regola scritta, da chiudere prima di implementarla</h3>
+  <div class="grid2">
+    <div class="card bl-o">
+      <div class="ct">Ambiguità 1 — cos'è «la banda»</div>
+      <h4>±0,5% attorno allo zero, o attorno al primo in classifica?</h4>
+      <p>Nell'esempio di partenza le due letture coincidono, in generale no. Con errori del <strong>3,0%</strong>, <strong>3,2%</strong> e <strong>8%</strong>: leggendo «errore assoluto ≤ 0,5%» nessuno è in banda e vince il 3,0%; leggendo «entro 0,5 punti dal migliore» i primi due vanno a pari merito e può vincere il 3,2% con l'AUC più alta. Due regole, due vincitori.</p>
+    </div>
+    <div class="card bl-r">
+      <div class="ct">Ambiguità 2 — la direzione dell'AUC</div>
+      <h4>La retention va invertita prima di calcolarla</h4>
+      <p>L'AUC si calcola sull'evento <code>churn = 1</code>, ma la submission contiene la probabilità di <em>restare</em>. Passando la retention direttamente come score si ottiene <strong>1 − AUC</strong>, e un modello perfetto diventa il peggiore. Nella spec va scritto: <em>score = 1 − retention_probability</em>, o «la coppia è concorde quando il churner ha la retention più bassa».</p>
+    </div>
+  </div>
+  <div class="card bl-o hl-o">
+    <div class="ct">Nota sulla granularità</div>
+    <p>Con 10 polizze l'AUC ha solo 22 valori possibili, a passi di 1/21 ≈ 0,048: i pari merito sono continui, e nella tabella della sezione 6 tre team su quattro stanno tutti a 1,0000. È un limite dell'esempio giocattolo, non della metrica: sul test set reale il problema non esiste.</p>
+  </div>
+</div>
+
+<!-- 9 -->
+<div class="sec">
+  <h2><span class="n">9</span> E il buco che resta finché il totale è dichiarato</h2>
+  <h3>Con due submission si ricava il profitto vero, senza aprire il dataset</h3>
+  <div class="codebox">
+<span class="cm"># la leaderboard restituisce e = |P − A| / A , quindi A = P/(1+e) oppure A = P/(1−e)</span><br><br>
+submission <span class="cb">"1500"</span> <span class="op">→</span> e <span class="op">=</span> 0,021798 <span class="op">→</span> A <span class="op">=</span> <span class="cg">1.468,00</span> <span class="op">oppure</span> <span class="cr">1.533,43</span><br>
+submission <span class="cb">"2500"</span> <span class="op">→</span> e <span class="op">=</span> 0,702997 <span class="op">→</span> A <span class="op">=</span> <span class="cg">1.468,00</span> <span class="op">oppure</span> <span class="cr">8.417,43</span><br><br>
+<span class="co">A</span> <span class="op">=</span> <span class="cg">1.468,00</span>   <span class="cm"># valore comune. la terza submission ha errore 0,0000000000%</span>
+  </div>
+  <p>Due tentativi qualsiasi, un sistema di due equazioni, la terza submission è perfetta. Funziona identica su 10 polizze o su 85.000, perché l'incognita è una sola.</p>
+  <div class="card bl-g hl-g">
+    <div class="ct">La correzione che chiude anche questo</div>
+    <p>Far consegnare il <strong>lifetime factor atteso per polizza</strong> invece del totale. Il totale diventa una quantità <em>derivata</em> — il server calcola <code>Σ mᵢ · lfᵢ</code> — quindi non si può più dichiarare un totale arbitrario e l'inversione muore. Dalla stessa submission escono la somma dei quadrati per ordinare, il profitto totale da riportare come numero di business, e l'AUC se la si vuole vedere. Una submission, una metrica di ranking, due report.</p>
+  </div>
+</div>
+
+<div class="foot">
+  Numeri sintetici, ordini di grandezza allineati al portafoglio reale (margini fra −620 e +961 €, churn intorno al 14%, lifetime factor = <code>churn_days_after_renewal / 365</code>). Le cifre statiche sono generate e verificate da <code>sim10.py</code> e <code>sim_sommaerrori.py</code>; i pannelli interattivi ricalcolano le stesse formule nel browser. Nessun dato Generali è riportato in questa pagina. La regola commentata è quella del kick-off: «ranked by increasing profit error; if within a tolerance band (e.g. ±0.5%), highest AUC wins».
+</div>
+
+</div>
+
+<script>
+/* ============================ dati ============================ */
+const IDS  = ['P01','P02','P03','P04','P05','P06','P07','P08','P09','P10'];
+const M    = [440,-315,190,140,-80,240,70,250,150,180];
+const LF   = [1,0.4,1,1,0.2,1,1,0.8,1,1];
+const CH   = [0,1,0,0,1,0,0,1,0,0];
+const A    = M.reduce((s,m,i)=>s+m*LF[i],0);          // 1468
+const N    = 10, BAND = 0.5;
+const CHI  = [1,4,7];                                  // indici dei churner
+const SUI  = [0,2,3,5,6,8,9];                          // indici dei rimasti
+
+const RET = {
+  A:[0.95,0.30,0.90,0.88,0.45,0.93,0.85,0.89,0.96,0.91],
+  B:[0.92,0.20,0.86,0.80,0.35,0.90,0.75,0.78,0.94,0.88],
+  C:[0.90,0.10,0.85,0.82,0.25,0.88,0.80,0.40,0.92,0.86]
+};
+// submission per polizza usate nella sezione 7
+const LFHAT = {
+  'Team B ottimo'  :[1.00,0.38,0.99,0.98,0.24,1.00,0.97,0.82,1.00,0.99],
+  'Team A buono'   :[1.00,0.42,0.98,0.96,0.30,0.99,0.94,0.88,1.00,0.97],
+  'Team C mediocre':[0.95,0.70,0.92,0.90,0.65,0.93,0.88,0.85,0.96,0.93],
+  'Team D furbo'   :[0.70,0.00,0.70,1.00,0.00,1.00,0.957,1.00,1.00,1.00]
+};
+
+const fmt  = (x,d=2)=>x.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct  = (x,d=4)=>fmt(x,d)+'%';
+const dpr  = ()=>window.devicePixelRatio||1;
+function prep(cv,h){const w=cv.clientWidth||900;cv.width=w*dpr();cv.height=h*dpr();
+  const c=cv.getContext('2d');c.setTransform(dpr(),0,0,dpr(),0,0);c.clearRect(0,0,w,h);return[c,w,h];}
+
+/* ==================== sezione 2 — banda ==================== */
+function bandState(){
+  const t={A:+sA.value,B:+sB.value,C:+sC.value};
+  const o={};
+  for(const k in t){const err=100*Math.abs(t[k]-A)/A;o[k]={tot:t[k],err,inside:err<=BAND,auc:aucOf(RET[k])};}
+  return o;
+}
+function drawBand(st){
+  const [c,w,h]=prep(cband,190);
+  const L=40,R=40,T=54,W=w-L-R, MAXE=6;
+  const X=e=>L+(e+MAXE)/(2*MAXE)*W, Y=T+52;
+  c.strokeStyle='#e5e7eb';c.lineWidth=1;
+  c.fillStyle='#f0fdf4';c.fillRect(X(-BAND),Y-40,X(BAND)-X(-BAND),80);
+  c.strokeStyle='#bbf7d0';c.strokeRect(X(-BAND),Y-40,X(BAND)-X(-BAND),80);
+  c.strokeStyle='#d1d5db';c.beginPath();c.moveTo(L,Y);c.lineTo(L+W,Y);c.stroke();
+  c.font='10px "DM Mono", monospace';c.fillStyle='#9ca3af';c.textAlign='center';
+  for(let e=-6;e<=6;e+=2){c.beginPath();c.moveTo(X(e),Y-5);c.lineTo(X(e),Y+5);c.stroke();c.fillText(e+'%',X(e),Y+22);}
+  c.fillStyle='#059669';c.font='700 10px "DM Sans", sans-serif';
+  c.fillText('banda ±0,5%',X(0),Y-48);
+  const cols={A:'#e8412a',B:'#2563eb',C:'#d97706'};
+  ['A','B','C'].forEach((k,i)=>{
+    const s=st[k], x=X(Math.max(-MAXE,Math.min(MAXE,(s.tot-A)/A*100))), yo=(i-1)*15;
+    c.strokeStyle=cols[k];c.lineWidth=1.6;c.setLineDash([3,3]);
+    c.beginPath();c.moveTo(x,Y);c.lineTo(x,Y-30+yo);c.stroke();c.setLineDash([]);
+    c.fillStyle=cols[k];c.beginPath();c.arc(x,Y,6,0,6.2832);c.fill();
+    c.fillStyle='#fff';c.beginPath();c.arc(x,Y,2.4,0,6.2832);c.fill();
+    c.fillStyle=cols[k];c.font='700 11px "DM Mono", monospace';
+    c.textAlign = x>w-140?'right':'left';
+    c.fillText('Team '+k+'  '+pct(s.err,3),x+(x>w-140?-10:10),Y-30+yo);
+  });
+}
+function renderBand(){
+  const st=bandState();
+  vA.textContent=fmt(st.A.tot,0);vB.textContent=fmt(st.B.tot,0);vC.textContent=fmt(st.C.tot,0);
+  drawBand(st);
+  bandOut.innerHTML=['A','B','C'].map(k=>{
+    const s=st[k];
+    return `<div class="ro ${s.inside?'c':'a'}"><div class="l">Team ${k}</div>
+      <div class="v">${pct(s.err,4)}</div>
+      <div class="n">${s.inside?'<strong>dentro</strong> la banda — decide l’AUC':'<strong>fuori</strong> banda — ordinato per errore'}</div></div>`;
+  }).join('');
+  const ins=['A','B','C'].filter(k=>st[k].inside);
+  bandNote.innerHTML = ins.length>1
+    ? `Adesso ci sono <strong>${ins.length} team</strong> dentro la banda (${ins.map(k=>'Team '+k).join(', ')}): fra loro l'errore sul profitto non conta più nulla e il vincitore lo decide l'AUC del pannello sotto.`
+    : ins.length===1
+      ? `Solo <strong>Team ${ins[0]}</strong> è dentro la banda, quindi vince senza che l'AUC venga guardata. Gli altri si ordinano per errore crescente.`
+      : `Nessun team è dentro la banda: l'AUC non viene usata affatto e la classifica è quella degli errori sul profitto.`;
+  renderRank();
+}
+
+/* ==================== sezione 3 — AUC ==================== */
+function aucOf(ret){
+  let conc=0,tie=0;
+  for(const i of CHI) for(const j of SUI){
+    if(ret[i]<ret[j])conc++; else if(ret[i]===ret[j])tie++;
+  }
+  return (conc+0.5*tie)/(CHI.length*SUI.length);
+}
+function curRet(){
+  const base=RET[teamSel.value].slice();
+  base[1]=+r02.value/100; base[4]=+r05.value/100; base[7]=+r08.value/100;
+  return base;
+}
+function renderAuc(){
+  const ret=curRet();
+  v02.textContent=fmt(ret[1],2);v05.textContent=fmt(ret[4],2);v08.textContent=fmt(ret[7],2);
+  teamLbl.textContent='Team '+teamSel.value;
+  let conc=0,tie=0,html='<table><thead><tr><th class="rh">churner ↓  rimasto →</th>';
+  for(const j of SUI) html+=`<th>${IDS[j]}<br>${fmt(ret[j],2)}</th>`;
+  html+='<th>tot</th></tr></thead><tbody>';
+  for(const i of CHI){
+    let rc=0; html+=`<tr><td class="rh">${IDS[i]} — ${fmt(ret[i],2)}</td>`;
+    for(const j of SUI){
+      if(ret[i]<ret[j]){html+='<td class="ok">✓</td>';rc++;conc++;}
+      else if(ret[i]===ret[j]){html+='<td class="tie">=</td>';rc+=0.5;tie++;}
+      else html+='<td class="no">✗</td>';
+    }
+    html+=`<td class="tl">${fmt(rc,1)}/7</td></tr>`;
+  }
+  html+='</tbody></table>';
+  amat.innerHTML=html;
+  const tot=CHI.length*SUI.length;
+  aucConc.textContent=conc+' / '+tot; aucTie.textContent=tie;
+  aucVal.textContent=fmt((conc+0.5*tie)/tot,4);
+}
+
+/* ==================== sezione 4 — classifica ==================== */
+function renderRank(){
+  const st=bandState();
+  const rows=['A','B','C'].map(k=>({k,...st[k]}));
+  const ins=rows.filter(r=>r.inside).sort((a,b)=>b.auc-a.auc);
+  const out=rows.filter(r=>!r.inside).sort((a,b)=>a.err-b.err);
+  const ord=[...ins,...out];
+  finalRank.innerHTML=ord.map((r,i)=>{
+    const why = r.inside
+      ? (i===0?'Dentro la banda, e con l’AUC più alta fra i team in banda. Vince.'
+              :'Dentro la banda, ma con AUC più bassa: l\'errore sul profitto non lo aiuta.')
+      : 'Fuori banda: l’AUC non viene considerata.';
+    return `<div class="rk ${i===0?'win':''} ${r.inside?'':'out'}">
+      <div class="pos">${i+1}</div><div>
+        <div class="nm">Team ${r.k}</div>
+        <div class="st">errore ${pct(r.err,4)} · AUC ${fmt(r.auc,4)} · ${r.inside?'in banda':'fuori banda'}</div>
+        <div class="wy">${why}</div></div></div>`;
+  }).join('');
+}
+
+/* ==================== sezione 5 — compensazione ==================== */
+const SGN=[1,-1,1,-1,1,-1,1,-1,1,-1];
+function errVec(){
+  const sig=+sSig.value/100, bias=+sBias.value/1000;   // bias in frazione di A
+  const raw=M.map((m,i)=>m*SGN[i]);
+  const mu=raw.reduce((a,b)=>a+b,0)/N;
+  return raw.map(r=>sig*(r-mu)+bias*A/N);
+}
+function drawBars(e){
+  const [c,w,h]=prep(cbars,260);
+  const L=42,R=14,T=18,B=44,W=w-L-R,H=h-T-B, Y0=T+H/2;
+  const mx=Math.max(120,...e.map(v=>Math.abs(v)))*1.15;
+  const Y=v=>Y0-v/mx*(H/2);
+  c.strokeStyle='#e5e7eb';c.lineWidth=1;
+  [-1,-0.5,0.5,1].forEach(f=>{c.beginPath();c.moveTo(L,Y(f*mx));c.lineTo(L+W,Y(f*mx));c.stroke();});
+  c.font='10px "DM Mono", monospace';c.fillStyle='#9ca3af';c.textAlign='right';
+  [-1,-0.5,0,0.5,1].forEach(f=>c.fillText(Math.round(f*mx)+'',L-7,Y(f*mx)+3));
+  const bw=W/N*0.56;
+  e.forEach((v,i)=>{
+    const x=L+(i+0.5)*W/N;
+    c.fillStyle = v>=0?'#93c5fd':'#fca5a5';
+    c.fillRect(x-bw/2,Math.min(Y0,Y(v)),bw,Math.abs(Y(v)-Y0));
+    c.strokeStyle = v>=0?'#2563eb':'#dc2626';c.lineWidth=1.2;
+    c.strokeRect(x-bw/2,Math.min(Y0,Y(v)),bw,Math.abs(Y(v)-Y0));
+    c.fillStyle='#6b7280';c.font='10px "DM Sans", sans-serif';c.textAlign='center';
+    c.fillText(IDS[i],x,T+H+16);
+    c.fillStyle=v>=0?'#2563eb':'#dc2626';c.font='700 9.5px "DM Mono", monospace';
+    c.fillText(Math.round(v),x,v>=0?Y(v)-5:Y(v)+13);
+  });
+  c.strokeStyle='#0d1b2a';c.lineWidth=1.6;c.beginPath();c.moveTo(L,Y0);c.lineTo(L+W,Y0);c.stroke();
+  const s=e.reduce((a,b)=>a+b,0);
+  c.fillStyle='#0d1b2a';c.font='700 11px "DM Sans", sans-serif';c.textAlign='left';
+  c.fillText('somma algebrica = '+fmt(s,1)+' €',L+4,T+12);
+  c.fillStyle='#6b7280';c.font='10px "DM Sans", sans-serif';c.textAlign='center';
+  c.fillText('errore di profitto per polizza (€)',L+W/2,h-6);
+}
+function renderBars(){
+  const e=errVec();
+  vSig.textContent=fmt(+sSig.value/100,2);
+  vBias.textContent=fmt(+sBias.value/10,2)+'%';
+  drawBars(e);
+  const s=e.reduce((a,b)=>a+b,0);
+  const sabs=e.reduce((a,b)=>a+Math.abs(b),0);
+  const ssq=e.reduce((a,b)=>a+b*b,0);
+  mAgg.textContent=pct(100*Math.abs(s)/A,2);
+  mAbs.textContent=fmt(sabs,0)+' €';
+  mSq.textContent=fmt(ssq,0);
+  nAgg.innerHTML = Math.abs(+sBias.value)<1
+    ? '<strong>fermo</strong>: la dispersione non lo muove di un centesimo'
+    : 'si muove solo perché hai alzato il bias';
+}
+
+/* ==================== sezione 7 — lambda ==================== */
+function lamScores(lam){
+  return Object.entries(LFHAT).map(([nm,p])=>{
+    const e=p.map((v,i)=>M[i]*v-M[i]*LF[i]);
+    const s=e.reduce((a,b)=>a+b,0), mu=s/N;
+    const cal=s*s/N, dis=e.reduce((a,b)=>a+(b-mu)*(b-mu),0);
+    return {nm,cal,dis,score:lam*cal+dis,agg:100*Math.abs(s)/A};
+  }).sort((a,b)=>a.score-b.score);
+}
+function renderLam(){
+  const lam=Math.pow(10,+sLam.value/10);
+  vLam.textContent = lam<1000?fmt(lam,lam<10?1:0):lam.toExponential(0).replace('e+','e');
+  const r=lamScores(lam);
+  lamRank.innerHTML=r.map((x,i)=>`<div class="rk ${i===0?'win':''}">
+    <div class="pos">${i+1}</div><div>
+      <div class="nm">${x.nm}</div>
+      <div class="st">score ${fmt(x.score,0)} · calibrazione ${fmt(lam*x.cal,0)} · dispersione ${fmt(x.dis,0)}</div>
+      <div class="wy">errore sul profitto totale ${pct(x.agg,4)}</div></div></div>`).join('');
+  const d=r.findIndex(x=>x.nm==='Team D furbo');
+  lamNote.innerHTML = d===0
+    ? `<div class="card bl-r hl-r" style="margin-bottom:0"><div class="ct">λ troppo alto</div><p>Con λ = ${vLam.textContent} vince <strong>Team D</strong>, che azzecca il totale e sbaglia tutto il resto: pesando troppo la calibrazione hai ricreato il problema di partenza. Su 200.000 polizze simulate il punto di rottura è intorno a λ = 10⁵.</p></div>`
+    : `<div class="card bl-g hl-g" style="margin-bottom:0"><div class="ct">λ nella zona sicura</div><p>Con λ = ${vLam.textContent} vince <strong>${r[0].nm}</strong> e Team D è ${d+1}° su 4. La classifica premia la qualità per polizza e tiene comunque conto del totale.</p></div>`;
+}
+
+/* ==================== bootstrap ==================== */
+['sA','sB','sC'].forEach(id=>document.getElementById(id).addEventListener('input',renderBand));
+['r02','r05','r08'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{renderAuc();renderRank();}));
+teamSel.addEventListener('change',()=>{
+  const b=RET[teamSel.value];
+  r02.value=Math.round(b[1]*100); r05.value=Math.round(b[4]*100); r08.value=Math.round(b[7]*100);
+  renderAuc(); renderRank();
+});
+['sSig','sBias'].forEach(id=>document.getElementById(id).addEventListener('input',renderBars));
+sLam.addEventListener('input',renderLam);
+window.addEventListener('resize',()=>{renderBand();renderBars();});
+renderBand(); renderAuc(); renderBars(); renderLam();
+</script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media vs mediana sul lifetime factor — Datapizza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+    svg: { fontCache: 'global' }, startup: { typeset: false }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<style>
+:root {
+  --bg: #f7f8fa; --white: #ffffff; --navy: #0d1b2a; --navy2: #1a2e42;
+  --accent-red: #e8412a; --accent-orange: #f5a623; --accent-blue: #2563eb;
+  --muted: #6b7280; --border: #e5e7eb; --border2: #d1d5db; --grid-color: #e5e7eb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background: var(--bg); color: var(--navy); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events:none; z-index:0;
+}
+body > * { position:relative; z-index:1; }
+.btn-blue { background:var(--accent-blue); color:#fff; border:none; padding:14px 28px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-blue:hover { background:#1d4ed8; transform:translateY(-1px); }
+.btn-blue:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+.btn-dark { background:var(--navy); color:#fff; border:none; padding:14px 28px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-dark:hover { background:var(--navy2); transform:translateY(-1px); }
+.btn-dark:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+.step-nav { background:var(--white); border-top:1px solid var(--border); border-bottom:1px solid var(--border); display:flex; overflow-x:auto; scrollbar-width:none; padding:0 48px; }
+.step-nav::-webkit-scrollbar { display:none; }
+.step-tab { padding:16px 18px; white-space:nowrap; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; gap:8px; border:none; background:none; font-family:'DM Sans',sans-serif; flex-shrink:0; }
+.step-tab:hover { color:var(--navy); }
+.step-tab.active { color:var(--accent-red); border-bottom:2px solid var(--accent-red); }
+.step-tab.done { color:var(--navy); }
+.snum { background:var(--bg); border:1px solid var(--border2); border-radius:5px; width:20px; height:20px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; color:var(--muted); flex-shrink:0; }
+.step-tab.active .snum { background:var(--accent-red); color:#fff; border-color:var(--accent-red); }
+.step-tab.done .snum { background:var(--navy); color:#fff; border-color:var(--navy); }
+.main { max-width:1100px; margin:0 auto; padding:48px 48px 80px; }
+.sh { margin-bottom:32px; display:flex; align-items:flex-start; gap:16px; }
+.badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; margin-top:6px; flex-shrink:0; }
+.b-r{background:#fee2e2;color:#dc2626}.b-g{background:#d1fae5;color:#059669}.b-o{background:#fef3c7;color:#d97706}
+.b-bl{background:#dbeafe;color:#2563eb}.b-p{background:#f3e8ff;color:#7c3aed}.b-n{background:var(--bg);color:var(--muted);border:1px solid var(--border2)}
+.sh h2 { font-size:clamp(22px,3vw,36px); font-weight:900; letter-spacing:-.5px; line-height:1.1; }
+.sh h2 .cr{color:var(--accent-red)}.sh h2 .cg{color:#059669}.sh h2 .co{color:#d97706}.sh h2 .cb{color:var(--accent-blue)}
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid1 { margin-bottom:18px; }
+.card { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:24px 26px; transition:box-shadow .2s; }
+.card:hover { box-shadow:0 4px 24px rgba(13,27,42,.07); }
+.card.bl-r{border-left:3px solid var(--accent-red)}.card.bl-g{border-left:3px solid #059669}
+.card.bl-o{border-left:3px solid #d97706}.card.bl-b{border-left:3px solid var(--accent-blue)}
+.card.hl-r{background:#fff8f7;border-color:#fecaca}.card.hl-g{background:#f0fdf4;border-color:#bbf7d0}
+.card.hl-o{background:#fffbeb;border-color:#fde68a}.card.hl-b{background:#eff6ff;border-color:#bfdbfe}
+.ctag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px; color:var(--muted); }
+.ctag.r{color:var(--accent-red)}.ctag.g{color:#059669}.ctag.o{color:#d97706}.ctag.b{color:var(--accent-blue)}
+.card h3 { font-size:15px; font-weight:800; margin-bottom:9px; color:var(--navy); line-height:1.3; }
+.card p { font-size:13px; color:var(--muted); line-height:1.75; }
+.card p strong { color:var(--navy); font-weight:700; }
+.card p + p { margin-top:10px; }
+.codebox { background:var(--navy); border-radius:10px; padding:16px 20px; margin-top:14px; color:#e2e8f0; font-family:'DM Mono',monospace; font-size:12.5px; line-height:2; overflow-x:auto; }
+.codebox .cr{color:#f87171;font-weight:700}.codebox .cg{color:#6ee7b7;font-weight:700}
+.codebox .co{color:#fcd34d;font-weight:700}.codebox .cb{color:#93c5fd;font-weight:700}
+.codebox .cm{color:#94a3b8;font-style:italic;font-size:11px}.codebox .op{color:#94a3b8}
+.lcard { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:26px 30px; margin-bottom:18px; }
+.lcard .ltag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+.lcard .ltitle { font-size:15px; font-weight:800; color:var(--navy); margin-bottom:16px; }
+.eqrow { display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.eqrow:last-child { border-bottom:none; }
+.eqlbl { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; width:110px; flex-shrink:0; }
+.eqf { flex:1; font-size:15px; min-width:200px; }
+.eqnote { font-size:11px; color:var(--muted); font-style:italic; width:180px; flex-shrink:0; text-align:right; line-height:1.4; }
+.darkcard { background:var(--navy); border-radius:14px; padding:30px 36px; margin-bottom:18px; color:#e2e8f0; }
+.darkcard .dtag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#94a3b8; margin-bottom:20px; }
+.drow { display:flex; align-items:center; gap:18px; padding:13px 0; border-bottom:1px solid rgba(255,255,255,.06); flex-wrap:wrap; }
+.drow:last-child { border-bottom:none; }
+.dchip { font-size:10px; font-weight:700; padding:3px 10px; border-radius:4px; text-transform:uppercase; letter-spacing:.07em; width:86px; text-align:center; flex-shrink:0; }
+.dc-r{background:rgba(248,113,113,.15);color:#f87171}.dc-g{background:rgba(110,231,183,.15);color:#6ee7b7}
+.dc-o{background:rgba(252,211,77,.15);color:#fcd34d}.dc-b{background:rgba(147,197,253,.15);color:#93c5fd}
+.deq { flex:1; font-size:15px; color:#f1f5f9; min-width:220px; }
+.dnote { font-size:11px; color:#94a3b8; font-style:italic; width:190px; flex-shrink:0; text-align:right; line-height:1.5; }
+.flow { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:22px 26px; margin-bottom:18px; overflow-x:auto; }
+.ftag { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
+.frow { display:flex; align-items:center; gap:6px; min-width:max-content; }
+.fnode { background:var(--bg); border:1px solid var(--border2); border-radius:8px; padding:8px 13px; font-size:12px; font-family:'DM Mono',monospace; text-align:center; line-height:1.4; }
+.fnode .fnl { color:var(--muted); font-size:9px; display:block; margin-bottom:2px; font-family:'DM Sans',sans-serif; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+.fnode .fnv { color:var(--navy); font-weight:700; font-size:13px; }
+.fn-r{background:#fff8f7;border-color:#fca5a5}.fn-g{background:#f0fdf4;border-color:#86efac}
+.fn-o{background:#fffbeb;border-color:#fcd34d}.fn-b{background:#eff6ff;border-color:#93c5fd}
+.farr { color:var(--border2); font-size:18px; flex-shrink:0; }
+.fop { width:28px; height:28px; border-radius:50%; border:1.5px solid var(--border2); background:var(--white); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--navy); flex-shrink:0; }
+.fop.r{border-color:#fca5a5;color:var(--accent-red)}.fop.g{border-color:#86efac;color:#059669}
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-right:3px; }
+.tg-r{background:#fee2e2;color:#dc2626}.tg-g{background:#d1fae5;color:#059669}
+.tg-o{background:#fef3c7;color:#d97706}.tg-b{background:#dbeafe;color:#2563eb}
+.tcard { background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:18px; overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+thead th { background:var(--bg); padding:12px 20px; text-align:left; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+tbody td { padding:13px 20px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:top; line-height:1.6; }
+tbody td:first-child { color:var(--navy); font-weight:700; font-size:13px; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:var(--bg); }
+td.num { font-family:'DM Mono',monospace; font-size:12.5px; text-align:right; }
+td.win { background:#f0fdf4 !important; color:#059669; font-weight:700; }
+td.lose { background:#fff8f7 !important; color:#dc2626; font-weight:700; }
+.bnav { background:var(--white); border-top:1px solid var(--border); padding:18px 48px; display:flex; align-items:center; justify-content:space-between; position:sticky; bottom:0; z-index:99; }
+.pinfo { font-size:13px; color:var(--muted); font-weight:500; display:flex; align-items:center; gap:12px; }
+.pbar { width:120px; height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
+.pfill { height:100%; background:var(--accent-red); border-radius:99px; transition:width .3s; }
+.panel { display:none; }
+.panel.active { display:block; animation:fadeUp .3s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.lead { font-size:15px; color:var(--muted); line-height:1.8; margin-bottom:20px; max-width:780px; }
+.lead strong { color:var(--navy); font-weight:700; }
+.simwrap { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:26px 30px; margin-bottom:18px; }
+.slrow { display:flex; align-items:center; gap:18px; flex-wrap:wrap; margin-bottom:8px; }
+.slrow label { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+input[type=range] { flex:1; min-width:220px; accent-color:var(--accent-red); height:4px; }
+.pval { font-family:'DM Mono',monospace; font-size:20px; font-weight:700; color:var(--accent-red); width:78px; text-align:right; }
+.readout { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px; }
+.ro { border:1px solid var(--border); border-radius:10px; padding:16px 18px; }
+.ro.mae { background:#fff8f7; border-color:#fecaca; }
+.ro.mse { background:#f0fdf4; border-color:#bbf7d0; }
+.ro .rol { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.ro .rov { font-family:'DM Mono',monospace; font-size:26px; font-weight:700; line-height:1.1; }
+.ro.mae .rov { color:#dc2626; } .ro.mse .rov { color:#059669; }
+.ro .ron { font-size:11.5px; color:var(--muted); margin-top:7px; line-height:1.55; }
+canvas { width:100%; height:auto; display:block; }
+.chartgrid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:22px; }
+.chartbox .cbt { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.foot { font-size:12px; color:var(--muted); line-height:1.7; margin-top:26px; padding-top:18px; border-top:1px solid var(--border); }
+.foot code { font-family:'DM Mono',monospace; font-size:11.5px; background:var(--white); border:1px solid var(--border); border-radius:4px; padding:1px 5px; }
+@media(max-width:800px){
+  .step-nav,.main,.bnav{padding-left:20px;padding-right:20px}
+  .grid2,.grid3,.chartgrid,.readout{grid-template-columns:1fr}
+  .eqnote,.dnote{display:none}.darkcard{padding:22px 18px}
+}
+</style>
+</head>
+<body>
+
+<div class="step-nav">
+  <button class="step-tab active" onclick="goTo(0)"><span class="snum">0</span> Il malinteso</button>
+  <button class="step-tab" onclick="goTo(1)"><span class="snum">1</span> Cosa elicita una loss</button>
+  <button class="step-tab" onclick="goTo(2)"><span class="snum">2</span> La distribuzione di lf</button>
+  <button class="step-tab" onclick="goTo(3)"><span class="snum">3</span> Simulazione interattiva</button>
+  <button class="step-tab" onclick="goTo(4)"><span class="snum">4</span> Il portafoglio simulato</button>
+  <button class="step-tab" onclick="goTo(5)"><span class="snum">5</span> Perché al business serve la media</button>
+  <button class="step-tab" onclick="goTo(6)"><span class="snum">6</span> Conclusione</button>
+</div>
+
+<div class="main">
+
+<!-- ============ 0 ============ -->
+<div class="panel active" id="panel-0">
+  <div class="sh"><span class="badge b-r">Premessa</span><h2>La media non è più <span class="cr">robusta</span> della mediana. Non è quella la proprietà in gioco.</h2></div>
+
+  <p class="lead">La domanda è giusta e il dubbio è sano: la mediana <em>è</em> più robusta della media, e questo è vero sempre. Ma robustezza e <strong>correttezza del bersaglio</strong> sono due cose diverse, e qui stiamo parlando della seconda. Il punto non è quale statistica resiste meglio agli outlier. È quale statistica una funzione di costo <strong>chiede implicitamente al modello di produrre</strong>.</p>
+
+  <div class="grid2">
+    <div class="card bl-o">
+      <div class="ctag o">Proprietà A — robustezza</div>
+      <h3>Quanto una stima resiste alla contaminazione</h3>
+      <p>La mediana vince, e non c'è discussione. Un valore assurdo in coda sposta la media e lascia la mediana dov'era. Serve quando i dati hanno errori di misura, code pesanti, valori impossibili.</p>
+      <p><strong>Qui non serve.</strong> Il lifetime factor vive per costruzione in $[0,1]$: non esiste un outlier possibile. Non c'è contaminazione da cui proteggersi.</p>
+    </div>
+    <div class="card bl-g">
+      <div class="ctag g">Proprietà B — quale funzionale elicita</div>
+      <h3>Quale statistica la loss premia</h3>
+      <p>Ogni funzione di costo, minimizzata, restituisce una statistica precisa della distribuzione condizionata. L'errore assoluto restituisce la <strong>mediana</strong>. L'errore quadratico restituisce la <strong>media</strong>. Non è una preferenza: è un teorema.</p>
+      <p><strong>Questa è la proprietà che decide.</strong> Perché il profitto ha bisogno di una media, e chiedere una mediana su questo target la fa collassare su una costante.</p>
+    </div>
+  </div>
+
+  <div class="card hl-b bl-b">
+    <div class="ctag b">In una riga</div>
+    <p style="font-size:14px">Il MAE non sbaglia perché è meno preciso. Sbaglia perché su un target che vale 1 nell'83% dei casi <strong>la mediana condizionata è 1 quasi ovunque</strong>, e quindi il predittore che minimizza il MAE è la costante «non esce nessuno» — che è esattamente la soluzione degenere da cui stiamo cercando di scappare.</p>
+  </div>
+</div>
+
+<!-- ============ 1 ============ -->
+<div class="panel" id="panel-1">
+  <div class="sh"><span class="badge b-bl">Teoria</span><h2>Ogni loss elicita <span class="cb">un funzionale diverso</span></h2></div>
+
+  <p class="lead">Fissiamo un target $Y$ e cerchiamo la costante $q$ che minimizza il costo atteso. Il risultato dipende solo dalla forma della loss, non dai dati.</p>
+
+  <div class="lcard">
+    <div class="ltag">minimizzatori</div>
+    <div class="ltitle">La stessa distribuzione, due bersagli diversi</div>
+    <div class="eqrow">
+      <span class="eqlbl"><span class="tag tg-r">MAE</span></span>
+      <span class="eqf">$$\arg\min_q\ \mathbb{E}\,|Y-q| \;=\; \mathrm{median}(Y)$$</span>
+      <span class="eqnote">la mediana condizionata</span>
+    </div>
+    <div class="eqrow">
+      <span class="eqlbl"><span class="tag tg-g">MSE</span></span>
+      <span class="eqf">$$\arg\min_q\ \mathbb{E}\,(Y-q)^2 \;=\; \mathbb{E}[Y]$$</span>
+      <span class="eqnote">la media condizionata</span>
+    </div>
+  </div>
+
+  <p class="lead">La derivata spiega il perché in un passaggio. Per il MAE, la condizione di primo ordine è $\mathbb{P}(Y \lt q) = \mathbb{P}(Y \gt q)$: conta solo <strong>da che parte</strong> cadono le osservazioni, non quanto lontano. Ogni punto pesa uno, indipendentemente dalla distanza. Per il MSE la condizione è $\mathbb{E}[Y-q]=0$: ogni punto pesa <strong>proporzionalmente alla sua distanza</strong>, quindi una coda lontana sposta l'ottimo.</p>
+
+  <div class="darkcard">
+    <div class="dtag">// la conseguenza che ci interessa</div>
+    <div class="drow">
+      <span class="dchip dc-r">MAE</span>
+      <span class="deq">conta i casi, non le distanze → se una classe è maggioritaria, vince lei e basta</span>
+      <span class="dnote">insensibile a <em>quanto</em> è grave la minoranza</span>
+    </div>
+    <div class="drow">
+      <span class="dchip dc-g">MSE</span>
+      <span class="deq">pesa le distanze → una minoranza lontana sposta la previsione in proporzione alla sua frequenza</span>
+      <span class="dnote">è così che nasce una probabilità calibrata</span>
+    </div>
+  </div>
+
+  <p class="lead">Detto in modo operativo: <strong>il MAE è una votazione, il MSE è una media pesata.</strong> Su un target sbilanciato la votazione la vince sempre la maggioranza, e la previsione non si muove mai.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<div class="panel" id="panel-2">
+  <div class="sh"><span class="badge b-o">I dati</span><h2>Il lifetime factor è <span class="co">un picco su 1</span> con una coda sottile</h2></div>
+
+  <p class="lead">Ricordiamo com'è fatto il target della challenge. Dalla formula di Stefano: $\mathrm{lf}=1$ se la polizza non esce, altrimenti la frazione d'anno in cui è rimasta attiva. Sul sample di 500 righe il churn è al <strong>16,6%</strong>, e nel catalogo completo intorno al <strong>14%</strong>.</p>
+
+  <div class="grid3">
+    <div class="card hl-g bl-g">
+      <div class="ctag g">Massa su 1</div>
+      <h3 style="font-size:30px;font-family:'DM Mono',monospace">83&nbsp;–&nbsp;86%</h3>
+      <p>Delle polizze non esce e ha lifetime factor esattamente 1. Un atomo di probabilità, non una densità.</p>
+    </div>
+    <div class="card hl-o bl-o">
+      <div class="ctag o">Coda</div>
+      <h3 style="font-size:30px;font-family:'DM Mono',monospace">14&nbsp;–&nbsp;17%</h3>
+      <p>Esce, e si distribuisce su tutto $[0,1)$ con media $\mathbb{E}[d]\approx0{,}44$ — cioè in media a metà anno.</p>
+    </div>
+    <div class="card hl-r bl-r">
+      <div class="ctag r">Mediana condizionata</div>
+      <h3 style="font-size:30px;font-family:'DM Mono',monospace">= 1</h3>
+      <p>Per <strong>ogni</strong> segmento in cui la probabilità di churn sta sotto il 50%. Nel portafoglio simulato: il 98,95% delle polizze.</p>
+    </div>
+  </div>
+
+  <div class="card bl-r hl-r">
+    <div class="ctag r">Il collasso, in una frase</div>
+    <p style="font-size:14px">La mediana di $\mathrm{lf}$ si sposta da 1 solo quando la probabilità di churn supera il <strong>50%</strong>. Nel portafoglio non esiste nessun segmento del genere: servirebbe un gruppo di clienti di cui più della metà disdice entro l'anno. Quindi la mediana condizionata è la <strong>costante 1</strong> su tutto il portafoglio, e con essa il predittore che minimizza il MAE. Tutto il segnale che hai su <em>chi</em> uscirà viene buttato via, non perché il modello sia debole, ma perché la metrica non chiede quell'informazione.</p>
+    <div class="codebox">
+<span class="cm"># il verificatore sul portafoglio simulato (200.000 polizze)</span><br>
+<span class="cb">costante che minimizza il MAE</span> <span class="op">=</span> <span class="cr">1.0000</span>   <span class="cm"># = mediana di lf</span><br>
+<span class="cb">costante che minimizza il MSE</span> <span class="op">=</span> <span class="cg">0.9330</span>   <span class="cm"># = media di lf</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 3 ============ -->
+<div class="panel" id="panel-3">
+  <div class="sh"><span class="badge b-p">Interattivo</span><h2>Muovi la probabilità di churn e guarda <span class="cr">dove sta il minimo</span></h2></div>
+
+  <p class="lead">Prendi un singolo segmento di clientela con probabilità di churn $p$. Sotto ci sono le due curve di costo atteso al variare della previsione $q$, con il loro minimo marcato. La distribuzione della frazione d'anno per chi esce è quella empirica del sample. <strong>Sposta lo slider e guarda cosa fa il minimo rosso.</strong></p>
+
+  <div class="simwrap">
+    <div class="slrow">
+      <label for="pslider">Probabilità di churn del segmento</label>
+      <input type="range" id="pslider" min="1" max="99" value="15">
+      <span class="pval" id="pout">15%</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:4px">Il portafoglio reale vive tra il 9% e il 26% a seconda del segmento. Per far muovere il minimo del MAE devi superare il 50%.</p>
+
+    <div class="readout">
+      <div class="ro mae">
+        <div class="rol">Previsione ottima per il MAE</div>
+        <div class="rov" id="maeopt">1.000</div>
+        <div class="ron" id="maenote">Resta incollata a 1: la maggioranza non esce, e il MAE conta i casi.</div>
+      </div>
+      <div class="ro mse">
+        <div class="rol">Previsione ottima per il MSE</div>
+        <div class="rov" id="mseopt">0.916</div>
+        <div class="ron" id="msenote">Si muove con continuità: è esattamente $1-p\,(1-\mathbb{E}[d])$.</div>
+      </div>
+    </div>
+
+    <div class="chartgrid">
+      <div class="chartbox">
+        <div class="cbt" style="color:#dc2626">Costo atteso — errore assoluto</div>
+        <canvas id="cmae" width="520" height="300"></canvas>
+      </div>
+      <div class="chartbox">
+        <div class="cbt" style="color:#059669">Costo atteso — errore quadratico</div>
+        <canvas id="cmse" width="520" height="300"></canvas>
+      </div>
+    </div>
+
+    <div class="foot">
+      La curva del MAE è <strong>lineare a tratti</strong> con un gomito su ogni valore possibile del target: il minimo si incastra in uno di quei gomiti e ci resta finché la massa non si sbilancia dall'altra parte. La curva del MSE è una <strong>parabola</strong> e il suo vertice si sposta con continuità appena cambia $p$. È tutta la differenza.
+    </div>
+  </div>
+</div>
+
+<!-- ============ 4 ============ -->
+<div class="panel" id="panel-4">
+  <div class="sh"><span class="badge b-n">Simulazione</span><h2>Cinque predittori, sei metriche, <span class="cr">due classifiche opposte</span></h2></div>
+
+  <p class="lead">Portafoglio sintetico di <strong>200.000 polizze</strong>, calibrato sul sample reale: margini ricampionati dalla distribuzione empirica di <code>pp_minus_tp</code>, probabilità di churn logistica su due covariate, frazione d'anno ricampionata dai <code>churn_days_after_renewal</code> osservati. Confrontiamo cinque predittori del lifetime factor, di cui uno è la verità.</p>
+
+  <div class="tcard">
+    <table>
+      <thead><tr><th>Predittore</th><th style="text-align:right">MAE lf</th><th style="text-align:right">RMSE lf</th><th style="text-align:right">MAE profitto</th><th style="text-align:right">RMSE profitto</th><th style="text-align:right">Brier</th><th style="text-align:right">AUC</th><th style="text-align:right">Err. profitto tot.</th></tr></thead>
+      <tbody>
+        <tr><td>Costante 1 — «non esce nessuno»</td><td class="num win">0.0670</td><td class="num">0.2180</td><td class="num win">8.64</td><td class="num">37.48</td><td class="num">0.1204</td><td class="num">0.500</td><td class="num">+6.98%</td></tr>
+        <tr><td>Costante = media globale</td><td class="num">0.1180</td><td class="num">0.2074</td><td class="num">15.27</td><td class="num">35.69</td><td class="num">0.1059</td><td class="num">0.500</td><td class="num">−0.19%</td></tr>
+        <tr><td>Mediana condizionata vera</td><td class="num">0.0699</td><td class="num lose">0.2240</td><td class="num">9.02</td><td class="num lose">38.54</td><td class="num">0.1187</td><td class="num">0.524</td><td class="num">+5.93%</td></tr>
+        <tr><td>Modello imperfetto ma sensato</td><td class="num">0.1115</td><td class="num">0.2028</td><td class="num">14.44</td><td class="num">34.95</td><td class="num">0.0996</td><td class="num">0.719</td><td class="num">−0.80%</td></tr>
+        <tr><td><strong>Media condizionata vera</strong></td><td class="num">0.1068</td><td class="num win">0.1989</td><td class="num">13.82</td><td class="num win">34.21</td><td class="num win">0.0946</td><td class="num win">0.752</td><td class="num">−0.18%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card bl-r hl-r">
+      <div class="ctag r">Se classifichi col MAE</div>
+      <h3>Vince «non esce nessuno», e la verità arriva ultima</h3>
+      <p>La costante 1 ha MAE <strong>0,0670</strong>, la media condizionata vera <strong>0,1068</strong>: la verità perde del 60%. E si noti che la costante 1 sbaglia il profitto totale del <strong>+6,98%</strong>, contro il <strong>−0,18%</strong> della verità.</p>
+      <p>Non è un'anomalia della simulazione. È il teorema che si vede all'opera: il MAE chiede la mediana, la mediana è 1, quindi il MAE premia chi predice 1.</p>
+    </div>
+    <div class="card bl-g hl-g">
+      <div class="ctag g">Se classifichi con RMSE o Brier</div>
+      <h3>Vince la verità, e la classifica ha senso</h3>
+      <p>La media condizionata vera è prima su RMSE (0,1989), prima su Brier (0,0946), prima su AUC (0,752). Il modello imperfetto è secondo. La costante 1 è ultima o penultima.</p>
+      <p>La classifica diventa <strong>monotona nella qualità del modello</strong>, che è l'unica proprietà che una leaderboard deve avere.</p>
+    </div>
+  </div>
+
+  <div class="card bl-b hl-b">
+    <div class="ctag b">Il dettaglio che chiude la questione</div>
+    <p style="font-size:14px">Guarda la colonna AUC. La costante 1 sta a <strong>0,500</strong>: non ordina niente, è indistinguibile dal caso. Eppure vince la classifica per MAE. Una metrica che mette al primo posto un predittore con AUC 0,5 non sta misurando la capacità di prevedere il churn — sta misurando quale sia la classe maggioritaria.</p>
+  </div>
+</div>
+
+<!-- ============ 5 ============ -->
+<div class="panel" id="panel-5">
+  <div class="sh"><span class="badge b-g">Business</span><h2>Il profitto è <span class="cg">lineare</span> nel lifetime factor. Quindi serve una media.</h2></div>
+
+  <p class="lead">C'è un secondo argomento, indipendente dal primo e più difficile da confutare: la media condizionata non è solo quella che una loss ragionevole elicita. È <strong>letteralmente la quantità che la formula del profitto richiede</strong>.</p>
+
+  <div class="lcard">
+    <div class="ltag">linearità</div>
+    <div class="ltitle">L'operatore che serve al profitto è l'attesa, e passa attraverso la somma</div>
+    <div class="eqrow">
+      <span class="eqlbl"><span class="tag tg-b">per polizza</span></span>
+      <span class="eqf">$$\mathbb{E}[\pi_i \mid x_i] \;=\; m_i \cdot \mathbb{E}[\mathrm{lf}_i \mid x_i]$$</span>
+      <span class="eqnote">il margine è noto, esce dall'attesa</span>
+    </div>
+    <div class="eqrow">
+      <span class="eqlbl"><span class="tag tg-g">portafoglio</span></span>
+      <span class="eqf">$$\mathbb{E}\Big[\sum_i \pi_i\Big] \;=\; \sum_i m_i \cdot \mathbb{E}[\mathrm{lf}_i \mid x_i]$$</span>
+      <span class="eqnote">l'attesa di una somma è la somma delle attese</span>
+    </div>
+    <div class="eqrow">
+      <span class="eqlbl"><span class="tag tg-r">e invece</span></span>
+      <span class="eqf">$$\mathrm{median}\Big[\sum_i \pi_i\Big] \;\neq\; \sum_i \mathrm{median}[\pi_i]$$</span>
+      <span class="eqnote">le mediane non si sommano</span>
+    </div>
+  </div>
+
+  <p class="lead">Questa è la parte che vale la pena portare a Stefano, perché non è un argomento statistico ma contabile. Il profitto di portafoglio è una <strong>somma</strong> di profitti per polizza. L'attesa attraversa la somma, la mediana no. Se ogni polizza ti restituisce una mediana, sommarle non ti dà nulla di interpretabile: non è il profitto atteso, non è il profitto mediano, non è niente.</p>
+
+  <div class="grid2">
+    <div class="card bl-g">
+      <div class="ctag g">Cosa vuoi da un modello di pricing</div>
+      <h3>Probabilità calibrate</h3>
+      <p>Vuoi poter dire: «su questo segmento mi aspetto di incassare 340.000 euro». Questo richiede $\mathbb{E}[\mathrm{lf}\mid x]$ corretta <strong>in media su ogni sottoinsieme</strong>, che è la definizione di calibrazione.</p>
+      <p>Il Brier score e la log-loss sono <em>proper scoring rules</em>: il loro unico minimizzatore è la probabilità vera. Non si possono ingannare.</p>
+    </div>
+    <div class="card bl-o">
+      <div class="ctag o">Cosa ti dà una mediana</div>
+      <h3>Un valore tipico, non sommabile</h3>
+      <p>«La polizza tipica di questo segmento resta attiva tutto l'anno» è probabilmente vera e completamente inutile per fare un budget. Ti serve sapere quanti escono e quando, non com'è fatto il caso mediano.</p>
+      <p>La mediana risponde a una domanda che nessuno nel pricing ha fatto.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 6 ============ -->
+<div class="panel" id="panel-6">
+  <div class="sh"><span class="badge b-r">Conclusione</span><h2>Cosa proporre, e <span class="cr">l'onestà sui limiti</span></h2></div>
+
+  <div class="darkcard">
+    <div class="dtag">// la proposta per la metrica della challenge</div>
+    <div class="drow">
+      <span class="dchip dc-g">Ranking</span>
+      <span class="deq"><strong>Brier score</strong> (o log-loss) sulla probabilità di churn per polizza</span>
+      <span class="dnote">proper: minimizzata solo dalla probabilità vera. Premia calibrazione e discriminazione</span>
+    </div>
+    <div class="drow">
+      <span class="dchip dc-b">Accanto</span>
+      <span class="deq"><strong>AUC</strong>, che Stefano già voleva</span>
+      <span class="dnote">misura solo l'ordinamento, ma è leggibile e loro la conoscono</span>
+    </div>
+    <div class="drow">
+      <span class="dchip dc-o">In cima</span>
+      <span class="deq"><strong>Errore relativo sul profitto totale</strong>, riportato ma non usato per ordinare</span>
+      <span class="dnote">è il numero di business: si mostra, non si classifica</span>
+    </div>
+    <div class="drow">
+      <span class="dchip dc-r">Da evitare</span>
+      <span class="deq"><strong>MAE</strong> sul lifetime factor o sul profitto per polizza</span>
+      <span class="dnote">premia «non esce nessuno». Se serve una metrica in euro, RMSE</span>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card bl-b">
+      <div class="ctag b">Perché è una modifica piccola</div>
+      <h3>La formula di Stefano non cambia di una virgola</h3>
+      <p>Resta $(\text{proposed} - \text{technical}) \times \mathrm{lf}$, resta la somma sul portafoglio, resta l'AUC che aveva già chiesto. Cambia solo <strong>su cosa si ordina la classifica</strong>: una quantità per polizza invece di un aggregato unico.</p>
+    </div>
+    <div class="card bl-o">
+      <div class="ctag o">Dove RMSE ha un difetto suo</div>
+      <h3>Pesa per il quadrato del margine</h3>
+      <p>L'RMSE sul profitto per polizza è proporzionale a $m_i^2$, quindi le polizze a margine grande contano molto più delle altre. Difendibile — in euro è così che va — ma va detto. Il Brier sulla probabilità evita del tutto la pesatura, ed è per questo che lo metterei primo.</p>
+    </div>
+  </div>
+
+  <div class="card bl-g hl-g">
+    <div class="ctag g">Cosa resta vero della tua obiezione</div>
+    <p style="font-size:14px">La mediana <strong>è</strong> più robusta, e se il target avesse code pesanti o valori sporchi sarebbe la scelta giusta. Il lifetime factor non è quel caso: è limitato in $[0,1]$ e non ha outlier possibili. Se invece scegliete una metrica in euro sul profitto per polizza, allora la robustezza torna a contare davvero — perché i <em>margini</em> hanno code lunghe, da −620 a +961 euro nel sample. In quel caso il rimedio non è passare al MAE, è troncare o winsorizzare i margini estremi e restare sull'errore quadratico.</p>
+  </div>
+
+  <div class="foot">
+    Simulazione: 200.000 polizze sintetiche, seed 20260803. Margini e distribuzione dei <code>churn_days_after_renewal</code> ricampionati dal sample di 500 righe di <code>fr_renewals_2024_data_catalog.xlsx</code>; probabilità di churn generata da un modello logistico su due covariate latenti, churn medio 12%. Nessun dato Generali è incorporato in questa pagina oltre alle statistiche aggregate citate.
+  </div>
+</div>
+
+</div>
+
+<div class="bnav">
+  <button class="btn-dark" id="btn-prev" onclick="nav(-1)">← Precedente</button>
+  <div class="pinfo">
+    <div class="pbar"><div class="pfill" id="pfill" style="width:14.3%"></div></div>
+    <span id="ptxt">Passo 1 di 7</span>
+  </div>
+  <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
+</div>
+
+<script>
+/* ---------- navigazione ---------- */
+let cur = 0;
+const TOT = 7;
+
+function goTo(idx) {
+  document.getElementById('panel-' + cur).classList.remove('active');
+  const tabs = document.querySelectorAll('.step-tab');
+  tabs[cur].classList.remove('active');
+  cur = idx;
+  document.getElementById('panel-' + cur).classList.add('active');
+  tabs.forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i < cur) t.classList.add('done');
+    if (i === cur) t.classList.add('active');
+  });
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === TOT - 1;
+  document.getElementById('ptxt').textContent = 'Passo ' + (cur + 1) + ' di ' + TOT;
+  document.getElementById('pfill').style.width = ((cur + 1) / TOT * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById('panel-' + cur)]);
+  if (cur === 3) draw();
+}
+function nav(dir) { goTo(Math.max(0, Math.min(TOT - 1, cur + dir))); }
+document.getElementById('btn-prev').disabled = true;
+
+/* ---------- simulazione interattiva ---------- */
+// quantili empirici di churn_days_after_renewal / 365, dal sample reale
+const D = [0.0,0.0,0.0,0.0411,0.0658,0.1096,0.126,0.1397,0.1616,0.1699,0.1973,0.2055,
+           0.2575,0.2603,0.2685,0.2932,0.3096,0.326,0.3671,0.3945,0.4055,0.4137,0.4466,
+           0.4685,0.5781,0.589,0.6082,0.6767,0.7014,0.726,0.737,0.7534,0.7699,0.8177,
+           0.8301,0.863,0.8904,0.8932,0.937,0.9644];
+const ED = D.reduce((a, b) => a + b, 0) / D.length;
+
+// costo atteso per una previsione q, dato p
+function lossMAE(q, p) {
+  let s = 0;
+  for (const d of D) s += Math.abs(d - q);
+  return (1 - p) * Math.abs(1 - q) + p * s / D.length;
+}
+function lossMSE(q, p) {
+  let s = 0;
+  for (const d of D) s += (d - q) * (d - q);
+  return (1 - p) * (1 - q) * (1 - q) + p * s / D.length;
+}
+const meanLF = (p) => (1 - p) + p * ED;
+
+function curveMin(fn, p) {
+  let bq = 0, bv = Infinity;
+  for (let i = 0; i <= 1000; i++) {
+    const q = i / 1000, v = fn(q, p);
+    if (v < bv) { bv = v; bq = q; }
+  }
+  return { q: bq, v: bv };
+}
+
+function plot(canvas, fn, p, colour, optQ) {
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 520, cssH = 300;
+  canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  const L = 46, R = 12, T = 14, B = 34;
+  const W = cssW - L - R, H = cssH - T - B;
+
+  // campiona la curva
+  const pts = [];
+  let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i <= 300; i++) {
+    const q = i / 300, v = fn(q, p);
+    pts.push([q, v]); if (v < lo) lo = v; if (v > hi) hi = v;
+  }
+  const pad = (hi - lo) * 0.12 || 0.01;
+  lo -= pad; hi += pad;
+  const X = (q) => L + q * W;
+  const Y = (v) => T + H - (v - lo) / (hi - lo) * H;
+
+  // griglia
+  ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+  ctx.font = '10px "DM Mono", monospace'; ctx.fillStyle = '#9ca3af';
+  for (let i = 0; i <= 5; i++) {
+    const q = i / 5;
+    ctx.beginPath(); ctx.moveTo(X(q), T); ctx.lineTo(X(q), T + H); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.fillText(q.toFixed(1), X(q), T + H + 16);
+  }
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const v = lo + (hi - lo) * i / 4;
+    ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(L + W, Y(v)); ctx.stroke();
+    ctx.fillText(v.toFixed(3), L - 7, Y(v) + 3);
+  }
+  ctx.fillStyle = '#6b7280'; ctx.font = '10px "DM Sans", sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText('previsione q', L + W / 2, cssH - 4);
+
+  // curva
+  ctx.strokeStyle = colour; ctx.lineWidth = 2.4; ctx.beginPath();
+  pts.forEach(([q, v], i) => i ? ctx.lineTo(X(q), Y(v)) : ctx.moveTo(X(q), Y(v)));
+  ctx.stroke();
+
+  // minimo
+  const vOpt = fn(optQ, p);
+  ctx.strokeStyle = colour; ctx.lineWidth = 1.2; ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(X(optQ), T); ctx.lineTo(X(optQ), Y(vOpt)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = colour; ctx.beginPath(); ctx.arc(X(optQ), Y(vOpt), 5, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(X(optQ), Y(vOpt), 2, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = colour; ctx.font = '700 11px "DM Mono", monospace';
+  ctx.textAlign = optQ > 0.82 ? 'right' : 'left';
+  ctx.fillText('q* = ' + optQ.toFixed(3), X(optQ) + (optQ > 0.82 ? -8 : 8), T + 14);
+}
+
+function draw() {
+  const p = +document.getElementById('pslider').value / 100;
+  document.getElementById('pout').textContent = Math.round(p * 100) + '%';
+
+  const mMin = curveMin(lossMAE, p);
+  const sMin = curveMin(lossMSE, p);
+
+  document.getElementById('maeopt').textContent = mMin.q.toFixed(3);
+  document.getElementById('mseopt').textContent = sMin.q.toFixed(3);
+
+  document.getElementById('maenote').innerHTML = (p < 0.5)
+    ? 'Incollata a 1. La maggioranza non esce, e il MAE conta i casi: nessun segnale sul churn la sposta.'
+    : '<strong>Ora si è staccata</strong> — ma solo perché più della metà del segmento disdice, cosa che nel portafoglio reale non accade mai.';
+  document.getElementById('msenote').innerHTML =
+    'Si muove con continuità: vale esattamente $1-p(1-\\mathbb{E}[d])$ = ' + meanLF(p).toFixed(3) + '.';
+
+  plot(document.getElementById('cmae'), lossMAE, p, '#dc2626', mMin.q);
+  plot(document.getElementById('cmse'), lossMSE, p, '#059669', sMin.q);
+
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById('msenote')]);
+}
+
+document.getElementById('pslider').addEventListener('input', draw);
+window.addEventListener('resize', () => { if (cur === 3) draw(); });
+window.addEventListener('load', () => {
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+  draw();
+});
+</script>
+</body>
+</html>
