@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Come funziona il watermark testuale di Claude — Datapizza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f8fa;
+  --white: #ffffff;
+  --navy: #0d1b2a;
+  --navy2: #1a2e42;
+  --accent-red: #e8412a;
+  --accent-orange: #f5a623;
+  --accent-blue: #2563eb;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --border2: #d1d5db;
+  --grid-color: #e5e7eb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events:none;
+  z-index:0;
+}
+body > * { position:relative; z-index:1; }
+
+nav {
+  background:var(--white); border-bottom:1px solid var(--border);
+  padding:0 48px; height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+}
+.logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:18px; color:var(--navy); text-decoration:none; }
+.logo svg { width:26px; height:26px; display:block; }
+.nav-meta { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; }
+
+.btn-blue { background:var(--accent-blue); color:#fff; border:none; padding:14px 28px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-blue:hover { background:#1d4ed8; transform:translateY(-1px); }
+.btn-blue:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+.btn-dark { background:var(--navy); color:#fff; border:none; padding:14px 28px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-dark:hover { background:var(--navy2); transform:translateY(-1px); }
+.btn-dark:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+
+.step-nav { background:var(--white); border-top:1px solid var(--border); border-bottom:1px solid var(--border); display:flex; overflow-x:auto; scrollbar-width:none; padding:0 48px; position:sticky; top:64px; z-index:98; }
+.step-nav::-webkit-scrollbar { display:none; }
+.step-tab { padding:16px 18px; white-space:nowrap; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; gap:8px; border:none; background:none; font-family:'DM Sans',sans-serif; flex-shrink:0; }
+.step-tab:hover { color:var(--navy); }
+.step-tab.active { color:var(--accent-red); border-bottom:2px solid var(--accent-red); }
+.step-tab.done { color:var(--navy); }
+.snum { background:var(--bg); border:1px solid var(--border2); border-radius:5px; width:20px; height:20px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; color:var(--muted); flex-shrink:0; }
+.step-tab.active .snum { background:var(--accent-red); color:#fff; border-color:var(--accent-red); }
+.step-tab.done .snum { background:var(--navy); color:#fff; border-color:var(--navy); }
+
+.main { max-width:1100px; margin:0 auto; padding:48px 48px 80px; }
+
+.sh { margin-bottom:32px; display:flex; align-items:flex-start; gap:16px; }
+.badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; margin-top:6px; flex-shrink:0; }
+.b-r  { background:#fee2e2; color:#dc2626; }
+.b-g  { background:#d1fae5; color:#059669; }
+.b-o  { background:#fef3c7; color:#d97706; }
+.b-bl { background:#dbeafe; color:#2563eb; }
+.b-p  { background:#f3e8ff; color:#7c3aed; }
+.b-n  { background:var(--bg); color:var(--muted); border:1px solid var(--border2); }
+.sh h2 { font-size:clamp(22px,3vw,36px); font-weight:900; letter-spacing:-.5px; line-height:1.1; }
+.sh h2 .cr { color:var(--accent-red); }
+.sh h2 .cg { color:#059669; }
+.sh h2 .co { color:#d97706; }
+.sh h2 .cb { color:var(--accent-blue); }
+
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid1 { margin-bottom:18px; }
+
+.card { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:24px 26px; transition:box-shadow .2s; }
+.card:hover { box-shadow:0 4px 24px rgba(13,27,42,.07); }
+.card.bl-r { border-left:3px solid var(--accent-red); }
+.card.bl-g { border-left:3px solid #059669; }
+.card.bl-o { border-left:3px solid #d97706; }
+.card.bl-b { border-left:3px solid var(--accent-blue); }
+.card.hl-r { background:#fff8f7; border-color:#fecaca; }
+.card.hl-g { background:#f0fdf4; border-color:#bbf7d0; }
+.card.hl-o { background:#fffbeb; border-color:#fde68a; }
+.card.hl-b { background:#eff6ff; border-color:#bfdbfe; }
+.ctag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px; color:var(--muted); }
+.ctag.r { color:var(--accent-red); }
+.ctag.g { color:#059669; }
+.ctag.o { color:#d97706; }
+.ctag.b { color:var(--accent-blue); }
+.card h3 { font-size:15px; font-weight:800; margin-bottom:9px; color:var(--navy); line-height:1.3; }
+.card p { font-size:13px; color:var(--muted); line-height:1.75; }
+.card p + p { margin-top:10px; }
+.card p strong { color:var(--navy); font-weight:700; }
+
+.prose { max-width:760px; margin:0 0 26px; }
+.prose p { font-size:15.5px; line-height:1.85; color:#374151; margin-bottom:16px; }
+.prose p strong { color:var(--navy); font-weight:700; }
+.prose h3 { font-size:18px; font-weight:800; color:var(--navy); margin:30px 0 12px; letter-spacing:-.2px; }
+.prose em { font-style:italic; color:var(--navy); }
+.mono { font-family:'DM Mono',monospace; font-size:14px; background:#eef1f5; border:1px solid var(--border); border-radius:5px; padding:1px 6px; }
+
+.codebox { background:var(--navy); border-radius:10px; padding:16px 20px; margin-top:14px; color:#e2e8f0; font-family:'DM Mono',monospace; font-size:12.5px; line-height:2; overflow-x:auto; }
+.codebox .cr { color:#f87171; font-weight:700; }
+.codebox .cg { color:#6ee7b7; font-weight:700; }
+.codebox .co { color:#fcd34d; font-weight:700; }
+.codebox .cb { color:#93c5fd; font-weight:700; }
+.codebox .cm { color:#475569; font-style:italic; font-size:11px; }
+.codebox .op { color:#94a3b8; }
+
+.darkcard { background:var(--navy); border-radius:14px; padding:30px 36px; margin-bottom:18px; color:#e2e8f0; }
+.darkcard .dtag { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#64748b; margin-bottom:20px; }
+.drow { display:flex; align-items:center; gap:18px; padding:13px 0; border-bottom:1px solid rgba(255,255,255,.06); flex-wrap:wrap; }
+.drow:last-child { border-bottom:none; }
+.dchip { font-size:10px; font-weight:700; padding:3px 10px; border-radius:4px; text-transform:uppercase; letter-spacing:.07em; width:96px; text-align:center; flex-shrink:0; }
+.dc-r { background:rgba(248,113,113,.15); color:#f87171; }
+.dc-g { background:rgba(110,231,183,.15); color:#6ee7b7; }
+.dc-o { background:rgba(252,211,77,.15); color:#fcd34d; }
+.dc-b { background:rgba(147,197,253,.15); color:#93c5fd; }
+.deq { flex:1; font-size:14px; color:#f1f5f9; min-width:220px; line-height:1.6; }
+.dnote { font-size:11px; color:#64748b; font-style:italic; width:190px; flex-shrink:0; text-align:right; line-height:1.5; }
+
+.flow { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:22px 26px; margin-bottom:18px; overflow-x:auto; }
+.ftag { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
+.frow { display:flex; align-items:center; gap:6px; min-width:max-content; }
+.fnode { background:var(--bg); border:1px solid var(--border2); border-radius:8px; padding:8px 13px; font-size:12px; font-family:'DM Mono',monospace; text-align:center; line-height:1.4; }
+.fnode .fnl { color:var(--muted); font-size:9px; display:block; margin-bottom:2px; font-family:'DM Sans',sans-serif; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+.fnode .fnv { color:var(--navy); font-weight:700; font-size:13px; }
+.fn-r { background:#fff8f7; border-color:#fca5a5; }
+.fn-g { background:#f0fdf4; border-color:#86efac; }
+.fn-o { background:#fffbeb; border-color:#fcd34d; }
+.fn-b { background:#eff6ff; border-color:#93c5fd; }
+.farr { color:var(--border2); font-size:18px; flex-shrink:0; }
+.fop { width:28px; height:28px; border-radius:50%; border:1.5px solid var(--border2); background:var(--white); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--navy); flex-shrink:0; }
+.fop.r { border-color:#fca5a5; color:var(--accent-red); }
+.fop.g { border-color:#86efac; color:#059669; }
+
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-right:3px; }
+.tg-r { background:#fee2e2; color:#dc2626; }
+.tg-g { background:#d1fae5; color:#059669; }
+.tg-o { background:#fef3c7; color:#d97706; }
+.tg-b { background:#dbeafe; color:#2563eb; }
+
+.tcard { background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:18px; }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+thead th { background:var(--bg); padding:12px 20px; text-align:left; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+tbody td { padding:13px 20px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:top; line-height:1.6; }
+tbody td:first-child { color:var(--navy); font-weight:700; font-size:13px; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:var(--bg); }
+
+.bnav { background:var(--white); border-top:1px solid var(--border); padding:18px 48px; display:flex; align-items:center; justify-content:space-between; position:sticky; bottom:0; z-index:99; }
+.pinfo { font-size:13px; color:var(--muted); font-weight:500; display:flex; align-items:center; gap:12px; }
+.pbar { width:120px; height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
+.pfill { height:100%; background:var(--accent-red); border-radius:99px; transition:width .3s; }
+
+.panel { display:none; }
+.panel.active { display:block; animation:fadeUp .3s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+.src { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; border-top:1px solid var(--border); padding-top:18px; margin-top:34px; line-height:1.8; }
+.src a { color:var(--accent-blue); text-decoration:none; }
+.src a:hover { text-decoration:underline; }
+
+@media(max-width:800px){
+  nav, .step-nav, .main, .bnav { padding-left:20px; padding-right:20px; }
+  .grid2, .grid3 { grid-template-columns:1fr; }
+  .dnote { display:none; }
+  .darkcard { padding:22px 18px; }
+  .nav-meta { display:none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">
+    <svg width="210" height="210" viewBox="0 0 210 210" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M127.24 107.052L117.61 79.7398C117.243 78.6967 117.737 77.5226 118.747 77.0665C120.457 76.2894 122.197 75.5588 123.962 74.8788C124.195 74.7902 124.418 74.6972 124.651 74.6128C126.18 74.0384 127.721 73.5063 129.267 73.0164C130.331 72.6785 131.459 73.2487 131.83 74.3003L160.042 154.319L166.296 172.061C166.922 173.83 165.11 175.516 163.425 174.73L15.8926 105.937C14.8748 105.464 14.4229 104.256 14.8664 103.2C15.597 101.452 16.3657 99.7075 17.1681 97.9718C17.2737 97.7395 17.375 97.5072 17.4848 97.2707C18.4731 95.1464 19.512 93.0601 20.5805 91.0033C23.0004 86.3535 25.6231 81.8684 28.4316 77.5564C29.8675 75.3561 31.3541 73.2022 32.8829 71.0906C34.4329 68.9536 36.0293 66.8715 37.6721 64.8274C53.6826 44.94 73.9882 29.6686 96.4814 19.8114C98.8126 18.7936 101.161 17.8265 103.534 16.9269C105.266 16.2681 107.01 15.6388 108.763 15.0391C109.84 14.6717 111.001 15.2334 111.381 16.3061L115.82 28.8873L120.938 43.4027L125.314 55.8234C125.715 56.9552 125.09 58.2095 123.95 58.5812C122.476 59.0627 121.006 59.5737 119.541 60.1227C119.308 60.2114 119.089 60.3043 118.856 60.3888C116.47 61.301 114.126 62.2935 111.833 63.3577C97.2711 70.1277 84.5337 79.9426 74.326 92.1436C73.0928 93.6176 71.8934 95.1295 70.7362 96.671C70.0352 97.6044 68.7386 97.8071 67.8179 97.1229L58.9617 90.5219C58.0326 89.8293 57.8468 88.4863 58.5563 87.5403C59.705 86.0072 60.8875 84.5079 62.0996 83.034C73.7221 68.9029 88.2797 57.5211 104.957 49.6447C105.95 49.1759 106.427 48.0188 106.064 46.9883L102.348 36.4469C101.938 35.2898 100.637 34.745 99.5221 35.2602C80.1288 44.2558 63.2399 57.4536 49.8732 73.9159C48.2219 75.9473 46.617 78.0336 45.0755 80.1664C43.5467 82.2865 42.077 84.453 40.6538 86.6618C38.8251 89.5125 37.0851 92.4308 35.4465 95.4251C34.8552 96.5063 35.2817 97.8535 36.3756 98.3645L136.89 145.235C138.575 146.02 140.387 144.335 139.762 142.565L138.968 140.314L127.235 107.043L127.24 107.052Z" fill="#D7342B"/></svg>
+    Datapizza
+  </a>
+  <span class="nav-meta">Anthropic · 14 agosto 2026</span>
+</nav>
+
+<div class="step-nav">
+  <button class="step-tab active" onclick="goTo(0)"><span class="snum">0</span> In sintesi</button>
+  <button class="step-tab" onclick="goTo(1)"><span class="snum">1</span> Cos'è un watermark</button>
+  <button class="step-tab" onclick="goTo(2)"><span class="snum">2</span> L'analogia del Monopoli</button>
+  <button class="step-tab" onclick="goTo(3)"><span class="snum">3</span> Il metodo e i suoi limiti</button>
+  <button class="step-tab" onclick="goTo(4)"><span class="snum">4</span> Codice, correzioni, traduzioni</button>
+  <button class="step-tab" onclick="goTo(5)"><span class="snum">5</span> Cosa cambia per chi usa Claude</button>
+  <button class="step-tab" onclick="goTo(6)"><span class="snum">6</span> Perché adesso</button>
+  <button class="step-tab" onclick="goTo(7)"><span class="snum">7</span> Domande sparse</button>
+</div>
+
+<div class="main">
+
+<!-- ============ 0 ============ -->
+<div class="panel active" id="panel-0">
+  <div class="sh">
+    <span class="badge b-r">Annuncio</span>
+    <h2>Il testo di Claude avrà una <span class="cr">filigrana</span> invisibile</h2>
+  </div>
+
+  <div class="prose">
+    <p>I prossimi modelli Claude produrranno testo con un watermark incorporato. Serve a stimare quanto è probabile che Claude abbia messo mano a un certo scritto, e Anthropic lo introduce insieme ad altri grandi fornitori di modelli per adeguarsi all'AI Act europeo.</p>
+    <p>L'articolo originale raccoglie le domande arrivate in queste settimane, e in fondo ruota tutto attorno a un equivoco ricorrente: la parola <em>filigrana</em> evoca qualcosa di visibile, come sulle banconote, mentre qui non c'è nulla da guardare. Prima di entrare nel merito conviene mettere in fila i punti fermi.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card bl-g">
+      <div class="ctag g">Qualità</div>
+      <h3>Nessun impatto pratico sull'output</h3>
+      <p>Il metodo scelto non intacca né la qualità né il contenuto di ciò che Claude scrive. Per chi legge, un testo con watermark e uno senza sono indistinguibili.</p>
+    </div>
+    <div class="card bl-g">
+      <div class="ctag g">Meccanica</div>
+      <h3>Non viene aggiunto nulla al testo</h3>
+      <p>Nessun carattere nascosto, nessuna sequenza infilata di soppiatto tra le parole. Cambia solo il modo in cui il modello decide fra alternative equivalenti.</p>
+    </div>
+    <div class="card bl-b">
+      <div class="ctag b">Costi</div>
+      <h3>Stessa velocità, stesso prezzo</h3>
+      <p>Il watermark non richiede token aggiuntivi, quindi il modello costa uguale da servire e da usare, con un impatto trascurabile sulla latenza.</p>
+    </div>
+    <div class="card bl-b">
+      <div class="ctag b">Privacy</div>
+      <h3>Non porta con sé alcuna identità</h3>
+      <p>Non contiene informazioni riconducibili a una persona, a un'organizzazione o a una singola conversazione. Dice qualcosa su Claude, non su chi lo usa.</p>
+    </div>
+  </div>
+
+  <div class="darkcard">
+    <div class="dtag">// il quadro normativo in tre righe</div>
+    <div class="drow">
+      <span class="dchip dc-r">2 agosto</span>
+      <span class="deq">Da questa data l'Unione Europea chiede ai fornitori di AI che servono il suo mercato di marcare i contenuti generati.</span>
+      <span class="dnote">obbligo di marcatura</span>
+    </div>
+    <div class="drow">
+      <span class="dchip dc-o">Non solo Claude</span>
+      <span class="deq">Gli altri principali sviluppatori di modelli hanno firmato lo stesso Codice di condotta e stanno implementando i propri watermark.</span>
+      <span class="dnote">circa 190 firmatari</span>
+    </div>
+    <div class="drow">
+      <span class="dchip dc-b">Portata</span>
+      <span class="deq">Al lancio la marcatura viene applicata ovunque, perché al momento manca un modo stabile di limitarla per area geografica.</span>
+      <span class="dnote">approccio in revisione</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 1 ============ -->
+<div class="panel" id="panel-1">
+  <div class="sh">
+    <span class="badge b-bl">Meccanismo</span>
+    <h2>Cambia la <span class="cb">sorgente</span> del caso, non le parole</h2>
+  </div>
+
+  <div class="prose">
+    <p>Facciamo un passo indietro e guardiamo come lavora un modello linguistico. Claude genera una parola alla volta, e a ogni passo sceglie fra una rosa di candidati quello che regge meglio rispetto al testo che precede.</p>
+    <p>Prendi una frase come <span class="mono">"Il tempo oggi era freddo e..."</span>. La parola dopo difficilmente sarà <em>zuccherina</em>, mentre <em>nuvoloso</em> o <em>grigio</em> sono entrambe plausibili. Per chi legge, quale delle due esca cambia poco o nulla: il senso resta quello. In situazioni così la partita si chiude con un numero casuale.</p>
+    <p>Il watermark si annida esattamente lì, nelle scelte a bassa posta che in un testo lungo ricorrono centinaia di volte, e vi lascia un motivo ricorrente. Invisibile a chi legge, ma leggibile da chi possiede la chiave che lo codifica.</p>
+    <p><strong>La differenza sta tutta nell'origine della casualità.</strong> Invece di affidarsi a un generatore di numeri casuali qualunque, il sistema usa la chiave insieme alle parole immediatamente precedenti per stabilire quale candidato pescare. Le parole restano casuali, ma diventa possibile ripercorrere la sequenza e verificare se combacia con le decisioni che Claude avrebbe preso usando quella chiave. Se combacia, si può assegnare una probabilità.</p>
+  </div>
+
+  <div class="flow">
+    <div class="ftag">Dove si annida il watermark</div>
+    <div class="frow">
+      <div class="fnode fn-b"><span class="fnl">contesto</span><span class="fnv">"freddo e..."</span></div>
+      <span class="farr">→</span>
+      <div class="fnode"><span class="fnl">candidati</span><span class="fnv">nuvoloso / grigio</span></div>
+      <span class="farr">→</span>
+      <div class="fop r">⊙</div>
+      <span class="farr">→</span>
+      <div class="fnode fn-o"><span class="fnl">sorgente casuale</span><span class="fnv">chiave + parole precedenti</span></div>
+      <span class="farr">→</span>
+      <div class="fnode fn-r"><span class="fnl">output</span><span class="fnv">motivo verificabile</span></div>
+    </div>
+  </div>
+
+  <div class="card bl-o hl-o">
+    <div class="ctag o">Attenzione all'equivoco</div>
+    <h3>Il modello non viene sbilanciato verso certe parole</h3>
+    <p>Non è che d'ora in poi Claude preferirà sempre <em>nuvoloso</em> a <em>grigio</em>. Come in un testo non marcato, in una frase uscirà l'una e in quella dopo l'altra, a seconda di ciò che viene prima. E soprattutto il metodo non spinge il modello verso parole che non avrebbe comunque preso in considerazione: nessuna svolta improvvisa verso sinonimi ricercati che nessuno userebbe in circostanze normali.</p>
+  </div>
+</div>
+
+<!-- ============ 2 ============ -->
+<div class="panel" id="panel-2">
+  <div class="sh">
+    <span class="badge b-o">Analogia</span>
+    <h2>I dadi del <span class="co">Monopoli</span> e le cifre di pi greco</h2>
+  </div>
+
+  <div class="prose">
+    <p>Per capirci, prendiamo un esempio semplice. Immagina una partita a Monopoli: a ogni turno ciascun giocatore avanza di un numero di caselle deciso dal lancio del dado.</p>
+    <p>Adesso sostituiamo il dado con un libro che riporta le cifre decimali di pi greco. Si parte da una posizione scelta a caso nella sequenza, poniamo la milionesima cifra dopo la virgola, e da lì in avanti ogni giocatore usa semplicemente la cifra successiva come proprio tiro.</p>
+    <p>A tutti gli effetti pratici le mosse restano casuali. Per chi gioca, e per come finisce la partita, non fa differenza se la casualità arrivi da pi greco o dai dadi. Però se dopo la fine potessimo osservare l'intera sequenza delle mosse, e conoscessimo il valore di pi greco, riusciremmo a stabilire che quella partita ha usato pi greco per muoversi. Quella partita, in un certo senso, è marcata.</p>
+    <p>Con il testo di Claude funziona allo stesso modo. L'esperienza di lettura non cambia di una virgola, ma se in un secondo momento vuoi controllare se quel testo sia stato prodotto dal modello, la filigrana te lo permette.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card bl-r">
+      <div class="ctag r">Verifica sperimentale</div>
+      <h3>Cosa dice il paper SynthID-Text</h3>
+      <p>Google DeepMind ha servito una versione con watermark a una porzione del traffico di Gemini, confrontando poi i giudizi positivi e negativi degli utenti. Nessuna differenza statisticamente significativa rispetto al modello non marcato.</p>
+    </div>
+    <div class="card bl-r">
+      <div class="ctag r">Valutazione umana</div>
+      <h3>Confronto affiancato</h3>
+      <p>In uno studio controllato, valutatori umani hanno messo a confronto risposte marcate e non marcate una accanto all'altra, senza rilevare scarti di qualità. I test interni di Anthropic non hanno mostrato effetti su contenuto, creatività o leggibilità.</p>
+    </div>
+  </div>
+
+  <div class="card bl-b hl-b">
+    <div class="ctag b">Una precisazione sul nome</div>
+    <h3>Poco a che vedere con la filigrana delle banconote</h3>
+    <p>Le filigrane su banconote, oggetti fisici e certi documenti digitali si vedono a occhio nudo, ed è proprio quello il loro scopo. Qui l'omonimia è fuorviante: il watermark testuale è progettato per non lasciare traccia percepibile.</p>
+  </div>
+</div>
+
+<!-- ============ 3 ============ -->
+<div class="panel" id="panel-3">
+  <div class="sh">
+    <span class="badge b-p">Metodo</span>
+    <h2>Da dove arriva e <span class="cr">dove si ferma</span></h2>
+  </div>
+
+  <div class="prose">
+    <p>La filigrana di Claude è una variante dell'approccio SynthID-Text pubblicato da Google DeepMind su <em>Nature</em> nel 2024. Appartiene a una famiglia di tecniche che risale a una proposta di Scott Aaronson del 2022, tutte fondate sullo stesso principio di fondo: l'unica cosa che cambia è la sorgente della casualità con cui si sceglie fra le parole.</p>
+    <p>Fin qui tutto bene. Però il quadro si fa più ruvido appena si guarda a cosa questo strumento può e non può dire.</p>
+  </div>
+
+  <div class="tcard">
+    <table>
+      <thead><tr><th>Domanda</th><th>Risposta della filigrana</th></tr></thead>
+      <tbody>
+        <tr><td>È stato scritto in parte da Claude?</td><td>Sì, con una probabilità stimata usando la chiave. È l'unica domanda a cui il metodo risponde davvero.</td></tr>
+        <tr><td>È stato scritto da un umano?</td><td>Non lo conferma. L'assenza di filigrana non equivale a una firma umana.</td></tr>
+        <tr><td>È stato scritto da un'altra AI?</td><td>Non lo rileva. Anche se quell'altro modello usasse una marcatura, avrebbe una chiave diversa, e forse un metodo del tutto differente.</td></tr>
+        <tr><td>Funziona su un testo breve?</td><td>Male. Poche scelte lessicali significano poca informazione su cui lavorare. Più il passaggio si allunga, più cresce la confidenza.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <h3>I passaggi fattuali sono terreno arido</h3>
+    <p>Dove il testo deve essere esatto la filigrana ha poco margine di manovra, perché non esistono alternative equivalenti fra cui pescare. Se la frase è <span class="mono">"L'opera più celebre di Isaac Newton si intitola Principia..."</span>, la parola dopo conta eccome: c'è una sola risposta giusta, e il watermark rimane a mani vuote.</p>
+    <p>Ed è qui che casca l'asino anche per la correzione di bozze. Se consegni a Claude un testo tuo chiedendogli di sistemare solo grammatica e punteggiatura, la marcatura può vivere soltanto in quella manciata di interventi, spesso troppo pochi per lasciare un segnale leggibile.</p>
+  </div>
+</div>
+
+<!-- ============ 4 ============ -->
+<div class="panel" id="panel-4">
+  <div class="sh">
+    <span class="badge b-g">Casi d'uso</span>
+    <h2>Revisioni, <span class="cg">codice</span> e traduzioni</h2>
+  </div>
+
+  <div class="prose">
+    <p>La regola operativa è una sola, e da lì discende tutto il resto: <strong>la filigrana riguarda soltanto le parole scelte da Claude.</strong> Più il modello scrive, più decisioni deve prendere, più spazio c'è perché la marcatura attecchisca.</p>
+  </div>
+
+  <div class="grid3">
+    <div class="card bl-o">
+      <div class="ctag o">Proofreading</div>
+      <h3>Testo umano rivisto</h3>
+      <p>Quando Claude corregge uno scritto altrui, quasi tutte le parole restano dell'autore e resta pochissimo a cui agganciarsi. A seconda della lunghezza e della profondità dell'intervento, quelle modifiche possono non bastare a rendere rilevabile il passaggio del modello.</p>
+    </div>
+    <div class="card bl-b">
+      <div class="ctag b">Codice</div>
+      <h3>Dove serve precisione, niente marcatura</h3>
+      <p>La tecnica sfrutta i bivi in cui entrambe le strade sono ugualmente buone. Dove invece l'output deve essere esatto, e una scelta diversa produrrebbe un errore o un programma che si rompe, la spinta non viene applicata. Il codice, che spesso non ammette varianti, ne riceve quindi molto meno di altri testi.</p>
+      <div class="codebox">
+        <span class="cm">// nessun margine di scelta</span><br>
+        <span class="cb">2 + 2 =</span> <span class="cg">4</span> <span class="op">← unica risposta sensata</span><br>
+        <span class="cm">// a meno che non si stia parlando di Orwell</span><br>
+        <span class="cb">2 + 2 =</span> <span class="cr">5</span> <span class="op">← in 1984, altrettanto obbligata</span>
+      </div>
+    </div>
+    <div class="card bl-g">
+      <div class="ctag g">Traduzioni</div>
+      <h3>Marcate, e in pieno</h3>
+      <p>Una traduzione prodotta da Claude porta la filigrana, perché in quel caso ogni singola parola dell'output è scelta dal modello. È il caso opposto alla correzione di bozze.</p>
+    </div>
+  </div>
+
+  <div class="card bl-b hl-b">
+    <div class="ctag b">Sfumatura sul codice</div>
+    <h3>I commenti restano un appiglio</h3>
+    <p>Nei punti in cui esiste una scelta arbitraria fra termini equivalenti dentro il codice, per esempio nei commenti, la marcatura può comunque insediarsi. Sul programma vero e proprio, però, l'effetto rimane per definizione irrilevante.</p>
+  </div>
+</div>
+
+<!-- ============ 5 ============ -->
+<div class="panel" id="panel-5">
+  <div class="sh">
+    <span class="badge b-bl">Utenti</span>
+    <h2>Cosa cambia <span class="cb">per chi lavora</span> con Claude</h2>
+  </div>
+
+  <div class="grid2">
+    <div class="card bl-g hl-g">
+      <div class="ctag g">Prestazioni</div>
+      <h3>Rallenta o costa di più?</h3>
+      <p>No. L'impatto sulla velocità è trascurabile e, non producendo token aggiuntivi, il modello mantiene lo stesso prezzo sia per chi lo eroga sia per chi lo consuma.</p>
+    </div>
+    <div class="card bl-g hl-g">
+      <div class="ctag g">Tracciabilità</div>
+      <h3>Può risalire a me o alla mia azienda?</h3>
+      <p>No. La marcatura riguarda Claude e i suoi output, non identifica nulla che abbia a che fare con il singolo utente. Né nella filigrana né nella chiave c'è qualcosa che permetta di recuperare informazioni su una persona, sulla sua organizzazione o sulle sue conversazioni.</p>
+    </div>
+    <div class="card bl-o">
+      <div class="ctag o">Diritti</div>
+      <h3>Cambia la proprietà dell'output o la responsabilità legale?</h3>
+      <p>No. La filigrana aiuta soltanto a verificare se Claude possa aver prodotto o processato quel contenuto. Non dice nulla su titolarità o paternità dell'opera e non modifica i diritti previsti dai termini di servizio. Viene applicata solo quando il modello è stato coinvolto nella lavorazione.</p>
+    </div>
+    <div class="card bl-o">
+      <div class="ctag o">Che valore ha una verifica</div>
+      <h3>Cosa dimostra concretamente</h3>
+      <p>Solo che Claude è stato probabilmente coinvolto a un certo punto. Non distingue fra "Claude ha scritto questo" e "Claude ha rimaneggiato pesantemente questo". La sfumatura pesa parecchio, per esempio in ambito scolastico o editoriale.</p>
+    </div>
+  </div>
+
+  <div class="darkcard">
+    <div class="dtag">// come leggere un esito di verifica</div>
+    <div class="drow">
+      <span class="dchip dc-g">Positivo</span>
+      <span class="deq">Il testo mostra un motivo compatibile con la chiave: alta probabilità che Claude abbia scritto o riscritto buona parte di quelle parole.</span>
+      <span class="dnote">indizio forte, non prova di paternità</span>
+    </div>
+    <div class="drow">
+      <span class="dchip dc-o">Negativo</span>
+      <span class="deq">Nessun motivo rilevato. Può voler dire scrittura umana, altro modello, testo troppo breve, contenuto fattuale, oppure revisione leggera.</span>
+      <span class="dnote">assenza di prova, non prova di assenza</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 6 ============ -->
+<div class="panel" id="panel-6">
+  <div class="sh">
+    <span class="badge b-r">Regolamentazione</span>
+    <h2>Perché <span class="cr">adesso</span>, e perché tutti insieme</h2>
+  </div>
+
+  <div class="prose">
+    <p>La spinta non arriva da una scelta di prodotto ma dall'AI Act europeo. Nel luglio 2026 Anthropic ha firmato, insieme ad altri grandi fornitori di modelli e a circa 190 firmatari complessivi, il Codice di condotta europeo sulla trasparenza dei contenuti generati da AI. Il testo impone ai fornitori di sistemi di AI di adottare metodi di marcatura per il testo generato.</p>
+    <p>Da qui discende anche una scelta che potrebbe sorprendere chi vive fuori dall'Unione: la marcatura viene applicata a livello globale fin dal lancio, perché al momento non esiste un modo affidabile di circoscriverla per regione. Anthropic dichiara che continuerà a valutare approcci diversi e che condividerà aggiornamenti quando ne avrà.</p>
+    <h3>E i modelli usciti prima?</h3>
+    <p>La normativa europea prevede un periodo transitorio per i modelli lanciati prima del 2 agosto 2026. Anche su quelli è in corso il lavoro per aggiungere la filigrana, con un rilascio distribuito nei prossimi mesi.</p>
+  </div>
+
+  <div class="card bl-r">
+    <div class="ctag r">Il punto che spesso sfugge</div>
+    <h3>Non è una funzionalità di Claude</h3>
+    <p>La marcatura non sarà una peculiarità di un singolo assistente. Gli altri principali sviluppatori hanno sottoscritto lo stesso Codice e stanno implementando i propri watermark, ciascuno con la propria chiave e potenzialmente con tecniche differenti. Il che, per inciso, spiega perché la verifica di un fornitore non possa dire nulla sui testi di un altro.</p>
+  </div>
+</div>
+
+<!-- ============ 7 ============ -->
+<div class="panel" id="panel-7">
+  <div class="sh">
+    <span class="badge b-n">FAQ</span>
+    <h2>Domande <span class="co">sparse</span></h2>
+  </div>
+
+  <div class="grid2">
+    <div class="card bl-b">
+      <div class="ctag b">Verifica</div>
+      <h3>Come faccio a controllare un testo?</h3>
+      <p>Anthropic offrirà a breve una API di rilevamento della filigrana. I dettagli implementativi sono ancora in fase di definizione.</p>
+    </div>
+    <div class="card bl-b">
+      <div class="ctag b">Immagini e file</div>
+      <h3>Per i file si usa un'altra strada</h3>
+      <p>Quando Claude produce un file di tipo supportato, per esempio <span class="mono">.png</span>, <span class="mono">.jpg</span> o <span class="mono">.svg</span>, allega una content credential: una piccola nota firmata crittograficamente nei metadati che dichiara che il file è stato creato o lavorato con Claude.</p>
+      <p>Si tratta dello standard aperto <strong>C2PA</strong>, lo stesso adottato dai produttori di fotocamere e dai software di fotoritocco per registrare la provenienza di un'immagine. Qualsiasi strumento compatibile può leggerlo, e Anthropic ne metterà a disposizione uno proprio in cui trascinare il file per la verifica.</p>
+    </div>
+    <div class="card bl-o">
+      <div class="ctag o">Differenza sostanziale</div>
+      <h3>Etichetta nei metadati contro filigrana</h3>
+      <p>La content credential non è un watermark. Nel file non cambia nulla, non c'è niente di incorporato né di nascosto nel contenuto. Come per il testo, dichiara solo il coinvolgimento di Claude senza portare informazioni identificative.</p>
+    </div>
+    <div class="card bl-r">
+      <div class="ctag r">Aggiramento</div>
+      <h3>Basta modificare il testo per liberarsene?</h3>
+      <p>In parte sì. Un intervento leggero difficilmente cancella del tutto la filigrana, una riscrittura integrale in cui ogni parola viene sostituita invece sì. Nel secondo caso, però, resta discutibile che quel testo possa ancora dirsi generato da un'AI.</p>
+    </div>
+  </div>
+
+  <div class="card bl-g">
+    <div class="ctag g">Confronto</div>
+    <h3>Che differenza c'è con i rilevatori di AI tipo Pangram?</h3>
+    <p>I software di detection lavorano in modo del tutto diverso, per la semplice ragione che le aziende che li offrono non possiedono la chiave. Fra le altre cose, quei servizi osservano le spie stilistiche che affiorano nel modo di scrivere dei modelli, alcune sottili e altre meno.</p>
+    <p>Anthropic ne cita due che fanno sorridere: i modelli sembrano affezionati alla costruzione <span class="mono">"this isn't X, it's Y"</span> e usano l'avverbio <span class="mono">quietly</span> molto più di quanto ci si aspetterebbe. Riconoscere questi tic è un'operazione di natura diversa dal controllare una filigrana.</p>
+  </div>
+
+  <div class="src">
+    Fonte: <a href="https://www.anthropic.com/news/claude-text-watermark" target="_blank">How Claude's text watermark works</a>, Anthropic, 14 agosto 2026.<br>
+    Riferimento tecnico: <a href="https://www.nature.com/articles/s41586-024-08025-4" target="_blank">SynthID-Text</a>, Google DeepMind, Nature, 2024.<br>
+    Codice di condotta UE: <a href="https://digital-strategy.ec.europa.eu/en/news/strong-backing-code-practice-transparency-ai-generated-content" target="_blank">Code of Practice on Transparency of AI-Generated Content</a>, Commissione Europea.<br>
+    Standard per i file: <a href="https://c2pa.org/" target="_blank">C2PA</a>.<br>
+    Resa in italiano rielaborata, non una traduzione letterale.
+  </div>
+</div>
+
+</div>
+
+<div class="bnav">
+  <button class="btn-dark" id="btn-prev" onclick="nav(-1)">← Precedente</button>
+  <div class="pinfo">
+    <div class="pbar"><div class="pfill" id="pfill" style="width:12.5%"></div></div>
+    <span id="ptxt">Passo 1 di 8</span>
+  </div>
+  <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
+</div>
+
+<script>
+let cur = 0;
+const TOT = 8;
+
+function goTo(idx) {
+  document.getElementById('panel-' + cur).classList.remove('active');
+  const tabs = document.querySelectorAll('.step-tab');
+  tabs[cur].classList.remove('active');
+  cur = idx;
+  document.getElementById('panel-' + cur).classList.add('active');
+  tabs.forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i < cur) t.classList.add('done');
+    if (i === cur) t.classList.add('active');
+  });
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === TOT - 1;
+  document.getElementById('ptxt').textContent = 'Passo ' + (cur + 1) + ' di ' + TOT;
+  document.getElementById('pfill').style.width = ((cur + 1) / TOT * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nav(dir) { goTo(Math.max(0, Math.min(TOT - 1, cur + dir))); }
+
+document.getElementById('btn-prev').disabled = true;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') nav(1);
+  if (e.key === 'ArrowLeft') nav(-1);
+});
+</script>
+</body>
+</html>
