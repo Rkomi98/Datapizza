@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tornare indietro con git, senza panico — Datapizza</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f8fa;
+  --white: #ffffff;
+  --navy: #0d1b2a;
+  --navy2: #1a2e42;
+  --accent-red: #e8412a;
+  --accent-orange: #f5a623;
+  --accent-blue: #2563eb;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --border2: #d1d5db;
+  --grid-color: #e5e7eb;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--navy);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events:none;
+  z-index:0;
+}
+body > * { position:relative; z-index:1; }
+
+nav {
+  background:var(--white); border-bottom:1px solid var(--border);
+  padding:0 48px; height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  gap:24px;
+}
+.logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; color:var(--navy); text-decoration:none; flex-shrink:0; }
+.logo svg { width:22px; height:22px; }
+.navlinks { display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; }
+.navlinks::-webkit-scrollbar { display:none; }
+.navlinks a { font-size:13px; font-weight:600; color:var(--muted); text-decoration:none; padding:8px 14px; border-radius:8px; white-space:nowrap; transition:all .15s; }
+.navlinks a:hover { color:var(--navy); background:var(--bg); }
+
+.main { max-width:1120px; margin:0 auto; padding:48px 48px 90px; }
+
+.intro { max-width:760px; margin:0 auto 56px; text-align:left; }
+.intro .eyebrow { display:inline-flex; align-items:center; gap:6px; background:var(--white); border:1px solid var(--border2); border-radius:20px; padding:6px 16px; font-size:11px; font-weight:700; color:var(--muted); margin-bottom:20px; letter-spacing:.06em; text-transform:uppercase; }
+.intro .eyebrow em { color:var(--accent-red); font-style:normal; }
+.intro h1 { font-size:clamp(28px,4vw,42px); font-weight:900; letter-spacing:-1px; line-height:1.12; margin-bottom:18px; }
+.intro h1 span { color:var(--accent-red); }
+.intro p { font-size:16px; color:var(--muted); line-height:1.75; margin-bottom:14px; }
+.intro p strong { color:var(--navy); font-weight:700; }
+
+section { margin-bottom:64px; scroll-margin-top:84px; }
+.sh { margin-bottom:26px; display:flex; align-items:flex-start; gap:16px; max-width:760px; }
+.badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; margin-top:6px; flex-shrink:0; }
+.b-r  { background:#fee2e2; color:#dc2626; }
+.b-g  { background:#d1fae5; color:#059669; }
+.b-o  { background:#fef3c7; color:#d97706; }
+.b-bl { background:#dbeafe; color:#2563eb; }
+.b-p  { background:#f3e8ff; color:#7c3aed; }
+.b-n  { background:var(--bg); color:var(--muted); border:1px solid var(--border2); }
+.sh h2 { font-size:clamp(20px,2.6vw,30px); font-weight:900; letter-spacing:-.5px; line-height:1.15; }
+.sh h2 .cr { color:var(--accent-red); }
+.sh p.dek { font-size:14.5px; color:var(--muted); line-height:1.7; max-width:640px; margin-top:6px; }
+
+/* DIAGRAMMA ZONE */
+.zones-wrap { background:var(--white); border:1px solid var(--border); border-radius:16px; padding:34px 30px 26px; overflow-x:auto; }
+.zones-row { display:flex; align-items:stretch; gap:0; min-width:920px; }
+.zone { flex:1; background:var(--bg); border:1.5px solid var(--border2); border-radius:12px; padding:18px 16px; text-align:center; }
+.zone .zn { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.zone h4 { font-size:14px; font-weight:800; margin-bottom:8px; line-height:1.3; }
+.zone p { font-size:11.5px; color:var(--muted); line-height:1.55; }
+.zone.z-remote { background:#fff8f7; border-color:#fecaca; }
+.connector { width:130px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:0 4px; }
+.connector .fwd { font-family:'DM Mono',monospace; font-size:10px; color:var(--border2); background:var(--white); border:1px dashed var(--border2); border-radius:6px; padding:3px 8px; }
+.connector .arrow-ic { font-size:20px; color:var(--border2); line-height:1; }
+.connector .bwd-stack { display:flex; flex-direction:column; gap:5px; align-items:center; }
+.connector .bwd { font-family:'DM Mono',monospace; font-size:10px; font-weight:700; border-radius:6px; padding:4px 9px; text-align:center; line-height:1.4; }
+.bwd.g { background:#d1fae5; color:#059669; }
+.bwd.o { background:#fef3c7; color:#d97706; }
+.bwd.bl { background:#dbeafe; color:#2563eb; }
+.pocket-row { display:flex; min-width:920px; margin-top:16px; gap:0; }
+.pocket-spacer { flex:2.13; flex-shrink:0; }
+.pocket { flex-shrink:0; width:260px; margin-left: -1px; }
+.pocket-inner { border:1.5px dashed var(--border2); border-radius:10px; padding:10px 14px; text-align:center; background:var(--white); }
+.pocket-inner .pk-lbl { font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.pocket-inner .pk-cmd { font-family:'DM Mono',monospace; font-size:11px; font-weight:700; color:#059669; margin-top:3px; }
+.reflog-note { background:var(--navy); color:#e2e8f0; border-radius:12px; padding:16px 22px; margin-top:20px; font-size:12.5px; line-height:1.7; display:flex; gap:12px; align-items:flex-start; }
+.reflog-note .rf-tag { font-family:'DM Mono',monospace; font-size:10px; font-weight:700; color:#93c5fd; background:rgba(147,197,253,.12); padding:3px 9px; border-radius:5px; flex-shrink:0; margin-top:1px; }
+
+/* BUSSOLA */
+.compass-hint { font-size:13px; color:var(--muted); margin-bottom:18px; max-width:640px; line-height:1.7; }
+.sit-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:24px; }
+.sit-card { background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:18px 18px; cursor:pointer; transition:all .15s; text-align:left; }
+.sit-card:hover { border-color:var(--border2); box-shadow:0 4px 18px rgba(13,27,42,.06); }
+.sit-card.selected { border-color:var(--accent-red); background:#fff8f7; }
+.sit-card .sq { font-size:13px; font-weight:700; color:var(--navy); line-height:1.4; margin-bottom:10px; }
+.sit-card .sbadge { font-size:9.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 9px; border-radius:5px; display:inline-block; }
+
+#answer-panel { display:none; }
+#answer-panel.show { display:block; animation:fadeUp .3s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.answer-card { background:var(--navy); border-radius:16px; padding:30px 34px; color:#e2e8f0; }
+.answer-card .a-eyebrow { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#64748b; margin-bottom:14px; }
+.answer-card .a-q { font-size:16px; font-weight:700; color:#f1f5f9; margin-bottom:16px; line-height:1.5; }
+.answer-card .a-cmd { background:rgba(255,255,255,.06); border-radius:10px; padding:14px 18px; font-family:'DM Mono',monospace; font-size:14px; color:#6ee7b7; margin-bottom:18px; overflow-x:auto; }
+.answer-card .a-why { font-size:13.5px; line-height:1.75; color:#cbd5e1; margin-bottom:16px; }
+.answer-card .a-example { background:rgba(0,0,0,.25); border-radius:10px; padding:14px 18px; font-family:'DM Mono',monospace; font-size:12px; line-height:2; color:#94a3b8; margin-bottom:14px; overflow-x:auto; }
+.answer-card .a-example .cm { color:#475569; font-style:italic; }
+.answer-card .a-note { font-size:12.5px; line-height:1.7; color:#fca5a5; background:rgba(248,113,113,.08); border-radius:8px; padding:10px 14px; }
+.answer-card .a-note.safe { color:#6ee7b7; background:rgba(110,231,183,.08); }
+
+/* ACCORDION COMANDI */
+.acc { background:var(--white); border:1px solid var(--border); border-radius:14px; margin-bottom:14px; overflow:hidden; }
+.acc-head { display:flex; align-items:center; justify-content:space-between; padding:20px 26px; cursor:pointer; gap:16px; }
+.acc-head:hover { background:var(--bg); }
+.acc-title { display:flex; align-items:center; gap:14px; }
+.acc-title .actag { font-family:'DM Mono',monospace; font-size:15px; font-weight:700; color:var(--navy); background:var(--bg); border:1px solid var(--border2); border-radius:8px; padding:5px 12px; }
+.acc-title .aclabel { font-size:14px; color:var(--muted); }
+.acc-chev { font-size:16px; color:var(--muted); transition:transform .2s; flex-shrink:0; }
+.acc.open .acc-chev { transform:rotate(180deg); }
+.acc-body { max-height:0; overflow:hidden; transition:max-height .3s ease; }
+.acc.open .acc-body { max-height:1400px; }
+.acc-body-inner { padding:0 26px 26px; }
+.acc-body-inner .ablock { margin-bottom:16px; }
+.acc-body-inner .ablock:last-child { margin-bottom:0; }
+.acc-body-inner .albl { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.acc-body-inner p { font-size:13.5px; color:var(--navy); line-height:1.75; }
+.acc-body-inner .codebox { background:var(--navy); border-radius:10px; padding:16px 20px; color:#e2e8f0; font-family:'DM Mono',monospace; font-size:12.5px; line-height:2; overflow-x:auto; }
+.codebox .cr { color:#f87171; font-weight:700; }
+.codebox .cg { color:#6ee7b7; font-weight:700; }
+.codebox .co { color:#fcd34d; font-weight:700; }
+.codebox .cb { color:#93c5fd; font-weight:700; }
+.codebox .cm { color:#475569; font-style:italic; }
+.trap-box { background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:12px 16px; font-size:13px; color:#92400e; line-height:1.65; }
+.recover-box { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 16px; font-size:13px; color:#1e40af; line-height:1.65; }
+
+/* TABELLA */
+.tcard { background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; min-width:760px; }
+thead th { background:var(--bg); padding:12px 18px; text-align:left; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+tbody td { padding:13px 18px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:top; line-height:1.6; font-size:12.5px; }
+tbody td:first-child { color:var(--navy); font-weight:700; font-size:13px; }
+tbody td code { font-family:'DM Mono',monospace; color:var(--accent-red); font-size:12px; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:var(--bg); }
+
+.closing { max-width:700px; margin:0 auto; text-align:left; }
+.closing p { font-size:15px; color:var(--muted); line-height:1.8; margin-bottom:14px; }
+.closing p strong { color:var(--navy); }
+.closing .sign { font-size:12px; color:var(--border2); margin-top:24px; font-family:'DM Mono',monospace; }
+
+@media(max-width:800px){
+  nav, .main { padding-left:20px; padding-right:20px; }
+  .sit-grid { grid-template-columns:1fr; }
+  .navlinks { display:none; }
+  .answer-card { padding:22px 20px; }
+  .acc-head { padding:16px 18px; }
+  .acc-body-inner { padding:0 18px 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#top">
+    <svg viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg"><path d="M127.24 107.052L117.61 79.7398C117.243 78.6967 117.737 77.5226 118.747 77.0665C120.457 76.2894 122.197 75.5588 123.962 74.8788C124.195 74.7902 124.418 74.6972 124.651 74.6128C126.18 74.0384 127.721 73.5063 129.267 73.0164C130.331 72.6785 131.459 73.2487 131.83 74.3003L160.042 154.319L166.296 172.061C166.922 173.83 165.11 175.516 163.425 174.73L15.8926 105.937C14.8748 105.464 14.4229 104.256 14.8664 103.2C15.597 101.452 16.3657 99.7075 17.1681 97.9718C17.2737 97.7395 17.375 97.5072 17.4848 97.2707C18.4731 95.1464 19.512 93.0601 20.5805 91.0033C23.0004 86.3535 25.6231 81.8684 28.4316 77.5564C29.8675 75.3561 31.3541 73.2022 32.8829 71.0906C34.4329 68.9536 36.0293 66.8715 37.6721 64.8274C53.6826 44.94 73.9882 29.6686 96.4814 19.8114C98.8126 18.7936 101.161 17.8265 103.534 16.9269C105.266 16.2681 107.01 15.6388 108.763 15.0391C109.84 14.6717 111.001 15.2334 111.381 16.3061L115.82 28.8873L120.938 43.4027L125.314 55.8234C125.715 56.9552 125.09 58.2095 123.95 58.5812C122.476 59.0627 121.006 59.5737 119.541 60.1227C119.308 60.2114 119.089 60.3043 118.856 60.3888C116.47 61.301 114.126 62.2935 111.833 63.3577C97.2711 70.1277 84.5337 79.9426 74.326 92.1436C73.0928 93.6176 71.8934 95.1295 70.7362 96.671C70.0352 97.6044 68.7386 97.8071 67.8179 97.1229L58.9617 90.5219C58.0326 89.8293 57.8468 88.4863 58.5563 87.5403C59.705 86.0072 60.8875 84.5079 62.0996 83.034C73.7221 68.9029 88.2797 57.5211 104.957 49.6447C105.95 49.1759 106.427 48.0188 106.064 46.9883L102.348 36.4469C101.938 35.2898 100.637 34.745 99.5221 35.2602C80.1288 44.2558 63.2399 57.4536 49.8732 73.9159C48.2219 75.9473 46.617 78.0336 45.0755 80.1664C43.5467 82.2865 42.077 84.453 40.6538 86.6618C38.8251 89.5125 37.0851 92.4308 35.4465 95.4251C34.8552 96.5063 35.2817 97.8535 36.3756 98.3645L136.89 145.235C138.575 146.02 140.387 144.335 139.762 142.565L138.968 140.314L127.235 107.043L127.24 107.052Z" fill="#D7342B"/></svg>
+    Datapizza
+  </a>
+  <div class="navlinks">
+    <a href="#zone">Le quattro zone</a>
+    <a href="#bussola">Bussola</a>
+    <a href="#comandi">I cinque comandi</a>
+    <a href="#tabella">Tabella</a>
+  </div>
+</nav>
+
+<div class="main" id="top">
+
+  <div class="intro">
+    <div class="eyebrow">Git · <em>senza panico</em></div>
+    <h1>Tornare indietro con git, <span>senza panico</span></h1>
+    <p>"Tornare indietro" è un'espressione comoda che nasconde almeno sei operazioni diverse tra loro, ognuna con un raggio d'azione preciso: correggere un file, togliere qualcosa dallo staging, sostituire l'ultimo commit, registrare un'inversione pubblica, spostare il branch locale, recuperare un commit che sembrava perso.</p>
+    <p>Il punto di partenza giusto non è mai il comando che ricordi a memoria, ma la domanda: <strong>su cosa sto agendo, e quella cosa è già visibile a qualcun altro?</strong> Working directory, staging e storia locale sono territorio tuo, puoi correggere il tiro liberamente. Nel momento in cui un commit è stato pubblicato, la stessa mossa cambia significato: da correzione privata diventa un problema che riguarda chiunque abbia già fatto pull.</p>
+  </div>
+
+  <section id="zone">
+    <div class="sh">
+      <span class="badge b-bl">Modello mentale</span>
+      <div><h2>Le quattro <span class="cr">zone</span> di git</h2>
+      <p class="dek">Ogni comando di questa famiglia agisce su un confine preciso tra due zone. Individuare il confine giusto è già metà del lavoro.</p></div>
+    </div>
+
+    <div class="zones-wrap">
+      <div class="zones-row">
+        <div class="zone">
+          <div class="zn">Zona 1</div>
+          <h4>Working directory</h4>
+          <p>I file sul disco, con le modifiche non ancora selezionate per il prossimo commit.</p>
+        </div>
+        <div class="connector">
+          <div class="fwd">git add</div>
+          <div class="arrow-ic">⇄</div>
+          <div class="bwd-stack">
+            <div class="bwd g">git restore &lt;file&gt;</div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="zn">Zona 2</div>
+          <h4>Staging area</h4>
+          <p>L'anticamera del commit: qui vive esattamente ciò che finirà nella prossima fotografia della storia.</p>
+        </div>
+        <div class="connector">
+          <div class="fwd">git commit</div>
+          <div class="arrow-ic">⇄</div>
+          <div class="bwd-stack">
+            <div class="bwd g">git restore --staged</div>
+            <div class="bwd o">git reset / --amend</div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="zn">Zona 3</div>
+          <h4>Repository locale</h4>
+          <p>La cronologia dei commit sul tuo branch: ancora soltanto sul tuo computer, riscrivibile senza chiedere permesso a nessuno.</p>
+        </div>
+        <div class="connector">
+          <div class="fwd">git push</div>
+          <div class="arrow-ic">⇄</div>
+          <div class="bwd-stack">
+            <div class="bwd bl">git revert &lt;hash&gt;</div>
+          </div>
+        </div>
+        <div class="zone z-remote">
+          <div class="zn">Zona 4</div>
+          <h4>Repository remoto</h4>
+          <p>La cronologia condivisa. Da qui in avanti, ogni riscrittura è una notizia che riguarda tutti i cloni, non solo il tuo.</p>
+        </div>
+      </div>
+
+      <div class="pocket-row">
+        <div class="pocket-spacer"></div>
+        <div class="pocket">
+          <div class="pocket-inner">
+            <div class="pk-lbl">Tasca laterale, da working dir + staging</div>
+            <div class="pk-cmd">git stash push → git stash pop</div>
+          </div>
+        </div>
+        <div class="pocket-spacer" style="flex:1.87"></div>
+      </div>
+
+      <div class="reflog-note">
+        <span class="rf-tag">git reflog</span>
+        <span>Non è una quinta zona ma un registratore che gira dentro alla zona 3: annota ogni spostamento del branch e di HEAD, commit, reset, amend, checkout, rebase. Non viene mai pubblicato e non è eterno, ma per un certo periodo è la rete di sicurezza che ti permette di ritrovare qualcosa che sembrava sparito.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="bussola">
+    <div class="sh">
+      <span class="badge b-r">Bussola</span>
+      <div><h2>Qual è la tua situazione?</h2>
+      <p class="dek">Scegli la frase che descrive meglio quello che ti è successo. La risposta compare qui sotto, con il comando, il perché e un esempio pronto all'uso.</p></div>
+    </div>
+
+    <div class="sit-grid" id="sit-grid"></div>
+
+    <div id="answer-panel"></div>
+  </section>
+
+  <section id="comandi">
+    <div class="sh">
+      <span class="badge b-bl">Approfondimento</span>
+      <div><h2>I cinque comandi, uno per uno</h2>
+      <p class="dek">Sintassi, esempio pratico, la trappola in cui ci si incastra più spesso e, dove serve, la via di recupero.</p></div>
+    </div>
+    <div id="acc-container"></div>
+  </section>
+
+  <section id="tabella">
+    <div class="sh">
+      <span class="badge b-n">Riepilogo</span>
+      <div><h2>La mappa completa, in una tabella sola</h2>
+      <p class="dek">Utile da tenere a portata di mano quando la domanda giusta non viene subito in mente.</p></div>
+    </div>
+    <div class="tcard">
+      <table>
+        <thead>
+          <tr><th>Situazione</th><th>Intenzione</th><th>Strumento tipico</th><th>Zona di sicurezza</th></tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="closing">
+    <p><strong>La regola pratica che vale la pena portarsi a casa</strong> è più semplice di quanto sembri dal numero di comandi coinvolti. Finché ti muovi tra working directory, staging e commit locali non ancora pubblicati, sei nel tuo territorio: restore, reset e amend correggono il tiro senza conseguenze per nessun altro. Nel momento in cui un commit è arrivato sul remoto ed è stato tirato giù da qualcun altro, cambia il verbo giusto: non si cancella più, si compensa. Ed è lì che entra in scena revert, l'unico dei cinque pensato apposta per la storia già pubblica.</p>
+    <p>Se qualcosa va storto e sembra irrecuperabile, prima di allarmarti vale la pena controllare il reflog: git raramente butta via davvero qualcosa, semplicemente smette di indicarlo.</p>
+    <div class="sign">// git restore · git reset · git revert · git reflog · git stash</div>
+  </section>
+
+</div>
+
+<script>
+const situazioni = [
+  {
+    id: 1,
+    domanda: "Ho modificato un file e voglio buttare via la modifica, ma non l'ho ancora aggiunta allo staging.",
+    badgeClass: "b-g", badgeLabel: "Sicuro",
+    cmd: "git restore &lt;file&gt;",
+    perche: "Restore agisce sulla working directory e sostituisce il contenuto del file con quello dell'index, cioè con l'ultima versione tracciata. È l'operazione più innocua della famiglia, ma con una precisazione importante: la modifica scartata non finisce da nessuna parte, non in uno stash, non in un commit. Sparisce.",
+    esempio: "<span class=\"cm\"># hai pasticciato in src/app.js e vuoi tornare alla versione tracciata</span>\ngit restore src/app.js",
+    nota: "Se non sei sicuro al cento per cento, prima <b>git stash</b>: costa un secondo e ti lascia una via di fuga.",
+    notaSafe: false
+  },
+  {
+    id: 2,
+    domanda: "Ho fatto git add per sbaglio e voglio togliere il file dallo staging, ma senza perdere la modifica.",
+    badgeClass: "b-g", badgeLabel: "Sicuro",
+    cmd: "git restore --staged &lt;file&gt;",
+    perche: "Qui restore lavora tra staging e repository locale: sposta il file fuori dall'index riportandolo allo stato dell'ultimo commit, ma la modifica resta intatta nella working directory. È letteralmente l'inverso di git add.",
+    esempio: "<span class=\"cm\"># volevi committare solo config.yaml, non anche debug.log</span>\ngit restore --staged debug.log",
+    nota: "Nessun dato va perso: la modifica torna semplicemente non staged.",
+    notaSafe: true
+  },
+  {
+    id: 3,
+    domanda: "Devo correggere il messaggio o il contenuto dell'ultimo commit locale, quello appena fatto.",
+    badgeClass: "b-o", badgeLabel: "Riscrive l'ultimo commit",
+    cmd: "git commit --amend",
+    perche: "Amend non crea un nuovo commit ma sostituisce l'ultimo, prendendo il contenuto attuale dello staging e, se lo lasci vuoto, il messaggio precedente. È un'operazione locale che riscrive un hash: se quel commit è già stato pushato e qualcuno l'ha già scaricato, dopo l'amend le due storie divergono.",
+    esempio: "<span class=\"cm\"># correggi un refuso nel messaggio senza toccare i file</span>\ngit commit --amend -m \"Messaggio corretto\"\n\n<span class=\"cm\"># hai dimenticato un file, lo aggiungi e lo fondi nell'ultimo commit</span>\ngit add file_dimenticato.py\ngit commit --amend --no-edit",
+    nota: "Va benissimo su un commit ancora solo tuo. Se è già pubblico e condiviso, valuta piuttosto un nuovo commit o, se proprio serve rimediare, coordina un force-push con chi ha già fatto pull.",
+    notaSafe: false
+  },
+  {
+    id: 4,
+    domanda: "Ho fatto uno o più commit locali che non ho ancora pubblicato e voglio disfarli, decidendo cosa conservare.",
+    badgeClass: "b-o", badgeLabel: "Riscrive la storia locale",
+    cmd: "git reset --soft | --mixed | --hard",
+    perche: "Reset sposta dove punta il branch corrente indietro nella storia locale, e la modalità decide quanto in profondità: soft lascia intatti staging e working directory, con le modifiche dei commit annullati pronte per essere ricommittate; mixed, la modalità di default, resetta anche lo staging ma lascia le modifiche nei file; hard resetta tutto, staging e working directory compresi, e in questo caso le modifiche sono perse davvero.",
+    esempio: "<span class=\"cm\"># unisci gli ultimi tre commit in uno, pronto per un nuovo commit</span>\ngit reset --soft HEAD~3\n\n<span class=\"cm\"># torna indietro di un commit, ma tieni le modifiche nei file</span>\ngit reset --mixed HEAD~1\n\n<span class=\"cm\"># cancella completamente l'ultimo commit e le sue modifiche</span>\ngit reset --hard HEAD~1",
+    nota: "Perfetto sui commit non ancora pubblicati. Su commit già pushati e condivisi, reset sposta il terreno sotto i piedi di chi ha già scaricato quella storia: lì la scelta giusta è quasi sempre revert.",
+    notaSafe: false
+  },
+  {
+    id: 5,
+    domanda: "Devo annullare l'effetto di un commit che è già stato pubblicato e scaricato da altri.",
+    badgeClass: "b-bl", badgeLabel: "Sicuro anche in pubblico",
+    cmd: "git revert &lt;hash&gt;",
+    perche: "Revert non tocca né cancella il commit incriminato: crea un nuovo commit che ne applica l'esatto contrario. La storia cresce in avanti invece di essere riscritta, il che lo rende l'unico strumento di questa famiglia sicuro da pushare su un branch condiviso senza mettere nei guai chi ha già fatto pull.",
+    esempio: "<span class=\"cm\"># annulla in modo tracciabile un commit già pubblico</span>\ngit revert a1b2c3d\n\n<span class=\"cm\"># revert di un merge: specifica quale genitore tenere come principale</span>\ngit revert -m 1 &lt;hash-del-merge&gt;",
+    nota: "Genera un commit in più nella storia, ed è esattamente il punto: quel commit in più è la traccia trasparente di cosa è stato annullato e perché.",
+    notaSafe: true
+  },
+  {
+    id: 6,
+    domanda: "Un commit che mi serviva non compare più nel log, come se non fosse mai esistito.",
+    badgeClass: "b-n", badgeLabel: "Rete di sicurezza",
+    cmd: "git reflog",
+    perche: "Il log normale mostra solo i commit raggiungibili dal branch corrente. Il reflog, invece, tiene traccia di ogni punto in cui HEAD si è spostato, compresi i commit che un reset o un rebase hanno reso irraggiungibili ma che git non ha ancora cancellato per davvero.",
+    esempio: "<span class=\"cm\"># trova l'hash del commit \"sparito\"</span>\ngit reflog\n\n<span class=\"cm\"># crea un branch di recupero da quel punto</span>\ngit branch recupero a1b2c3d\n\n<span class=\"cm\"># oppure porta solo quel commit sul branch attuale</span>\ngit cherry-pick a1b2c3d",
+    nota: "È locale, non viene mai pushato, e i commit non più raggiungibili vengono eliminati definitivamente dopo un certo periodo dal garbage collector. È una rete di sicurezza a tempo, non un backup permanente.",
+    notaSafe: true
+  },
+  {
+    id: 7,
+    domanda: "Ho lanciato un merge o un rebase e voglio tornare esattamente allo stato precedente all'operazione.",
+    badgeClass: "b-g", badgeLabel: "Annulla, non riscrive",
+    cmd: "git merge --abort  /  git rebase --abort",
+    perche: "Durante un merge o un rebase in corso, in particolare quando ci sono conflitti irrisolti, git conserva lo stato precedente. --abort interrompe l'operazione e riporta il branch esattamente com'era prima di iniziare.",
+    esempio: "<span class=\"cm\"># conflitti ovunque, meglio ripensarci</span>\ngit merge --abort\n\n<span class=\"cm\"># stessa logica durante un rebase interattivo</span>\ngit rebase --abort",
+    nota: "Funziona solo mentre l'operazione è ancora in corso. Se hai già confermato il merge, quello è un commit come un altro, e per tornare indietro servono reset o revert a seconda che sia già pubblico.",
+    notaSafe: true
+  },
+  {
+    id: 8,
+    domanda: "Ho del lavoro in corso, non è pronto per un commit, ma devo cambiare contesto senza perderlo.",
+    badgeClass: "b-g", badgeLabel: "Reversibile",
+    cmd: "git stash push",
+    perche: "Stash prende tutte le modifiche di working directory e staging e le mette da parte in una pila separata, riportando il branch a uno stato pulito. Quando sei pronto, le reintegri esattamente da dove le avevi lasciate.",
+    esempio: "<span class=\"cm\"># metti da parte tutto, incluso un promemoria</span>\ngit stash push -m \"refactor a metà, parser incompleto\"\n\n<span class=\"cm\"># includi anche i file non tracciati</span>\ngit stash push -u\n\n<span class=\"cm\"># quando torni: applica e rimuovi dalla pila</span>\ngit stash pop",
+    nota: "pop applica e rimuove dalla pila; apply applica ma lascia la copia nello stash. Comodo se vuoi riapplicare altrove, rischioso se ti dimentichi di fare pulizia dopo.",
+    notaSafe: true
+  },
+  {
+    id: 9,
+    domanda: "Mi sono accorto di aver committato un segreto, una chiave API o una password, ed è già stato pushato.",
+    badgeClass: "b-r", badgeLabel: "Emergenza",
+    cmd: "Revoca subito → bonifica la storia → coordina i cloni",
+    perche: "Qui nessun comando locale basta da solo, perché il problema non è più \"che aspetto ha la cronologia\" ma \"quella credenziale l'ha già vista chiunque abbia accesso al repository, anche solo per un istante\". Il primo passo, prima ancora di toccare git, è revocare e ruotare la credenziale esposta: cambiarla sul servizio che l'ha emessa. Solo dopo ha senso ripulire la storia con uno strumento pensato per farlo, come git filter-repo o BFG Repo-Cleaner, e coordinare un force-push con chiunque abbia un clone.",
+    esempio: "<span class=\"cm\"># 1. sul servizio interessato: revoca e genera una nuova credenziale</span>\n<span class=\"cm\"># 2. rimuovi il segreto dall'intera storia</span>\ngit filter-repo --path config/secrets.env --invert-paths\n\n<span class=\"cm\"># 3. sincronizza il remoto e avvisa il team prima del force-push</span>\ngit push origin --force --all",
+    nota: "Riscrivere la storia dopo che è stata clonata richiede che tutti rifacciano il clone o riallineino manualmente il proprio repository locale: è un'operazione che va comunicata, non lanciata in silenzio.",
+    notaSafe: false
+  }
+];
+
+const grid = document.getElementById('sit-grid');
+situazioni.forEach(s => {
+  const card = document.createElement('div');
+  card.className = 'sit-card';
+  card.dataset.id = s.id;
+  card.innerHTML = `<div class="sq">${s.domanda}</div><span class="sbadge ${s.badgeClass}">${s.badgeLabel}</span>`;
+  card.addEventListener('click', () => selectSituazione(s.id));
+  grid.appendChild(card);
+});
+
+function selectSituazione(id) {
+  const s = situazioni.find(x => x.id === id);
+  document.querySelectorAll('.sit-card').forEach(c => c.classList.toggle('selected', parseInt(c.dataset.id) === id));
+
+  const panel = document.getElementById('answer-panel');
+  panel.innerHTML = `
+    <div class="answer-card">
+      <div class="a-eyebrow">Comando consigliato</div>
+      <div class="a-q">${s.domanda}</div>
+      <div class="a-cmd">${s.cmd}</div>
+      <div class="a-why">${s.perche}</div>
+      <pre class="a-example">${s.esempio}</pre>
+      <div class="a-note ${s.notaSafe ? 'safe' : ''}">${s.nota}</div>
+    </div>
+  `;
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+selectSituazione(1);
+
+const comandi = [
+  {
+    tag: "restore",
+    label: "correggere file in working dir o staging",
+    cosaFa: "Ripristina il contenuto di uno o più file prendendolo da un'altra sorgente, di norma l'index o l'ultimo commit, senza mai toccare la cronologia dei commit. È il comando pensato apposta per l'errore più comune di tutti: ho modificato o aggiunto qualcosa e voglio tornare indietro solo su quel file.",
+    sintassi: "<span class=\"cm\">// ripristina dal contenuto dell'index, scarta la modifica non staged</span>\n<span class=\"cb\">git restore</span> &lt;file&gt;\n\n<span class=\"cm\">// toglie dallo staging, la modifica resta nel file</span>\n<span class=\"cb\">git restore</span> <span class=\"co\">--staged</span> &lt;file&gt;\n\n<span class=\"cm\">// ripristina un file da un commit precedente, non solo dall'ultimo</span>\n<span class=\"cb\">git restore</span> <span class=\"co\">--source=HEAD~2</span> &lt;file&gt;",
+    trappola: "La modifica scartata con restore semplice non finisce in nessuna pila di recupero: è persa nel momento stesso in cui premi invio. Se hai il minimo dubbio, prima git stash: è un secondo di lavoro in più che può risparmiarti un pomeriggio.",
+    recupero: null
+  },
+  {
+    tag: "reset",
+    label: "spostare HEAD nella storia locale",
+    cosaFa: "Sposta dove punta il branch corrente, e a seconda della modalità scelta trascina con sé anche lo staging e la working directory. È lo strumento giusto per rimaneggiare commit che esistono soltanto sul tuo computer.",
+    sintassi: "<span class=\"cm\">// sposta solo HEAD: i commit annullati tornano staged, pronti per un nuovo commit</span>\n<span class=\"cb\">git reset</span> <span class=\"co\">--soft</span> HEAD~3\n\n<span class=\"cm\">// modalità di default: sposta HEAD e resetta lo staging, i file restano modificati</span>\n<span class=\"cb\">git reset</span> <span class=\"co\">--mixed</span> HEAD~1\n\n<span class=\"cm\">// resetta tutto, comprese le modifiche nei file: distruttivo</span>\n<span class=\"cb\">git reset</span> <span class=\"cr\">--hard</span> HEAD~1",
+    trappola: "Reset riscrive la cronologia del branch. È innocuo finché quei commit non sono usciti dal tuo computer. Nel momento in cui sono stati pushati e qualcun altro ha già fatto pull, un reset seguito da force-push sposta il terreno sotto i piedi di chi ha lavorato su quella base: lì la mossa giusta è quasi sempre revert.",
+    recupero: "Un reset --hard fatto per sbaglio non cancella subito i commit dal database di git: restano orfani ma recuperabili per un po'. Basta git reflog per ritrovare l'hash e ricrearne un branch."
+  },
+  {
+    tag: "revert",
+    label: "annullare un commit già pubblico, in modo tracciabile",
+    cosaFa: "Crea un nuovo commit che applica l'esatto contrario delle modifiche introdotte da un commit esistente, senza toccare né cancellare quel commit. La storia si allunga invece di essere riscritta.",
+    sintassi: "<span class=\"cm\">// crea un nuovo commit che annulla quello indicato</span>\n<span class=\"cb\">git revert</span> a1b2c3d\n\n<span class=\"cm\">// prepara il revert senza committare subito, utile per accumularne più di uno</span>\n<span class=\"cb\">git revert</span> <span class=\"co\">-n</span> a1b2c3d\n\n<span class=\"cm\">// revert di un commit di merge: indica quale genitore restare come storia principale</span>\n<span class=\"cb\">git revert</span> <span class=\"co\">-m 1</span> &lt;hash-del-merge&gt;",
+    trappola: "Se il commit da annullare è un merge, revert da solo non basta: serve specificare con -m quale dei due genitori considerare la linea principale, altrimenti git non sa rispetto a cosa calcolare la differenza.",
+    recupero: null
+  },
+  {
+    tag: "reflog",
+    label: "ritrovare qualcosa che sembrava perso",
+    cosaFa: "Tiene un registro locale, non replicato e non pushato, di ogni spostamento di HEAD e dei branch: commit, reset, checkout, rebase, amend finiscono tutti lì, indipendentemente dal fatto che siano ancora visibili nel log normale.",
+    sintassi: "<span class=\"cm\">// mostra la cronologia degli spostamenti di HEAD</span>\n<span class=\"cb\">git reflog</span>\n\n<span class=\"cm\">// stessa cosa, ma per un branch specifico</span>\n<span class=\"cb\">git reflog show</span> nome-branch\n\n<span class=\"cm\">// ricrea un punto di accesso al commit ritrovato</span>\n<span class=\"cb\">git branch</span> recupero a1b2c3d",
+    trappola: "Non è un backup permanente. È locale al tuo repository, quindi non aiuta se il problema riguarda un altro clone, e i commit non più raggiungibili vengono spazzati via dal garbage collector dopo un certo periodo, di norma attorno ai trenta giorni per quelli orfani.",
+    recupero: null
+  },
+  {
+    tag: "stash",
+    label: "mettere da parte lavoro non ancora committabile",
+    cosaFa: "Sposta le modifiche di working directory e staging, opzionalmente anche i file non tracciati, in una pila separata, riportando il branch a uno stato pulito. Utile ogni volta che devi cambiare contesto, un hotfix urgente, un cambio di branch, senza voler fare un commit a metà.",
+    sintassi: "<span class=\"cm\">// mette da parte tutto, con un messaggio descrittivo</span>\n<span class=\"cb\">git stash push</span> <span class=\"co\">-m</span> \"refactor parser a metà\"\n\n<span class=\"cm\">// include anche i file non tracciati</span>\n<span class=\"cb\">git stash push</span> <span class=\"co\">-u</span>\n\n<span class=\"cm\">// elenca gli stash accumulati</span>\n<span class=\"cb\">git stash list</span>\n\n<span class=\"cm\">// riapplica l'ultimo e lo toglie dalla pila</span>\n<span class=\"cb\">git stash pop</span>",
+    trappola: "pop applica e rimuove dalla pila, ma se emergono conflitti lo stash resta lì finché non risolvi a mano. apply applica senza rimuovere: comodo per riusare lo stesso stash su un altro branch, ma se dimentichi git stash drop la pila si accumula silenziosamente.",
+    recupero: null
+  }
+];
+
+const accContainer = document.getElementById('acc-container');
+comandi.forEach((c, i) => {
+  const el = document.createElement('div');
+  el.className = 'acc' + (i === 0 ? ' open' : '');
+  el.innerHTML = `
+    <div class="acc-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="acc-title">
+        <span class="actag">git ${c.tag}</span>
+        <span class="aclabel">${c.label}</span>
+      </div>
+      <span class="acc-chev">▾</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-body-inner">
+        <div class="ablock">
+          <div class="albl">Cosa fa esattamente</div>
+          <p>${c.cosaFa}</p>
+        </div>
+        <div class="ablock">
+          <div class="albl">Sintassi e varianti</div>
+          <div class="codebox">${c.sintassi}</div>
+        </div>
+        <div class="ablock">
+          <div class="albl">La trappola più comune</div>
+          <div class="trap-box">${c.trappola}</div>
+        </div>
+        ${c.recupero ? `<div class="ablock"><div class="albl">Se hai già sbagliato</div><div class="recover-box">${c.recupero}</div></div>` : ''}
+      </div>
+    </div>
+  `;
+  accContainer.appendChild(el);
+});
+
+const tabellaRighe = [
+  ["Modifica non staged", "Ripristinare il file dall'index o da un'altra sorgente", "<code>git restore</code>", "Working directory"],
+  ["File nello staging", "Toglierlo dallo staging, conservando la modifica", "<code>git restore --staged</code>", "Staging area"],
+  ["Ultimo commit locale", "Correggere contenuto o messaggio", "<code>git commit --amend</code>", "Repository locale"],
+  ["Commit locale non pubblicato", "Spostare il branch e decidere cosa conservare", "<code>git reset --soft|--mixed|--hard</code>", "Repository locale"],
+  ["Commit già condiviso", "Registrare un'inversione tracciabile", "<code>git revert</code>", "Repository locale + remoto"],
+  ["Commit non più nel log visibile", "Ritrovare il vecchio valore di un riferimento", "<code>git reflog</code>, poi branch di recupero", "Repository locale"],
+  ["Merge o rebase in corso", "Tornare allo stato precedente all'operazione", "<code>--abort</code> specifico", "Repository locale"],
+  ["Lavoro temporaneo non committabile", "Accantonare working tree e, se richiesto, untracked", "<code>git stash push</code>", "Working directory + staging"],
+  ["Segreto committato", "Revocare, bonificare storia e coordinare i cloni", "Secret rotation + riscrittura controllata", "Tutti i cloni"]
+];
+const tbody = document.getElementById('table-body');
+tabellaRighe.forEach(r => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = r.map(c => `<td>${c}</td>`).join('');
+  tbody.appendChild(tr);
+});
+</script>
+
+</body>
+</html>
