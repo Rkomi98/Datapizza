@@ -1,0 +1,720 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Caso dei Mille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f8fa;
+  --white: #ffffff;
+  --navy: #0d1b2a;
+  --navy2: #1a2e42;
+  --accent-red: #e8412a;
+  --accent-orange: #f5a623;
+  --accent-blue: #2563eb;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --border2: #d1d5db;
+  --grid-color: #e5e7eb;
+  /* archivio (intro) */
+  --ink: #ece3d0;
+  --ink-dim: #b8ac93;
+  --parch: #d9c9a3;
+  --seal: #b23a2a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--navy);
+  font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
+  min-height: 100vh;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events:none; z-index:0;
+}
+body > * { position:relative; z-index:1; }
+
+/* ============ INTRO / ARCHIVIO ============ */
+#intro {
+  position:fixed; inset:0; z-index:9999;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, #16283b 0%, #0b1521 55%, #070d16 100%);
+  color:var(--ink);
+  display:flex; flex-direction:column;
+  overflow-y:auto;
+  font-family:'DM Mono', ui-monospace, monospace;
+}
+#intro.gone { opacity:0; visibility:hidden; transition:opacity .8s ease, visibility 0s .8s; }
+#intro::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px);
+  mix-blend-mode:overlay; opacity:.6;
+}
+#intro::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  box-shadow: inset 0 0 240px 40px rgba(0,0,0,.75);
+}
+.itop{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 28px; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-dim); border-bottom:1px solid rgba(217,201,163,.14);
+  position:relative; z-index:2; flex-wrap:wrap; gap:10px;
+}
+.itop .rec{ display:flex; align-items:center; gap:9px; color:var(--parch); }
+.dot{ width:8px; height:8px; border-radius:50%; background:var(--accent-red);
+  box-shadow:0 0 12px var(--accent-red); animation:blink 1.3s steps(1) infinite; }
+@keyframes blink{ 50%{opacity:.25} }
+.istage{
+  flex:1; display:flex; flex-direction:column; justify-content:center;
+  max-width:820px; width:100%; margin:0 auto; padding:40px 32px 24px;
+  position:relative; z-index:2;
+}
+.ifile{ font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--parch);
+  margin-bottom:26px; opacity:0; }
+.iline{ opacity:0; transform:translateY(10px); margin:0 0 16px; }
+.iline.text{ font-family:'Spectral', Georgia, serif; font-size:clamp(16px,2.4vw,21px);
+  line-height:1.72; color:var(--ink); letter-spacing:.1px; max-width:66ch; }
+.iline.text b{ color:#fff; font-weight:600; }
+.iline.quote{ font-family:'Spectral', Georgia, serif; font-style:italic;
+  font-size:clamp(17px,2.7vw,24px); line-height:1.6; color:var(--parch);
+  border-left:2px solid var(--seal); padding-left:20px; margin:6px 0 22px; max-width:60ch; }
+.iline.small{ font-size:12px; letter-spacing:.05em; color:var(--ink-dim); line-height:1.7; }
+.iline.show{ opacity:1; transform:none; transition:opacity .7s ease, transform .7s ease; }
+
+.iprog{ margin-top:20px; max-width:820px; width:100%; margin-left:auto; margin-right:auto;
+  padding:0 32px 8px; position:relative; z-index:2; }
+.iprog-lbl{ display:flex; justify-content:space-between; font-size:10.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-dim); margin-bottom:8px; }
+.iprog-bar{ height:3px; background:rgba(217,201,163,.16); border-radius:99px; overflow:hidden; }
+.iprog-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--seal),var(--accent-orange));
+  border-radius:99px; transition:width .4s ease; }
+
+.ienter{ max-width:820px; width:100%; margin:8px auto 0; padding:18px 32px 48px;
+  position:relative; z-index:2; opacity:0; transform:translateY(12px);
+  pointer-events:none; transition:opacity .8s ease, transform .8s ease; }
+.ienter.show{ opacity:1; transform:none; pointer-events:auto; }
+.ienter-row{ display:flex; align-items:center; gap:22px; flex-wrap:wrap; }
+.seal{ width:64px; height:64px; flex-shrink:0; animation:sealin .9s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes sealin{ from{ transform:scale(.4) rotate(-18deg); opacity:0 } to{ transform:none; opacity:1 } }
+.btn-enter{
+  font-family:'DM Sans',sans-serif; font-size:16px; font-weight:800; letter-spacing:.02em;
+  background:var(--accent-red); color:#fff; border:none; border-radius:12px;
+  padding:16px 30px; cursor:pointer; transition:transform .15s, box-shadow .15s;
+  box-shadow:0 10px 30px rgba(232,65,42,.35);
+}
+.btn-enter:hover{ transform:translateY(-2px); box-shadow:0 14px 40px rgba(232,65,42,.5); }
+.ienter-sub{ font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink-dim); }
+.ienter-sub b{ color:var(--parch); font-weight:700; }
+.iskip{ position:fixed; right:22px; bottom:18px; z-index:3;
+  background:none; border:1px solid rgba(217,201,163,.3); color:var(--ink-dim);
+  font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  padding:8px 14px; border-radius:8px; cursor:pointer; transition:all .15s; }
+.iskip:hover{ color:var(--parch); border-color:var(--parch); }
+
+/* ============ APP ============ */
+#app{ opacity:0; transition:opacity .7s ease .1s; }
+#app.on{ opacity:1; }
+
+nav{ background:var(--white); border-bottom:1px solid var(--border);
+  padding:0 clamp(20px,4vw,48px); height:64px; display:flex; align-items:center;
+  justify-content:space-between; position:sticky; top:0; z-index:100; }
+.logo{ display:flex; align-items:center; gap:10px; font-weight:900; font-size:18px;
+  color:var(--navy); text-decoration:none; }
+.logo-icon{ width:26px; height:27px; flex-shrink:0; }
+.nav-right{ display:flex; align-items:center; gap:14px; }
+.nav-tag{ font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); border:1px solid var(--border2);
+  padding:6px 12px; border-radius:8px; }
+.nav-tag b{ color:var(--accent-red); }
+
+.audio-bar{ background:var(--white); border-bottom:1px solid var(--border);
+  padding:10px clamp(20px,4vw,48px); display:flex; align-items:center; justify-content:center;
+  gap:14px; }
+.audio-label{ display:flex; align-items:center; gap:8px; color:var(--navy); font-size:13px; font-weight:800;
+  white-space:nowrap; }
+.audio-label svg{ color:var(--accent-red); flex-shrink:0; }
+.audio-label small{ color:var(--muted); font-size:11px; font-weight:500; }
+.audio-player{ width:min(500px, 100%); height:36px; }
+
+.step-nav{ background:var(--white); border-bottom:1px solid var(--border);
+  display:flex; overflow-x:auto; scrollbar-width:none; padding:0 clamp(12px,3vw,48px);
+  position:sticky; top:64px; z-index:99; }
+.step-nav::-webkit-scrollbar{ display:none; }
+.step-tab{ padding:15px 16px; white-space:nowrap; font-size:13px; font-weight:700; color:var(--muted);
+  cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex;
+  align-items:center; gap:8px; border:none; background:none; font-family:'DM Sans',sans-serif; flex-shrink:0; }
+.step-tab:hover{ color:var(--navy); }
+.step-tab.active{ color:var(--accent-red); border-bottom:2px solid var(--accent-red); }
+.step-tab.done{ color:var(--navy); }
+.snum{ background:var(--bg); border:1px solid var(--border2); border-radius:5px; width:20px; height:20px;
+  font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  color:var(--muted); flex-shrink:0; font-family:'DM Mono',monospace; }
+.step-tab.active .snum{ background:var(--accent-red); color:#fff; border-color:var(--accent-red); }
+.step-tab.done .snum{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+.main{ max-width:1120px; margin:0 auto; padding:44px clamp(20px,4vw,48px) 90px; }
+.sh{ margin-bottom:30px; display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+.badge{ display:inline-flex; align-items:center; padding:4px 12px; border-radius:6px; font-size:11px;
+  font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; margin-top:8px;
+  flex-shrink:0; font-family:'DM Mono',monospace; }
+.b-r{ background:#fee2e2; color:#dc2626; } .b-g{ background:#d1fae5; color:#059669; }
+.b-o{ background:#fef3c7; color:#d97706; } .b-bl{ background:#dbeafe; color:#2563eb; }
+.b-p{ background:#f3e8ff; color:#7c3aed; } .b-n{ background:var(--bg); color:var(--muted); border:1px solid var(--border2); }
+.sh h2{ font-size:clamp(24px,3.4vw,40px); font-weight:900; letter-spacing:-.6px; line-height:1.08; text-wrap:balance; }
+.sh h2 .cr{ color:var(--accent-red); } .sh h2 .cg{ color:#059669; }
+.sh h2 .co{ color:#d97706; } .sh h2 .cb{ color:var(--accent-blue); }
+.lead{ font-size:16px; color:var(--muted); line-height:1.7; max-width:66ch; margin:-14px 0 26px; }
+.lead b{ color:var(--navy); font-weight:700; }
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:18px; }
+.grid1{ margin-bottom:18px; }
+
+.card{ background:var(--white); border:1px solid var(--border); border-radius:14px; padding:22px 24px;
+  transition:box-shadow .2s, transform .2s; }
+.card:hover{ box-shadow:0 6px 26px rgba(13,27,42,.08); transform:translateY(-2px); }
+.card.bl-r{ border-left:3px solid var(--accent-red); }
+.card.bl-g{ border-left:3px solid #059669; }
+.card.bl-o{ border-left:3px solid #d97706; }
+.card.bl-b{ border-left:3px solid var(--accent-blue); }
+.card.hl-r{ background:#fff8f7; border-color:#fecaca; }
+.card.hl-g{ background:#f0fdf4; border-color:#bbf7d0; }
+.card.hl-o{ background:#fffbeb; border-color:#fde68a; }
+.card.hl-b{ background:#eff6ff; border-color:#bfdbfe; }
+.ctag{ font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px;
+  color:var(--muted); font-family:'DM Mono',monospace; }
+.ctag.r{ color:var(--accent-red); } .ctag.g{ color:#059669; }
+.ctag.o{ color:#d97706; } .ctag.b{ color:var(--accent-blue); }
+.card h3{ font-size:15.5px; font-weight:800; margin-bottom:9px; color:var(--navy); line-height:1.3; }
+.card p{ font-size:13.5px; color:var(--muted); line-height:1.72; }
+.card p + p{ margin-top:9px; }
+.card p strong{ color:var(--navy); font-weight:700; }
+
+.darkcard{ background:var(--navy); border-radius:16px; padding:30px 34px; margin-bottom:18px; color:#e2e8f0; }
+.darkcard .dtag{ font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:#64748b; margin-bottom:20px; font-family:'DM Mono',monospace; }
+.drow{ display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.07); flex-wrap:wrap; }
+.drow:last-child{ border-bottom:none; }
+.dchip{ font-size:10px; font-weight:700; padding:4px 10px; border-radius:5px; text-transform:uppercase;
+  letter-spacing:.06em; min-width:92px; text-align:center; flex-shrink:0; font-family:'DM Mono',monospace; }
+.dc-r{ background:rgba(248,113,113,.16); color:#f87171; }
+.dc-g{ background:rgba(110,231,183,.16); color:#6ee7b7; }
+.dc-o{ background:rgba(252,211,77,.16); color:#fcd34d; }
+.dc-b{ background:rgba(147,197,253,.16); color:#93c5fd; }
+.dtxt{ flex:1; font-size:14px; color:#f1f5f9; min-width:220px; line-height:1.5; }
+.dtxt small{ display:block; color:#7c8ba1; font-size:12px; margin-top:2px; font-weight:400; }
+.dnum{ font-family:'DM Mono',monospace; font-weight:500; color:#fcd34d; font-size:16px; flex-shrink:0;
+  font-variant-numeric:tabular-nums; }
+
+.flow{ background:var(--white); border:1px solid var(--border); border-radius:14px; padding:22px 24px;
+  margin-bottom:18px; overflow-x:auto; }
+.ftag{ font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+  margin-bottom:18px; font-family:'DM Mono',monospace; }
+.frow{ display:flex; align-items:center; gap:6px; min-width:max-content; }
+.fnode{ background:var(--bg); border:1px solid var(--border2); border-radius:8px; padding:9px 13px;
+  font-size:12px; font-family:'DM Mono',monospace; text-align:center; line-height:1.4; }
+.fnode .fnl{ color:var(--muted); font-size:9px; display:block; margin-bottom:2px; font-family:'DM Sans',sans-serif;
+  font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+.fnode .fnv{ color:var(--navy); font-weight:700; font-size:13px; }
+.fn-r{ background:#fff8f7; border-color:#fca5a5; } .fn-g{ background:#f0fdf4; border-color:#86efac; }
+.fn-o{ background:#fffbeb; border-color:#fcd34d; } .fn-b{ background:#eff6ff; border-color:#93c5fd; }
+.farr{ color:var(--border2); font-size:18px; flex-shrink:0; }
+
+.tcard{ background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:18px; }
+.tcard-scroll{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:440px; }
+thead th{ background:var(--bg); padding:12px 18px; text-align:left; font-size:11px; font-weight:700;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border);
+  font-family:'DM Mono',monospace; }
+tbody td{ padding:13px 18px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:top; line-height:1.6; }
+tbody td:first-child{ color:var(--navy); font-weight:700; }
+tbody tr:last-child td{ border-bottom:none; }
+tbody tr:hover td{ background:var(--bg); }
+td .pts{ font-family:'DM Mono',monospace; color:var(--accent-red); font-weight:700; font-variant-numeric:tabular-nums; }
+
+.tag{ display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin:1px 3px 1px 0;
+  font-family:'DM Mono',monospace; }
+.tg-r{ background:#fee2e2; color:#dc2626; } .tg-g{ background:#d1fae5; color:#059669; }
+.tg-o{ background:#fef3c7; color:#d97706; } .tg-b{ background:#dbeafe; color:#2563eb; }
+.tg-n{ background:var(--bg); color:var(--muted); border:1px solid var(--border2); }
+
+/* timeline */
+.tl{ position:relative; margin:8px 0 8px; padding-left:26px; }
+.tl::before{ content:''; position:absolute; left:7px; top:6px; bottom:6px; width:2px;
+  background:linear-gradient(var(--accent-red), var(--accent-orange)); border-radius:2px; }
+.tlrow{ position:relative; padding:0 0 22px 18px; }
+.tlrow::before{ content:''; position:absolute; left:-24px; top:4px; width:12px; height:12px; border-radius:50%;
+  background:var(--white); border:2.5px solid var(--accent-red); }
+.tlrow.acc::before{ background:var(--accent-red); }
+.tlrow .tlt{ font-family:'DM Mono',monospace; font-size:12px; font-weight:700; color:var(--accent-red);
+  letter-spacing:.04em; margin-bottom:3px; }
+.tlrow h4{ font-size:15px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+.tlrow p{ font-size:13px; color:var(--muted); line-height:1.6; max-width:62ch; }
+
+.steplist{ counter-reset:st; }
+.stepitem{ display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); }
+.stepitem:last-child{ border-bottom:none; }
+.stepitem .sn{ counter-increment:st; flex-shrink:0; width:30px; height:30px; border-radius:8px;
+  background:var(--navy); color:#fff; font-family:'DM Mono',monospace; font-weight:700; font-size:13px;
+  display:flex; align-items:center; justify-content:center; }
+.stepitem .sn::before{ content:counter(st); }
+.stepitem h4{ font-size:14.5px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+.stepitem p{ font-size:13px; color:var(--muted); line-height:1.65; }
+.stepitem p code{ font-family:'DM Mono',monospace; font-size:12px; background:var(--bg);
+  border:1px solid var(--border); padding:1px 6px; border-radius:5px; color:var(--navy); }
+
+.callout{ display:flex; gap:14px; align-items:flex-start; background:#fff8f7; border:1px solid #fecaca;
+  border-left:3px solid var(--accent-red); border-radius:12px; padding:16px 20px; margin-bottom:18px; }
+.callout .ci{ font-size:20px; line-height:1; flex-shrink:0; }
+.callout p{ font-size:13.5px; color:var(--navy); line-height:1.65; }
+.callout p b{ font-weight:800; }
+
+.kpi{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.kpi.kpi5{ grid-template-columns:repeat(5,1fr); }
+.kpibox{ background:var(--white); border:1px solid var(--border); border-radius:14px; padding:20px 18px; text-align:left; }
+.kpibox .kv{ font-family:'DM Mono',monospace; font-size:34px; font-weight:500; color:var(--navy);
+  letter-spacing:-1px; font-variant-numeric:tabular-nums; line-height:1; }
+.kpibox .kv .u{ font-size:15px; color:var(--muted); }
+.kpibox .kl{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:8px; }
+.kpibox.acc .kv{ color:var(--accent-red); }
+
+/* kickoff hero */
+.ko{ background:var(--navy);
+  background-image: radial-gradient(700px 400px at 85% -20%, rgba(232,65,42,.28), transparent 60%),
+                    radial-gradient(600px 400px at 0% 120%, rgba(37,99,235,.22), transparent 55%);
+  border-radius:20px; padding:clamp(30px,5vw,54px); color:#e2e8f0; text-align:center; }
+.ko .kbadge{ font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+  color:#fcd34d; margin-bottom:18px; }
+.ko h2{ font-size:clamp(30px,5vw,52px); font-weight:900; letter-spacing:-1px; line-height:1.05; color:#fff;
+  text-wrap:balance; margin-bottom:16px; }
+.ko h2 span{ color:var(--accent-red); }
+.ko p{ font-size:16px; color:#b4c0cf; max-width:58ch; margin:0 auto 26px; line-height:1.65; }
+.clock{ font-family:'DM Mono',monospace; font-size:15px; color:#fcd34d; letter-spacing:.05em;
+  border:1px solid rgba(252,211,77,.3); border-radius:99px; padding:9px 20px; display:inline-block;
+  font-variant-numeric:tabular-nums; }
+
+.bnav{ background:var(--white); border-top:1px solid var(--border); padding:16px clamp(20px,4vw,48px);
+  display:flex; align-items:center; justify-content:space-between; position:sticky; bottom:0; z-index:98; gap:14px; }
+.btn-blue{ background:var(--accent-blue); color:#fff; border:none; padding:13px 24px; border-radius:10px;
+  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-blue:hover{ background:#1d4ed8; transform:translateY(-1px); }
+.btn-blue:disabled{ opacity:.3; cursor:not-allowed; transform:none; }
+.btn-dark{ background:var(--navy); color:#fff; border:none; padding:13px 24px; border-radius:10px;
+  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btn-dark:hover{ background:var(--navy2); transform:translateY(-1px); }
+.btn-dark:disabled{ opacity:.3; cursor:not-allowed; transform:none; }
+.pinfo{ font-size:13px; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:12px; }
+.pbar{ width:120px; height:4px; background:var(--border); border-radius:99px; overflow:hidden; }
+.pfill{ height:100%; background:var(--accent-red); border-radius:99px; transition:width .3s; }
+
+.panel{ display:none; }
+.panel.active{ display:block; animation:fadeUp .35s ease forwards; }
+@keyframes fadeUp{ from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:800px){
+  .grid2,.grid3,.kpi{ grid-template-columns:1fr; }
+  .kpi, .kpi.kpi5{ grid-template-columns:1fr 1fr; }
+  .pinfo .ptxt{ display:none; }
+  .audio-bar{ align-items:stretch; flex-direction:column; gap:6px; }
+  .audio-player{ width:100%; }
+}
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.05ms !important; }
+}
+</style>
+
+<!-- ============ INTRO ============ -->
+<div id="intro">
+  <div class="itop">
+    <span class="rec"><span class="dot"></span> Ricostruzione in corso</span>
+    <span>Fondo riservato · Catania · <span id="year">1860</span></span>
+  </div>
+
+  <div class="istage">
+    <div class="ifile iline" id="l0">// ARCHIVIO SIGILLATO — decrittazione fondo «I MILLE»</div>
+    <p class="iline text" id="l1">In un palazzo del centro di <b>Catania</b>, dietro una parete riemersa durante un restauro, è stato ritrovato un fondo archivistico dato per perduto.</p>
+    <p class="iline text" id="l2">Corrispondenze, dispacci, registri, memorie tardive e <b>mappe annotate</b>. Alcune carte autentiche, altre di mano incerta. Tutte parlano dei giorni della <b>Spedizione dei Mille</b>: lo sbarco, Calatafimi, Palermo.</p>
+    <p class="iline quote" id="l3">In Sicilia quei giorni si raccontano ancora a due voci: liberazione per gli uni, conquista per gli altri.</p>
+    <p class="iline text" id="l4">L'entusiasmo dei porti e la prudenza dei salotti. Le promesse di terra e i plebisciti, poi il disincanto. Un'isola che cambia perché — dice qualcuno — <b>tutto resti com'era</b>.</p>
+    <p class="iline text" id="l5">Gli storici hanno le carte, ma non riescono a leggerle tutte. Soprattutto, non riescono a distinguere <b>la prova dall'indizio</b>, la cronaca dalla propaganda, il documento dalla congettura.</p>
+    <p class="iline text" id="l6">Serve una macchina che sappia interrogare l'archivio. Che citi le fonti, resti fedele alle evidenze e — quando le carte non bastano — sappia dire <b>«non lo so»</b>.</p>
+    <p class="iline small" id="l7">È qui che entrate voi. Squadre di Catania: il fascicolo è aperto.</p>
+  </div>
+
+  <div class="iprog">
+    <div class="iprog-lbl"><span id="progtxt">Indicizzazione carte…</span><span id="progpct">0%</span></div>
+    <div class="iprog-bar"><div class="iprog-fill" id="progfill"></div></div>
+  </div>
+
+  <div class="ienter" id="ienter">
+    <div class="ienter-row">
+      <svg class="seal" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="44" fill="#8f2a1e"/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#e8412a" stroke-width="1.5" opacity=".6"/>
+        <circle cx="50" cy="50" r="34" fill="none" stroke="#f5a623" stroke-width="1" stroke-dasharray="2 3" opacity=".7"/>
+        <text x="50" y="45" text-anchor="middle" font-family="DM Mono, monospace" font-size="20" font-weight="700" fill="#f2e4c8">M</text>
+        <text x="50" y="62" text-anchor="middle" font-family="DM Mono, monospace" font-size="8" letter-spacing="1.5" fill="#f2e4c8">1860</text>
+      </svg>
+      <div>
+        <button class="btn-enter" id="enterBtn">Entra nell'Archivio →</button>
+        <div class="ienter-sub" style="margin-top:10px">Fondo decrittato · <b>Il caso dei Mille</b> · Briefing e regolamento pronti</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="iskip" id="skipBtn">Salta →</button>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <nav>
+    <a class="logo" href="#">
+      <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="26" height="27" viewBox="0 0 37 38" fill="none"><path d="M27.0094 21.8532L24.6482 15.3676C24.558 15.1195 24.675 14.8425 24.9166 14.7362C25.3257 14.5547 25.7413 14.385 26.1644 14.2283C26.2191 14.2079 26.2739 14.1864 26.3287 14.166C26.6948 14.0318 27.0631 13.9094 27.4325 13.7955C27.6881 13.7172 27.9587 13.8546 28.0499 14.1048L34.9673 33.1097L36.5006 37.3244C36.6542 37.7453 36.2215 38.1404 35.8166 37.9515L0.290388 21.3851C0.0455648 21.2712-0.0650354 20.9845 0.039122 20.7354C0.212002 20.322 0.392398 19.9108 0.581384 19.5006C0.606082 19.4458 0.630779 19.391 0.65655 19.3352C0.890635 18.8337 1.13438 18.342 1.3878 17.8555C1.96013 16.7592 2.58185 15.7015 3.24652 14.6857C3.58691 14.1671 3.93912 13.6592 4.30206 13.162C4.67037 12.6584 5.04941 12.1677 5.4392 11.6877C9.2447 7.00598 14.0896 3.42705 19.4682 1.13344C20.0255 0.896134 20.5871 0.672786 21.1551 0.462324C21.5696 0.309846 21.9873 0.163811 22.4061 0.0252923C22.6638-0.0595369 22.943 0.0757603 23.0364 0.330248L24.1242 3.3186L25.3794 6.76653L26.4521 9.71622C26.5499 9.98574 26.4038 10.281 26.13 10.3669C25.7767 10.4775 25.4256 10.5967 25.0755 10.7234C25.0208 10.7438 24.9671 10.7653 24.9123 10.7857C24.3421 10.9972 23.7806 11.2281 23.2329 11.4762C19.7517 13.0525 16.7129 15.3536 14.2861 18.2249C13.993 18.5717 13.7084 18.9272 13.4325 19.2901C13.266 19.5092 12.9546 19.5553 12.7334 19.3921L10.5955 17.8126C10.3711 17.6461 10.3239 17.3283 10.4924 17.106C10.7652 16.7452 11.0465 16.392 11.3343 16.0451C14.0971 12.7196 17.5698 10.0502 21.5557 8.21614C21.793 8.10662 21.9057 7.83387 21.8166 7.58905L20.906 5.08605C20.8062 4.81116 20.4926 4.67909 20.2263 4.80042C15.5897 6.89538 11.5619 9.99004 8.3846 13.8643C7.99159 14.3432 7.61147 14.8339 7.24531 15.3353C6.88237 15.8347 6.53339 16.3447 6.19622 16.8655C5.76241 17.5366 5.35007 18.2249 4.96244 18.9315C4.82284 19.1859 4.927 19.5059 5.19115 19.6294L29.3954 30.916C29.8013 31.105 30.2329 30.7098 30.0794 30.2889L29.885 29.7552L27.0084 21.8532H27.0094Z" fill="#e8412a"/></svg>
+      Datapizza
+    </a>
+    <div class="nav-right">
+      <span class="nav-tag">Hackathon · <b>Il caso dei Mille</b></span>
+    </div>
+  </nav>
+
+  <section class="audio-bar" aria-label="Ascolta Cantami">
+    <div class="audio-label">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18V5l10-2v13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="3" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Cantami <small>· colonna sonora</small></span>
+    </div>
+    <audio class="audio-player" controls preload="metadata">
+      <source src="assets/Cantami.mp3" type="audio/mpeg">
+      Il tuo browser non supporta la riproduzione audio. <a href="assets/Cantami.mp3">Scarica Cantami.mp3</a>.
+    </audio>
+  </section>
+
+  <div class="step-nav" id="stepnav"></div>
+
+  <div class="main">
+
+    <!-- 0 · Ritrovamento -->
+    <div class="panel active" id="panel-0">
+      <div class="sh"><span class="badge b-r">Briefing</span><h2>Un archivio <span class="cr">ritrovato</span></h2></div>
+      <p class="lead">Le carte del <b>1860</b> sono tornate alla luce. Prima di scrivere una riga di codice, ecco cosa avete tra le mani — e perché non è una lettura neutra.</p>
+      <div class="grid3">
+        <div class="card bl-r">
+          <div class="ctag r">Il fondo</div>
+          <h3>Carte da riordinare</h3>
+          <p>Dossier, cronologie d'ufficio, lettere, scansioni manoscritte danneggiate, <strong>mappe annotate</strong> e propaganda. Autentiche, simulate o derivate: la provenienza è dichiarata, non garantita.</p>
+        </div>
+        <div class="card bl-o">
+          <div class="ctag o">Due voci</div>
+          <h3>Il sentimento dell'isola</h3>
+          <p>Per una parte della Sicilia i Mille furono <strong>liberazione</strong>; per un'altra, l'inizio di una <strong>conquista</strong>. Porti in festa e salotti prudenti: la stessa transizione, letta da due lati.</p>
+        </div>
+        <div class="card bl-b">
+          <div class="ctag b">Il problema</div>
+          <h3>Leggere senza tradire</h3>
+          <p>Troppe carte, troppe versioni. Gli storici hanno bisogno di distinguere <strong>ciò che è provato</strong> da ciò che è solo raccontato — e di farlo alla scala di tutto l'archivio.</p>
+        </div>
+      </div>
+      <div class="darkcard">
+        <div class="dtag">// dal dossier introduttivo · Palermo, 1860</div>
+        <p style="font-family:'Spectral',Georgia,serif; font-size:19px; font-style:italic; line-height:1.65; color:#f1f5f9; max-width:70ch;">«Una notizia ripetuta da più bocche può essere insistente senza essere vera; una frase prudente può contenere un avvertimento senza costituire un patto. Quando le carte non bastino, la conclusione più corretta sarà dichiarare che non bastano.»</p>
+      </div>
+    </div>
+
+    <!-- 1 · La Sfida -->
+    <div class="panel" id="panel-1">
+      <div class="sh"><span class="badge b-bl">La sfida</span><h2>Costruite la macchina che <span class="cb">interroga l'archivio</span></h2></div>
+      <p class="lead">Il compito non è raccontare la Storia con la S maiuscola. È costruire una <b>pipeline RAG robusta</b> che recuperi le fonti giuste, risponda solo con evidenze verificabili e dichiari l'incertezza quando l'archivio non basta.</p>
+      <div class="grid2">
+        <div class="card bl-g"><div class="ctag g">Missione</div><h3>Recuperare le fonti corrette</h3><p>Trovare i documenti realmente pertinenti alla domanda, con il giusto <strong>ranking</strong>, dentro un corpus multimodale: PDF, scansioni, immagini e mappe.</p></div>
+        <div class="card bl-g"><div class="ctag g">Missione</div><h3>Rispondere con fedeltà</h3><p>Ogni affermazione dev'essere <strong>sostenuta dai contesti</strong> passati al modello. Niente invenzioni: un contesto non supportato azzera la Faithfulness della domanda.</p></div>
+        <div class="card bl-g"><div class="ctag g">Missione</div><h3>Ragionare da storici</h3><p>Distinguere prova diretta, indizio, congettura, fonte contestata e propaganda. Preferire la versione aggiornata quando serve.</p></div>
+        <div class="card bl-g"><div class="ctag g">Missione</div><h3>Sapersi astenere</h3><p>Quando le evidenze non reggono, la risposta corretta è <strong>«non lo so»</strong>. L'astensione ben motivata vale più di una certezza inventata.</p></div>
+      </div>
+      <div class="flow">
+        <div class="ftag">Pipeline baseline — <code style="font-family:'DM Mono',monospace">baseline_naive_rag.py</code></div>
+        <div class="frow">
+          <div class="fnode fn-b"><span class="fnl">ingest</span><span class="fnv">Docling</span></div>
+          <span class="farr">→</span>
+          <div class="fnode"><span class="fnl">chunk</span><span class="fnv">Recursive Splitter</span></div>
+          <span class="farr">→</span>
+          <div class="fnode fn-o"><span class="fnl">embed</span><span class="fnv">OpenAI</span></div>
+          <span class="farr">→</span>
+          <div class="fnode"><span class="fnl">store</span><span class="fnv">Qdrant</span></div>
+          <span class="farr">→</span>
+          <div class="fnode fn-g"><span class="fnl">retrieve</span><span class="fnv">top-5 denso</span></div>
+          <span class="farr">→</span>
+          <div class="fnode fn-r"><span class="fnl">generate</span><span class="fnv">risposta grounded</span></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card hl-b"><div class="ctag b">Track Standard</div><h3>La baseline è vostra</h3><p>Partite dallo starter con Act 1–2 già dentro. Potete estenderla o sostituirla: <strong>hybrid search, rerank</strong>, quello che serve. La baseline non li richiede.</p></div>
+        <div class="card hl-o"><div class="ctag o">Track Esperti</div><h3>Più carte, stesse regole</h3><p>Gli esperti ricevono <strong>file in più</strong> nei pack (fonti aggiuntive). Stesso schema di consegna, stesso scoring, asticella più alta.</p></div>
+      </div>
+    </div>
+
+    <!-- 2 · L'Archivio -->
+    <div class="panel" id="panel-2">
+      <div class="sh"><span class="badge b-o">L'archivio</span><h2>Quattro atti, <span class="co">quattro qualificazioni</span></h2></div>
+      <p class="lead">L'archivio si apre a tappe. E ogni carta va pesata: il dossier introduttivo fissa il <b>metodo</b> con cui giudicare quanto una fonte sostenga davvero una ricostruzione.</p>
+      <div class="grid2">
+        <div class="card bl-r hl-r"><div class="ctag r">Peso massimo</div><h3>Prova diretta</h3><p>L'atto contemporaneo, riconoscibile e pertinente, che afferma il fatto o ne registra l'esecuzione. <strong>Una firma, un ordine, una ricevuta, un dispaccio preciso.</strong></p></div>
+        <div class="card bl-o hl-o"><div class="ctag o">Da corroborare</div><h3>Indizio</h3><p>La circostanza che rende ragionevole una spiegazione e acquista forza <strong>solo se concorda con altre carte indipendenti</strong>. Carri pronti, corrieri, riunioni insolite.</p></div>
+        <div class="card bl-b hl-b"><div class="ctag b">Da separare</div><h3>Congettura</h3><p>Il passaggio che <strong>l'esaminatore aggiunge</strong> perché la carta non lo contiene. Serve a formulare una domanda, mai a chiuderla. Va tenuta distinta dalle parole del documento.</p></div>
+        <div class="card bl-g hl-g" style="border-left-color:#7c3aed; background:#faf5ff; border-color:#e9d5ff;"><div class="ctag" style="color:#7c3aed">Da maneggiare</div><h3>Fonte contestata</h3><p>La carta la cui attendibilità è diminuita da tardività, interesse o contraddizioni. Mostra <strong>come nacque una versione</strong>; non va elevata a certezza. Include la propaganda borbonica.</p></div>
+      </div>
+      <div class="tcard"><div class="tcard-scroll"><table>
+        <thead><tr><th>Atto</th><th>Quando arriva</th><th>Cosa porta</th></tr></thead>
+        <tbody>
+          <tr><td>Act 1–2</td><td>Al kickoff (nello starter)</td><td>RAG testuale: dossier, cronologia, personaggi, luoghi, punti di vista e contraddizioni</td></tr>
+          <tr><td>Act 3</td><td>Dopo il Round 1</td><td>Cross-doc, tabelle e le prime mappe e scansioni</td></tr>
+          <tr><td>Act 4</td><td>Dopo pranzo</td><td>Versioning, propaganda e fonti dannose se usate male</td></tr>
+          <tr><td>Gold Run</td><td>Pomeriggio</td><td>Stesso archivio (Act 1–4), ma domande nuove e nascoste</td></tr>
+        </tbody>
+      </table></div></div>
+      <div class="callout"><span class="ci">🗺️</span><p><b>Attenzione al multimodale.</b> Per mappe e scansioni conta il <code style="font-family:'DM Mono',monospace;background:#fff;padding:1px 5px;border-radius:4px;border:1px solid #fecaca">document_id</code> citato e il testo passato al modello. I file <code style="font-family:'DM Mono',monospace;background:#fff;padding:1px 5px;border-radius:4px;border:1px solid #fecaca">garib_*</code> sono <b>scansioni autentiche</b> — OCR rumoroso, layout irregolare, pagine come immagine: gestitele senza inventare testo che non c'è.</p></div>
+    </div>
+
+    <!-- 3 · La Giornata -->
+    <div class="panel" id="panel-3">
+      <div class="sh"><span class="badge b-p">La giornata</span><h2>Due round, un <span class="cr">Gold Run</span>, una difesa orale</h2></div>
+      <p class="lead">L'archivio cresce mentre la gara avanza. Nei due round avete feedback completo per correggere il tiro; nella Gold Run niente feedback in finestra e un solo tentativo.</p>
+      <div class="tl">
+        <div class="tlrow acc"><div class="tlt">09:00 – 09:30</div><h4>Kickoff</h4><p>Login alla piattaforma, download di starter e materiali (Act 1–2), lettura di schema e scoring. Join con il codice squadra.</p></div>
+        <div class="tlrow"><div class="tlt">09:30 – 10:40</div><h4>Build Sprint 1</h4><p>Setup, <code style="font-family:'DM Mono',monospace">make sample</code>, primo end-to-end e primi fix.</p></div>
+        <div class="tlrow acc"><div class="tlt">10:40 – 10:55</div><h4>Round 1</h4><p>Domande sugli Act 1–2. <strong>Fino a 2 submission ufficiali.</strong> La validazione non consuma il tentativo.</p></div>
+        <div class="tlrow"><div class="tlt">10:55 – 12:15</div><h4>Build Sprint 2</h4><p>Error analysis sul feedback pack; appunti in <code style="font-family:'DM Mono',monospace">TEAM_NOTES.md</code>.</p></div>
+        <div class="tlrow"><div class="tlt">12:15 – 13:00</div><h4>Act 3</h4><p>Installate lo zip di release, poi <code style="font-family:'DM Mono',monospace">--rebuild</code>. Cross-doc, tabelle, prime mappe e scansioni.</p></div>
+        <div class="tlrow"><div class="tlt">13:00 – 14:00</div><h4>Pranzo</h4><p>—</p></div>
+        <div class="tlrow"><div class="tlt">14:00 – 14:35</div><h4>Build Sprint 3 + Act 4</h4><p>Conflitti, versioni, OCR/mappe e fonti pericolose se usate male.</p></div>
+        <div class="tlrow acc"><div class="tlt">14:35 – 14:55</div><h4>Round 2</h4><p>Domande più difficili + feedback. Fino a 2 submission ufficiali.</p></div>
+        <div class="tlrow"><div class="tlt">14:55 – 15:35</div><h4>Final Sprint</h4><p>Schema, costi, abstention, prompt, regressioni.</p></div>
+        <div class="tlrow acc"><div class="tlt">15:45 – 16:00</div><h4>Gold Run</h4><p>One-shot, <strong>domande nascoste</strong>, stessi documenti, <strong>nessun feedback</strong> in finestra.</p></div>
+        <div class="tlrow"><div class="tlt">16:00 – 16:30</div><h4>Preparazione presentazioni</h4><p>Slide della Historical Review mentre si completa l'evaluation della Gold Run.</p></div>
+        <div class="tlrow acc"><div class="tlt">16:30 – 17:30</div><h4>Review + speech</h4><p>Architettura + Historical Review (5 min + 5 min) davanti alla giuria.</p></div>
+        <div class="tlrow"><div class="tlt">17:50 – 18:00</div><h4>Premiazione</h4><p>Punteggio finale su <strong>110</strong> e badge narrativi.</p></div>
+      </div>
+      <div class="callout"><span class="ci">🕘</span><p><b>Round = apprendimento, Gold = verità.</b> Nei Round 1 e 2 il feedback completo serve a correggere il tiro. Nella Gold Run quello che avete costruito è quello che conta: un tentativo, nessun paracadute.</p></div>
+    </div>
+
+    <!-- 4 · Regolamento -->
+    <div class="panel" id="panel-4">
+      <div class="sh"><span class="badge b-r">Regolamento</span><h2>Dal login alla <span class="cr">conferma irreversibile</span></h2></div>
+      <p class="lead">Poche regole, non negoziabili. Servono a tenere la gara equa e ogni submission tracciabile.</p>
+      <div class="card grid1" style="padding:8px 26px;">
+        <div class="steplist">
+          <div class="stepitem"><div class="sn"></div><div><h4>Login & Join</h4><p>Accesso con il <code>token evento</code>, poi join con il <strong>codice squadra condiviso</strong>. Alla prima attivazione il team completa nome, referente, track e componenti.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Download domande</h4><p>Le domande si scaricano <strong>solo a round aperto</strong>. Lo stato del round è derivato dall'orologio: programmato, aperto, chiuso.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Validazione</h4><p>L'upload per sola validazione controlla lo schema e <strong>non consuma il tentativo</strong>. Usatelo quanto volete prima di confermare.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Conferma irreversibile</h4><p>Solo il pulsante di conferma crea la submission ufficiale. <strong>Fino a 2 submission per Round 1 e 2</strong>, <strong>una sola per la Gold Run</strong>: conta quella con lo score più alto. La validazione, invece, potete ripeterla quanto volete.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Ricevuta</h4><p>Ogni conferma genera una ricevuta con <strong>timestamp, hash SHA-256 del file e ID submission</strong>.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Consegna finale</h4><p>Repository con codice, test, README, <code>TEAM_NOTES.md</code> e <code>outputs/submission_gold.json</code>. L'URL GitHub si inserisce <strong>sulla piattaforma</strong>, non nel JSON.</p></div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card hl-r"><div class="ctag r">Regola dei contesti</div><h3>Antifabrication</h3><p><code style="font-family:'DM Mono',monospace">contexts</code> contiene le evidenze finali passate al generatore (<strong>max 5</strong>, stesso ordine del top-k). Il <code style="font-family:'DM Mono',monospace">content</code> è confrontato col corpus: se non è riconducibile al documento indicato, <strong>Faithfulness = 0</strong> per quella domanda.</p></div>
+        <div class="card bl-b"><div class="ctag b">Supporto & materiali</div><h3>Dove trovare tutto</h3><p>Materiali (starter, regole, act, domande) <strong>solo dalla dashboard</strong>. Annunci e incidenti su <strong>Microsoft Teams</strong>. Non chiedete annotazioni private o soluzioni: arrivano nel feedback pack, dopo la chiusura del round.</p></div>
+      </div>
+      <div class="darkcard">
+        <div class="dtag">// schema submission.json — schema_version "1.0"</div>
+        <div class="drow"><span class="dchip dc-b">round</span><span class="dtxt"><code style="font-family:'DM Mono',monospace">round_id</code> + per ogni domanda <code style="font-family:'DM Mono',monospace">question_id</code>, <code style="font-family:'DM Mono',monospace">question</code>, <code style="font-family:'DM Mono',monospace">answer</code></span></div>
+        <div class="drow"><span class="dchip dc-g">contexts</span><span class="dtxt">fino a 5 evidenze<small>rank · document_id · content</small></span></div>
+        <div class="drow"><span class="dchip dc-o">telemetry</span><span class="dtxt">misurazioni per domanda<small>latency_ms · declared_cost_eur · model_calls</small></span></div>
+      </div>
+    </div>
+
+    <!-- 5 · Scoring -->
+    <div class="panel" id="panel-5">
+      <div class="sh"><span class="badge b-g">Punteggio</span><h2>110 punti, <span class="cg">cinque blocchi</span></h2></div>
+      <p class="lead">Il retrieval pesa più di tutto, ma da solo non basta: una risposta infedele o costosa lascia punti sul tavolo. I modelli sono liberi — il costo lo dichiarate voi. Gli ultimi 20 punti si vincono dal vivo, dopo la Gold Run.</p>
+      <div class="kpi kpi5">
+        <div class="kpibox acc"><div class="kv">40</div><div class="kl">Retrieval</div></div>
+        <div class="kpibox"><div class="kv">35</div><div class="kl">Generation</div></div>
+        <div class="kpibox"><div class="kv">15</div><div class="kl">Latenza + Costo</div></div>
+        <div class="kpibox"><div class="kv">10</div><div class="kl">Historical Review</div></div>
+        <div class="kpibox"><div class="kv">10</div><div class="kl">Speaker</div></div>
+      </div>
+      <div class="tcard"><div class="tcard-scroll"><table>
+        <thead><tr><th>Componente</th><th>Sotto-metriche</th><th>Punti</th></tr></thead>
+        <tbody>
+          <tr><td>Retrieval</td><td>Recall@5 (20) · Precision fino a 5 (10) · Hit@5 (5) · qualità del ranking (5)</td><td><span class="pts">40</span></td></tr>
+          <tr><td>Generation</td><td>Faithfulness (18) · Answer Correctness (12) · Historical Reasoning (5)</td><td><span class="pts">35</span></td></tr>
+          <tr><td>Latenza</td><td>wall-clock end-to-end per domanda</td><td><span class="pts">7</span></td></tr>
+          <tr><td>Costo</td><td>EUR/domanda autodichiarato (media)</td><td><span class="pts">8</span></td></tr>
+          <tr><td>Historical Review</td><td>tesi storica umana dopo la Gold · giudice Professore d'Archivio</td><td><span class="pts">10</span></td></tr>
+          <tr><td>Speaker</td><td>qualità dello speech e della difesa</td><td><span class="pts">10</span></td></tr>
+          <tr><td style="color:var(--accent-red)">Totale</td><td>—</td><td><span class="pts">110</span></td></tr>
+        </tbody>
+      </table></div></div>
+      <div class="grid2">
+        <div class="darkcard" style="margin-bottom:0">
+          <div class="dtag">// soglie latenza — punti</div>
+          <div class="drow"><span class="dtxt">≤ 4 s</span><span class="dnum">7</span></div>
+          <div class="drow"><span class="dtxt">≤ 8 s</span><span class="dnum">5</span></div>
+          <div class="drow"><span class="dtxt">≤ 15 s</span><span class="dnum">3</span></div>
+          <div class="drow"><span class="dtxt">≤ 25 s</span><span class="dnum">1</span></div>
+          <div class="drow"><span class="dtxt">&gt; 25 s</span><span class="dnum" style="color:#f87171">0</span></div>
+        </div>
+        <div class="darkcard" style="margin-bottom:0">
+          <div class="dtag">// soglie costo — punti</div>
+          <div class="drow"><span class="dtxt">≤ €0,005</span><span class="dnum">8</span></div>
+          <div class="drow"><span class="dtxt">≤ €0,02</span><span class="dnum">6</span></div>
+          <div class="drow"><span class="dtxt">≤ €0,05</span><span class="dnum">3</span></div>
+          <div class="drow"><span class="dtxt">≤ €0,10</span><span class="dnum">1</span></div>
+          <div class="drow"><span class="dtxt">&gt; €0,10</span><span class="dnum" style="color:#f87171">0</span></div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:18px"><span class="ci">⚖️</span><p><b>In caso di parità</b>, l'ordine è: totale → technical score → Retrieval → Generation → Historical Review → latenza media minore → decisione documentata della giuria. Dichiarazioni di costo palesemente implausibili possono essere moderate.</p></div>
+    </div>
+
+    <!-- 6 · Historical Review -->
+    <div class="panel" id="panel-6">
+      <div class="sh"><span class="badge b-o">Historical Review</span><h2>La difesa davanti al <span class="co">Professore d'Archivio</span></h2></div>
+      <p class="lead">Dopo la Gold Run, ogni team difende il proprio lavoro dal vivo. Non è un extra: vale <b>fino a 20 punti</b> — 10 per la Historical Review e 10 per lo Speaker — che si sommano allo score tecnico.</p>
+      <div class="grid2">
+        <div class="card bl-o"><div class="ctag o">Formato</div><h3>≈ 10 minuti, 5 + 5</h3><p>Il filo è: <strong>architettura → cosa non funzionava → fonti decisive → tesi storica</strong>. Circa 5 minuti di parte tecnica e 5 di Historical Review sulla domanda assegnata.</p></div>
+        <div class="card bl-o"><div class="ctag o">Valutazione</div><h3>Due voti, nessun JSON</h3><p>La giuria registra la parte storica, la trascrive e la valuta con il giudice <strong>Professore d'Archivio</strong> (moderazione umana se serve): questa è la <strong>Historical Review</strong>. Lo <strong>Speaker</strong> valuta invece la qualità della difesa. Nessuna consegna JSON.</p></div>
+      </div>
+      <div class="callout"><span class="ci">🎙️</span><p><b>La domanda storica arriva assegnata.</b> Ogni team riceve una sola domanda e la vede solo al momento. Non premia chi conosce la Storia a memoria, ma chi sa <b>ragionare sulle fonti</b> con cautela.</p></div>
+      <div class="darkcard">
+        <div class="dtag">// esempi dalla banca domande (assegnate, non pubbliche)</div>
+        <p style="font-family:'Spectral',Georgia,serif; font-style:italic; font-size:16px; line-height:1.9; color:#e2e8f0; max-width:72ch;">
+          «Le carte descrivono una trattativa politica o soprattutto opportunismo aristocratico?»<br>
+          «Qual è la fonte più pericolosa se letta senza contesto?»<br>
+          «Come distinguere consenso popolare e adattamento delle élite?»<br>
+          «Siamo davanti a prove dirette o a una costellazione di indizi?»
+        </p>
+      </div>
+    </div>
+
+    <!-- 7 · Al Via -->
+    <div class="panel" id="panel-7">
+      <div class="sh"><span class="badge b-r">Kickoff</span><h2>Il fascicolo è <span class="cr">aperto</span></h2></div>
+      <p class="lead">Quattro mosse per partire. Poi il resto è vostro.</p>
+      <div class="card grid1" style="padding:8px 26px; margin-bottom:22px;">
+        <div class="steplist">
+          <div class="stepitem"><div class="sn"></div><div><h4>Fate login e join</h4><p>Token evento, poi il codice squadra condiviso. Completate nome, referente, track e componenti.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Scaricate starter + regolamento</h4><p>Dalla dashboard della piattaforma. Lo starter porta già Act 1–2 e la baseline <code>baseline_naive_rag.py</code>; Act 3–4 arrivano più tardi come zip di release.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Aprite Microsoft Teams</h4><p>È il canale ufficiale: annunci orari, apertura round e incidenti passano da lì.</p></div></div>
+          <div class="stepitem"><div class="sn"></div><div><h4>Fate girare la baseline</h4><p>Provate l'end-to-end sul sample prima del Round 1. Meglio scoprire ora cosa si rompe.</p></div></div>
+        </div>
+      </div>
+      <div class="ko">
+        <div class="kbadge">Catania · Il caso dei Mille</div>
+        <h2>Che vinca la squadra che sa dire<br>anche <span>«non lo so»</span>.</h2>
+        <p>Le carte non si giudicano da sole. Distinguete la prova dall'indizio, citate le fonti, restate fedeli alle evidenze. L'archivio aspetta di essere interrogato.</p>
+        <div class="clock" id="clock">--:--:--</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bnav">
+    <button class="btn-dark" id="btn-prev" onclick="nav(-1)">← Precedente</button>
+    <div class="pinfo">
+      <div class="pbar"><div class="pfill" id="pfill" style="width:12.5%"></div></div>
+      <span class="ptxt" id="ptxt">Passo 1 di 8</span>
+    </div>
+    <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
+  </div>
+</div>
+
+<script>
+/* ---------- STEP NAV build ---------- */
+const STEPS = ["Ritrovamento","La Sfida","L'Archivio","La Giornata","Regolamento","Punteggio","Historical Review","Al Via"];
+const TOT = STEPS.length;
+const sn = document.getElementById('stepnav');
+STEPS.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='step-tab'+(i===0?' active':'');
+  b.innerHTML='<span class="snum">'+i+'</span> '+s;
+  b.addEventListener('click',()=>goTo(i));
+  sn.appendChild(b);
+});
+let cur=0;
+function goTo(idx){
+  if(idx===cur) return;
+  document.getElementById('panel-'+cur).classList.remove('active');
+  const tabs=document.querySelectorAll('.step-tab');
+  cur=idx;
+  document.getElementById('panel-'+cur).classList.add('active');
+  tabs.forEach((t,i)=>{
+    t.classList.remove('active','done');
+    if(i<cur) t.classList.add('done');
+    if(i===cur) t.classList.add('active');
+  });
+  document.getElementById('btn-prev').disabled = cur===0;
+  document.getElementById('btn-next').disabled = cur===TOT-1;
+  document.getElementById('ptxt').textContent='Passo '+(cur+1)+' di '+TOT;
+  document.getElementById('pfill').style.width=((cur+1)/TOT*100)+'%';
+  const at=tabs[cur]; if(at&&at.scrollIntoView) at.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function nav(dir){ goTo(Math.max(0,Math.min(TOT-1,cur+dir))); }
+document.getElementById('btn-prev').disabled=true;
+document.addEventListener('keydown',(e)=>{
+  if(document.getElementById('intro') && !document.getElementById('intro').classList.contains('gone')) return;
+  if(e.key==='ArrowRight') nav(1);
+  if(e.key==='ArrowLeft') nav(-1);
+});
+
+/* ---------- CLOCK ---------- */
+function tick(){
+  try{
+    const s=new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date());
+    const el=document.getElementById('clock'); if(el) el.textContent=s+' · ora di Catania';
+  }catch(e){}
+}
+setInterval(tick,1000); tick();
+
+/* ---------- INTRO sequence ---------- */
+const intro=document.getElementById('intro');
+const app=document.getElementById('app');
+const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const lines=['l0','l1','l2','l3','l4','l5','l6','l7'];
+const delays=[300,1500,3600,6000,7600,9700,12200,14600];
+const progTexts=[['Apertura del fondo…',6],['Indicizzazione carte…',34],['Confronto con il corpus…',62],['Ricostruzione indice…',86],['Fascicolo pronto',100]];
+let timers=[];
+function scheduleProg(){
+  const total=16000;
+  progTexts.forEach((p,i)=>{
+    timers.push(setTimeout(()=>{
+      document.getElementById('progtxt').textContent=p[0];
+      document.getElementById('progpct').textContent=p[1]+'%';
+      document.getElementById('progfill').style.width=p[1]+'%';
+    }, total*(i/(progTexts.length))));
+  });
+}
+function revealEnter(){
+  document.getElementById('progtxt').textContent='Fascicolo pronto';
+  document.getElementById('progpct').textContent='100%';
+  document.getElementById('progfill').style.width='100%';
+  document.getElementById('ienter').classList.add('show');
+}
+function runIntro(){
+  lines.forEach((id,i)=>{ timers.push(setTimeout(()=>document.getElementById(id).classList.add('show'), delays[i])); });
+  scheduleProg();
+  timers.push(setTimeout(revealEnter, 16200));
+}
+function showAllIntro(){
+  lines.forEach(id=>document.getElementById(id).classList.add('show'));
+  revealEnter();
+}
+function enter(){
+  timers.forEach(t=>clearTimeout(t));
+  intro.classList.add('gone');
+  app.classList.add('on');
+  setTimeout(()=>{ if(intro&&intro.parentNode) intro.parentNode.removeChild(intro); }, 900);
+}
+document.getElementById('enterBtn').addEventListener('click',enter);
+document.getElementById('skipBtn').addEventListener('click',()=>{ timers.forEach(t=>clearTimeout(t)); showAllIntro(); });
+document.getElementById('year').textContent='1860';
+
+if(reduce){ showAllIntro(); } else { runIntro(); }
+</script>
