@@ -434,7 +434,7 @@
     .source-row a { font-weight:700; }
 
     .method-note { border-left:3px solid var(--accent-orange); background:#fffbeb; border-radius:10px; padding:15px 18px; color:#7b5a20; font-size:11px; line-height:1.65; margin-top:14px; }
-    .topline { max-width:1140px; margin:18px auto 0; padding:0 48px; display:flex; justify-content:space-between; align-items:center; color:var(--muted); font:600 10px 'DM Mono'; text-transform:uppercase; letter-spacing:.08em; }
+    .topline { width:100%; margin:18px 0 0; padding:0 48px; display:flex; justify-content:space-between; align-items:center; color:var(--muted); font:600 10px 'DM Mono'; text-transform:uppercase; letter-spacing:.08em; box-sizing:border-box; }
     .brand-logo { display:block; width:112px; height:auto; }
     .final-note { text-align:center; color:var(--muted); font-size:11px; line-height:1.6; margin:28px auto 0; max-width:650px; }
     .kbd-hint { color:var(--muted); font:500 10px 'DM Mono'; }
@@ -537,17 +537,17 @@
   <main class="main">
     <section class="panel active cover-panel" id="panel-0" role="tabpanel" aria-labelledby="tab-0" tabindex="-1">
       <div class="hero">
-        <div class="hero-badge"><em>●</em> Un’indagine in cinque domande</div>
+        <div class="hero-badge"><em>●</em> 5 domande che sento spesso</div>
         <h1>Timori legati<br>all’<span>AI</span></h1>
-        <p>Le paure diventano utili quando smettono di essere slogan. Questo percorso le mette alla prova con dati, limiti metodologici e scelte concrete.</p>
+        <p>Questo percorso mette alla prova le nostre paure con dati e alcuni consigli metodologici!</p>
         <div class="hero-btns">
-          <button class="btn-dark" onclick="goTo(1)">Inizia l’indagine →</button>
+          <button class="btn-dark" onclick="goTo(1)">Inizia il percorso →</button>
           <button class="btn-light" onclick="document.getElementById('method-cover').open=true; document.getElementById('method-cover').scrollIntoView({behavior:'smooth'})">Come sono trattate le fonti</button>
         </div>
       </div>
 
       <div class="question-grid" aria-label="Le cinque domande">
-        <button class="question-card" onclick="goTo(1)"><span>01 / ENERGIA</span><strong>L’AI consuma troppo?</strong><small>Dal cloud alle reti elettriche</small></button>
+        <button class="question-card" onclick="goTo(1)"><span>01 / ENERGIA</span><strong>Quanto consuma l'AI?</strong><small>Dal cloud alle reti elettriche</small></button>
         <button class="question-card" onclick="goTo(2)"><span>02 / COGNIZIONE</span><strong>Penseremo ancora senza AI?</strong><small>Prestazione e apprendimento</small></button>
         <button class="question-card" onclick="goTo(3)"><span>03 / CREATIVITÀ</span><strong>Più creativi o più simili?</strong><small>Beneficio individuale, rischio collettivo</small></button>
         <button class="question-card" onclick="goTo(4)"><span>04 / AFFIDABILITÀ</span><strong>Possiamo fidarci?</strong><small>Errore, sicurezza e astensione</small></button>
@@ -555,7 +555,7 @@
       </div>
 
       <div class="reality-strip" aria-label="Tre dati di contesto dallo Stanford AI Index 2026">
-        <div class="reality-item"><b>88%</b><span>adozione organizzativa dell’AI</span></div>
+        <div class="reality-item"><b>88%</b><span>adozione dell’AI in azienda (tra quelle analizzate in AI index)</span></div>
         <div class="reality-item"><b>4 su 5</b><span>studenti universitari usano GenAI</span></div>
         <div class="reality-item"><b>362</b><span>incidenti AI documentati, da 233 nel 2024</span></div>
       </div>
