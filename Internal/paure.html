@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Timori legati all’AI: un’indagine interattiva su energia, cognizione, creatività, affidabilità e pensiero umano.">
+  <meta name="description" content="Timori legati all’AI: un’indagine interattiva su energia, cognizione, creatività e affidabilità.">
   <title>Timori legati all’AI — Datapizza</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -187,7 +187,7 @@
 
     /* Componenti specifici dell’explainer */
     .cover-panel { margin-top:-18px; }
-    .question-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin:10px auto 34px; max-width:1040px; }
+    .question-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:10px auto 34px; max-width:1040px; }
     .question-card { --accent:var(--accent-red); min-height:128px; text-align:left; cursor:pointer; border:1px solid rgba(13,27,42,.09); border-radius:var(--radius-card); background:var(--white); padding:20px 18px 18px; font-family:inherit; color:var(--navy); transition:transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s cubic-bezier(.16,1,.3,1), border-color .25s; position:relative; overflow:hidden; box-shadow:var(--shadow-card); }
     .question-card:nth-child(2) { --accent:var(--accent-orange); }
     .question-card:nth-child(3) { --accent:var(--purple); }
@@ -325,18 +325,6 @@
     .forest-value { text-align:right; font:700 13px 'DM Mono'; }
     .forest-direction { display:flex; justify-content:space-between; margin:10px 108px 0 206px; color:var(--muted); font-size:9px; }
 
-    .composition-chart { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:18px; margin-top:14px; }
-    .composition-chart h4 { font-size:12px; margin-bottom:4px; }
-    .composition-chart > p { color:var(--muted); font-size:10px; line-height:1.5; margin-bottom:12px; }
-    .composition-track { height:34px; background:var(--border); border-radius:7px; overflow:hidden; display:flex; }
-    .composition-seg { width:0; height:100%; color:white; font:700 10px 'DM Mono'; display:flex; align-items:center; justify-content:center; overflow:hidden; white-space:nowrap; transition:width .35s ease; }
-    .composition-seg.delegate { background:var(--accent-blue); }
-    .composition-seg.exercise { background:var(--accent-red); }
-    .composition-seg.case { background:var(--accent-orange); color:var(--navy); }
-    .composition-legend { display:flex; flex-wrap:wrap; gap:13px; margin-top:11px; }
-    .composition-legend span { color:var(--muted); font-size:9px; display:flex; gap:6px; align-items:center; }
-    .composition-legend i { width:8px; height:8px; border-radius:2px; }
-
     .factor-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
     .factor-btn { border:1px solid var(--border2); background:white; padding:10px 16px; border-radius:999px; color:var(--muted); font:700 12px 'DM Sans'; cursor:pointer; transition:all .2s; }
     .factor-btn:hover { border-color:var(--navy); color:var(--navy); }
@@ -436,31 +424,6 @@
     .bar-legend span { font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px; }
     .bar-legend i { width:8px; height:8px; border-radius:2px; }
 
-    .quiet-stage { background:linear-gradient(165deg,var(--navy2),var(--navy) 65%); border-radius:var(--radius-stage); padding:clamp(34px,7vw,76px); color:white; text-align:center; margin-bottom:18px; box-shadow:var(--shadow-stage); }
-    .quiet-stage .qmark { width:52px; height:52px; border:1px solid rgba(248,113,113,.35); background:rgba(248,113,113,.08); border-radius:50%; display:grid; place-items:center; margin:0 auto 30px; color:#f87171; font:500 20px 'DM Mono'; }
-    .quiet-stage blockquote { font-size:clamp(28px,4.8vw,52px); line-height:1.1; font-weight:800; letter-spacing:-1.5px; max-width:850px; margin:auto; }
-    .quiet-stage p { color:#96a8b9; max-width:610px; margin:22px auto 0; font-size:13px; line-height:1.7; }
-
-    .delegation-board { background:var(--white); border:1px solid rgba(13,27,42,.09); border-radius:var(--radius-card); padding:28px; margin-bottom:18px; box-shadow:var(--shadow-card); }
-    .delegation-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:20px; }
-    .delegation-head h3 { font-size:17px; }
-    .delegation-head p { color:var(--muted); font-size:11px; line-height:1.5; max-width:470px; text-align:right; }
-    .capacity-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    .capacity { border:1px solid var(--border); background:var(--bg); border-radius:14px; padding:16px; text-align:left; cursor:pointer; font-family:inherit; color:var(--navy); min-height:112px; transition:transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s; }
-    .capacity:hover { transform:translateY(-2px); box-shadow:0 10px 22px -10px rgba(13,27,42,.18); }
-    .capacity:active { transform:scale(.97); }
-    .capacity strong { display:block; font-size:13px; margin-bottom:19px; }
-    .capacity span { display:inline-block; border-radius:999px; padding:4px 9px; font:700 9px 'DM Mono'; text-transform:uppercase; letter-spacing:.04em; background:#e5e7eb; color:var(--muted); }
-    .capacity[data-state="delegate"] { background:#eff6ff; border-color:#bfdbfe; }
-    .capacity[data-state="delegate"] span { background:#dbeafe; color:#2563eb; }
-    .capacity[data-state="exercise"] { background:#fff8f7; border-color:#fecaca; }
-    .capacity[data-state="exercise"] span { background:#fee2e2; color:#dc2626; }
-    .capacity[data-state="case"] { background:#fffbeb; border-color:#fde68a; }
-    .capacity[data-state="case"] span { background:#fef3c7; color:#b45309; }
-    .personal-output { background:linear-gradient(165deg,var(--navy2),var(--navy) 70%); color:white; border-radius:16px; padding:22px 24px; margin-top:14px; display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-    .personal-output b { display:block; font:700 10px 'DM Mono'; color:#8193a7; text-transform:uppercase; margin-bottom:7px; }
-    .personal-output span { font-size:12px; line-height:1.5; color:#dce4eb; }
-
     .sources { background:var(--white); border:1px solid rgba(13,27,42,.09); border-radius:var(--radius-card); margin-top:18px; overflow:hidden; box-shadow:var(--shadow-card); }
     .sources summary { list-style:none; cursor:pointer; padding:18px 22px; display:flex; align-items:center; justify-content:space-between; font-size:12px; font-weight:800; transition:background .2s; }
     .sources summary:hover { background:var(--bg); }
@@ -477,7 +440,6 @@
     .method-note::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent-orange); }
     .topline { width:100%; margin:18px 0 0; padding:0 48px; display:flex; justify-content:space-between; align-items:center; color:var(--muted); font:600 10px 'DM Mono'; text-transform:uppercase; letter-spacing:.08em; box-sizing:border-box; }
     .brand-logo { display:block; width:112px; height:auto; }
-    .final-note { text-align:center; color:var(--muted); font-size:11px; line-height:1.6; margin:28px auto 0; max-width:650px; }
     .kbd-hint { color:var(--muted); font:500 10px 'DM Mono'; }
 
     :focus-visible { outline:3px solid rgba(37,99,235,.35); outline-offset:3px; }
@@ -507,9 +469,6 @@
       .mode-btn { margin:0; flex-direction:column; gap:4px; align-items:flex-start; }
       .atlas-card { grid-template-columns:1fr; }
       .atlas-stat { border-right:0; border-bottom:1px solid #bfdbfe; }
-      .capacity-grid, .personal-output { grid-template-columns:1fr 1fr; }
-      .delegation-head { align-items:flex-start; flex-direction:column; }
-      .delegation-head p { text-align:left; }
       .forecast-head { align-items:flex-start; flex-direction:column; }
       .forecast-head p { text-align:left; }
       .effect-row { grid-template-columns:135px 1fr 62px; gap:10px; }
@@ -530,7 +489,7 @@
       .question-grid { grid-template-columns:1fr; }
       .question-card:last-child { grid-column:auto; }
       .question-card { min-height:122px; }
-      .grid5, .capacity-grid, .personal-output { grid-template-columns:1fr; }
+      .grid5 { grid-template-columns:1fr; }
       .sh { flex-direction:column; gap:8px; }
       .sh .badge { margin-top:0; }
       .factor-detail { grid-template-columns:1fr; gap:8px; }
@@ -574,13 +533,12 @@
     <button class="step-tab" id="tab-2" role="tab" aria-selected="false" aria-controls="panel-2" onclick="goTo(2)"><span class="snum">2</span> Penseremo ancora?</button>
     <button class="step-tab" id="tab-3" role="tab" aria-selected="false" aria-controls="panel-3" onclick="goTo(3)"><span class="snum">3</span> Più simili?</button>
     <button class="step-tab" id="tab-4" role="tab" aria-selected="false" aria-controls="panel-4" onclick="goTo(4)"><span class="snum">4</span> Possiamo fidarci?</button>
-    <button class="step-tab" id="tab-5" role="tab" aria-selected="false" aria-controls="panel-5" onclick="goTo(5)"><span class="snum">5</span> Cosa resta?</button>
   </div>
 
   <main class="main">
     <section class="panel active cover-panel" id="panel-0" role="tabpanel" aria-labelledby="tab-0" tabindex="-1">
       <div class="hero">
-        <div class="hero-badge"><em>●</em> 5 domande che sento spesso</div>
+        <div class="hero-badge"><em>●</em> 4 domande che sento spesso</div>
         <h1>Timori legati<br>all’<span>AI</span></h1>
         <p>Questo percorso mette alla prova le nostre paure con dati e alcuni consigli metodologici!</p>
         <div class="hero-btns">
@@ -589,12 +547,11 @@
         </div>
       </div>
 
-      <div class="question-grid" aria-label="Le cinque domande">
+      <div class="question-grid" aria-label="Le quattro domande">
         <button class="question-card" onclick="goTo(1)"><strong><span>01</span>Quanto consuma l'AI?</strong><small>Dal cloud alle reti elettriche</small></button>
         <button class="question-card" onclick="goTo(2)"><strong><span>02</span>Penseremo ancora senza AI?</strong><small>Prestazione e apprendimento</small></button>
         <button class="question-card" onclick="goTo(3)"><strong><span>03</span>Più creativi o più simili?</strong><small>Beneficio individuale, rischio collettivo</small></button>
         <button class="question-card" onclick="goTo(4)"><strong><span>04</span>Possiamo fidarci?</strong><small>Errore, sicurezza e astensione</small></button>
-        <button class="question-card" onclick="goTo(5)"><strong><span>05</span>Cosa resta dell’umano?</strong><small>Il confine della delega</small></button>
       </div>
 
       <div class="reality-strip" aria-label="Tre dati di contesto dallo Stanford AI Index 2026">
@@ -905,74 +862,13 @@
       </details>
     </section>
 
-    <section class="panel" id="panel-5" role="tabpanel" aria-labelledby="tab-5" tabindex="-1">
-      <div class="sh">
-        <span class="badge b-n">05 · Scelta culturale</span>
-        <div class="sh-copy"><h2>Se una macchina sa argomentare, <span class="cr">cosa resta del pensiero umano?</span></h2><p>Qui le fonti non offrono una scala quantitativa comparabile. Il grafico nasce quindi soltanto dalle tue scelte e rende visibile il confine che decidi di tracciare.</p></div>
-      </div>
-
-      <div class="quiet-stage">
-        <div class="qmark">?</div>
-        <blockquote>Quali capacità vuoi delegare all’AI, e quali vuoi continuare a esercitare anche quando delegarle sarebbe più facile?</blockquote>
-        <p>L’AI può ampliare gli orizzonti del pensiero e, nello stesso tempo, favorire omogeneizzazione o dipendenza. La tensione resta aperta: dipende anche dalle pratiche che scegliamo.</p>
-      </div>
-
-      <div class="delegation-board">
-        <div class="delegation-head"><h3>Disegna il tuo confine della delega</h3><p>Ogni tessera cambia stato al clic. Non esiste una risposta corretta: il risultato serve a rendere esplicita la tua scelta.</p></div>
-        <div class="capacity-grid">
-          <button class="capacity" data-state="case" data-label="Prima bozza" onclick="cycleCapacity(this)"><strong>Scrivere una prima bozza</strong><span>caso per caso</span></button>
-          <button class="capacity" data-state="case" data-label="Sintesi" onclick="cycleCapacity(this)"><strong>Sintetizzare molte fonti</strong><span>caso per caso</span></button>
-          <button class="capacity" data-state="case" data-label="Memoria" onclick="cycleCapacity(this)"><strong>Ricordare ciò che ho prodotto</strong><span>caso per caso</span></button>
-          <button class="capacity" data-state="case" data-label="Verifica" onclick="cycleCapacity(this)"><strong>Verificare un’affermazione</strong><span>caso per caso</span></button>
-          <button class="capacity" data-state="case" data-label="Ideazione" onclick="cycleCapacity(this)"><strong>Generare alternative</strong><span>caso per caso</span></button>
-          <button class="capacity" data-state="case" data-label="Giudizio" onclick="cycleCapacity(this)"><strong>Prendere la decisione finale</strong><span>caso per caso</span></button>
-        </div>
-        <div class="composition-chart" aria-labelledby="delegation-chart-title">
-          <h4 id="delegation-chart-title">Distribuzione delle tue sei scelte</h4>
-          <p>Composizione aggiornata in tempo reale; il denominatore resta sempre pari a sei capacità.</p>
-          <div class="composition-track" id="delegation-chart" aria-label="Sei scelte valutate caso per caso">
-            <span class="composition-seg delegate" id="choice-delegate"></span>
-            <span class="composition-seg exercise" id="choice-exercise"></span>
-            <span class="composition-seg case" id="choice-case" style="width:100%">6</span>
-          </div>
-          <div class="composition-legend"><span><i style="background:#2563eb"></i> Delego: <b id="count-delegate">0</b></span><span><i style="background:#e8412a"></i> Esercito: <b id="count-exercise">0</b></span><span><i style="background:#f5a623"></i> Caso per caso: <b id="count-case">6</b></span></div>
-          <div class="chart-footnote">È una visualizzazione riflessiva delle tue risposte, non una misura psicologica o un risultato tratto dai saggi citati.</div>
-        </div>
-        <div class="personal-output" aria-live="polite">
-          <div><b>Delego</b><span id="out-delegate">—</span></div>
-          <div><b>Continuo a esercitare</b><span id="out-exercise">—</span></div>
-          <div><b>Valuto ogni volta</b><span id="out-case">Prima bozza, Sintesi, Memoria, Verifica, Ideazione, Giudizio</span></div>
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div class="card bl-o"><div class="ctag o">Tesi filosofica</div><h3>Opportunità e minaccia convivono</h3><p>Mondo Digitale presenta l’AI come possibile amplificatore del pensiero e, insieme, come fonte di omogeneizzazione e manipolazione intellettuale.</p></div>
-        <div class="card bl-r"><div class="ctag r">Cornice storica</div><h3>La tecnologia riapre una domanda antica</h3><p>Fondazione Leonardo usa l’AI per tornare a interrogare intelligenza, mente e natura dell’essere umano. È una cornice del 2019, non un’evidenza contemporanea.</p></div>
-      </div>
-
-      <div class="claim">
-        <div class="claim-label">La conclusione dell’indagine</div>
-        <p>Il confine decisivo non passa tra umano e macchina. Passa tra ciò che <em>scegliamo consapevolmente di delegare</em> e ciò che smettiamo di esercitare senza accorgercene.</p>
-      </div>
-
-      <details class="sources">
-        <summary>Fonti e natura delle affermazioni</summary>
-        <div class="sources-list">
-          <div class="source-row"><span class="source-type">Saggio</span><p><a href="https://mondodigitale.aicanet.it/filosofare-artificiale-minaccia-o-opportunita-per-il-pensiero/" target="_blank" rel="noopener">Colamedici &amp; Gancitano, Filosofare artificiale, Mondo Digitale, 2025</a>. Discute amplificazione, omogeneizzazione e manipolazione come possibilità concorrenti.</p></div>
-          <div class="source-row"><span class="source-type">Cornice</span><p><a href="https://www.fondazioneleonardo.com/stories/fine-della-filosofia-e-intelligenza-artificiale" target="_blank" rel="noopener">Fondazione Leonardo, Fine della filosofia e Intelligenza Artificiale, 2019</a>. Usata per la domanda su intelligenza e natura umana.</p></div>
-          <div class="source-row"><span class="source-type">Trasparenza</span><p>La mappa personale della delega è un esercizio riflessivo dell’utente. Non misura capacità cognitive e non produce alcuna valutazione psicologica.</p></div>
-        </div>
-      </details>
-
-      <p class="final-note">Le paure più feconde non sono quelle che danno già una risposta. Sono quelle che ci obbligano a decidere quali criteri vogliamo conservare.</p>
-    </section>
   </main>
 
   <div class="bnav" aria-label="Navigazione tra i capitoli">
     <button class="btn-dark" id="btn-prev" onclick="nav(-1)" disabled>← Precedente</button>
     <div class="pinfo">
-      <div class="pbar" aria-hidden="true"><div class="pfill" id="pfill" style="width:16.67%"></div></div>
-      <span id="ptxt">Passo 1 di 6</span>
+      <div class="pbar" aria-hidden="true"><div class="pfill" id="pfill" style="width:20%"></div></div>
+      <span id="ptxt">Passo 1 di 5</span>
       <span class="kbd-hint">← →</span>
     </div>
     <button class="btn-blue" id="btn-next" onclick="nav(1)">Successivo →</button>
@@ -980,7 +876,7 @@
 
   <script>
     let cur = 0;
-    const TOT = 6;
+    const TOT = 5;
 
     function goTo(idx) {
       const next = Math.max(0, Math.min(TOT - 1, idx));
@@ -1132,35 +1028,7 @@
       }
     }
 
-    const stateOrder = ['case', 'delegate', 'exercise'];
-    const stateLabels = { case:'caso per caso', delegate:'delegare', exercise:'continuare a esercitare' };
-
-    function cycleCapacity(button) {
-      const current = stateOrder.indexOf(button.dataset.state);
-      const nextState = stateOrder[(current + 1) % stateOrder.length];
-      button.dataset.state = nextState;
-      button.querySelector('span').textContent = stateLabels[nextState];
-      updateDelegationOutput();
-    }
-
-    function updateDelegationOutput() {
-      const groups = { delegate:[], exercise:[], case:[] };
-      document.querySelectorAll('.capacity').forEach(item => groups[item.dataset.state].push(item.dataset.label));
-      document.getElementById('out-delegate').textContent = groups.delegate.join(', ') || '—';
-      document.getElementById('out-exercise').textContent = groups.exercise.join(', ') || '—';
-      document.getElementById('out-case').textContent = groups.case.join(', ') || '—';
-      ['delegate','exercise','case'].forEach(state => {
-        const count = groups[state].length;
-        const segment = document.getElementById('choice-' + state);
-        segment.style.width = (count / 6 * 100) + '%';
-        segment.textContent = count || '';
-        document.getElementById('count-' + state).textContent = count;
-      });
-      document.getElementById('delegation-chart').setAttribute('aria-label', groups.delegate.length + ' delegate, ' + groups.exercise.length + ' da esercitare, ' + groups.case.length + ' caso per caso');
-    }
-
     setQuoteSession(1, null);
-    updateDelegationOutput();
 
     document.addEventListener('keydown', event => {
       const tag = document.activeElement && document.activeElement.tagName;
