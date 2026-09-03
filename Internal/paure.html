@@ -421,19 +421,6 @@
     .shift-grid b { display:block; font:700 10px 'DM Mono'; color:var(--accent-blue); margin-bottom:5px; text-transform:uppercase; }
     .shift-grid span { font-size:12px; color:#415d78; }
 
-    .choice-stage { background:linear-gradient(165deg,var(--navy2),var(--navy) 65%); border-radius:var(--radius-stage); padding:36px; margin-bottom:18px; color:white; box-shadow:var(--shadow-stage); }
-    .choice-stage > h3 { font-size:clamp(22px,3vw,32px); max-width:700px; margin-bottom:8px; }
-    .choice-stage > p { color:#9fb0c1; font-size:13px; line-height:1.6; margin-bottom:24px; }
-    .choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .choice-btn { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); color:white; border-radius:16px; padding:24px; font-family:inherit; text-align:left; cursor:pointer; transition:all .3s cubic-bezier(.16,1,.3,1); }
-    .choice-btn:hover { background:rgba(255,255,255,.1); transform:translateY(-3px); }
-    .choice-btn.selected { border-color:#f87171; box-shadow:inset 0 0 0 1px #f87171, 0 0 0 6px rgba(248,113,113,.1); }
-    .choice-btn b { display:block; color:#f87171; font:700 10px 'DM Mono'; margin-bottom:16px; }
-    .choice-btn strong { display:block; font-size:16px; }
-    .choice-btn span { display:block; color:#9fb0c1; font-size:11px; line-height:1.5; margin-top:6px; }
-    .reveal { display:none; animation:fadeUp .3s ease forwards; }
-    .reveal.visible { display:block; }
-
     .qa-bars { background:var(--white); border:1px solid rgba(13,27,42,.09); border-radius:var(--radius-card); padding:28px; margin-bottom:18px; box-shadow:var(--shadow-card); }
     .qa-bars h3 { font-size:16px; margin-bottom:4px; }
     .qa-bars > p { color:var(--muted); font-size:11px; margin-bottom:22px; }
@@ -526,7 +513,6 @@
       .forecast-head { align-items:flex-start; flex-direction:column; }
       .forecast-head p { text-align:left; }
       .effect-row { grid-template-columns:135px 1fr 62px; gap:10px; }
-      .choice-grid { grid-template-columns:1fr; }
       .model-row { grid-template-columns:1fr; gap:7px; }
       .chart-head { flex-direction:column; gap:10px; }
       .chart-source { align-self:flex-start; }
@@ -555,7 +541,6 @@
       .brain-svg { min-width:0; }
       .forecast-track { grid-template-columns:58px 1fr 58px; }
       .claim { padding:28px 24px; }
-      .choice-stage { padding:24px; }
       .effect-row { grid-template-columns:1fr; }
       .effect-value { text-align:left; }
       .evidence-chart { padding:20px 17px; }
@@ -800,11 +785,11 @@
         <div class="ctag r">Cinque antidoti operativi · Datapizza</div>
         <h3 style="margin-bottom:16px">Dalla delega selettiva alla resa cognitiva il confine è nel controllo</h3>
         <div class="grid5" id="rules-grid">
-          <button class="rule-card" onclick="toggleRule(this)"><b>01</b><strong>Distingui competenza e simulazione</strong><p>Chiediti se vuoi restare capace di svolgere quel compito anche senza AI.</p></button>
-          <button class="rule-card" onclick="toggleRule(this)"><b>02</b><strong>Guida tu la conversazione</strong><p>Tratta ogni proposta come un’ipotesi da verificare e conserva la direzione del lavoro.</p></button>
-          <button class="rule-card" onclick="toggleRule(this)"><b>03</b><strong>Riconosci le vulnerabilità</strong><p>Stanchezza e scadenze riducono la vigilanza proprio quando una risposta sicura sembra più comoda.</p></button>
-          <button class="rule-card" onclick="toggleRule(this)"><b>04</b><strong>Verbalizza la logica</strong><p>Riformula con parole tue le ragioni di ogni output importante che decidi di accettare.</p></button>
-          <button class="rule-card" onclick="toggleRule(this)"><b>05</b><strong>Reintroduci pratica manuale</strong><p>Nei domini che vuoi padroneggiare, prova prima, sbaglia e critica il risultato riga per riga.</p></button>
+          <button class="rule-card" onclick="toggleRule(this)"><b>01</b><strong>Scegli cosa vuoi saper fare</strong><p>Chiediti sempre: se domani mi togliessero l'AI, saprei ancora fare questa cosa da solo?</p></button>
+          <button class="rule-card" onclick="toggleRule(this)"><b>02</b><strong>Tieni tu il volante</strong><p>Non prendere tutto per buono. Tratta le risposte come bozze e decidi tu dove portare il discorso.</p></button>
+          <button class="rule-card" onclick="toggleRule(this)"><b>03</b><strong>Occhio alla stanchezza</strong><p>Quando sei di fretta abbassi la guardia, ed è lì che tendi a fidarti ciecamente di una risposta comoda.</p></button>
+          <button class="rule-card" onclick="toggleRule(this)"><b>04</b><strong>Spiegalo a parole tue</strong><p>Se accetti una soluzione dell'AI, sforzati di spiegarne il motivo. Se non ci riesci, non l'hai capita a fondo.</p></button>
+          <button class="rule-card" onclick="toggleRule(this)"><b>05</b><strong>Torna a sporcarti le mani</strong><p>Sulle cose importanti lavora da solo. Sbaglia, riprova, e usa l'AI solo alla fine per un confronto.</p></button>
         </div>
       </div>
 
@@ -841,14 +826,14 @@
           <span class="forest-value">−0,863</span>
         </button>
         <div class="forest-direction" aria-hidden="true"><span>effetto negativo</span><span>effetto positivo</span></div>
-        <div class="chart-detail" id="forest-chart-detail" aria-live="polite"><b>Performance creativa: g = 0,273</b><p>IC 95% [0,018; 0,528], p = 0,036. L’effetto aggregato è positivo e contenuto; l’intervallo resta appena sopra lo zero.</p></div>
+        <div class="chart-detail" id="forest-chart-detail" aria-live="polite"><b>Performance creativa: g = 0,273</b><p>In media, chi lavora con un’AI produce risultati creativi leggermente migliori rispetto a chi lavora senza assistenza. Il vantaggio c’è, ma resta piccolo: i dati sono compatibili anche con un miglioramento quasi impercettibile. Non significa che l’AI renda automaticamente ogni persona più creativa; segnala piuttosto un aiuto medio nella qualità immediata dell’output.</p></div>
         <div class="chart-footnote">Il punto rappresenta l’effetto aggregato; la linea orizzontale il suo intervallo di confidenza. La linea verticale marca l’assenza di effetto.</div>
       </div>
 
       <div class="sequence" aria-label="Tre tempi della collaborazione umano AI">
-        <button class="seq-step active" data-n="01" onclick="selectSequence(this)"><h3>Mentre l’AI è presente</h3><p>La collaborazione migliora, in media, la performance immediata nei compiti considerati.</p></button>
-        <button class="seq-step" data-n="02" onclick="selectSequence(this)"><h3>Quando molti usano lo stesso ausilio</h3><p>Le produzioni possono diventare più simili: Doshi e Hauser mostrano il paradosso, la meta-analisi ne conferma la direzione.</p></button>
-        <button class="seq-step" data-n="03" onclick="selectSequence(this)"><h3>Quando l’assistenza scompare</h3><p>Nei quattro esperimenti di Wu et al., il vantaggio prestazionale non persiste nel compito successivo svolto da soli; calano motivazione intrinseca e cresce la noia.</p></button>
+        <button class="seq-step active" data-n="01" onclick="selectSequence(this)"><h3>Finché usiamo l'AI</h3><p>Di solito il risultato immediato migliora. Lavorando insieme all'assistente, in media, tiriamo fuori un lavoro migliore rispetto a quello che avremmo fatto da soli.</p></button>
+        <button class="seq-step" data-n="02" onclick="selectSequence(this)"><h3>Se tutti usano lo stesso strumento</h3><p>I risultati tendono ad assomigliarsi un po' tutti. Come mostrano Doshi e Hauser (e conferma la meta-analisi), si alza la qualità media, ma si appiattiscono la varietà e l'originalità delle idee.</p></button>
+        <button class="seq-step" data-n="03" onclick="selectSequence(this)"><h3>Quando l'aiuto svanisce</h3><p>Il vantaggio sparisce con lui. Negli esperimenti di Wu et al. si nota come, affrontando subito dopo un compito da soli, facciamo più fatica, ci annoiamo prima e ci passa la voglia.</p></button>
       </div>
 
       <div class="shift-card">
@@ -860,11 +845,6 @@
           <div><b>Stewardship</b><span>Custodire obiettivo e responsabilità del task</span></div>
         </div>
         <div class="method-note">Nel survey di Lee et al., maggiore fiducia nella GenAI è associata a minore esercizio dichiarato di pensiero critico; maggiore fiducia nelle proprie capacità all’associazione opposta. È un risultato auto-riferito e associativo.</div>
-      </div>
-
-      <div class="claim">
-        <div class="claim-label">La paura, resa più precisa</div>
-        <p>L’AI può migliorare ciò che produciamo oggi, mentre <em>cambia le capacità che esercitiamo</em> per produrlo.</p>
       </div>
 
       <details class="sources">
@@ -882,23 +862,13 @@
     <section class="panel" id="panel-4" role="tabpanel" aria-labelledby="tab-4" tabindex="-1">
       <div class="sh">
         <span class="badge b-bl">04 · Incertezza</span>
-        <div class="sh-copy"><h2>Possiamo fidarci di una macchina <span class="cb">che sembra sicura di sé?</span></h2><p>Una risposta fluida può essere corretta, errata oppure prudentemente sospesa. Il modo in cui misuriamo i modelli decide quale comportamento premiamo.</p></div>
+        <div class="sh-copy"><h2>Possiamo fidarci di una macchina <span class="cb">che sembra sicura di sé?</span></h2><p>Una risposta scritta con sicurezza può essere giusta, sbagliata, oppure il modello può semplicemente ammettere di non sapere. Tutto dipende da come giudichiamo l'AI e da quale comportamento decidiamo di premiare.</p></div>
       </div>
 
-      <div class="choice-stage">
-        <h3>Quale sistema ti sembra più affidabile?</h3>
-        <p>Scegli prima di vedere i risultati dell’evaluation SimpleQA.</p>
-        <div class="choice-grid">
-          <button class="choice-btn" onclick="chooseReliability(this,'always')"><b>SISTEMA A</b><strong>Prova quasi sempre a rispondere</strong><span>Raramente si astiene quando non è sicuro.</span></button>
-          <button class="choice-btn" onclick="chooseReliability(this,'uncertain')"><b>SISTEMA B</b><strong>Ammette spesso l’incertezza</strong><span>Rinuncia a una risposta specifica in più casi.</span></button>
-        </div>
-      </div>
-
-      <div class="reveal" id="reliability-reveal" aria-live="polite">
-        <div class="qa-bars evidence-chart">
-          <div class="ctag b">SimpleQA · dati riportati da OpenAI</div>
-          <h3>Una differenza piccola nell’accuracy nasconde una differenza enorme negli errori</h3>
-          <p id="choice-feedback">Hai scelto. Ora guarda come si compongono le risposte.</p>
+      <div class="qa-bars evidence-chart">
+        <div class="ctag b">SimpleQA · dati riportati da OpenAI</div>
+        <h3>Una differenza piccola nell’accuracy nasconde una differenza enorme negli errori</h3>
+        <p>Confronta prima l’accuracy, poi guarda come si compongono tutte le risposte.</p>
           <div class="chart-controls" aria-label="Scegli la metrica visualizzata">
             <button class="chart-toggle active reliability-view" onclick="setReliabilityView('accuracy',this)">Solo accuracy</button>
             <button class="chart-toggle reliability-view" onclick="setReliabilityView('outcomes',this)">Esito completo</button>
@@ -913,27 +883,16 @@
           </div>
           <div class="bar-legend" id="qa-legend"><span><i style="background:#059669"></i> Accuracy</span><span><i style="background:#edf0f3"></i> Esito non visibile in questa metrica</span></div>
           <div class="chart-detail" id="qa-chart-detail" aria-live="polite"><b>Vista “Solo accuracy”</b><p>o4-mini sembra avanti di 2 punti percentuali. Questa vista, da sola, non distingue astensioni e risposte errate.</p></div>
-        </div>
+      </div>
 
-        <div class="grid2">
-          <div class="card hl-b bl-b"><div class="ctag b">Accuracy</div><h3>24% contro 22%</h3><p>Se guardassimo soltanto le risposte corrette, o4-mini apparirebbe leggermente migliore.</p></div>
-          <div class="card hl-r bl-r"><div class="ctag r">Error rate</div><h3>75% contro 26%</h3><p>Il modello che quasi non si astiene produce molte più risposte sbagliate.</p></div>
-        </div>
+      <div class="grid2">
+        <div class="card hl-b bl-b"><div class="ctag b">Accuracy</div><h3>24% contro 22%</h3><p>Se guardassimo soltanto le risposte corrette, o4-mini apparirebbe leggermente migliore.</p></div>
+        <div class="card hl-r bl-r"><div class="ctag r">Error rate</div><h3>75% contro 26%</h3><p>Il modello che quasi non si astiene produce molte più risposte sbagliate.</p></div>
       </div>
 
       <div class="claim">
         <div class="claim-label">Il punto dell’evaluation</div>
         <p><em>Accuracy e affidabilità non sono sinonimi.</em> Anche saper dire “non lo so” è una capacità del sistema.</p>
-      </div>
-
-      <div class="flow">
-        <div class="ftag">L’incentivo descritto nel paper</div>
-        <div class="frow">
-          <div class="fnode fn-b"><span class="fnl">benchmark</span><span class="fnv">premia accuratezza</span></div><span class="farr">→</span>
-          <div class="fnode fn-o"><span class="fnl">strategia</span><span class="fnv">tentare la risposta</span></div><span class="farr">→</span>
-          <div class="fnode fn-r"><span class="fnl">effetto</span><span class="fnv">più risposte errate</span></div><span class="farr">→</span>
-          <div class="fnode fn-g"><span class="fnl">correzione</span><span class="fnv">penalizzare l’errore</span></div>
-        </div>
       </div>
 
       <details class="sources">
@@ -1147,19 +1106,6 @@
       const detail = document.getElementById('forest-chart-detail');
       detail.querySelector('b').textContent = forestDetails[key].title;
       detail.querySelector('p').textContent = forestDetails[key].text;
-    }
-
-    function chooseReliability(button, choice) {
-      document.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('selected'));
-      button.classList.add('selected');
-      const reveal = document.getElementById('reliability-reveal');
-      reveal.classList.add('visible');
-      const feedback = choice === 'uncertain'
-        ? 'Hai privilegiato il sistema che esplicita l’incertezza. I dati mostrano perché questa scelta può ridurre le risposte errate.'
-        : 'Hai privilegiato il sistema che tenta più risposte. L’accuracy sale di poco, ma osserva ciò che accade al tasso di errore.';
-      document.getElementById('choice-feedback').textContent = feedback;
-      setReliabilityView('accuracy', reveal.querySelector('.reliability-view'));
-      setTimeout(() => reveal.scrollIntoView({behavior:'smooth', block:'center'}), 120);
     }
 
     function setReliabilityView(view, button) {
