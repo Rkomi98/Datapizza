@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Da token a deployment — Gemma 4 | Datapizza</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f7f8fa;--white:#fff;--navy:#0d1b2a;--navy2:#1a2e42;--red:#e8412a;--orange:#f5a623;--blue:#2563eb;--green:#059669;--muted:#6b7280;--border:#e5e7eb;--border2:#d1d5db}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--navy);font-family:'DM Sans',sans-serif;min-height:100vh}
+    body:before{content:'';position:fixed;inset:0;background-image:linear-gradient(#e5e7eb88 1px,transparent 1px),linear-gradient(90deg,#e5e7eb88 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+    body>*{position:relative;z-index:1}
+    .shell{max-width:1100px;margin:0 auto;padding:28px 32px 80px}
+    .kicker{font:800 11px 'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+    .hero{padding:26px 0 20px}
+    .hero h1{font-size:clamp(34px,5vw,60px);line-height:1.02;letter-spacing:-1.8px;margin:0 0 14px;font-weight:900;max-width:850px}
+    .hero h1 span{color:var(--red)}
+    .hero p{font-size:16px;line-height:1.7;color:var(--muted);max-width:760px;margin:0}
+    .model{display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:white;border:1px solid var(--border2);border-radius:10px;padding:8px 12px;font:700 12px 'DM Mono',monospace}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+    .tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 0 14px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex:0 0 auto;border:1px solid var(--border);background:white;border-radius:9px;padding:10px 12px;font:700 12px 'DM Sans',sans-serif;color:var(--muted);cursor:pointer;min-height:44px}
+    .tab[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:white}
+    .tab:focus-visible,.btn:focus-visible,.choice:focus-visible,.node:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+    .panel{display:none;animation:up .25s ease}
+    .panel.active{display:block}
+    @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .card{background:white;border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:14px;transition:box-shadow .2s}
+    .card:hover{box-shadow:0 4px 24px rgba(13,27,42,.07)}
+    .card.red{border-left:3px solid var(--red)}.card.blue{border-left:3px solid var(--blue)}.card.orange{border-left:3px solid var(--orange)}.card.green{border-left:3px solid var(--green)}
+    .card h3{font-size:18px;margin:0 0 9px;font-weight:900}
+    .card p{font-size:13px;color:var(--muted);line-height:1.7;margin:0}
+    .card strong{color:var(--navy)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .flow{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;overflow-x:auto;margin-bottom:14px}
+    .flowrow{display:flex;align-items:center;gap:7px;min-width:700px}
+    .node{border:1px solid var(--border2);background:var(--bg);border-radius:9px;padding:10px 12px;min-width:120px;text-align:center;cursor:pointer;transition:.15s}
+    .node:hover{transform:translateY(-1px)}
+    .node small{display:block;color:var(--muted);font:700 9px 'DM Mono',monospace;text-transform:uppercase;margin-bottom:4px}
+    .node b{font-size:12px}
+    .arrow{color:#c6cbd2;font-size:18px}
+    .code{background:var(--navy);border-radius:12px;padding:17px;color:#e2e8f0;font:12px/1.8 'DM Mono',monospace;overflow:auto;margin-top:14px}
+    .code .r{color:#f87171}.code .g{color:#6ee7b7}.code .b{color:#93c5fd}.code .o{color:#fcd34d}.code .dim{color:#64748b}
+    .label{font:800 10px 'DM Mono',monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .tokenline{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+    .token{padding:6px 9px;border-radius:6px;background:#eff6ff;border:1px solid #bfdbfe;font:700 12px 'DM Mono',monospace}
+    .mask{background:#fff8f7;border-color:#fca5a5;color:var(--red)}
+    .bars{margin-top:14px}
+    .barrow{display:grid;grid-template-columns:90px 1fr 42px;align-items:center;gap:8px;margin:8px 0;font-size:12px}
+    .track{height:9px;background:#edf0f3;border-radius:99px;overflow:hidden}
+    .fill{height:100%;border-radius:99px;background:var(--blue)}
+    .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .btn,.choice{border:0;border-radius:9px;background:var(--navy);color:white;padding:11px 14px;font:700 12px 'DM Sans',sans-serif;cursor:pointer;min-height:44px}
+    .btn.secondary,.choice{background:white;color:var(--navy);border:1px solid var(--border2)}
+    .choice.selected{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
+    .prompt{font:700 13px/1.6 'DM Mono',monospace;background:var(--bg);border:1px solid var(--border);padding:12px;border-radius:9px;margin:14px 0 10px}
+    .answer{border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:9px;font-size:13px;line-height:1.6;background:white;color:var(--navy)}
+    .answer .who{font:800 10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+    .answer.good{border-color:#86efac;background:#f0fdf4}
+    .meter{height:24px;border-radius:8px;overflow:hidden;background:#edf0f3;margin:10px 0 5px}
+    .meterfill{height:100%;background:var(--red);transition:width .35s ease}
+    .mem{font-size:clamp(28px,5vw,44px);font-weight:900;letter-spacing:-1px}
+    .mem small{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:0}
+    .stat{padding:14px;border-radius:10px;background:white;border:1px solid var(--border)}
+    .stat b{display:block;font-size:22px;margin-bottom:3px}
+    .stat span{font-size:11px;color:var(--muted)}
+    .callout{background:var(--navy);color:#e2e8f0;border-radius:14px;padding:18px;margin-top:14px}
+    .callout b{color:white}
+    .callout p{font-size:12px;line-height:1.65;color:#cbd5e1;margin:0}
+    .callout .label{color:#64748b}
+    .source{font-size:10px;color:var(--muted);margin-top:10px;font-family:'DM Mono',monospace}
+    .stepper{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+    .draft{padding:8px 10px;border-radius:7px;border:1px solid var(--border);background:white;font:700 12px 'DM Mono',monospace}
+    .draft.accept{background:#f0fdf4;border-color:#86efac;color:#047857}
+    .draft.reject{background:#fff8f7;border-color:#fca5a5;color:#dc2626;text-decoration:line-through}
+    .check{font-size:11px;color:var(--muted);margin-top:8px;min-height:20px}
+    .note{padding:12px 14px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;font-size:12px;line-height:1.6;color:#92400e;margin-top:12px}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;padding:16px 0;border-top:1px solid var(--border);position:sticky;bottom:0;background:linear-gradient(to bottom,rgba(247,248,250,.85),rgba(247,248,250,.98));backdrop-filter:blur(8px)}
+    .progress{flex:1;max-width:220px;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+    .progress>div{height:100%;background:var(--red);transition:width .25s}
+    .count{font:700 10px 'DM Mono',monospace;color:var(--muted);white-space:nowrap}
+    @media(max-width:760px){.shell{padding:20px 18px 60px}.grid2,.grid3{grid-template-columns:1fr}.progress{display:none}.barrow{grid-template-columns:72px 1fr 36px}}
+    @media(prefers-reduced-motion:reduce){.panel{animation:none}.meterfill,.progress>div{transition:none}}
+  </style>
+</head>
+<body>
+  <main class="shell" id="app">
+    <section class="hero">
+      <div class="kicker">LLM lifecycle · interactive explainer</div>
+      <h1>Da <span>next token</span> a un modello che puoi usare</h1>
+      <p>Segui Gemma 4 31B lungo la filiera: apprendimento generale, comportamento conversazionale, allineamento, quantizzazione e inferenza efficiente.</p>
+      <div class="model"><span class="dot"></span> FIL ROUGE · GEMMA 4 31B</div>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Fasi del ciclo di vita">
+      <button class="tab" role="tab" aria-selected="true" data-i="0">0 · Mappa</button>
+      <button class="tab" role="tab" aria-selected="false" data-i="1">1 · Pretraining</button>
+      <button class="tab" role="tab" aria-selected="false" data-i="2">2 · Post-training</button>
+      <button class="tab" role="tab" aria-selected="false" data-i="3">3 · Alignment</button>
+      <button class="tab" role="tab" aria-selected="false" data-i="4">4 · Quantizzazione</button>
+      <button class="tab" role="tab" aria-selected="false" data-i="5">5 · Inference</button>
+    </div>
+
+    <section class="panel active" data-panel="0">
+      <div class="flow">
+        <div class="label">La pipeline concettuale</div>
+        <div class="flowrow">
+          <button class="node" data-jump="1"><small>fase 01</small><b>Pretraining</b></button><span class="arrow">→</span>
+          <button class="node" data-jump="2"><small>fase 02</small><b>Post-training</b></button><span class="arrow">→</span>
+          <button class="node" data-jump="3"><small>obiettivo</small><b>Alignment</b></button><span class="arrow">→</span>
+          <button class="node" data-jump="4"><small>ottimizzazione</small><b>QAT</b></button><span class="arrow">→</span>
+          <button class="node" data-jump="5"><small>runtime</small><b>Inference</b></button>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="card blue"><div class="label">Impara</div><h3>Conoscenza e pattern</h3><p>Il modello apprende regolarità statistiche attraverso la <strong>predizione autoregressiva</strong>.</p></div>
+        <div class="card red"><div class="label">Si comporta</div><h3>Istruzioni e preferenze</h3><p>Il modello viene trasformato da checkpoint generale a sistema più utile per <strong>dialogo e task</strong>.</p></div>
+        <div class="card green"><div class="label">Diventa pratico</div><h3>Memoria e velocità</h3><p>Quantizzazione e tecniche di decoding rendono il modello <strong>più economico da eseguire</strong>.</p></div>
+      </div>
+      <div class="note"><strong>Una distinzione utile:</strong> “alignment” descrive l'obiettivo comportamentale. Non coincide necessariamente con una singola tecnica come RLHF. Nel report di Gemma 4, Google documenta il post-training ma non pubblica ogni dettaglio della recipe di ottimizzazione.</div>
+    </section>
+
+    <section class="panel" data-panel="1">
+      <div class="grid2">
+        <div class="card blue">
+          <div class="label">01 · Pretraining</div><h3>Predici il prossimo token</h3>
+          <p>Il modello vede enormi quantità di dati e aggiorna i pesi per rendere più probabile il token corretto nel contesto.</p>
+          <div class="tokenline"><span class="token">Roma</span><span class="token">è</span><span class="token">la</span><span class="token">capitale</span><span class="token">d'</span><span class="token mask">?</span></div>
+          <div class="bars">
+            <div class="barrow"><span>Italia</span><div class="track"><div class="fill" style="width:83%"></div></div><b>83%</b></div>
+            <div class="barrow"><span>Europa</span><div class="track"><div class="fill" style="width:10%"></div></div><b>10%</b></div>
+            <div class="barrow"><span>Lazio</span><div class="track"><div class="fill" style="width:4%"></div></div><b>4%</b></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="label">Gemma 4 · documentato</div><h3>Cosa entra davvero</h3>
+          <p>Google descrive un dataset di pretraining multimodale composto da <strong>documenti web, codice, immagini</strong> e, per alcune varianti, <strong>audio</strong>. Il tokenizer ha un vocabolario da 262k elementi.</p>
+          <div class="code"><span class="dim">// effetto concettuale</span><br><span class="b">input</span> = trilioni_di_segnali<br><span class="r">loss</span> = next_token_error<br><span class="g">output</span> = checkpoint_PT</div>
+          <div class="source">Fonte · Gemma 4 Technical Report §2.4</div>
+        </div>
+      </div>
+      <div class="callout"><div class="label">Idea chiave</div><p>Il pretraining costruisce la capacità generale. <b>Non insegna ancora esplicitamente al modello come essere un assistente.</b></p></div>
+    </section>
+
+    <section class="panel" data-panel="2">
+      <div class="card red">
+        <div class="label">02 · Instruction / Post-training</div><h3>Stesso modello, comportamento diverso</h3>
+        <p>Scegli un checkpoint per vedere l'effetto didattico della trasformazione PT → IT.</p>
+        <div class="btns"><button class="choice selected" data-mode="pt">Checkpoint PT</button><button class="choice" data-mode="it">Checkpoint IT</button></div>
+        <div class="prompt">USER › Spiegami la fotosintesi in due frasi semplici.</div>
+        <div class="answer" id="answer-mode"><div class="who">PRETRAINED · esempio didattico</div>La fotosintesi è un processo biologico mediante il quale organismi fotoautotrofi...</div>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="label">Cosa cambia</div><h3>Formato e comportamento</h3><p>Il checkpoint viene addestrato su esempi orientati alle istruzioni. Gemma 4 introduce anche un <strong>thinking mode</strong> prima della risposta finale.</p></div>
+        <div class="card orange"><div class="label">Dati post-training</div><h3>Qualità e sicurezza</h3><p>Google descrive filtraggio di esempi con output tossici o insicuri e dati mirati a migliorare <strong>attribuzione, hedging e rifiuti appropriati</strong>.</p></div>
+      </div>
+      <div class="source">Fonte · Gemma 4 Technical Report §3 Instruction Tuning</div>
+    </section>
+
+    <section class="panel" data-panel="3">
+      <div class="grid2">
+        <div class="card orange">
+          <div class="label">03 · Alignment</div><h3>Quale risposta vogliamo privilegiare?</h3>
+          <div class="prompt">USER › Dammi una spiegazione breve e corretta.</div>
+          <button class="answer choice" data-pref="a" style="width:100%;text-align:left"><div class="who">Risposta A</div>Molto lunga, vaga, piena di dettagli non richiesti e con un'affermazione non verificata.</button>
+          <button class="answer choice" data-pref="b" style="width:100%;text-align:left"><div class="who">Risposta B</div>Diretta, pertinente, distingue ciò che è certo da ciò che è incerto e segue il formato richiesto.</button>
+          <div class="check" id="pref-result">Seleziona la risposta che preferiresti usare come segnale di training.</div>
+        </div>
+        <div class="card">
+          <div class="label">Generalizzazione concettuale</div><h3>Preference optimization ≠ solo RLHF</h3>
+          <p>Le preferenze possono diventare un segnale per modificare il comportamento del modello attraverso <strong>RL, reward model, metodi diretti di preference optimization</strong> o altre recipe.</p>
+          <div class="code"><span class="dim">// astrazione</span><br>candidate_A + candidate_B<br><span class="o">preference_signal</span> → optimization<br><span class="g">policy</span> → comportamento_desiderato</div>
+          <div class="note"><strong>Gemma 4:</strong> il report descrive gli obiettivi e il filtraggio del post-training, ma non espone una decomposizione completa “SFT → RLHF” tale da poterla presentare come pipeline certa.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="4">
+      <div class="grid2">
+        <div class="card green">
+          <div class="label">04 · Quantization-Aware Training</div><h3>Meno bit, stessa rete</h3>
+          <p>Con QAT il modello viene addestrato tenendo conto degli errori introdotti dalla rappresentazione a precisione ridotta.</p>
+          <div class="btns" id="bits"><button class="choice selected" data-bit="16">BF16</button><button class="choice" data-bit="8">8 bit*</button><button class="choice" data-bit="4">Q4_0</button></div>
+          <div style="margin-top:18px"><div class="label">Footprint illustrativo</div><div class="mem" id="mem">64.0 GB <small>checkpoint BF16 riportato da Google</small></div><div class="meter"><div class="meterfill" id="meter" style="width:100%"></div></div></div>
+          <div class="source" id="mem-source">Gemma 4 31B · valore ufficiale BF16</div>
+        </div>
+        <div class="card">
+          <div class="label">Cosa sta succedendo</div><h3>La conoscenza non viene “compressa in un riassunto”</h3>
+          <p>I parametri restano numericamente organizzati nella stessa rete, ma vengono rappresentati con <strong>meno livelli di precisione</strong>. Questo riduce memoria e banda necessarie per caricarli ed elaborarli.</p>
+          <div class="code"><span class="b">BF16</span>  ≈ molti valori possibili<br><span class="r">Q4_0</span> ≈ rappresentazione ~4 bit<br><br><span class="dim">Gemma 4 31B</span><br><span class="b">64.0 GB</span> → <span class="g">19.2 GB</span></div>
+          <div class="source">Google · Table 3, Q4_0 weight representation</div>
+        </div>
+      </div>
+      <div class="grid3"><div class="stat"><b>31B</b><span>parametri del modello dense</span></div><div class="stat"><b>64 GB</b><span>footprint BF16 riportato</span></div><div class="stat"><b>19.2 GB</b><span>checkpoint Q4_0 riportato</span></div></div>
+      <div class="note">* Il pulsante 8 bit è una <strong>stima didattica</strong> per visualizzare il rapporto fra precisione e memoria; 64 GB e 19,2 GB sono invece i valori pubblicati da Google per Gemma 4 31B.</div>
+    </section>
+
+    <section class="panel" data-panel="5">
+      <div class="grid2">
+        <div class="card blue">
+          <div class="label">05 · Inference optimization</div><h3>Speculative decoding con MTP</h3>
+          <p>Gemma 4 usa un piccolo <strong>Multi-Token Prediction drafter</strong> che propone token futuri. Il modello principale li verifica, riducendo il lavoro necessario quando le proposte vengono accettate.</p>
+          <div class="stepper" id="draft"><span class="draft">Il</span><span class="draft">modello</span><span class="draft">genera</span><span class="draft">token</span><span class="draft">veloci</span></div>
+          <button class="btn" id="verify">Verifica draft →</button><div class="check" id="verify-text">Il drafter ha proposto una sequenza. Verifichiamola.</div>
+        </div>
+        <div class="card">
+          <div class="label">Fine della storia?</div><h3>Ora può essere servito</h3>
+          <p>Quando il checkpoint è pronto, entrano in gioco runtime, batching, KV cache, speculative decoding e hardware. Sono tecniche di <strong>inference engineering</strong>, non nuove fasi di apprendimento generale.</p>
+          <div class="code"><span class="r">pretrain</span> → capacità<br><span class="o">post_train</span> → comportamento<br><span class="g">QAT</span> → efficienza numerica<br><span class="b">runtime</span> → velocità reale</div>
+        </div>
+      </div>
+      <div class="callout"><div class="label">La frase da ricordare</div><p><b>Training decide che cosa sa fare il modello e come tende a comportarsi. Quantizzazione e inference optimization decidono quanto efficientemente riesci a farlo girare.</b></p></div>
+      <div class="source">Fonti · Gemma 4 Technical Report §§2.4, 2.5, 3 · Google DeepMind, 2026</div>
+    </section>
+
+    <div class="nav">
+      <button class="btn secondary" id="prev" disabled>← Prima</button>
+      <div class="progress" aria-hidden="true"><div id="progress" style="width:16.7%"></div></div>
+      <span class="count" id="count">1 / 6</span>
+      <button class="btn" id="next">Avanti →</button>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const root = document.getElementById('app');
+      const tabs = [...root.querySelectorAll('.tab')];
+      const panels = [...root.querySelectorAll('.panel')];
+      const prev = root.querySelector('#prev');
+      const next = root.querySelector('#next');
+      const count = root.querySelector('#count');
+      const prog = root.querySelector('#progress');
+      let cur = 0;
+
+      function go(i){
+        cur = Math.max(0, Math.min(panels.length - 1, i));
+        panels.forEach((p,n) => p.classList.toggle('active', n === cur));
+        tabs.forEach((t,n) => t.setAttribute('aria-selected', n === cur ? 'true' : 'false'));
+        prev.disabled = cur === 0;
+        next.disabled = cur === panels.length - 1;
+        count.textContent = (cur + 1) + ' / ' + panels.length;
+        prog.style.width = ((cur + 1) / panels.length * 100) + '%';
+        tabs[cur].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+        window.scrollTo({top:0, behavior:'smooth'});
+      }
+
+      tabs.forEach(t => t.addEventListener('click', () => go(Number(t.dataset.i))));
+      root.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.jump))));
+      prev.addEventListener('click', () => go(cur - 1));
+      next.addEventListener('click', () => go(cur + 1));
+
+      const modeAns = root.querySelector('#answer-mode');
+      root.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
+        root.querySelectorAll('[data-mode]').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        if (b.dataset.mode === 'it') {
+          modeAns.className = 'answer good';
+          modeAns.innerHTML = '<div class="who">INSTRUCTION-TUNED · esempio didattico</div>Le piante usano la luce del Sole per trasformare acqua e anidride carbonica in zuccheri. Durante il processo rilasciano ossigeno.';
+        } else {
+          modeAns.className = 'answer';
+          modeAns.innerHTML = '<div class="who">PRETRAINED · esempio didattico</div>La fotosintesi è un processo biologico mediante il quale organismi fotoautotrofi...';
+        }
+      }));
+
+      const pref = root.querySelector('#pref-result');
+      root.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => {
+        root.querySelectorAll('[data-pref]').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        pref.textContent = b.dataset.pref === 'b'
+          ? 'Segnale: B preferita → il processo di ottimizzazione può aumentare la probabilità di comportamenti simili.'
+          : 'Puoi scegliere A, ma in un dataset di preferenze questo insegnerebbe al modello a privilegiare proprio quelle caratteristiche.';
+      }));
+
+      const mem = root.querySelector('#mem');
+      const meter = root.querySelector('#meter');
+      const ms = root.querySelector('#mem-source');
+      const memData = {
+        16:{v:64,label:'checkpoint BF16 riportato da Google',src:'Gemma 4 31B · valore ufficiale BF16'},
+        8:{v:32,label:'stima didattica ideale',src:'~32 GB · stima lineare, non checkpoint Google'},
+        4:{v:19.2,label:'checkpoint Q4_0 riportato da Google',src:'Gemma 4 31B · valore ufficiale Q4_0'}
+      };
+      root.querySelectorAll('[data-bit]').forEach(b => b.addEventListener('click', () => {
+        root.querySelectorAll('[data-bit]').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        const d = memData[b.dataset.bit];
+        mem.innerHTML = d.v.toFixed(1) + ' GB <small>' + d.label + '</small>';
+        meter.style.width = Math.max(4, d.v / 64 * 100) + '%';
+        ms.textContent = d.src;
+      }));
+
+      let verified = false;
+      root.querySelector('#verify').addEventListener('click', () => {
+        verified = !verified;
+        const toks = [...root.querySelectorAll('#draft .draft')];
+        toks.forEach((t,i) => {
+          t.classList.remove('accept','reject');
+          if (verified) t.classList.add(i < 4 ? 'accept' : 'reject');
+        });
+        root.querySelector('#verify-text').textContent = verified
+          ? '4 token accettati · “veloci” viene scartato e rigenerato dal modello principale.'
+          : 'Il drafter ha proposto una sequenza. Verifichiamola.';
+        root.querySelector('#verify').textContent = verified ? 'Reset verifica' : 'Verifica draft →';
+      });
+    })();
+  </script>
+</body>
+</html>
