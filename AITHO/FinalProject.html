@@ -222,7 +222,7 @@ footer { margin-top: 6rem; padding-top: 2rem; border-top: 2px solid var(--line);
       </div>
       <div class="facts">
         <span class="fact"><b>Lunedì 23 novembre</b>, dalle 9 alle 18</span>
-        <span class="fact"><b>15 minuti</b> per persona: 10 di presentazione, 3 di domande, 2 per il cambio</span>
+        <span class="fact"><b>15 minuti</b> per persona; 20 per Christian e Graziano</span>
         <span class="fact" id="countdown">Si presenta lunedì 23 novembre</span>
       </div>
     </div>
@@ -303,7 +303,7 @@ footer { margin-top: 6rem; padding-top: 2rem; border-top: 2px solid var(--line);
   <section id="giornata">
     <div class="sec-head">
       <h2 class="display">Le ultime otto ore</h2>
-      <p class="lead">Lunedì 23 novembre si lavora dalle 9 alle 18, con la pausa pranzo dalle 13 alle 14. La mattina serve a rifinire il progetto; nel pomeriggio ogni persona ha uno slot di quindici minuti: dieci per presentare, tre per le domande e due per il cambio.</p>
+      <p class="lead">Lunedì 23 novembre si lavora dalle 9 alle 18, con la pausa pranzo dalle 13 alle 14. Si rifinisce il progetto fino alle 12, poi iniziano le presentazioni. Ogni slot prevede dieci minuti di esposizione, tre di domande e due per il cambio; Christian e Graziano hanno cinque minuti in più per esporre.</p>
     </div>
     <div class="daywrap">
       <div class="day-bar" id="dayBar" role="img" aria-label="La giornata dalle 9 alle 18"></div>
@@ -311,6 +311,7 @@ footer { margin-top: 6rem; padding-top: 2rem; border-top: 2px solid var(--line);
     </div>
     <p class="day-cap" id="dayCap"></p>
     <div class="scrub">
+      <label id="scrubLab" for="scrub">Trascina per esplorare la giornata.</label>
       <input type="range" id="scrub" min="540" max="1080" step="5" value="870">
       <p class="scrub-out"><b id="scrubT">14:30</b><span id="scrubTxt"></span></p>
       <button class="pill sm" type="button" id="nowBtn" hidden>Torna a adesso</button>
@@ -335,7 +336,7 @@ footer { margin-top: 6rem; padding-top: 2rem; border-top: 2px solid var(--line);
 
     <h3 class="chips-title">Chi parla, e quando</h3>
     <div class="chips" id="slotChips"></div>
-    <p class="wnote">L'ordine è provvisorio fino a conferma. Gli slot durano quindici minuti e iniziano dopo la pausa pranzo. Gli ultimi quindici minuti della giornata sono per chiudere il corso: cinque minuti in cui commentiamo l'ultimo blocco, cinque per farvi dire la vostra e compilare il final form, cinque per commentare insieme tutto il percorso.</p>
+    <p class="wnote">L'ordine è provvisorio fino a conferma. Le presentazioni iniziano alle 12 e riprendono alle 14:30. Gli ultimi quindici minuti della giornata sono per chiudere il corso: cinque minuti in cui commentiamo l'ultimo blocco, cinque per farvi dire la vostra e compilare il final form, cinque per commentare insieme tutto il percorso.</p>
   </section>
 
   <footer>
@@ -346,13 +347,13 @@ footer { margin-top: 6rem; padding-top: 2rem; border-top: 2px solid var(--line);
 
 <script>
 (function () {
-  var ROSTER = ['Michele Eremita','Riccardo Pirrello','Andrea Bellomo','Salvatore La Torre','Salvatore Orefice','Michele Ferro','Christian Crimi','Stanislav Sorochan','Monica Sava','Sergio Suraci','Alessandro Catalano','Nicolò Calcagno','Graziano Di Grande'];
-  var SPEECH_MIN = 15, DAY_START = 540, LUNCH_A = 780, LUNCH_B = 840, DAY_END = 1080, FIRST = 870;
+  var ROSTER = ['Monica Sava','Nicolò Calcagno','Michele Ferro','Michele Eremita','Riccardo Pirrello','Andrea Bellomo','Salvatore La Torre','Salvatore Orefice','Christian Crimi','Stanislav Sorochan','Sergio Suraci','Alessandro Catalano','Graziano Di Grande'];
+  var SPEECH_MIN = 15, DAY_START = 540, LUNCH_A = 780, LUNCH_B = 840, DAY_END = 1080, FIRST = 720;
 
   function $(id) { return document.getElementById(id); }
   function fmt(mins) { var h = Math.floor(mins / 60) % 24, m = mins % 60; return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m; }
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-  function slots(n) { var out = [], t = FIRST; for (var i = 0; i < n; i++) { if (t < LUNCH_B && t + SPEECH_MIN > LUNCH_A) t = LUNCH_B; out.push([t, t + SPEECH_MIN]); t += SPEECH_MIN; } return out; }
+  function slots(n) { var out = [], t = FIRST; for (var i = 0; i < n; i++) { if (i === 3) t = 870; var duration = /^(Christian Crimi|Graziano Di Grande)$/.test(ROSTER[i]) ? 20 : 15; out.push([t, t + duration]); t += duration; } return out; }
 
   /* la giornata: barra degli orari e chi parla */
   function day() {
@@ -364,16 +365,17 @@ footer { margin-top: 6rem; padding-top: 2rem; border-top: 2px solid var(--line);
     if (am.length && am[am.length - 1][1] < LUNCH_A) segs.push(['', am[am.length - 1][1], LUNCH_A, 'br']);
     segs.push(['Pranzo', LUNCH_A, LUNCH_B, 'br']);
     if (pm.length) { if (pm[0][0] > LUNCH_B) segs.push(['Finalizzazione', LUNCH_B, pm[0][0], '']); segs.push(['Speech', pm[0][0], last, 'sp']); }
-    if (last < DAY_END) segs.push(['Tiriamo le somme', last, DAY_END, 'br']);
+    if (last < DAY_END - 15) segs.push(['Pausa / finalizzazione', last, DAY_END - 15, '']);
+    segs.push(['Tiriamo le somme', DAY_END - 15, DAY_END, 'br']);
     var el = $('dayBar'); if (!el) return;
     el.innerHTML = segs.map(function(s){ return '<div class="' + s[3] + '" style="flex:' + (s[2] - s[1]) + ' 1 0"><span>' + fmt(s[1]) + '</span><b>' + s[0] + '</b></div>'; }).join('');
     var cap = $('dayCap');
-    if (cap) cap.textContent = 'Si rifinisce il progetto dalle ' + fmt(DAY_START) + ' alle ' + fmt(fEnd) + ', poi seguono ' + n + ' speech da quindici minuti, con la pausa pranzo dalle 13:00 alle 14:00. L\'ultimo si conclude alle ' + fmt(last) + (last > DAY_END ? ', oltre il termine della giornata (18:00).' : last < DAY_END ? '. Gli ultimi ' + (DAY_END - last) + ' minuti sono per tirare le somme sul corso.' : '.');
+    if (cap) cap.textContent = 'Si rifinisce il progetto fino alle 12:00; le presentazioni riprendono alle 14:30 dopo la pausa pranzo. L’ultimo slot si conclude alle ' + fmt(last) + '. La chiusura del corso è prevista dalle 17:45 alle 18:00.';
     chips(sl);
   }
   function chips(sl) {
     var el = $('slotChips'); if (!el) return;
-    el.innerHTML = sl.map(function(s, i){ return '<div class="chip' + (s[0] >= LUNCH_B ? ' pm' : '') + '" data-s="' + s[0] + '"><b>' + fmt(s[0]) + '</b><span class="nm">' + esc(ROSTER[i]) + '</span></div>'; }).join('');
+    el.innerHTML = sl.map(function(s, i){ return '<div class="chip' + (s[0] >= LUNCH_B ? ' pm' : '') + '" data-s="' + s[0] + '" data-end="' + s[1] + '"><b>' + fmt(s[0]) + '</b><span class="nm">' + esc(ROSTER[i]) + '</span></div>'; }).join('');
   }
 
   /* conto alla rovescia */
@@ -513,30 +515,33 @@ footer { margin-top: 6rem; padding-top: 2rem; border-top: 2px solid var(--line);
     var LUNCH_A = 780, LUNCH_B = 840;
     function fm(m) { var h = Math.floor(m / 60), mm = m % 60; return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm; }
     function dur(m) { var h = Math.floor(m / 60), r = m % 60, out = []; if (h) out.push(h + (h === 1 ? ' ora' : ' ore')); if (r || !h) out.push(r + (r === 1 ? ' minuto' : ' minuti')); return out.join(' e '); }
-    function sched() { return $$('.chip', chipsEl).map(function (c) { return { el: c, s: +c.getAttribute('data-s'), n: $('.nm', c).textContent }; }); }
+    function sched() { return $$('.chip', chipsEl).map(function (c) { return { el: c, s: +c.getAttribute('data-s'), end: +c.getAttribute('data-end'), n: $('.nm', c).textContent }; }); }
     function toA(n) { return (/^[AEIOU]/i.test(n) ? 'ad ' : 'a ') + n; }
     function clock() { var d = new Date(); return d.getHours() * 60 + d.getMinutes(); }
     var d0 = new Date(), isDay = d0.getFullYear() === 2026 && d0.getMonth() === 10 && d0.getDate() === 23, live = false;
     function scrub(v) {
-      var ch = sched(), msg = '', cur = -1, F = ch.length ? ch[0].s : 870, last = ch.length ? ch[ch.length - 1].s + 15 : 870;
+      var ch = sched(), msg = '', cur = -1, F = ch.length ? ch[0].s : 870, last = ch.length ? ch[ch.length - 1].end : 870;
       var pos = Math.min(Math.max(v, 540), 1080);
       mk.style.left = ((pos - 540) / 540 * 100).toFixed(2) + '%'; tEl.textContent = fm(v); rng.value = pos;
       ch.forEach(function (c, i) {
         c.el.classList.remove('now', 'past');
-        if (v >= c.s && v < c.s + 15) { cur = i; c.el.classList.add('now'); } else if (v >= c.s + 15) c.el.classList.add('past');
+        if (v >= c.s && v < c.end) { cur = i; c.el.classList.add('now'); } else if (v >= c.end) c.el.classList.add('past');
       });
       if (cur >= 0) {
         var off = v - ch[cur].s, nxt = ch[cur + 1];
-        if (off < 10) msg = 'Parla ' + ch[cur].n + ' (' + fm(ch[cur].s) + '–' + fm(ch[cur].s + 15) + ').' + (nxt ? ' Subito dopo tocca ' + toA(nxt.n) + '.' : ' È l\'ultimo speech della giornata.');
-        else if (off < 13) msg = 'Domande per ' + ch[cur].n + '.' + (nxt ? ' Poi tocca ' + toA(nxt.n) + '.' : '');
+        var speech = ch[cur].end - ch[cur].s - 5;
+        if (off < speech) msg = 'Parla ' + ch[cur].n + ' (' + fm(ch[cur].s) + '–' + fm(ch[cur].end) + ').' + (nxt ? (nxt.s > ch[cur].end ? ' Alle ' + fm(nxt.s) + ' tocca ' : ' Subito dopo tocca ') + toA(nxt.n) + '.' : ' È l\'ultimo speech della giornata.');
+        else if (off < speech + 3) msg = 'Domande per ' + ch[cur].n + '.' + (nxt ? ' Poi tocca ' + toA(nxt.n) + '.' : '');
         else msg = 'Cambio di postazione' + (nxt ? ': si prepara ' + nxt.n + '.' : '.');
       }
       else if (v < 540) msg = 'La giornata inizia alle 09:00.';
       else if (v >= 1080) msg = 'La giornata è finita. Grazie a tutti!';
       else if (v < LUNCH_A && v < F) msg = 'Finalizzazione: mancano ' + dur(LUNCH_A - v) + ' alla pausa pranzo.';
       else if (v >= LUNCH_A && v < LUNCH_B) msg = 'Pausa pranzo. Si riprende alle 14:00.';
-      else if (v >= LUNCH_B && v < F) msg = 'Ultima verifica tecnica: il primo speech inizia alle ' + fm(F) + '.';
-      else if (v >= last) msg = 'Gli speech sono finiti. Ora si tirano le somme sul corso: un mio commento, la parola a voi con il final form e poi commentiamo insieme tutto il percorso.';
+      else if (v >= LUNCH_B && v < 870) msg = 'Ultima verifica tecnica: le presentazioni riprendono alle 14:30.';
+      else if (v >= 765 && v < LUNCH_A) msg = 'Pausa prima del pranzo.';
+      else if (v >= last && v < 1065) msg = 'Presentazioni concluse. La chiusura del corso inizia alle 17:45.';
+      else if (v >= 1065) msg = 'Si tirano le somme sul corso: un mio commento, la parola a voi con il final form e poi commentiamo insieme tutto il percorso.';
       tx.textContent = msg;
     }
     function setLive(on) {
