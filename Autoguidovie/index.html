@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
 <title>Linea 1B Autoguidovie</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,6 +113,31 @@ section{padding-block:28px}
 .prog{font-family:var(--f-mono);font-size:12px;color:var(--route);font-weight:600}
 .stop.done .dot{background:var(--route-fill);border-color:var(--route-fill);color:#fff}
 .stop.now .dot{box-shadow:0 0 0 6px var(--hl)}
+
+/* bonus */
+.deviazione{display:flex;align-items:stretch;gap:0;margin-top:18px}
+.deviazione .dash{flex:none;width:34px;margin-left:24px;border-left:6px dashed var(--route);border-bottom:6px dashed var(--route);border-bottom-left-radius:14px;height:46px}
+.bonus-card{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;text-align:left;font:inherit;color:inherit;text-decoration:none;border-radius:14px;padding:18px 20px;border:2px dashed var(--rule);background:var(--surface)}
+.bonus-card h3{font-size:26px;font-weight:800;text-transform:uppercase;margin:2px 0 4px}
+.bonus-card p{margin:0;color:var(--muted)}
+.bonus-card .lock{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:30px;background:var(--rule);color:var(--muted)}
+.bonus-card.locked h3{color:var(--muted)}
+.pbar{height:8px;border-radius:4px;background:var(--rule);overflow:hidden;margin-top:12px;max-width:420px}
+.pbar i{display:block;height:100%;background:var(--route-fill)}
+.bonus-card.spoiler{cursor:pointer;border:2px solid var(--sign);background:repeating-linear-gradient(135deg,var(--surface) 0 14px,var(--hl) 14px 28px)}
+.bonus-card.spoiler .lock{background:var(--sign);color:var(--sign-ink);animation:pulse 1.6s ease-in-out infinite}
+.bonus-card.spoiler:hover{border-color:var(--ink)}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.bonus-card.open{border:2px solid var(--ink);background:var(--surface)}
+.bonus-card.open .lock{background:var(--ink);color:var(--bg)}
+.bonus-card.open:hover{border-color:var(--route)}
+.bonus-card.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.96)}60%{transform:scale(1.02)}100%{transform:none}}
+.sign.bonus{background:var(--bar);box-shadow:inset 0 0 0 6px var(--sign),0 0 0 2px var(--bar)}
+.sign.bonus b,.sign.bonus span{color:var(--sign)}
+.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:14px 18px;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
+.toast a{color:var(--sign);font-weight:700}
+@media (max-width:560px){.deviazione .dash{display:none}.bonus-card{grid-template-columns:1fr}}
 
 /* rules plate */
 .rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
@@ -271,10 +297,17 @@ footer{padding-block:30px 50px;color:var(--muted);font-size:14px;border-top:1px 
 .cases td{padding:4px 6px;vertical-align:top}
 .cases td:first-child{font-weight:700;color:var(--ink);white-space:nowrap}
 
+
+/* tema */
+.themebtn{border:0;background:rgba(255,255,255,.1);color:#fff;height:38px;padding:0 14px 0 12px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
+.themebtn:hover{background:rgba(255,255,255,.18)}
+.themebtn svg{width:18px;height:18px;flex:none}
+@media (max-width:560px){.themebtn span{display:none}.themebtn{padding:0;width:38px;justify-content:center}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<script>try{var _t=JSON.parse(localStorage.getItem("l1b:theme"));if(_t==='light'||_t==='dark')document.documentElement.dataset.theme=_t}catch(e){}</script>
 
 <header class="topbar">
   <div class="wrap">
@@ -289,6 +322,7 @@ footer{padding-block:30px 50px;color:var(--muted);font-size:14px;border-top:1px 
       <button id="s-pm" type="button" data-s="pm">Pomeriggio</button>
     </div>
     <span class="clock tab" id="clock">--:--</span>
+    <button class="themebtn" id="theme" type="button"></button>
   </div>
 </header>
 
@@ -395,7 +429,42 @@ ${[["Agosto","135",1180,1004],["Agosto","140",960,902],["Agosto","M1",640,614],[
 <div class="e"><b>4. Assistente sulle offerte dei fornitori</b> <span class="tag agente">Agente</span><p><i>Direzione tecnica.</i> Rispondere a domande su capitolato e offerte ricevute, confrontandole.</p><p><b>Riceve:</b> i documenti come fonti e domande a voce. <b>Produce:</b> risposte con il riferimento al documento e al punto, e l'elenco di cosa manca.</p><p><b>Regole:</b> citare sempre la fonte, dire "non lo trovo" quando manca, segnalare quando due documenti si contraddicono.</p></div>
 <div class="e"><b>5. Avvisi ai passeggeri in italiano e in inglese</b> <span class="tag skill">Skill</span><p><i>Comunicazione.</i> Trasformare le informazioni di una deviazione in un avviso per le fermate.</p><p><b>Riceve:</b> date, linea, fermate non servite, fermata sostitutiva. <b>Produce:</b> un avviso in italiano semplice e uno in inglese, brevi.</p><p><b>Regole:</b> non cambiare date, numeri di linea e nomi di vie.</p></div>
 </div>`},
-  scheda:{file:"mat-9-scheda-agente-o-skill.docx",kind:"doc",desc:"Scheda da compilare man mano: la trovi anche qui sotto, compilabile",drive:DRIVE.scheda}
+  scheda:{file:"mat-9-scheda-agente-o-skill.docx",kind:"doc",desc:"Scheda da compilare man mano: la trovi anche qui sotto, compilabile",drive:DRIVE.scheda},
+  cvecchio:{file:"mat-extra1-contratto-in-vigore.docx",kind:"doc",desc:"Il contratto attuale",title:"Contratto in vigore",
+    html:FICT+`<p><b>Contratto di servizio – linee extraurbane 135 e 140</b><br>Versione in vigore</p>
+<h4>Articolo 1 – Oggetto</h4><p>Il presente contratto disciplina il servizio di trasporto pubblico extraurbano svolto da Autoguidovie (di seguito il gestore) per conto dell'ente affidante sulle linee 135 (Pavia – Vigevano) e 140.</p>
+<h4>Articolo 2 – Durata</h4><p>Il contratto ha durata dal 1° gennaio 2025 al 31 dicembre 2030.</p>
+<h4>Articolo 3 – Programma di esercizio</h4><p>Il programma di esercizio prevede circa 3.200 corse al mese, secondo l'orario approvato dall'ente affidante.</p>
+<h4>Articolo 4 – Corrispettivo e pagamento</h4><p>L'ente affidante riconosce al gestore un corrispettivo mensile. Il pagamento avviene entro 30 giorni dal ricevimento della fattura.</p>
+<h4>Articolo 5 – Standard di puntalità</h4><p>Il gestore garantisce che almeno il 90% delle corse di ogni mese sia effettuato entro 5 minuti dall'orario previsto.</p>
+<h4>Articolo 6 – Penali</h4><p>Per ogni corsa soppressa oltre la soglia dell'1% mensile delle corse programmate si applica una penale di 150 euro.</p>
+<h4>Articolo 7 – Forza maggiore</h4><p>Non sono conteggiate le soppressioni dovute a lavori stradali, eventi meteo e provvedimenti dell'autorità.</p>
+<h4>Articolo 8 – Revisione dei corrispettivi</h4><p>I corrispettivi sono aggiornati ogni anno in misura pari alla variazione dell'indice ISTAT dei prezzi al consumo.</p>
+<h4>Articolo 9 – Comunicazione delle soppressioni</h4><p>Il gestore comunica all'ente affidante ogni soppressione entro 2 giorni lavorativi.</p>
+<h4>Articolo 10 – Recesso</h4><p>Il gestore può recedere con preavviso di 90 giorni. L'ente affidante può recedere per gravi inadempienze, con preavviso di 30 giorni.</p>
+<h4>Articolo 11 – Controversie</h4><p>Per ogni controversia è competente il foro di Pavia.</p>
+<h4>Articolo 12 – Disposizioni finali</h4><p>Per quanto non previsto si applicano le norme vigenti. Le penali di cui all'articolo 6 non si applicano nei casi previsti dall'articolo 7.</p>`},
+  cnuovo:{file:"mat-extra1-contratto-aggiornato.docx",kind:"doc",desc:"La versione proposta dall'ente",title:"Contratto aggiornato",
+    html:FICT+`<p><b>Contratto di servizio – linee extraurbane 135 e 140</b><br>Versione aggiornata</p>
+<h4>Articolo 1 – Oggetto</h4><p>Il presente contratto disciplina il servizio di trasporto pubblico extraurbano svolto da Autoguidovie (di seguito il Gestore) per conto dell'Ente sulle linee 135 (Pavia – Vigevano) e 140.</p>
+<h4>Articolo 2 – Durata</h4><p>Il contratto ha durata dal 1° gennaio 2025 al 31 dicembre 2030.</p>
+<h4>Articolo 3 – Programma di esercizio</h4><p>Il programma di esercizio prevede circa 3.200 corse al mese, secondo l'orario approvato dall'Ente.</p>
+<h4>Articolo 4 – Trasmissione dei dati</h4><p>Il Gestore trasmette all'Ente, entro il giorno 5 di ogni mese, i dati di puntualità e di soppressione del mese precedente.</p>
+<h4>Articolo 5 – Corrispettivo e pagamento</h4><p>L'Ente riconosce al Gestore un corrispettivo mensile. Il pagamento avviene entro 60 giorni dal ricevimento della fattura.</p>
+<h4>Articolo 6 – Standard di puntualità</h4><p>Il Gestore garantisce che almeno il 90% delle corse di ogni mese sia effettuato entro 5 minuti dall'orario previsto.</p>
+<h4>Articolo 7 – Penali</h4><p>Per ogni corsa soppressa oltre la soglia di una corsa ogni cento corse programmate nel mese si applica una penale di 180 euro.</p>
+<h4>Articolo 8 – Forza maggiore</h4><p>Non sono conteggiate le soppressioni dovute a eventi meteo e a provvedimenti dell'autorità, né quelle dovute a lavori stradali comunicati dall'Ente al Gestore con almeno 10 giorni di anticipo.</p>
+<h4>Articolo 9 – Comunicazione delle soppressioni</h4><p>Il Gestore comunica all'Ente ogni soppressione entro due giorni lavorativi.</p>
+<h4>Articolo 10 – Recesso</h4><p>L'Ente può recedere per gravi inadempienze, con preavviso di 30 giorni.</p>
+<h4>Articolo 11 – Controversie</h4><p>Per ogni controversia è competente il foro di Pavia.</p>
+<h4>Articolo 12 – Revisione dei corrispettivi</h4><p>I corrispettivi sono aggiornati ogni anno nella misura della variazione dell'indice ISTAT dei prezzi al consumo, solo se tale variazione supera il 3%.</p>
+<h4>Articolo 13 – Disposizioni finali</h4><p>Per quanto non previsto si applicano le norme vigenti. Le penali di cui all'articolo 6 non si applicano nei casi previsti dall'articolo 7.</p>`},
+  mailente:{file:"mat-extra1-mail-ente.docx",kind:"doc",desc:"La mail di Paola Ricci",title:"Mail dell'ente affidante",
+    html:FICT+`<p><b>Da:</b> Paola Ricci, ente affidante<br><b>A:</b> Direzione d'esercizio, Autoguidovie<br><b>Data:</b> lunedì 30 novembre 2026<br><b>Oggetto:</b> Contratto di servizio linee 135 e 140 – versione aggiornata</p>
+<p>Buongiorno,</p><p>in allegato la versione aggiornata del contratto di servizio per le linee 135 e 140. Le modifiche sono solo formali: nuova numerazione degli articoli e correzione di alcuni refusi.</p><p>Vi chiediamo di confermare la presa visione entro venerdì 4 dicembre, così da procedere alla firma.</p><p>Cordiali saluti,<br>Paola Ricci</p>`},
+  richextra:{file:"mat-extra1-richiesta-direzione.docx",kind:"doc",desc:"La richiesta di Stefano Bruni",title:"Richiesta della Direzione",
+    html:FICT+`<p><b>Da:</b> Stefano Bruni, Direttore d'esercizio<br><b>A:</b> Giulia Sala, Direzione d'esercizio<br><b>Data:</b> lunedì 30 novembre 2026<br><b>Oggetto:</b> Nuova versione del contratto, possiamo confermare?</p>
+<p>Giulia, l'ente ha mandato la nuova versione del contratto e dice che cambia solo la forma. Prima di rispondere voglio sapere se è vero. Mi servono una pagina con quello che cambia davvero e una bozza di risposta per Paola Ricci. Non voglio confermare niente che non abbiamo controllato. Stefano</p>`}
 };
 
 const P = s => s; // prompt text helper (placeholders in [quadre])
@@ -464,7 +533,33 @@ const EX = [
   finale:["Scheda compilata con il compito, la scelta e la bozza","Agente o skill funzionante","Tabella dei tre casi di prova, prima e dopo la correzione","Nota d'uso di 5 righe"],
   confronto:["Copilot ha consigliato quello che ti aspettavi?","Quale regola hai dovuto scrivere in modo esplicito?","Chi lo aggiorna, e quando lo spegneresti?"]
  }
+
+ ,{id:5, bonus:true, short:"Il contratto aggiornato", sub:"Cosa cambia davvero", level:"Advanced", min:40, timer:[38,10],
+  who:"Giulia Sala", ini:"GS", role:"Direzione d'esercizio · per Stefano Bruni",
+  caso:"Giulia Sala, della Direzione d'esercizio di Autoguidovie, riceve dall'ente affidante una versione aggiornata del contratto di servizio per le linee 135 e 140. L'ente scrive che cambia solo la forma: nuova numerazione degli articoli e qualche refuso. Stefano Bruni, Direttore d'esercizio, deve rispondere entro venerdì e, prima di confermare, vuole sapere se è vero. Giulia ha il contratto in vigore, quello aggiornato, la mail dell'ente e la richiesta di Stefano. Il compito è affidare il confronto a Cowork come lavoro in più passaggi, controllarne il piano e il risultato, farlo rileggere da tre punti di vista e preparare una nota e una bozza di risposta all'ente. Non è un parere legale: la firma e il giudizio restano alle persone.",
+  goals:["Affidare a Cowork un compito in più passaggi e rivederne il piano prima che parta","Distinguere le modifiche formali da quelle che cambiano costi, tempi o diritti","Controllare ogni differenza citata sui due testi, comprese le clausole sparite","Usare una seconda lettura per trovare quello che la prima ha perso","Preparare una bozza di risposta che non impegna Autoguidovie, senza inviarla"],
+  mats:["cvecchio","cnuovo","mailente","richextra"],
+  steps:[
+   {t:"Prima di chiedere, fai una previsione", min:5, do:["Leggi la mail dell'ente e la richiesta di Stefano","Sfoglia i due contratti guardando solo i titoli degli articoli","Scrivi su un foglio: quante differenze che cambiano soldi, tempi o diritti pensi che ci siano? Nessuna, da una a tre, più di tre? E quale articolo ti preoccupa di più?"], q:"Ti fidi di 'le modifiche sono solo formali'? Perché?", out:"La tua previsione scritta."},
+   {t:"Affida il lavoro a Cowork e leggi il piano", min:8, do:["Apri Cowork e allega i due contratti, la mail dell'ente e la richiesta di Stefano","Scrivi la richiesta (esempio qui sotto)","Leggi il piano: ha un passaggio per controllare il lavoro? Cita gli articoli di entrambe le versioni? Prevede di inviare una mail?","Correggi il piano prima di dare il via: aggiungi 'cita sempre l'articolo in entrambe le versioni e riporta il testo prima e dopo' e 'salva la mail come bozza, non inviarla'","Quando Cowork chiede un'approvazione, leggi cosa sta per fare prima di dire sì","Se Cowork non è disponibile sul tuo account: usa Copilot Chat con i file allegati e chiedi tabella, nota e bozza uno alla volta"],
+    exs:[{l:"Esempio di richiesta",x:"Confronta il contratto in vigore con quello aggiornato, articolo per articolo. Prepara: 1) un foglio Excel con una riga per ogni differenza, con articolo nella versione vecchia e in quella nuova, testo prima e dopo, tipo (formale o sostanziale) e a chi giova; 2) una nota Word di massimo una pagina per Stefano Bruni; 3) una bozza di risposta a Paola Ricci in Outlook. Prima di iniziare mostrami il piano e aspetta il mio via."}],
+    out:"Piano rivisto e tre prodotti (tabella, nota, bozza)."},
+   {t:"Verifica la tabella", min:12, do:["Apri la tabella e controlla sui due contratti almeno cinque righe, comprese una classificata 'formale' e una 'sostanziale'","Cerca in particolare: un articolo che c'è in un contratto e non nell'altro, un numero che è cambiato, un numero scritto in un altro modo ma uguale","Poi chiedi a Cowork l'elenco delle differenze formali (qui sotto) e leggi la lista","Correggi la tabella dove serve"],
+    exs:[{l:"Richiesta",x:"Elenca una per una le differenze che hai classificato come formali, con il testo prima e dopo."}],
+    q:"La nota ripete 'solo modifiche formali' dalla mail dell'ente? Una modifica formale può cambiare soldi, tempi o diritti di qualcuno? Ogni citazione c'è davvero nel testo?", out:"Tabella corretta e l'elenco delle correzioni che hai fatto."},
+   {t:"Fai fare una seconda lettura", min:6, do:["Apri un nuovo compito in Cowork, così non è influenzato dal primo. Allega i due contratti, la nota e la bozza","Chiedi la rilettura da tre revisori (qui sotto)","Scegli due osservazioni che ti sembrano giuste e una che scarti, e scrivi perché"],
+    exs:[{l:"Richiesta",x:"Rileggi la nota e la bozza come tre revisori, uno alla volta: 1) un legale che cerca costi, rischi e diritti persi; 2) Stefano Bruni, che ha un minuto; 3) Paola Ricci, che riceve la mail e non sopporta chi cita il contratto in modo impreciso. Per ognuno dimmi cosa manca, cosa è sbagliato e cosa riscriveresti. Non modificare i file."}],
+    q:"Le critiche citano articoli e numeri oppure sono generiche ('sii più chiaro')?", out:"Due osservazioni accolte e una scartata con il motivo."},
+   {t:"Chiudi la nota e la bozza", min:7, do:["Chiedi a Cowork di aggiornare nota e bozza con le tue correzioni e di dividere la nota in tre parti: 'Verificato su entrambi i testi', 'Da chiedere all'ente', 'Non so'","Rileggi la bozza: non deve confermare niente, non deve promettere niente a nome di Autoguidovie e deve citare gli articoli","Non inviare: la bozza resta tra le bozze"], out:"Nota di una pagina divisa in tre parti e bozza di risposta non inviata."}
+  ],
+  finale:["Tabella delle differenze, verificata sui due testi, con l'articolo di entrambe le versioni","Nota di una pagina per Stefano Bruni divisa in verificato, da chiedere e non so","Bozza di risposta a Paola Ricci, non inviata","Elenco di cosa Cowork ha sbagliato o ha perso, e di come l'hai scoperto"],
+  confronto:["Quante differenze sostanziali avevi previsto e quante ne ha trovate Cowork? Quale classificata 'formale' era in realtà sostanziale?","Cosa hai cambiato nel piano di Cowork prima di dare il via? Quale passaggio ti ha fatto fermare?","La seconda lettura ha trovato qualcosa che la prima aveva perso? Era specifica o generica?","Cosa affideresti a Cowork e cosa no (confronto dei testi, giudizio legale, invio della mail, firma)?"]
+ }
 ];
+const MAIN = EX.filter(e=>!e.bonus);
+const totalMain = ()=>MAIN.reduce((n,e)=>n+e.steps.length,0);
+const doneMain = ()=>MAIN.reduce((n,e)=>n+stepsDone(e.id),0);
+const unlocked = ()=>doneMain()>=totalMain();
 
 /* orario della giornata (minuti dall'inizio sessione) */
 const AGENDA = [
@@ -537,6 +632,7 @@ function home(){
   <section class="wrap">
     <div class="sec-h"><h2>La linea della giornata</h2><p>Tocca una fermata per aprire l'esercizio.</p></div>
     <div class="linemap"><ol class="stops">${stops}</ol></div>
+    <div class="deviazione"><span class="dash" aria-hidden="true"></span>${bonusCard()}</div>
   </section>
   <section class="wrap">
     <div class="sec-h"><h2>Regole di viaggio</h2></div>
@@ -554,13 +650,13 @@ function home(){
 function matItem(k){
   const m=MATS[k]; const ic=m.kind==="img"?"JPG":m.kind==="xls"?"XLSX":"DOCX";
   const view = m.html?`<button type="button" data-mat="${k}">Leggi</button>`:(k==="scheda"?`<a href="#scheda">Compila</a>`:"");
-  return `<li class="mat"><span class="ic ${m.kind}">${ic}</span><span class="nm"><b>${m.file}</b>${esc(m.desc)}</span><span class="acts">${view}<a href="${m.drive}" target="_blank" rel="noopener">Drive</a></span></li>`;
+  return `<li class="mat"><span class="ic ${m.kind}">${ic}</span><span class="nm"><b>${m.file}</b>${esc(m.desc)}</span><span class="acts">${view}${m.drive?`<a href="${m.drive}" target="_blank" rel="noopener">Drive</a>`:""}</span></li>`;
 }
 const CHECK_RE=/^(Controlla|Confronta|Apri la foto accanto|Rileggi|Per ogni risposta controlla|Solo per la skill)/;
 function stepHTML(ex,s,i){
   const done=store.get(`s${ex.id}-${i}`,false);
   const items=s.do.map(d=>CHECK_RE.test(d)?`<li class="ck"><span class="hand">controlla</span>${esc(d)}</li>`:`<li>${esc(d)}</li>`).join("");
-  const exq=s.ex?`<div class="prompt"><div class="prompt-h"><span class="l">${esc(s.ex.l)} · <b>dalle istruzioni</b></span><button class="copy" type="button" data-copy="${ex.id}-${i}">Copia</button></div><pre>${esc(s.ex.x)}</pre></div>`:"";
+  const exq=(s.exs||(s.ex?[s.ex]:[])).map((r,j)=>`<div class="prompt"><div class="prompt-h"><span class="l">${esc(r.l)} · <b>dalle istruzioni</b></span><button class="copy" type="button" data-copy="${ex.id}-${i}-${j}">Copia</button></div><pre>${esc(r.x)}</pre></div>`).join("");
   return `<li class="tappa ${done?"ok":""}" id="t${ex.id}-${i}">
     <div class="tappa-h"><span class="num">${i+1}</span><h2>${esc(s.t)}</h2><span class="min tab">${s.min}'</span>
       <label for="c${ex.id}-${i}"><input type="checkbox" id="c${ex.id}-${i}" data-step="${ex.id}-${i}" ${done?"checked":""}> Fatto</label></div>
@@ -606,16 +702,27 @@ function formText(){
   return out;
 }
 
+function bonusCard(){
+  const d=doneMain(), t=totalMain(), pct=Math.round(d/t*100);
+  if(!unlocked()) return `<div class="bonus-card locked"><div class="lock" aria-hidden="true">?</div><div><div class="eyebrow">Corsa extra · facoltativa</div><h3>Fermata coperta</h3><p>Si scopre quando avete segnato come fatte tutte le tappe delle quattro fermate.</p><div class="pbar" role="progressbar" aria-valuemin="0" aria-valuemax="${t}" aria-valuenow="${d}"><i style="width:${pct}%"></i></div><p class="mini tab">${d} di ${t} tappe fatte</p></div></div>`;
+  const shown=store.get("bonusShown",false);
+  if(!shown) return `<button type="button" class="bonus-card spoiler" id="reveal"><div class="lock" aria-hidden="true">!</div><div><div class="eyebrow">Corsa extra sbloccata</div><h3>Tocca per scoprire la fermata</h3><p>Avete completato il percorso. C'è ancora una corsa, per chi ha tempo.</p></div></button>`;
+  return `<a class="bonus-card open" href="#fermata-5"><div class="lock" aria-hidden="true">X</div><div><div class="eyebrow">Corsa extra · Advanced · 40 minuti</div><h3>Il contratto aggiornato: cosa cambia davvero</h3><p>L'ente dice che cambia solo la forma. Lo verificate con Cowork, passo per passo. Apri la fermata →</p></div></a>`;
+}
+function lockedPage(){
+  return `<div class="wrap" style="padding-block:40px">${bonusCard()}<p style="margin-top:16px"><a href="#linea">← Torna alla linea</a></p></div>`;
+}
 function fermata(id){
   const ex=EX.find(e=>e.id===id); if(!ex) return home();
-  const ag=AGENDA.find(a=>a.ex===id); const t0=SESS[session].start+ag.o;
-  const prev=EX.find(e=>e.id===id-1), next=EX.find(e=>e.id===id+1);
+  if(ex.bonus&&!unlocked()) return lockedPage();
+  const ag=AGENDA.find(a=>a.ex===id); const t0=ag?SESS[session].start+ag.o:0;
+  const prev=EX.find(e=>e.id===id-1&&!e.bonus), next=EX.find(e=>e.id===id+1&&!e.bonus);
   return `
   <div class="wrap">
-    <nav class="crumb"><a href="#linea">← Linea</a><span>/</span><span>Fermata ${ex.id} di ${EX.length}</span><span>/</span><span class="tab">${hhmm(t0)}–${hhmm(t0+ag.d)}</span></nav>
-    <div class="pole"><div class="sign" aria-hidden="true"><div><span>FERMATA</span><b>${ex.id}</b></div></div>
+    <nav class="crumb"><a href="#linea">← Linea</a><span>/</span>${ex.bonus?`<span>Corsa extra · fuori orario</span>`:`<span>Fermata ${ex.id} di ${MAIN.length}</span><span>/</span><span class="tab">${hhmm(t0)}–${hhmm(t0+ag.d)}</span>`}</nav>
+    <div class="pole"><div class="sign ${ex.bonus?"bonus":""}" aria-hidden="true"><div><span>${ex.bonus?"CORSA":"FERMATA"}</span><b>${ex.bonus?"X":ex.id}</b></div></div>
       <div><h1>${esc(ex.short)}</h1>
-      <div class="chips"><span class="chip lv">${ex.level}</span><span class="chip tab">${ex.min} minuti</span><span class="chip">${ex.steps.length} tappe</span><span class="chip">Microsoft 365 Copilot</span></div></div></div>
+      <div class="chips"><span class="chip lv">${ex.level}</span><span class="chip tab">${ex.min} minuti</span><span class="chip">${ex.steps.length} tappe</span><span class="chip">${ex.bonus?"Copilot Cowork":"Microsoft 365 Copilot"}</span>${ex.bonus?`<span class="chip">Facoltativo</span>`:""}</div></div></div>
     <div class="ex-grid">
       <div style="min-width:0">
         <div class="card"><div class="case"><div class="avatar">${ex.ini}</div><div><div class="who">${esc(ex.who)}</div><div class="role">${esc(ex.role)}</div>
@@ -628,7 +735,7 @@ function fermata(id){
         ${ex.form?`<div style="margin-top:18px">${formHTML()}</div>`:""}
         <div class="next" style="margin-top:18px">
           ${prev?`<a href="#fermata-${prev.id}"><small>← Fermata precedente</small><b>${esc(prev.short)}</b></a>`:`<a href="#linea"><small>← Torna</small><b>Mappa della linea</b></a>`}
-          ${next?`<a href="#fermata-${next.id}" style="text-align:right"><small>Fermata successiva →</small><b>${esc(next.short)}</b></a>`:`<a href="#linea" style="text-align:right"><small>Capolinea →</small><b>Chiusura</b></a>`}
+          ${next?`<a href="#fermata-${next.id}" style="text-align:right"><small>Fermata successiva →</small><b>${esc(next.short)}</b></a>`:(ex.bonus?`<a href="#linea" style="text-align:right"><small>Torna →</small><b>Mappa della linea</b></a>`:`<a href="#fermata-5" style="text-align:right"><small>${unlocked()?"Corsa extra →":"Corsa extra · bloccata"}</small><b>${unlocked()?"Il contratto aggiornato":"Completa tutte le tappe"}</b></a>`)}
         </div>
       </div>
       <aside class="aside">
@@ -650,7 +757,7 @@ function renderTimer(){
   const mm=String(Math.floor(left/60)).padStart(2,"0"), ss=String(left%60).padStart(2,"0");
   const pct=el/tot*100, wp=w/(w+c)*100;
   box.innerHTML=`<h3>Cronometro</h3><div class="dial tab">${mm}:${ss}</div>
-   <div class="phase">${el>=tot?"Tempo finito: si passa alla fermata successiva":inWork?`Lavoro con Copilot · ${w}'`:`Confronto in coppia · ${c}'`}</div>
+   <div class="phase">${el>=tot?"Tempo finito: si passa alla fermata successiva":inWork?`Lavoro con ${ex.bonus?"Cowork":"Copilot"} · ${w}'`:`Confronto in coppia · ${c}'`}</div>
    <div class="track"><div class="bar"><i style="width:${wp}%;background:var(--route)"></i><i style="width:${100-wp}%;background:var(--sign)"></i></div><span class="mk" style="left:${wp}%"></span><span style="position:absolute;left:${pct}%;top:0">${busSVG()}</span></div>
    <div class="tbtns"><button class="btn pri" type="button" id="t-go">${T.run?"Pausa":el>0&&el<tot?"Riprendi":"Avvia"}</button><button class="btn" type="button" id="t-skip">${inWork?"Vai al confronto":"Ricomincia"}</button></div>`;
   $("#t-go").onclick=()=>{T.run=!T.run; if(T.el>=tot)T.el=0; tick(); renderTimer()};
@@ -662,7 +769,7 @@ function tick(){clearInterval(T.h); if(!T.run)return; T.h=setInterval(()=>{T.el+
 let lastFocus=null;
 function openMat(k){
   const m=MATS[k]; lastFocus=document.activeElement;
-  $("#dr-title").textContent=m.title||m.file; $("#dr-body").innerHTML=m.html+`<p class="mini" style="margin-top:20px">File originale: <a href="${m.drive}" target="_blank" rel="noopener">${m.file} su Drive</a></p>`;
+  $("#dr-title").textContent=m.title||m.file; $("#dr-body").innerHTML=m.html+(m.drive?`<p class="mini" style="margin-top:20px">File originale: <a href="${m.drive}" target="_blank" rel="noopener">${m.file} su Drive</a></p>`:"");
   $("#dr-copy").onclick=e=>copyText($("#dr-body").innerText.replace(/\nFile originale:.*$/s,"").trim(),e.currentTarget);
   $("#drawer").hidden=false; $("#dr-close").focus();
 }
@@ -685,25 +792,43 @@ window.addEventListener("hashchange",()=>{window._fromNav=true;route()});
 
 /* ---------- eventi delegati ---------- */
 document.addEventListener("click",e=>{
-  const c=e.target.closest("[data-copy]"); if(c){const [a,b]=c.dataset.copy.split("-").map(Number);copyText(EX.find(x=>x.id===a).steps[b].ex.x,c);return}
+  const c=e.target.closest("[data-copy]"); if(c){const [a,b,d]=c.dataset.copy.split("-").map(Number);const st=EX.find(x=>x.id===a).steps[b];copyText((st.exs||[st.ex])[d||0].x,c);return}
   const mt=e.target.closest("[data-mat]"); if(mt){openMat(mt.dataset.mat);return}
   const go=e.target.closest("tr[data-go]"); if(go){location.hash=go.dataset.go;return}
   const s=e.target.closest(".seg button"); if(s){session=s.dataset.s;store.set("session",session);route();return}
+  if(e.target.closest("#reveal")){store.set("bonusShown",true);route();const b=$(".bonus-card.open");if(b){b.classList.add("pop");b.focus()}return}
   const dq=e.target.closest("[data-dq]"); if(dq){const a=store.get("dq",{});a[dq.dataset.dq]=dq.dataset.v;store.set("dq",a);verdict();return}
   if(e.target.id==="f-copy"){copyText(formText(),e.target);return}
   if(e.target.id==="f-clear"){const m=$("#f-msg"); if(m.dataset.arm){store.set("form",{});route();}else{m.dataset.arm="1";m.textContent="Tocca di nuovo per svuotare";setTimeout(()=>{m.textContent="";delete m.dataset.arm},3000)}}
 });
 document.addEventListener("keydown",e=>{const go=e.target.closest&&e.target.closest("tr[data-go]");if(go&&(e.key==="Enter"||e.key===" ")){e.preventDefault();location.hash=go.dataset.go}});
 document.addEventListener("change",e=>{
-  const st=e.target.dataset&&e.target.dataset.step; if(st){store.set("s"+st,e.target.checked);e.target.closest(".tappa").classList.toggle("ok",e.target.checked)}
+  const st=e.target.dataset&&e.target.dataset.step; if(st){const was=unlocked();store.set("s"+st,e.target.checked);e.target.closest(".tappa").classList.toggle("ok",e.target.checked);if(!was&&unlocked())toast()}
   if(e.target.dataset&&e.target.dataset.f==="kind"){const f=store.get("form",{});f.kind=e.target.value;store.set("form",f);document.querySelectorAll("[data-only]").forEach(fs=>fs.hidden=fs.dataset.only!==e.target.value)}
 });
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.f; if(k&&k!=="kind"){const f=store.get("form",{});f[k]=e.target.value;store.set("form",f)}});
+
+function toast(){
+  let t=$("#toast"); if(t)t.remove();
+  t=document.createElement("div");t.id="toast";t.className="toast";t.setAttribute("role","status");
+  t.innerHTML=`<b>Percorso completato.</b> Si è sbloccata una corsa extra. <a href="#linea">Vai alla mappa</a>`;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),9000);
+}
 
 /* ---------- orologio ---------- */
 function updClock(){const d=new Date();const t=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;$("#clock").textContent=t;const b=$("#bclock");if(b)b.textContent=t}
 let lastMin=nowMin();
 setInterval(()=>{updClock();const n=nowMin();if(n!==lastMin){lastMin=n;if(!location.hash.startsWith("#fermata"))route()}},5000);
+
+/* ---------- tema ---------- */
+const MQ = matchMedia("(prefers-color-scheme: dark)");
+const curTheme = ()=>document.documentElement.dataset.theme||(MQ.matches?"dark":"light");
+const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function paintTheme(){const b=$("#theme"),d=curTheme()==="dark";b.innerHTML=(d?SUN:MOON)+`<span>${d?"Chiaro":"Scuro"}</span>`;b.setAttribute("aria-label",d?"Passa al tema chiaro":"Passa al tema scuro");b.title=b.getAttribute("aria-label")}
+$("#theme").onclick=()=>{const n=curTheme()==="dark"?"light":"dark";document.documentElement.dataset.theme=n;try{localStorage.setItem("l1b:theme",JSON.stringify(n))}catch(e){}paintTheme()};
+try{MQ.addEventListener("change",paintTheme)}catch(e){}
+paintTheme();
 
 route(); updClock();
 </script>
