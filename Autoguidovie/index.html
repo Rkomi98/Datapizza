@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linea 1B Autoguidovie</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Caveat:wght@600;700&display=swap">
+<style>
+/* Layout: segnaletica di trasporto pubblico. Home = tabellone partenze + mappa della linea; ogni esercizio = una fermata con le sue tappe. */
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --ink:#0B2A52; --text:#1B2B3F; --muted:#5A6B82; --rule:#D5DEEA;
+  --route:#1A8A4C; --route-soft:#E2F4EA; --route-fill:#17804A; --sign:#FFCB05; --sign-ink:#1A1A1A; --marker:#D23A2A;
+  --hl:rgba(255,203,5,.38); --prompt-bg:#0E2340; --prompt-fg:#E8EEF7; --prompt-dim:#93A7C4;
+  --board:#0A1624; --board-row:#0F1F33; --board-led:#FFC23D; --board-dim:#7D8BA0; --board-go:#3DDC84; --board-red:#FF6B5B;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --f-hand:"Caveat","Comic Sans MS",cursive;
+  --r:10px; --bar:#0B2A52;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#08121F; --surface:#0F1C2E; --ink:#DCE7F7; --text:#C9D5E6; --muted:#8798B0; --rule:#22344D;
+  --route:#35C277; --route-soft:#103426; --hl:rgba(255,203,5,.22); --prompt-bg:#050C16; --prompt-fg:#E8EEF7; --prompt-dim:#7F93B0; --marker:#FF6E5E;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#08121F; --surface:#0F1C2E; --ink:#DCE7F7; --text:#C9D5E6; --muted:#8798B0; --rule:#22344D;
+  --route:#35C277; --route-soft:#103426; --hl:rgba(255,203,5,.22); --prompt-bg:#050C16; --prompt-fg:#E8EEF7; --prompt-dim:#7F93B0; --marker:#FF6E5E;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);color:var(--ink);text-wrap:balance;margin:0;line-height:1.05}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
+.mono{font-family:var(--f-mono)}
+.tab{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bar);color:#fff}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bar)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;min-height:56px;flex-wrap:wrap;padding-block:8px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.logos{display:flex;align-items:center;gap:10px;background:#fff;border-radius:8px;padding:6px 12px}
+.logos img{display:block;height:30px;width:auto}
+.logos .lg-dp{height:18px}
+.logos .x{color:#5A6B82;font-weight:600}
+@media (max-width:900px){.brand .t{display:none}}
+@media (max-width:560px){.brand .badge{display:none}.logos img{height:24px}.logos .lg-dp{height:14px}}
+.brand .badge{background:var(--route-fill);color:#fff;font-family:var(--f-display);font-weight:800;font-size:20px;padding:2px 10px;border-radius:6px;letter-spacing:.02em}
+.brand .t{font-family:var(--f-display);font-weight:600;font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:#fff}
+.brand .t small{display:block;font-family:var(--f-body);font-weight:500;font-size:12px;letter-spacing:.06em;color:#A9BCD6}
+.spacer{flex:1}
+.seg{display:inline-flex;background:rgba(255,255,255,.1);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:#C8D6EA;padding:6px 14px;border-radius:999px;font-weight:600;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--sign);color:var(--sign-ink)}
+.clock{font-family:var(--f-mono);color:var(--board-led);font-size:15px;font-weight:600}
+
+/* hero */
+.hero{padding-block:40px 28px}
+.eyebrow{font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--route)}
+.hero h1{font-size:clamp(40px,7vw,78px);font-weight:800;letter-spacing:-.01em;margin-top:8px;text-transform:uppercase}
+.hero h1 .arrow{color:var(--route)}
+.hero p.lede{max-width:62ch;font-size:18px;color:var(--muted);margin:14px 0 0}
+
+/* departure board */
+.board{background:var(--board);border-radius:14px;padding:18px 18px 10px;color:var(--board-led);box-shadow:0 18px 40px -24px rgba(5,20,40,.6);overflow-x:auto}
+.board-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.board-head .lbl{font-family:var(--f-display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-size:15px}
+.board-head .lbl span{color:var(--board-dim);font-weight:600;margin-left:8px;letter-spacing:.08em}
+.board table{width:100%;border-collapse:separate;border-spacing:0 4px;font-family:var(--f-mono);font-size:15px;min-width:640px}
+.board th{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--board-dim);text-align:left;padding:0 12px 4px}
+.board td{background:var(--board-row);padding:10px 12px;white-space:nowrap}
+.board td:first-child{border-radius:6px 0 0 6px}
+.board td:last-child{border-radius:0 6px 6px 0}
+.board tr.ex td{cursor:pointer}
+.board tr.ex:hover td{background:#14294A}
+.board .dest{color:#fff;white-space:normal}
+.board .dest small{display:block;color:var(--board-dim);font-size:12px}
+.board .st{font-weight:700}
+.st.go{color:var(--board-go)} .st.now{color:var(--board-led);animation:blink 1.2s steps(2) infinite} .st.past{color:var(--board-dim)}
+@keyframes blink{50%{opacity:.35}}
+.board .plat{display:inline-block;min-width:30px;text-align:center;background:var(--route-fill);color:#fff;border-radius:4px;padding:3px 8px;font-weight:700}
+.board .plat.p{background:#3A4A60}
+.board-foot{font-family:var(--f-mono);font-size:12px;color:var(--board-dim);padding:8px 2px 4px;overflow:hidden;white-space:nowrap}
+.ticker{display:inline-block;padding-left:100%;animation:tick 38s linear infinite}
+@keyframes tick{to{transform:translateX(-100%)}}
+
+/* line map */
+section{padding-block:28px}
+.sec-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.sec-h h2{font-size:clamp(28px,4vw,40px);font-weight:800;text-transform:uppercase}
+.sec-h p{margin:0;color:var(--muted)}
+.linemap{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:28px 18px 22px;overflow-x:auto}
+.stops{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));position:relative;min-width:860px}
+.stops::before{content:"";position:absolute;left:calc(100%/14);right:calc(100%/14);top:21px;height:8px;background:var(--route);border-radius:4px}
+.stop{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:0 6px}
+.stop .dot{position:relative;z-index:1;width:50px;height:50px;border-radius:50%;background:var(--surface);border:7px solid var(--route);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:20px;color:var(--ink)}
+.stop.term .dot{border-radius:10px;background:var(--ink);border-color:var(--ink);color:var(--bg);font-size:13px;letter-spacing:.06em}
+.stop.pause .dot{width:30px;height:30px;border-width:5px;margin-top:10px;margin-bottom:10px}
+.stop .time{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.stop .name{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.1;color:var(--ink)}
+.stop .sub{font-size:13px;color:var(--muted);line-height:1.35}
+.stop a.go{position:absolute;inset:-8px 0 -8px;border-radius:12px;text-decoration:none}
+.stop a.go:hover{background:var(--route-soft)}
+.stop a.go:hover ~ .dot{transform:scale(1.06)}
+.stop .dot,.stop .time,.stop .name,.stop .sub,.stop .prog{position:relative;pointer-events:none}
+.prog{font-family:var(--f-mono);font-size:12px;color:var(--route);font-weight:600}
+.stop.done .dot{background:var(--route-fill);border-color:var(--route-fill);color:#fff}
+.stop.now .dot{box-shadow:0 0 0 6px var(--hl)}
+
+/* rules plate */
+.rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.rule{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:16px 16px 18px;display:flex;flex-direction:column;gap:6px}
+.rule .k{font-family:var(--f-display);font-weight:800;font-size:30px;color:var(--route);line-height:1}
+.rule h3{font-size:20px;font-weight:700}
+.rule p{margin:0;color:var(--muted);font-size:15px}
+.rule.warn{background:var(--sign);border-color:var(--sign);color:var(--sign-ink)}
+.rule.warn h3,.rule.warn .k,.rule.warn p{color:var(--sign-ink)}
+@media (max-width:900px){.rules{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.rules{grid-template-columns:1fr}}
+
+footer{padding-block:30px 50px;color:var(--muted);font-size:14px;border-top:1px solid var(--rule);margin-top:20px}
+
+/* ===== exercise view ===== */
+.crumb{display:flex;gap:10px;align-items:center;padding-block:18px 0;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.crumb a{font-weight:600;color:var(--ink)}
+.pole{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;padding-block:22px 10px}
+.sign{width:110px;height:110px;border-radius:50%;background:var(--sign);display:grid;place-items:center;text-align:center;box-shadow:inset 0 0 0 6px #fff,0 0 0 2px var(--sign)}
+.sign b{display:block;font-family:var(--f-display);font-weight:800;font-size:52px;line-height:.9;color:var(--sign-ink)}
+.sign span{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.16em;color:var(--sign-ink)}
+.pole h1{font-size:clamp(34px,5.4vw,60px);font-weight:800;text-transform:uppercase}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--rule);color:var(--ink)}
+.chip.lv{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+@media (max-width:560px){.pole{grid-template-columns:1fr}.sign{width:84px;height:84px}.sign b{font-size:40px}}
+
+.ex-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:26px;align-items:start;padding-bottom:40px}
+@media (max-width:960px){.ex-grid{grid-template-columns:1fr}}
+.aside{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);display:flex;flex-direction:column;gap:14px}
+@media (max-width:960px){.aside{position:static}}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:18px}
+.card h3{font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+
+.case{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--route-soft);color:var(--route);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:22px}
+.case .who{font-family:var(--f-display);font-weight:700;font-size:20px;color:var(--ink);line-height:1.1}
+.case .role{font-size:14px;color:var(--muted)}
+.case p{margin:8px 0 0;max-width:68ch}
+.goals{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.goals li{padding-left:24px;position:relative}
+.goals li::before{content:"";position:absolute;left:4px;top:.55em;width:10px;height:10px;border-radius:50%;border:3px solid var(--route)}
+
+/* steps = tappe */
+.route{list-style:none;margin:26px 0 0;padding:0;position:relative}
+.route::before{content:"";position:absolute;left:23px;top:12px;bottom:12px;width:6px;background:var(--route);border-radius:3px}
+.tappa{position:relative;padding-left:70px;padding-bottom:26px}
+.tappa .num{position:absolute;left:0;top:0;width:52px;height:52px;border-radius:50%;background:var(--surface);border:6px solid var(--route);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:21px;color:var(--ink);z-index:1}
+.tappa.ok .num{background:var(--route-fill);color:#fff}
+.tappa-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:52px}
+.tappa-h h2{font-size:26px;font-weight:700}
+.tappa-h .min{font-family:var(--f-mono);font-size:13px;color:var(--muted);border:1px solid var(--rule);border-radius:6px;padding:3px 9px}
+.tappa-h label{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;user-select:none}
+.tappa-h input{width:20px;height:20px;accent-color:var(--route)}
+.tappa .body{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.do{margin:0;padding-left:20px;display:grid;gap:4px}
+.do li::marker{color:var(--route);font-weight:700}
+.do li.ck{background:var(--hl);border-radius:6px;padding:8px 12px}
+.do li.ck .hand{font-family:var(--f-hand);font-weight:700;font-size:20px;color:var(--marker);margin-right:8px;display:inline-block;transform:rotate(-2deg)}
+.platform{font-size:13px;color:var(--muted)}
+.platform b{color:var(--ink)}
+
+.prompt{background:var(--prompt-bg);color:var(--prompt-fg);border-radius:10px;overflow:hidden}
+.prompt-h{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.prompt-h .l{font-family:var(--f-display);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:13px;color:var(--prompt-dim)}
+.prompt-h .l b{color:var(--sign)}
+.copy{margin-left:auto;border:0;background:var(--sign);color:var(--sign-ink);font-weight:700;font-size:13px;padding:6px 12px;border-radius:6px;display:inline-flex;gap:6px;align-items:center}
+.copy.done{background:var(--route-fill);color:#fff}
+.prompt pre{margin:0;padding:12px 14px 14px;font-family:var(--f-mono);font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.prompt pre .ph{color:var(--sign);background:rgba(255,203,5,.12);border-radius:3px;padding:0 3px}
+
+.check{position:relative;padding:12px 14px 12px 16px;border-radius:8px;background:linear-gradient(transparent 0,var(--hl) 0)}
+.check .hand{font-family:var(--f-hand);font-weight:700;font-size:24px;color:var(--marker);line-height:1;transform:rotate(-2deg);display:inline-block;margin-bottom:4px}
+.check ul{margin:0;padding-left:18px}
+.check p{margin:0}
+.q{border-left:4px solid var(--ink);padding:4px 0 4px 12px;font-weight:600;color:var(--ink)}
+.q small{display:block;font-weight:700;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.out{display:flex;gap:10px;align-items:baseline;font-size:15px;border-top:1px dashed var(--rule);padding-top:12px}
+.out b{font-family:var(--f-display);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--route);font-size:14px;white-space:nowrap}
+
+.capolinea{background:var(--ink);color:var(--bg);border-radius:var(--r);padding:20px 22px;margin-left:70px}
+.capolinea h3{color:var(--bg);font-size:22px;text-transform:uppercase;margin-bottom:8px}
+.capolinea ul{margin:0;padding-left:18px}
+@media (max-width:560px){.tappa{padding-left:0}.route::before{display:none}.tappa .num{position:relative;width:44px;height:44px;font-size:18px;border-width:5px}.tappa-h{gap:10px}.tappa-h .num{flex:none}.capolinea{margin-left:0}}
+
+/* aside: timer & materials */
+.timer .dial{font-family:var(--f-mono);font-size:44px;font-weight:700;color:var(--ink);letter-spacing:.02em;line-height:1}
+.timer .phase{font-size:14px;color:var(--muted);margin-top:4px}
+.track{position:relative;height:30px;margin:16px 0 12px}
+.track .bar{position:absolute;left:0;right:0;top:13px;height:5px;background:var(--rule);border-radius:3px;overflow:hidden;display:flex}
+.track .bar i{display:block;height:100%}
+.track .bus{position:absolute;top:0;width:34px;height:22px;transform:translateX(-50%);transition:left .9s linear}
+.track .mk{position:absolute;top:8px;width:3px;height:15px;background:var(--ink);transform:translateX(-50%)}
+.tbtns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--rule);background:var(--surface);color:var(--ink);font-weight:600;font-size:14px;padding:8px 14px;border-radius:8px}
+.btn.pri{background:var(--route-fill);border-color:var(--route-fill);color:#fff}
+.btn:hover{border-color:var(--ink)}
+.mats{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mat{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--bg)}
+.mat .ic{width:34px;height:34px;flex:none;border-radius:6px;display:grid;place-items:center;font-family:var(--f-mono);font-size:10px;font-weight:700;color:#fff;background:var(--ink)}
+.mat .ic.img{background:#7A4FD0}.mat .ic.xls{background:#1E7B45}.mat .ic.doc{background:#2B5DB8}
+.mat .nm{min-width:0;flex:1;font-size:13.5px;line-height:1.3}
+.mat .nm b{display:block;font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--ink);word-break:break-all}
+.mat .acts{display:flex;gap:6px}
+.mat .acts a,.mat .acts button{font-size:12.5px;font-weight:700;padding:5px 9px;border-radius:6px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);text-decoration:none;white-space:nowrap}
+.mini{font-size:13px;color:var(--muted);margin:10px 0 0}
+.next{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:8px}
+.next a{flex:1 1 220px;text-decoration:none;border:1px solid var(--rule);background:var(--surface);border-radius:var(--r);padding:14px 16px}
+.next a small{display:block;color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.next a b{font-family:var(--f-display);font-size:20px;color:var(--ink)}
+.next a:hover{border-color:var(--route)}
+
+/* drawer for materials */
+.drawer{position:fixed;inset:0;z-index:50;display:flex;justify-content:flex-end;background:rgba(5,15,30,.45)}
+.drawer .panel{width:min(720px,100%);height:100%;background:var(--surface);overflow:auto;padding:22px max(18px,env(safe-area-inset-right,0px)) calc(30px + env(safe-area-inset-bottom,0px)) 22px;padding-top:calc(22px + env(safe-area-inset-top,0px));box-shadow:-20px 0 40px rgba(0,0,0,.2)}
+.drawer .ph{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.drawer h2{font-size:30px;text-transform:uppercase}
+.drawer .close{margin-left:auto}
+.doc{font-size:15.5px}
+.doc h4{font-family:var(--f-display);font-size:20px;color:var(--ink);margin:20px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+.doc p{margin:6px 0}
+.doc .fict{font-size:13px;color:var(--muted);font-style:italic}
+.tblw{overflow-x:auto;margin:8px 0}
+.doc table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+.doc th,.doc td{border-bottom:1px solid var(--rule);padding:7px 10px;text-align:left}
+.doc th{font-family:var(--f-display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.doc td.n,.doc th.n{text-align:right}
+.doc .indent td:first-child{padding-left:26px;color:var(--muted)}
+.ex5{display:grid;gap:10px}
+.ex5 .e{border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
+.ex5 .e b{font-family:var(--f-display);font-size:18px;color:var(--ink)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.skill{background:var(--route-soft);color:var(--route)}
+.tag.agente{background:var(--ink);color:var(--bg)}
+.tag.nessuno{background:var(--rule);color:var(--ink)}
+
+/* decision helper */
+.decide{display:grid;gap:10px}
+.decide .qq{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--rule);padding-bottom:10px}
+.decide .qq span{flex:1 1 260px}
+.yn{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.yn button{border:0;background:var(--surface);color:var(--ink);padding:6px 14px;font-weight:600;font-size:14px}
+.yn button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.verdict{border-radius:8px;padding:12px 14px;background:var(--route-soft);color:var(--ink)}
+.verdict b{font-family:var(--f-display);font-size:22px;text-transform:uppercase}
+
+/* scheda form */
+.scheda{display:grid;gap:12px}
+.scheda fieldset{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin:0;display:grid;gap:10px}
+.scheda legend{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);padding:0 6px}
+.scheda label{display:grid;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink)}
+.scheda input,.scheda textarea,.scheda select{font:inherit;font-weight:400;font-size:14.5px;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--text);width:100%}
+.scheda textarea{min-height:58px;resize:vertical}
+.cases{overflow-x:auto}
+.cases table{border-collapse:collapse;width:100%;min-width:560px;font-size:13.5px}
+.cases th{text-align:left;font-family:var(--f-display);letter-spacing:.06em;text-transform:uppercase;font-size:12.5px;color:var(--muted);padding:4px 6px}
+.cases td{padding:4px 6px;vertical-align:top}
+.cases td:first-child{font-weight:700;color:var(--ink);white-space:nowrap}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#linea" aria-label="Torna alla linea">
+      <span class="logos"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPQAAABkCAYAAACxSR29AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDYuMC1jMDAyIDc5LjE2NDM1MiwgMjAyMC8wMS8zMC0xNTo1MDozOCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RkYwOEQ5QjZDRjM3MTFFQkEyMUNFRkQ0MEY1NkZCNjAiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RkYwOEQ5QjVDRjM3MTFFQkEyMUNFRkQ0MEY1NkZCNjAiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjU2NTZBQ0E0RTMyRjExRTM4RTY5OEM5QkU1MkMwQzZBIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU2NTZBQ0E1RTMyRjExRTM4RTY5OEM5QkU1MkMwQzZBIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+W9XM5gAAHd5JREFUeNrsXQl8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" alt="Autoguidovie" class="lg-agi"><span class="x" aria-hidden="true">×</span><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTc2OSIgaGVpZ2h0PSIzNTQiIHZpZXdCb3g9IjAgMCAxNzY5IDM1NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTI1MS41MzQgMjAzLjUxNkwyMjkuNTQ0IDE0My4xMTZDMjI4LjcwNCAxNDAuODA2IDIyOS43OTQgMTM4LjIyNiAyMzIuMDQ0IDEzNy4yMzZDMjM1Ljg1NCAxMzUuNTQ2IDIzOS43MjQgMTMzLjk2NiAyNDMuNjY0IDEzMi41MDZDMjQ0LjE3NCAxMzIuMzE2IDI0NC42ODQgMTMyLjExNiAyNDUuMTk0IDEzMS45MjZDMjQ4LjYwNCAxMzAuNjc2IDI1Mi4wMzQgMTI5LjUzNiAyNTUuNDc0IDEyOC40NzZDMjU3Ljg1NCAxMjcuNzQ2IDI2MC4zNzQgMTI5LjAyNiAyNjEuMjI0IDEzMS4zNTZMMzI1LjY0NCAzMDguMzQ2TDMzOS45MjQgMzQ3LjU5NkMzNDEuMzU0IDM1MS41MTYgMzM3LjMyNCAzNTUuMTk2IDMzMy41NTQgMzUzLjQzNkwyLjcwNDM0IDE5OS4xNTZDMC40MjQzMzcgMTk4LjA5NiAtMC42MDU2NjMgMTk1LjQyNiAwLjM2NDMzNyAxOTMuMTA2QzEuOTc0MzQgMTg5LjI1NiAzLjY1NDM0IDE4NS40MjYgNS40MTQzNCAxODEuNjA2QzUuNjQ0MzQgMTgxLjA5NiA1Ljg3NDM0IDE4MC41ODYgNi4xMTQzNCAxODAuMDY2QzguMjk0MzQgMTc1LjM5NiAxMC41NjQzIDE3MC44MTYgMTIuOTI0MyAxNjYuMjg2QzE4LjI1NDMgMTU2LjA3NiAyNC4wNDQzIDE0Ni4yMjYgMzAuMjM0MyAxMzYuNzY2QzMzLjQwNDMgMTMxLjkzNiAzNi42ODQzIDEyNy4yMDYgNDAuMDY0MyAxMjIuNTc2QzQzLjQ5NDMgMTE3Ljg4NiA0Ny4wMjQzIDExMy4zMTYgNTAuNjU0MyAxMDguODQ2Qzg2LjA5NDMgNjUuMjQ1NSAxMzEuMjE0IDMxLjkxNTUgMTgxLjMwNCAxMC41NTU1QzE4Ni40OTQgOC4zNDU1NCAxOTEuNzI0IDYuMjY1NTQgMTk3LjAxNCA0LjMwNTU0QzIwMC44NzQgMi44ODU1NCAyMDQuNzY0IDEuNTI1NTQgMjA4LjY2NCAwLjIzNTU0M0MyMTEuMDY0IC0wLjU1NDQ1NyAyMTMuNjY0IDAuNzA1NTQzIDIxNC41MzQgMy4wNzU1NEwyMjQuNjY0IDMwLjkwNTVMMjM2LjM1NCA2My4wMTU1TDI0Ni4zNDQgOTAuNDg1NUMyNDcuMjU0IDkyLjk5NTUgMjQ1Ljg5NCA5NS43NDU1IDI0My4zNDQgOTYuNTQ1NUMyNDAuMDU0IDk3LjU3NTUgMjM2Ljc4NCA5OC42ODU1IDIzMy41MjQgOTkuODY1NUMyMzMuMDE0IDEwMC4wNTYgMjMyLjUxNCAxMDAuMjU2IDIzMi4wMDQgMTAwLjQ0NkMyMjYuNjk0IDEwMi40MTYgMjIxLjQ2NCAxMDQuNTY2IDIxNi4zNjQgMTA2Ljg3NkMxODMuOTQ0IDEyMS41NTYgMTU1LjY0NCAxNDIuOTg2IDEzMy4wNDQgMTY5LjcyNkMxMzAuMzE0IDE3Mi45NTYgMTI3LjY2NCAxNzYuMjY2IDEyNS4wOTQgMTc5LjY0NkMxMjMuNTQ0IDE4MS42ODYgMTIwLjY0NCAxODIuMTE2IDExOC41ODQgMTgwLjU5Nkw5OC42NzQzIDE2NS44ODZDOTYuNTg0MyAxNjQuMzM2IDk2LjE0NDMgMTYxLjM3NiA5Ny43MTQzIDE1OS4zMDZDMTAwLjI1NCAxNTUuOTQ2IDEwMi44NzQgMTUyLjY1NiAxMDUuNTU0IDE0OS40MjZDMTMxLjI4NCAxMTguNDU2IDE2My42MjQgOTMuNTk1NSAyMDAuNzQ0IDc2LjUxNTVDMjAyLjk1NCA3NS40OTU1IDIwNC4wMDQgNzIuOTU1NSAyMDMuMTc0IDcwLjY3NTVMMTk0LjY5NCA0Ny4zNjU1QzE5My43NjQgNDQuODA1NSAxOTAuODQ0IDQzLjU3NTUgMTg4LjM2NCA0NC43MDU1QzE0NS4xODQgNjQuMjE1NSAxMDcuNjc0IDkzLjAzNTUgNzguMDg0MyAxMjkuMTE2Qzc0LjQyNDMgMTMzLjU3NiA3MC44ODQzIDEzOC4xNDYgNjcuNDc0MyAxNDIuODE2QzY0LjA5NDMgMTQ3LjQ2NiA2MC44NDQzIDE1Mi4yMTYgNTcuNzA0MyAxNTcuMDY2QzUzLjY2NDMgMTYzLjMxNiA0OS44MjQzIDE2OS43MjYgNDYuMjE0MyAxNzYuMzA2QzQ0LjkxNDMgMTc4LjY3NiA0NS44ODQzIDE4MS42NTYgNDguMzQ0MyAxODIuODA2TDI3My43NTQgMjg3LjkxNkMyNzcuNTM0IDI4OS42NzYgMjgxLjU1NCAyODUuOTk2IDI4MC4xMjQgMjgyLjA3NkwyNzguMzE0IDI3Ny4xMDZMMjUxLjUyNCAyMDMuNTE2SDI1MS41MzRaIiBmaWxsPSIjRDczNDJCIi8+CjxwYXRoIGQ9Ik01MTUuMjQ0IDQ3Ljk1NkM1MzIuOTc0IDU2Ljk4NiA1NDYuNTY0IDY5Ljg4NiA1NTYuMDE0IDg2LjY1NkM1NjUuNDY0IDEwMy40MzYgNTcwLjE5NCAxMjMuMTg2IDU3MC4xOTQgMTQ1LjkwNkM1NzAuMTk0IDE2OC42MjYgNTY1LjQ2NCAxODguMzI2IDU1Ni4wMTQgMjA0Ljk5NkM1NDYuNTY0IDIyMS42NzYgNTMyLjk3NCAyMzQuNDE2IDUxNS4yNDQgMjQzLjIyNkM0OTcuNTA0IDI1Mi4wNDYgNDc2LjU0NCAyNTYuNDQ2IDQ1Mi4zMzQgMjU2LjQ0NkgzODMuMjE0VjM0LjQxNkg0NTIuMzM0QzQ3Ni41NDQgMzQuNDE2IDQ5Ny41MTQgMzguOTI2IDUxNS4yNDQgNDcuOTU2Wk01MTcuOTQ0IDIwOS43NzZDNTMzLjAyNCAxOTQuNTk2IDU0MC41NjQgMTczLjMwNiA1NDAuNTY0IDE0NS45MDZDNTQwLjU2NCAxMTguNTA2IDUzMi45NzQgOTYuNzQ2IDUxNy43OTQgODEuMjQ2QzUwMi42MDQgNjUuNzQ2IDQ4MC43OTQgNTcuOTg2IDQ1Mi4zMzQgNTcuOTg2SDQxMi4xOTRWMjMyLjU0Nkg0NTIuMzM0QzQ4MS4wMDQgMjMyLjU0NiA1MDIuODc0IDIyNC45NTYgNTE3Ljk1NCAyMDkuNzc2SDUxNy45NDRaIiBmaWxsPSIjMzQzNDM0Ii8+CjxwYXRoIGQ9Ik01OTUuNjk0IDEyMS41MzZDNjAyLjkxNCAxMDguMDU2IDYxMi44NDQgOTcuNTk1OSA2MjUuNDc0IDkwLjE1NTlDNjM4LjEwNCA4Mi43MjU5IDY1Mi4xNzQgNzkuMDA1OSA2NjcuNjg0IDc5LjAwNTlDNjgzLjE5NCA3OS4wMDU5IDY5Ni4yNDQgODIuMzA1OSA3MDcuNTA0IDg4Ljg4NTlDNzE4Ljc1NCA5NS40NjU5IDcyNy4xNDQgMTAzLjc1NiA3MzIuNjY0IDExMy43MzZWODEuODc1OUg3NjEuOTc0VjI1Ni40MzZINzMyLjY2NFYyMjMuOTQ2QzcyNi45MzQgMjM0LjEzNiA3MTguMzg0IDI0Mi41NzYgNzA3LjAyNCAyNDkuMjY2QzY5NS42NjQgMjU1Ljk1NiA2ODIuNDQ0IDI1OS4yOTYgNjY3LjM2NCAyNTkuMjk2QzY1Mi4yODQgMjU5LjI5NiA2MzcuODQ0IDI1NS40NzYgNjI1LjMxNCAyNDcuODI2QzYxMi43ODQgMjQwLjE3NiA2MDIuOTA0IDIyOS40NTYgNTk1LjY5NCAyMTUuNjU2QzU4OC40NzQgMjAxLjg1NiA1ODQuODY0IDE4Ni4xMzYgNTg0Ljg2NCAxNjguNTE2QzU4NC44NjQgMTUwLjg5NiA1ODguNDc0IDEzNS4wMTYgNTk1LjY5NCAxMjEuNTM2Wk03MjQuNzA0IDEzNC40MzZDNzE5LjM5NCAxMjQuNjc2IDcxMi4yMjQgMTE3LjE4NiA3MDMuMjA0IDExMS45NzZDNjk0LjE3NCAxMDYuNzc2IDY4NC4yNTQgMTA0LjE2NiA2NzMuNDI0IDEwNC4xNjZDNjYyLjU5NCAxMDQuMTY2IDY1Mi43MTQgMTA2LjcxNiA2NDMuODA0IDExMS44MTZDNjM0Ljg4NCAxMTYuOTE2IDYyNy43NjQgMTI0LjM0NiA2MjIuNDY0IDEzNC4xMTZDNjE3LjE1NCAxNDMuODg2IDYxNC41MDQgMTU1LjM1NiA2MTQuNTA0IDE2OC41MTZDNjE0LjUwNCAxODEuNjc2IDYxNy4xNTQgMTkzLjUyNiA2MjIuNDY0IDIwMy4zOTZDNjI3Ljc3NCAyMTMuMjc2IDYzNC44ODQgMjIwLjgxNiA2NDMuODA0IDIyNi4wMTZDNjUyLjcyNCAyMzEuMjI2IDY2Mi41OTQgMjMzLjgxNiA2NzMuNDI0IDIzMy44MTZDNjg0LjI1NCAyMzMuODE2IDY5NC4xODQgMjMxLjIxNiA3MDMuMjA0IDIyNi4wMTZDNzEyLjIyNCAyMjAuODE2IDcxOS4zOTQgMjEzLjI3NiA3MjQuNzA0IDIwMy4zOTZDNzMwLjAwNCAxOTMuNTI2IDczMi42NjQgMTgyLjAwNiA3MzIuNjY0IDE2OC44MzZDNzMyLjY2NCAxNTUuNjY2IDczMC4wMDQgMTQ0LjIwNiA3MjQuNzA0IDEzNC40MzZaIiBmaWxsPSIjMzQzNDM0Ii8+CjxwYXRoIGQ9Ik04MzAuNTU1IDEwNS43NjZWMjA4LjY1NkM4MzAuNTU1IDIxNy4xNTYgODMyLjM1NSAyMjMuMTQ2IDgzNS45NzUgMjI2LjY1NkM4MzkuNTg1IDIzMC4xNTYgODQ1Ljg1NSAyMzEuOTA2IDg1NC43NjUgMjMxLjkwNkg4NzYuMTA1VjI1Ni40MzZIODQ5Ljk4NUM4MzMuODQ1IDI1Ni40MzYgODIxLjczNSAyNTIuNzI2IDgxMy42NzUgMjQ1LjI4NkM4MDUuNjA1IDIzNy44NTYgODAxLjU3NSAyMjUuNjQ2IDgwMS41NzUgMjA4LjY1NlYxMDUuNzY2SDc3OC45NTVWODEuODc2SDgwMS41NzVWMzcuOTE2SDgzMC41NjVWODEuODc2SDg3Ni4xMTVWMTA1Ljc2Nkg4MzAuNTY1SDgzMC41NTVaIiBmaWxsPSIjMzQzNDM0Ii8+CjxwYXRoIGQ9Ik04ODkuMjY1IDEyMS41MzZDODk2LjQ4NSAxMDguMDU2IDkwNi40MTUgOTcuNTk1OSA5MTkuMDQ1IDkwLjE1NTlDOTMxLjY3NSA4Mi43MjU5IDk0NS43NDUgNzkuMDA1OSA5NjEuMjU1IDc5LjAwNTlDOTc2Ljc2NSA3OS4wMDU5IDk4OS44MTUgODIuMzA1OSAxMDAxLjA3IDg4Ljg4NTlDMTAxMi4zMiA5NS40NjU5IDEwMjAuNzEgMTAzLjc1NiAxMDI2LjIzIDExMy43MzZWODEuODc1OUgxMDU1LjU0VjI1Ni40MzZIMTAyNi4yM1YyMjMuOTQ2QzEwMjAuNSAyMzQuMTM2IDEwMTEuOTUgMjQyLjU3NiAxMDAwLjU5IDI0OS4yNjZDOTg5LjIzNSAyNTUuOTU2IDk3Ni4wMTUgMjU5LjI5NiA5NjAuOTM1IDI1OS4yOTZDOTQ1Ljg1NSAyNTkuMjk2IDkzMS40MTUgMjU1LjQ3NiA5MTguODg1IDI0Ny44MjZDOTA2LjM1NSAyNDAuMTc2IDg5Ni40NzUgMjI5LjQ1NiA4ODkuMjY1IDIxNS42NTZDODgyLjA0NSAyMDEuODU2IDg3OC40MzUgMTg2LjEzNiA4NzguNDM1IDE2OC41MTZDODc4LjQzNSAxNTAuODk2IDg4Mi4wNDUgMTM1LjAxNiA4ODkuMjY1IDEyMS41MzZaTTEwMTguMjYgMTM0LjQzNkMxMDEyLjk1IDEyNC42NzYgMTAwNS43OCAxMTcuMTg2IDk5Ni43NjUgMTExLjk3NkM5ODcuNzM1IDEwNi43NzYgOTc3LjgxNSAxMDQuMTY2IDk2Ni45ODUgMTA0LjE2NkM5NTYuMTU1IDEwNC4xNjYgOTQ2LjI3NSAxMDYuNzE2IDkzNy4zNjUgMTExLjgxNkM5MjguNDQ1IDExNi45MTYgOTIxLjMyNSAxMjQuMzQ2IDkxNi4wMjUgMTM0LjExNkM5MTAuNzE1IDE0My44ODYgOTA4LjA2NSAxNTUuMzU2IDkwOC4wNjUgMTY4LjUxNkM5MDguMDY1IDE4MS42NzYgOTEwLjcxNSAxOTMuNTI2IDkxNi4wMjUgMjAzLjM5NkM5MjEuMzM1IDIxMy4yNzYgOTI4LjQ0NSAyMjAuODE2IDkzNy4zNjUgMjI2LjAxNkM5NDYuMjg1IDIzMS4yMjYgOTU2LjE1NSAyMzMuODE2IDk2Ni45ODUgMjMzLjgxNkM5NzcuODE1IDIzMy44MTYgOTg3Ljc0NSAyMzEuMjE2IDk5Ni43NjUgMjI2LjAxNkMxMDA1Ljc4IDIyMC44MTYgMTAxMi45NSAyMTMuMjc2IDEwMTguMjYgMjAzLjM5NkMxMDIzLjU2IDE5My41MjYgMTAyNi4yMiAxODIuMDA2IDEwMjYuMjIgMTY4LjgzNkMxMDI2LjIyIDE1NS42NjYgMTAyMy41NiAxNDQuMjA2IDEwMTguMjYgMTM0LjQzNloiIGZpbGw9IiMzNDM0MzQiLz4KPHBhdGggZD0iTTExNDMuNzMgODkuMDQ1NkMxMTU1LjA5IDgyLjM1NTYgMTE2OC4zMSA3OS4wMTU2IDExODMuMzkgNzkuMDE1NkMxMTk4LjQ3IDc5LjAxNTYgMTIxMi45NiA4Mi43MzU2IDEyMjUuNiA5MC4xNjU2QzEyMzguMjMgOTcuNjA1NiAxMjQ4LjE2IDEwOC4wNTYgMTI1NS4zOCAxMjEuNTQ2QzEyNjIuNiAxMzUuMDM2IDEyNjYuMjEgMTUwLjY5NiAxMjY2LjIxIDE2OC41MjZDMTI2Ni4yMSAxODYuMzU2IDEyNjIuNiAyMDEuODY2IDEyNTUuMzggMjE1LjY2NkMxMjQ4LjE2IDIyOS40NzYgMTIzOC4yMyAyNDAuMTk2IDEyMjUuNiAyNDcuODM2QzEyMTIuOTYgMjU1LjQ4NiAxMTk4Ljg5IDI1OS4zMDYgMTE4My4zOSAyNTkuMzA2QzExNjcuODkgMjU5LjMwNiAxMTU1LjQxIDI1NS45NjYgMTE0NC4wNSAyNDkuMjc2QzExMzIuNjkgMjQyLjU4NiAxMTI0LjAzIDIzNC4yNTYgMTExOC4wOSAyMjQuMjY2VjMzOS4yNTZIMTA4OS4xVjgxLjg3NTZIMTExOC4wOVYxMTQuMDQ2QzExMjMuODIgMTA0LjA2NiAxMTMyLjM3IDk1LjcyNTYgMTE0My43MyA4OS4wNDU2Wk0xMjI4LjYyIDEzNC4xMTZDMTIyMy4zMSAxMjQuMzU2IDEyMTYuMTQgMTE2LjkxNiAxMjA3LjEyIDExMS44MTZDMTE5OC4wOSAxMDYuNzI2IDExODguMTcgMTA0LjE2NiAxMTc3LjM0IDEwNC4xNjZDMTE2Ni41MSAxMDQuMTY2IDExNTYuOSAxMDYuNzY2IDExNDcuODggMTExLjk3NkMxMTM4Ljg1IDExNy4xODYgMTEzMS42MyAxMjQuNzE2IDExMjYuMjIgMTM0LjU5NkMxMTIwLjgxIDE0NC40NzYgMTExOC4xIDE1NS44ODYgMTExOC4xIDE2OC44MzZDMTExOC4xIDE4MS43ODYgMTEyMC44MSAxOTMuNTI2IDExMjYuMjIgMjAzLjM5NkMxMTMxLjY0IDIxMy4yNzYgMTEzOC44NSAyMjAuODE2IDExNDcuODggMjI2LjAxNkMxMTU2LjkgMjMxLjIyNiAxMTY2LjcyIDIzMy44MTYgMTE3Ny4zNCAyMzMuODE2QzExODcuOTYgMjMzLjgxNiAxMTk4LjEgMjMxLjIxNiAxMjA3LjEyIDIyNi4wMTZDMTIxNi4xNCAyMjAuODE2IDEyMjMuMzEgMjEzLjI3NiAxMjI4LjYyIDIwMy4zOTZDMTIzMy45MyAxOTMuNTI2IDEyMzYuNTggMTgxLjg5NiAxMjM2LjU4IDE2OC41MTZDMTIzNi41OCAxNTUuMTM2IDEyMzMuOTIgMTQzLjg4NiAxMjI4LjYyIDEzNC4xMTZaIiBmaWxsPSIjMzQzNDM0Ii8+CjxwYXRoIGQ9Ik0xMjg5Ljg1IDQ3Ljc5NTZDMTI4Ni4wMyA0My45NzU2IDEyODQuMTIgMzkuMzA1NiAxMjg0LjEyIDMzLjc3NTZDMTI4NC4xMiAyOC4yNDU2IDEyODYuMDMgMjMuNTg1NiAxMjg5Ljg1IDE5Ljc1NTZDMTI5My42NyAxNS45MzU2IDEyOTguMzQgMTQuMDE1NiAxMzAzLjg3IDE0LjAxNTZDMTMwOS40IDE0LjAxNTYgMTMxMy42OSAxNS45MjU2IDEzMTcuNDEgMTkuNzU1NkMxMzIxLjEyIDIzLjU3NTYgMTMyMi45OSAyOC4yNTU2IDEzMjIuOTkgMzMuNzc1NkMxMzIyLjk5IDM5LjI5NTYgMTMyMS4xMyA0My45NjU2IDEzMTcuNDEgNDcuNzk1NkMxMzEzLjY5IDUxLjYxNTYgMTMwOS4xOCA1My41MzU2IDEzMDMuODcgNTMuNTM1NkMxMjk4LjU2IDUzLjUzNTYgMTI5My42OCA1MS42MjU2IDEyODkuODUgNDcuNzk1NlpNMTMxNy44OCA4MS44NzU2VjI1Ni40MzZIMTI4OC44OVY4MS44NzU2SDEzMTcuODhaIiBmaWxsPSIjMzQzNDM0Ii8+CjxwYXRoIGQ9Ik0xMzY5LjQ0IDIzMi41NDZIMTQ1NS4xM1YyNTYuNDM2SDEzMzYuMzJWMjMyLjU0NkwxNDIxLjA1IDEwNS40NDZIMTMzNi45NlY4MS44NzZIMTQ1NC41VjEwNS40NDZMMTM2OS40NSAyMzIuNTQ2SDEzNjkuNDRaIiBmaWxsPSIjMzQzNDM0Ii8+CjxwYXRoIGQ9Ik0xNTAxLjQxIDIzMi41NDZIMTU4Ny4xVjI1Ni40MzZIMTQ2OC4yOVYyMzIuNTQ2TDE1NTMuMDIgMTA1LjQ0NkgxNDY4LjkzVjgxLjg3NkgxNTg2LjQ3VjEwNS40NDZMMTUwMS40MiAyMzIuNTQ2SDE1MDEuNDFaIiBmaWxsPSIjMzQzNDM0Ii8+CjxwYXRoIGQ9Ik0xNjAxLjc0IDEyMS41MzZDMTYwOC45NiAxMDguMDU2IDE2MTguODkgOTcuNTk1OSAxNjMxLjUyIDkwLjE1NTlDMTY0NC4xNSA4Mi43MjU5IDE2NTguMjIgNzkuMDA1OSAxNjczLjczIDc5LjAwNTlDMTY4OS4yNCA3OS4wMDU5IDE3MDIuMjkgODIuMzA1OSAxNzEzLjU1IDg4Ljg4NTlDMTcyNC44IDk1LjQ2NTkgMTczMy4xOSAxMDMuNzU2IDE3MzguNzEgMTEzLjczNlY4MS44NzU5SDE3NjguMDJWMjU2LjQzNkgxNzM4LjcxVjIyMy45NDZDMTczMi45OCAyMzQuMTM2IDE3MjQuNDMgMjQyLjU3NiAxNzEzLjA3IDI0OS4yNjZDMTcwMS43MSAyNTUuOTU2IDE2ODguNDkgMjU5LjI5NiAxNjczLjQxIDI1OS4yOTZDMTY1OC4zMyAyNTkuMjk2IDE2NDMuODkgMjU1LjQ3NiAxNjMxLjM2IDI0Ny44MjZDMTYxOC44MyAyNDAuMTc2IDE2MDguOTUgMjI5LjQ1NiAxNjAxLjc0IDIxNS42NTZDMTU5NC41MiAyMDEuODU2IDE1OTAuOTEgMTg2LjEzNiAxNTkwLjkxIDE2OC41MTZDMTU5MC45MSAxNTAuODk2IDE1OTQuNTIgMTM1LjAxNiAxNjAxLjc0IDEyMS41MzZaTTE3MzAuNzUgMTM0LjQzNkMxNzI1LjQ0IDEyNC42NzYgMTcxOC4yNyAxMTcuMTg2IDE3MDkuMjUgMTExLjk3NkMxNzAwLjIyIDEwNi43NzYgMTY5MC4zIDEwNC4xNjYgMTY3OS40NyAxMDQuMTY2QzE2NjguNjQgMTA0LjE2NiAxNjU4Ljc2IDEwNi43MTYgMTY0OS44NSAxMTEuODE2QzE2NDAuOTMgMTE2LjkxNiAxNjMzLjgxIDEyNC4zNDYgMTYyOC41MSAxMzQuMTE2QzE2MjMuMiAxNDMuODg2IDE2MjAuNTUgMTU1LjM1NiAxNjIwLjU1IDE2OC41MTZDMTYyMC41NSAxODEuNjc2IDE2MjMuMiAxOTMuNTI2IDE2MjguNTEgMjAzLjM5NkMxNjMzLjgyIDIxMy4yNzYgMTY0MC45MyAyMjAuODE2IDE2NDkuODUgMjI2LjAxNkMxNjU4Ljc3IDIzMS4yMjYgMTY2OC42NCAyMzMuODE2IDE2NzkuNDcgMjMzLjgxNkMxNjkwLjMgMjMzLjgxNiAxNzAwLjIzIDIzMS4yMTYgMTcwOS4yNSAyMjYuMDE2QzE3MTguMjcgMjIwLjgxNiAxNzI1LjQ0IDIxMy4yNzYgMTczMC43NSAyMDMuMzk2QzE3MzYuMDUgMTkzLjUyNiAxNzM4LjcxIDE4Mi4wMDYgMTczOC43MSAxNjguODM2QzE3MzguNzEgMTU1LjY2NiAxNzM2LjA1IDE0NC4yMDYgMTczMC43NSAxMzQuNDM2WiIgZmlsbD0iIzM0MzQzNCIvPgo8L3N2Zz4K" alt="Datapizza" class="lg-dp"></span>
+      <span class="badge">1B</span>
+      <span class="t">Linea AI · Copilot<small>Productivity Booster</small></span>
+    </a>
+    <span class="spacer"></span>
+    <div class="seg" role="group" aria-label="Sessione">
+      <button id="s-am" type="button" data-s="am">Mattina</button>
+      <button id="s-pm" type="button" data-s="pm">Pomeriggio</button>
+    </div>
+    <span class="clock tab" id="clock">--:--</span>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="dr-title">
+    <div class="ph">
+      <h2 id="dr-title">Materiale</h2>
+      <button class="copy" id="dr-copy" type="button">Copia il testo</button>
+      <button class="btn close" id="dr-close" type="button">Chiudi</button>
+    </div>
+    <div class="doc" id="dr-body"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- dati ---------- */
+const DRIVE = {
+  orario:"https://drive.google.com/file/d/11I5EmfZOMgFlAJMWzS90k0BP07ma0oCk/view",
+  modulo:"https://drive.google.com/file/d/1yhYQIOTB0RGvHWANd_ck9LhnJx1uv7eL/view",
+  dossier:"https://drive.google.com/file/d/1atYRUEBojU7r6lCJwcXolXy5G6ChZ4m1/view",
+  profilo:"https://drive.google.com/file/d/1a73dNuRsd2kaAC-LNL28wqEjAyk9udpt/view",
+  richiesta:"https://drive.google.com/file/d/1Q9JV2h5RrPJHcmUMCfQ7tLR4jkFTUTxz/view",
+  dati:"https://drive.google.com/file/d/1E_aU3HGQiNFglSb0AkAPyCSMgsVIlGQR/view",
+  esempi:"https://drive.google.com/file/d/1NWAdQxjlHqiqJgolxrWRpAnMadXwo0QS/view",
+  scheda:"https://drive.google.com/file/d/1krrK-1rWZzUEzlqXzI5HPlPiROUuAIwE/view"
+};
+
+const FICT = '<p class="fict">Documento fittizio creato a scopo formativo. Nomi, aziende, codici e dati non corrispondono a persone, fornitori o progetti reali.</p>';
+
+const MATS = {
+  orario:{file:"mat-5-foto-orario-fermata.jpg",kind:"img",desc:"Foglio orari della linea 135, con una correzione a pennarello",drive:DRIVE.orario},
+  modulo:{file:"mat-5-foto-modulo-urto.jpg",kind:"img",desc:"Modulo di segnalazione di un urto, compilato a mano",drive:DRIVE.modulo},
+  dossier:{file:"mat-6-dossier-ottobre.docx",kind:"doc",desc:"Numeri, contratto e obiettivi della Direzione",drive:DRIVE.dossier,title:"Dossier corse soppresse di ottobre",
+    html:FICT+`<p><b>Preparato da:</b> Direzione d'esercizio, Autoguidovie<br><b>Per:</b> incontro con l'ente affidante, giovedì 26 novembre 2026</p>
+<h4>1. Dati di ottobre 2026</h4>
+<div class="tblw"><table><thead><tr><th>Voce</th><th class="n">Valore</th></tr></thead><tbody>
+<tr><td>Corse programmate</td><td class="n">3200</td></tr>
+<tr><td>Soglia contrattuale di corse soppresse</td><td class="n">1% (32 corse)</td></tr>
+<tr><td>Corse soppresse</td><td class="n">41</td></tr>
+<tr class="indent"><td>di cui per guasti ai bus</td><td class="n">29</td></tr>
+<tr class="indent"><td>di cui per assenze di personale</td><td class="n">8</td></tr>
+<tr class="indent"><td>di cui per lavori stradali</td><td class="n">4</td></tr>
+<tr><td>Penale prevista per ogni corsa oltre la soglia</td><td class="n">150 euro</td></tr>
+</tbody></table></div>
+<h4>2. Contratto di servizio</h4>
+<p><b>Articolo 6:</b> penale di 150 euro per ogni corsa soppressa oltre la soglia dell'1% mensile</p>
+<p><b>Articolo 7:</b> le soppressioni dovute a lavori stradali, eventi meteo e provvedimenti dell'autorità sono cause di forza maggiore e non sono conteggiate</p>
+<p><b>Articolo 9:</b> il gestore comunica all'ente ogni soppressione entro 2 giorni lavorativi</p>
+<h4>3. Cosa è successo</h4>
+<p>Ottobre ha avuto un numero insolito di guasti sui bus più vecchi, soprattutto sulle linee 135 e 140</p>
+<p>I guasti sono legati in parte a revisioni di manutenzione rimandate in estate. Questa è una debolezza interna di cui non è obbligatorio parlare in apertura</p>
+<p>Quattro corse sono saltate il 14 e 15 ottobre per la chiusura di un ponte</p>
+<p>Le soppressioni di ottobre sono state comunicate all'ente in media dopo 4 giorni lavorativi, oltre il termine dell'articolo 9</p>
+<h4>4. Cosa vuole la Direzione</h4>
+<p>Far riconoscere le 4 corse per lavori stradali come forza maggiore</p>
+<p>Presentare un piano di manutenzione dei bus con scadenze</p>
+<p>Concordare un modo per comunicare le soppressioni nei tempi</p>`},
+  profilo:{file:"mat-6-profilo-controparte.docx",kind:"doc",desc:"Profilo di Paola Ricci, da incollare nella chat",drive:DRIVE.profilo,title:"Profilo della controparte",
+    html:FICT+`<h4>Ruolo</h4>
+<p>Paola Ricci, funzionaria dell'ente affidante, responsabile del controllo del contratto di servizio con Autoguidovie. Ha 52 anni, lavora nell'ente da 18.</p>
+<h4>Cosa vuole</h4>
+<p>Che le penali previste dal contratto vengano applicate in modo uniforme: ha già avuto un caso in cui un gestore ha ottenuto uno sconto e il suo dirigente non l'ha dimenticato</p>
+<p>Che il servizio per i cittadini migliori: ha ricevuto 12 segnalazioni di cittadini per le corse di ottobre</p>
+<p>Un piano credibile, con date, non promesse generiche</p>
+<h4>Cosa la irrita</h4>
+<p>Le comunicazioni tardive: ha saputo di alcune soppressioni dai cittadini prima che da Autoguidovie</p>
+<p>Chi cita il contratto in modo impreciso</p>
+<p>Chi minimizza</p>
+<h4>Cosa può concedere</h4>
+<p>Di non conteggiare le corse sospese per cause di forza maggiore, se documentate, come dice l'articolo 7</p>
+<p>Di discutere un piano di manutenzione, ma non di ridurre la penale per i guasti</p>
+<h4>Come parla</h4>
+<p>Formale, secca, a frasi brevi. Non concede nulla al primo scambio. Se il suo interlocutore è preciso e porta dati, si ammorbidisce un poco. Non conosce i dati interni di Autoguidovie oltre a quelli ricevuti.</p>`},
+  richiesta:{file:"mat-7-richiesta-direzione.docx",kind:"doc",desc:"La richiesta di Franco Mazza",drive:DRIVE.richiesta,title:"Richiesta della Direzione",
+    html:FICT+`<p><b>Da:</b> Franco Mazza, Direttore tecnico<br><b>A:</b> Irene Cattaneo<br><b>Data:</b> lunedì 23 novembre 2026<br><b>Oggetto:</b> Slide per il comitato di giovedì</p>
+<p>Ciao Irene,</p>
+<p>giovedì al comitato di direzione ho 5 minuti per parlare dell'andamento del trimestre agosto-ottobre. Mi servono 5 slide al massimo, con un messaggio solo: voglio che il comitato esca sapendo una cosa. Mi servono i numeri giusti, perché qualcuno li ricontrolla sempre. Il foglio è quello del trimestre. Le note del relatore le leggo io.</p>
+<p>Grazie, Franco</p>`},
+  dati:{file:"mat-7-dati-trimestre.xlsx",kind:"xls",desc:"Fogli Puntualità, Reclami, Note",drive:DRIVE.dati,title:"Dati del trimestre",
+    html:`<h4>Foglio Puntualità</h4><div class="tblw"><table><thead><tr><th>Mese</th><th>Linea</th><th class="n">Corse effettuate</th><th class="n">Corse puntuali</th></tr></thead><tbody>
+${[["Agosto","135",1180,1004],["Agosto","140",960,902],["Agosto","M1",640,614],["Agosto","M6",700,644],["Settembre","135",1250,1000],["Settembre","140",990,931],["Settembre","M1",660,640],["Settembre","M6","n.d.","n.d."],["Ottobre","135",1300,962],["Ottobre","140",1010,929],["Ottobre","M1",670,650],["Ottobre","M6",720,655]].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td></tr>`).join("")}
+</tbody></table></div>
+<h4>Foglio Reclami</h4><div class="tblw"><table><thead><tr><th>Mese</th><th class="n">Ritardi</th><th class="n">Pulizia</th><th class="n">Comport.</th><th class="n">Inform.</th><th class="n">Altro</th><th class="n">Totale</th></tr></thead><tbody>
+<tr><td>Agosto</td><td class="n">12</td><td class="n">4</td><td class="n">2</td><td class="n">3</td><td class="n">1</td><td class="n">22</td></tr>
+<tr><td>Settembre</td><td class="n">18</td><td class="n">5</td><td class="n">3</td><td class="n">4</td><td class="n">2</td><td class="n">32</td></tr>
+<tr><td>Ottobre</td><td class="n">29</td><td class="n">6</td><td class="n">3</td><td class="n">4</td><td class="n">1</td><td class="n">41</td></tr>
+</tbody></table></div>
+<h4>Foglio Note</h4>
+<p>Puntualità: una corsa è puntuale se arriva a destinazione con meno di 5 minuti di ritardo.</p>
+<p>Le linee 135 e 140 sono extraurbane, M1 e M6 urbane e suburbane.</p>
+<p>Il dato della linea M6 di settembre non è disponibile per un guasto al sistema di rilevazione.</p>`},
+  esempi:{file:"mat-9-esempi-agenti-e-skill.docx",kind:"doc",desc:"Come scegliere e cinque esempi per ruoli Autoguidovie",drive:DRIVE.esempi,title:"Esempi di agenti e skill",
+    html:FICT+`<h4>Come scegliere</h4><div class="tblw"><table><thead><tr><th>Quando</th><th>Cosa serve</th><th>Perché</th></tr></thead><tbody>
+<tr><td>Un compito ripetitivo con passi e formato fissi, che parte da una richiesta chiara</td><td><span class="tag skill">Skill</span></td><td>Si scrive una volta e si richiama, il risultato ha sempre la stessa forma</td></tr>
+<tr><td>Un assistente con un ruolo, che consulta documenti, fa domande e gestisce compiti simili</td><td><span class="tag agente">Agente</span></td><td>Serve conversare, e avere fonti e limiti sempre a disposizione</td></tr>
+<tr><td>Un compito che si fa una volta sola o richiede un giudizio nuovo ogni volta</td><td><span class="tag nessuno">Nessuno</span></td><td>Il tempo per costruirlo è maggiore del tempo che fa risparmiare</td></tr>
+</tbody></table></div>
+<h4>Cinque esempi</h4><div class="ex5">
+<div class="e"><b>1. Risposta ai reclami dei passeggeri</b> <span class="tag skill">Skill</span><p><i>Servizio clienti.</i> Ogni giorno si risponde a reclami scritti secondo la stessa procedura.</p><p><b>Riceve:</b> il testo del reclamo. <b>Produce:</b> una risposta di 6-8 righe, con una nota interna di categoria e azione.</p><p><b>Regole:</b> non promettere rimborsi, non ripetere nomi di dipendenti, non inventare numeri di protocollo, chiedere i dati se mancano data, linea o orario.</p></div>
+<div class="e"><b>2. Primo triage di una segnalazione di sinistro</b> <span class="tag agente">Agente</span><p><i>Ufficio sinistri.</i> Classificare una segnalazione appena arrivata e decidere chi avvisare.</p><p><b>Riceve:</b> la segnalazione, spesso incompleta, e la procedura di prima gestione come fonte. <b>Produce:</b> categoria (danni a cose, danni a terzi, persone ferite, non è un sinistro), chi avvisare e in quanto tempo, dati mancanti.</p><p><b>Regole:</b> se una persona dice di essersi fatta male, anche in modo incerto, si tratta come possibile lesione. Non si stabilisce la responsabilità. Se mancano data, luogo o bus si chiedono i dati.</p></div>
+<div class="e"><b>3. Controllo dei turni della settimana</b> <span class="tag skill">Skill</span><p><i>Pianificazione.</i> Ogni venerdì si controlla il foglio dei turni rispetto a poche regole.</p><p><b>Riceve:</b> il foglio turni con assenze. <b>Produce:</b> una tabella dei problemi (conducente, giorno, regola) e la copertura per giorno.</p><p><b>Regole:</b> massimo 5 giorni di lavoro consecutivi, minimo di conducenti in servizio, nessun turno durante un'assenza.</p></div>
+<div class="e"><b>4. Assistente sulle offerte dei fornitori</b> <span class="tag agente">Agente</span><p><i>Direzione tecnica.</i> Rispondere a domande su capitolato e offerte ricevute, confrontandole.</p><p><b>Riceve:</b> i documenti come fonti e domande a voce. <b>Produce:</b> risposte con il riferimento al documento e al punto, e l'elenco di cosa manca.</p><p><b>Regole:</b> citare sempre la fonte, dire "non lo trovo" quando manca, segnalare quando due documenti si contraddicono.</p></div>
+<div class="e"><b>5. Avvisi ai passeggeri in italiano e in inglese</b> <span class="tag skill">Skill</span><p><i>Comunicazione.</i> Trasformare le informazioni di una deviazione in un avviso per le fermate.</p><p><b>Riceve:</b> date, linea, fermate non servite, fermata sostitutiva. <b>Produce:</b> un avviso in italiano semplice e uno in inglese, brevi.</p><p><b>Regole:</b> non cambiare date, numeri di linea e nomi di vie.</p></div>
+</div>`},
+  scheda:{file:"mat-9-scheda-agente-o-skill.docx",kind:"doc",desc:"Scheda da compilare man mano: la trovi anche qui sotto, compilabile",drive:DRIVE.scheda}
+};
+
+const P = s => s; // prompt text helper (placeholders in [quadre])
+
+const EX = [
+ {id:1, slot:1, short:"Leggere un'immagine", sub:"Estrarre dati da due foto e controllarli", level:"Explorer", min:30, timer:[20,10],
+  who:"Marco Ferri", ini:"MF", role:"Responsabile di esercizio",
+  caso:"Marco Ferri, responsabile di esercizio di Autoguidovie, riceve dal capodeposito due foto fatte con il telefono: il foglio con l'orario di una fermata, su cui qualcuno ha scritto una correzione a pennarello, e un modulo di segnalazione di un urto compilato a mano. Servono i dati in forma utilizzabile, cioè una tabella degli orari e una scheda dell'urto. Lo strumento AI può leggere le immagini ma può anche leggerle male o indovinare. Il compito è usarlo per estrarre i dati e controllare ogni valore sull'immagine.",
+  goals:["Far leggere un'immagine allo strumento e distinguere ciò che è stampato da ciò che è scritto a mano","Estrarre i dati in tabella con un livello di certezza per ogni valore","Controllare i valori sull'immagine e riconoscere dove lo strumento indovina","Non far completare i campi vuoti"],
+  mats:["orario","modulo"],
+  steps:[
+   {t:"Fai descrivere la foto dell'orario", min:4, do:["Apri Copilot Chat e allega la foto dell'orario","Chiedi cosa vede, senza interpretare: titolo, colonne, note, cosa è stampato e cosa è scritto a mano","Apri la foto accanto e controlla se la descrizione corrisponde"], out:"Descrizione verificata."},
+   {t:"Estrai la tabella con la certezza", min:6, do:["Chiedi una tabella con gli orari delle tre colonne e, per ogni orario, una colonna che dica se la lettura è sicura o incerta","Chiedi di dire esplicitamente se un valore è coperto, sfocato o corretto a mano","Controlla sulla foto almeno sei orari, compreso uno dove c'è un riflesso"], q:"Quale valore sembra letto bene e non lo è?", out:"Tabella degli orari con certezza e sei valori verificati."},
+   {t:"Fai domande sul foglio", min:4, do:["Chiedi: qual è la prima corsa feriale dopo le 8:00? Quante corse feriali ci sono dal 7 dicembre?","Controlla se lo strumento ha tenuto conto della scritta a mano"], out:"Due risposte controllate."},
+   {t:"Leggi il modulo a mano", min:6, do:["Allega la foto del modulo in una chat nuova","Chiedi una scheda con tutti i campi del modulo e il loro valore. Chiedi di segnalare i campi vuoti e le correzioni a mano, e di non completare niente che non sia scritto","Controlla sul modulo: ora, bus, feriti, targa","Confronta: la scheda con la foto, campo per campo"], out:"Scheda dell'urto con vuoti e correzioni segnalati."}
+  ],
+  finale:["Tabella degli orari con certezza, verificata su sei valori","Risposte alle due domande sul foglio","Scheda dell'urto con campi vuoti e correzioni segnalati"],
+  confronto:["Quale valore sembrava letto bene e non lo era?","Lo strumento ha detto \"non riesco a leggere\" o ha indovinato?","Per quali foto di lavoro lo useresti, e per quali no (dati personali, targhe, volti)?"]
+ },
+ {id:2, slot:2, short:"Il dialogo difficile", sub:"Prove di un incontro con l'AI come controparte", level:"Practitioner", min:30, timer:[20,10],
+  who:"Stefano Bruni", ini:"SB", role:"Direttore d'esercizio",
+  caso:"Autoguidovie ha chiuso ottobre con più corse soppresse del consentito e giovedì incontra l'ente affidante, che può applicare penali. Stefano Bruni, Direttore d'esercizio, non ha tempo per provare l'incontro con un collega. Ha a disposizione un dossier con i numeri e le clausole del contratto e un profilo della funzionaria che incontrerà. Il compito è usare lo strumento AI per prevedere le obiezioni e poi per fare le prove del dialogo, con l'AI nel ruolo della controparte, e controllare che quello che dice la controparte sia nel dossier.",
+  goals:["Preparare un incontro difficile usando l'AI per prevedere le obiezioni","Fare una prova del dialogo con l'AI nel ruolo della controparte","Distinguere cosa dice la controparte dal dossier e cosa inventa","Decidere cosa dire e cosa non dire all'incontro"],
+  mats:["dossier","profilo"],
+  steps:[
+   {t:"Prevedi le obiezioni", min:5, do:["Apri Copilot Chat e allega il dossier","Chiedi le 5 obiezioni più probabili dell'ente e, per ognuna, la risposta migliore basata solo sui dati del dossier","Segna le obiezioni che ti mettono più in difficoltà"], q:"Cosa non vuoi dire in apertura, e cosa farai se te lo chiedono?", out:"5 obiezioni con risposte e punti deboli."},
+   {t:"Dai un ruolo all'AI", min:3, mat:"profilo", do:["Apri una nuova chat","Incolla il profilo di Paola Ricci e chiedi all'AI di interpretarla nel dialogo, senza mai uscire dal ruolo","Chiedi che non ceda al primo scambio e che parli solo dei dati che conosce","Dille che aspetti la tua battuta prima di rispondere"], out:"AI pronta a interpretare la controparte."},
+   {t:"Fai la prova", min:8, do:["Fai almeno 5 scambi, rispondendo come faresti all'incontro","Prova a portare le 4 corse per lavori stradali come forza maggiore e a proporre il piano di manutenzione","Se l'AI cede troppo presto o è esagerata, chiedile di essere più realistica"], out:"Dialogo di almeno 5 scambi."},
+   {t:"Controlla e chiedi un feedback", min:4, do:["Rileggi quello che ha detto la controparte e confronta ogni numero e ogni clausola con il dossier","Esci dal ruolo e chiedi all'AI un feedback: dove sei stato vago, dove hai ceduto, cosa non hai chiesto","Scrivi 3 frasi che userai all'incontro e una cosa che non dirai"], q:"Quali frasi dell'AI erano inventate? Le avresti accettate in un incontro vero?", out:"Feedback e 3 frasi per l'incontro."}
+  ],
+  finale:["5 obiezioni previste con risposte","Dialogo di prova di almeno 5 scambi, con le invenzioni segnalate","3 frasi per l'incontro e una cosa da non dire"],
+  confronto:["Dove hai ceduto o sei stato vago?","Quale obiezione non avevi previsto? Quale frase della controparte era inventata?","Cosa prepareresti con l'AI e cosa solo tra persone?"]
+ },
+ {id:3, slot:3, short:"Dai dati a una presentazione", sub:"Da un foglio di dati a cinque slide giuste", level:"Practitioner", min:30, timer:[20,10],
+  who:"Irene Cattaneo", ini:"IC", role:"Analista · per Franco Mazza, Direttore tecnico",
+  caso:"Franco Mazza, Direttore tecnico di Autoguidovie, ha cinque minuti al comitato di direzione di giovedì per parlare dell'andamento del trimestre agosto-ottobre. Irene Cattaneo, analista, deve preparare cinque slide partendo da un foglio con la puntualità per linea e i reclami per categoria. I numeri nelle slide devono essere giusti, perché in comitato qualcuno li ricontrolla. Il compito è usare lo strumento AI per trovare il messaggio dei dati, costruire le slide e controllare ogni numero sul foglio.",
+  goals:["Trovare il messaggio dei dati prima di costruire le slide","Far costruire una presentazione con un messaggio per slide","Controllare i numeri di ogni slide sul foglio e trovare i dati mancanti o sbagliati","Spostare i dettagli nelle note del relatore"],
+  mats:["richiesta","dati"],
+  steps:[
+   {t:"Trova il messaggio", min:4, do:["Apri Copilot Chat e allega il foglio e la richiesta. Se hai Copilot in PowerPoint puoi usarlo dal passo 3","Chiedi 3 possibili messaggi che i dati sostengono, ognuno con i numeri che lo dimostrano","Scegli il messaggio e controlla sul foglio i numeri che lo sostengono"], q:"Il messaggio vale per tutte le linee o solo per alcune?", out:"Messaggio scelto e numeri verificati."},
+   {t:"Chiedi la struttura", min:3, do:["Chiedi la scaletta di 5 slide, con un titolo che dica il messaggio per ognuna","Chiedi cosa va in ogni slide e cosa va nelle note del relatore","Modifica la scaletta se un passaggio non serve al messaggio"], out:"Scaletta di 5 slide."},
+   {t:"Costruisci le slide", min:6, do:["In PowerPoint chiedi a Copilot di creare la presentazione dal documento. Se non c'è, chiedi il testo delle slide in Copilot Chat","Chiedi massimo 3 righe per slide e un numero o un grafico per slide"], out:"5 slide o testo delle slide."},
+   {t:"Controlla i numeri", min:7, do:["Controlla sul foglio ogni numero che compare nelle slide","Cerca in particolare la puntualità complessiva (come è calcolata?), il dato mancante e il totale dei reclami","Confronta: la media che dice lo strumento con il rapporto tra corse puntuali ed effettuate","Correggi le slide e scrivi in una riga cosa non tornava","Sposta i dettagli nelle note del relatore"], out:"Slide con numeri corretti e note del relatore."}
+  ],
+  finale:["Messaggio scelto, in una frase","5 slide con titoli che dicono il messaggio e numeri corretti","Elenco dei numeri che non tornavano","Note del relatore"],
+  confronto:["Quale numero non tornava col foglio? Sbagliava lo strumento o il foglio?","Ogni slide dice una cosa sola? Cosa hai tagliato?","Cosa ti ha fatto risparmiare tempo e cosa va fatto a mano?"]
+ },
+ {id:4, slot:5, short:"Crea il tuo agente o la tua skill", sub:"Dall'intervista allo strumento che funziona", level:"Advanced", min:110, timer:[70,10],
+  who:"Tu", ini:"TU", role:"Il tuo ruolo in Autoguidovie",
+  caso:"Ogni persona di Autoguidovie ha compiti che rifà in modo quasi uguale ogni settimana: rispondere a richieste, controllare un foglio, scrivere lo stesso tipo di documento. Finora costruire qualcosa per farlo al posto proprio sembrava lavoro da tecnici. In questo esercizio lo strumento AI ti intervista per capire cosa fai davvero, ti dice se ti servirebbe un agente, una skill o nessuno dei due, e poi lo costruisci e lo provi. Un agente è un assistente con un ruolo, istruzioni e fonti con cui si conversa. Una skill è una procedura scritta una volta e richiamata quando serve. Il punto non è lo strumento in sé: è vedere che dal bisogno al prototipo funzionante si arriva in un'ora.",
+  goals:["Identificare, con un'intervista guidata dall'AI, un compito ripetitivo che vale la pena trasformare","Capire se serve un agente, una skill o nessuno dei due, e perché","Costruire lo strumento e provarlo su casi di prova, compreso uno difficile","Correggere le istruzioni e decidere chi lo aggiorna e quando non usarlo"],
+  mats:["esempi","scheda"], decide:true, form:true,
+  steps:[
+   {t:"Fatti intervistare", min:12, do:["Apri Copilot Chat in una chat nuova","Chiedi allo strumento di intervistarti sul tuo lavoro per trovare un compito ripetitivo da trasformare. Una domanda alla volta, al massimo 8, senza consigli finché non hai finito","Rispondi sul tuo lavoro reale, senza dati personali o riservati. Se non hai un'idea, parti da uno dei cinque esempi del file e adattalo al tuo caso","Compila la parte 1 della scheda con quello che emerge"],
+    ex:{l:"Esempio di richiesta",x:"Intervistami sul mio lavoro per capire quale compito ripetitivo potrebbe diventare un agente o una skill. Fammi una domanda alla volta, al massimo 8: cosa rifaccio ogni settimana, cosa ricevo in ingresso, cosa produco, quali regole rispetto, cosa non devo fare, chi controlla il risultato. Non darmi consigli finché non hai finito."},
+    out:"Compito ripetitivo descritto: ingresso, uscita, regole, limiti, controllo."},
+   {t:"Fatti dire cosa ti serve", min:5, do:["Chiedi allo strumento, in base all'intervista, se per quel compito ti servirebbe un agente, una skill o nessuno dei due, con il motivo","Se ti consiglia l'agente, chiedi perché non una skill, e il contrario","Compila la parte 2 della scheda"],
+    ex:{l:"Esempio di richiesta",x:"In base a quello che ti ho detto, per questo compito mi serve un agente, una skill o nessuno dei due? Spiega il motivo in tre righe e dimmi cosa cambierebbe se scegliessi l'altra strada."},
+    q:"Sei d'accordo? Decidi tu, non lo strumento.", out:"Scelta fatta e motivata."},
+   {t:"Fatti scrivere la bozza", min:10, do:["Chiedi allo strumento la bozza completa di quello che hai scelto","Se hai scelto un agente: nome, ruolo, istruzioni con tono e limiti, fonti da caricare, formato della risposta, quando passa la mano a una persona","Se hai scelto una skill: nome, descrizione di 2 frasi che dica quando si usa, passi numerati, regole su cosa fa sempre e non fa mai, formato della risposta, un esempio completo","Leggi la bozza e togli o riscrivi tutto ciò che è generico. Meglio frasi controllabili come 'non promettere rimborsi' che principi come 'sii prudente'","Compila la parte 3 della scheda"], out:"Bozza rivista e scheda compilata."},
+   {t:"Costruiscilo nello strumento", min:12, do:["Se hai scelto un agente, apri la creazione di un agente (Agent Builder). Se hai scelto una skill, creala in Cowork o in Copilot Chat, dove è disponibile","Incolla la bozza, carica le eventuali fonti e salva con un nome che puoi richiamare"], out:"Agente o skill creati e richiamabili."},
+   {t:"Provalo su tre casi", min:12, do:["In una chat nuova chiedi allo strumento di inventare tre casi di prova fittizi: uno tipico, uno con un dato mancante e uno fuori dal perimetro","Passa i tre casi al tuo agente o alla tua skill, uno alla volta","Per ogni risposta controlla: rispetta le regole? ha chiesto il dato mancante invece di inventarlo? ha rifiutato il caso fuori perimetro?","Solo per la skill: chiedi qualcosa che non c'entra con il compito e controlla che la skill non applichi la procedura"], out:"Tabella dei tre casi con esito atteso e ottenuto."},
+   {t:"Correggi e riprova", min:10, do:["Scegli l'errore più grave e correggilo nel testo dell'agente o della skill, non nella richiesta","Ripeti il caso sbagliato e un caso che prima funzionava"], out:"Strumento corretto e provato di nuovo."},
+   {t:"Scrivi la nota d'uso", min:5, do:["Scrivi 5 righe per chi lo userà: cosa fa, cosa non fa, quando non usarlo, cosa controllare sempre prima di fidarsi del risultato, chi lo aggiorna quando cambia la procedura"], out:"Nota d'uso."}
+  ],
+  finale:["Scheda compilata con il compito, la scelta e la bozza","Agente o skill funzionante","Tabella dei tre casi di prova, prima e dopo la correzione","Nota d'uso di 5 righe"],
+  confronto:["Copilot ha consigliato quello che ti aspettavi?","Quale regola hai dovuto scrivere in modo esplicito?","Chi lo aggiorna, e quando lo spegneresti?"]
+ }
+];
+
+/* orario della giornata (minuti dall'inizio sessione) */
+const AGENDA = [
+ {o:0,  d:15, k:"term", name:"Ripresa", sub:"Tre casi di riscaldamento", dest:"Cosa avete usato dall'altra volta?"},
+ {o:15, d:30, k:"ex", ex:1},
+ {o:45, d:30, k:"ex", ex:2},
+ {o:75, d:30, k:"ex", ex:3},
+ {o:105,d:15, k:"pause", name:"Pausa", sub:"15 minuti", dest:"Caffè"},
+ {o:120,d:110,k:"ex", ex:4},
+ {o:230,d:10, k:"term", name:"Chiusura", sub:"Una cosa che portate nel lavoro", dest:"Capolinea"}
+];
+const SESS = {am:{start:9*60,label:"Mattina · Gruppo 3 · 9:00–13:00"}, pm:{start:14*60,label:"Pomeriggio · Gruppo 2 · 14:00–18:00"}};
+
+/* ---------- stato locale ---------- */
+const store = {
+  get(k,d){try{const v=localStorage.getItem("l1b:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("l1b:"+k,JSON.stringify(v))}catch(e){}}
+};
+let session = store.get("session", new Date().getHours()>=13.5 ? "pm":"am");
+
+/* ---------- utilità ---------- */
+const $ = (s,r=document)=>r.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hhmm = m=>`${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
+const nowMin = ()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+function copyText(text,btn){
+  const ok=()=>{if(!btn)return;const o=btn.textContent;btn.textContent="Copiato";btn.classList.add("done");setTimeout(()=>{btn.textContent=o;btn.classList.remove("done")},1600)};
+  const fallback=()=>{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){if(btn)btn.textContent="Seleziona e copia"}ta.remove()};
+  try{navigator.clipboard.writeText(text).then(ok,fallback)}catch(e){fallback()}
+}
+const stepsDone = id=>EX.find(e=>e.id===id).steps.filter((_,i)=>store.get(`s${id}-${i}`,false)).length;
+const fmtPrompt = t=>esc(t).replace(/\[([^\]]+)\]/g,'<span class="ph">[$1]</span>');
+
+/* ---------- HOME ---------- */
+function statusFor(a){
+  const s=SESS[session].start+a.o, e=s+a.d, n=nowMin();
+  if(n<s){const diff=s-n;return diff<=20?{c:"go",t:`tra ${diff}'`}:{c:"go",t:"in orario"}}
+  if(n<e) return {c:"now",t:`in corso · ${e-n}'`};
+  return {c:"past",t:"partito"};
+}
+function home(){
+  const rows = AGENDA.map((a,i)=>{
+    const ex=a.ex?EX.find(e=>e.id===a.ex):null, st=statusFor(a);
+    const name=ex?ex.short:a.name, sub=ex?ex.sub:a.sub;
+    return `<tr class="${ex?"ex":""}" ${ex?`data-go="fermata-${ex.id}" tabindex="0"`:""}>
+      <td class="tab">${hhmm(SESS[session].start+a.o)}</td>
+      <td><span class="plat ${ex?"":"p"}">${ex?"F"+ex.id:"—"}</span></td>
+      <td class="dest">${esc(name)}<small>${esc(sub)}</small></td>
+      <td class="tab">${a.d}'</td>
+      <td class="st ${st.c}">${st.t}</td></tr>`}).join("");
+  const stops = AGENDA.map(a=>{
+    const ex=a.ex?EX.find(e=>e.id===a.ex):null, st=statusFor(a);
+    const t=hhmm(SESS[session].start+a.o);
+    if(!ex) return `<li class="stop ${a.k==="term"?"term":"pause"} ${st.c==="now"?"now":""}"><span class="dot">${a.k==="term"?(a.o===0?"INIZIO":"FINE"):""}</span><span class="time tab">${t}</span><span class="name">${esc(a.name)}</span><span class="sub">${esc(a.sub)}</span></li>`;
+    const d=stepsDone(ex.id), n=ex.steps.length;
+    return `<li class="stop ${d===n?"done":""} ${st.c==="now"?"now":""}"><a class="go" href="#fermata-${ex.id}" aria-label="Apri fermata ${ex.id}: ${esc(ex.short)}"></a><span class="dot">${ex.id}</span><span class="time tab">${t} · ${ex.min}'</span><span class="name">${esc(ex.short)}</span><span class="sub">${esc(ex.sub)}</span><span class="prog tab">${d}/${n} tappe</span></li>`}).join("");
+  return `
+  <div class="wrap hero">
+    <div class="eyebrow">Productivity Booster · seconda sessione · giovedì 26 novembre 2026</div>
+    <h1>Dal lavoro di ogni giorno <span class="arrow">→</span> al vostro agente</h1>
+    <p class="lede">Quattro fermate, un esercizio per fermata. Ogni esercizio ha le sue tappe, i materiali da usare con Copilot e i punti da controllare con i vostri occhi. Scegliete una fermata dal tabellone o dalla mappa.</p>
+  </div>
+  <div class="wrap">
+    <div class="board" aria-label="Tabellone della giornata">
+      <div class="board-head"><div class="lbl">Partenze<span>${esc(SESS[session].label)}</span></div><div class="lbl tab" id="bclock"></div></div>
+      <table><thead><tr><th>Ora</th><th>Fermata</th><th>Destinazione</th><th>Durata</th><th>Stato</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="board-foot"><span class="ticker">Avviso ai viaggiatori · tutti i materiali sono fittizi · non incollate dati reali o personali, né di colleghi né dell'ente · ogni numero che vi dà Copilot va controllato sulla fonte · chi resta indietro salta e riparte dalla fermata successiva ·</span></div>
+    </div>
+  </div>
+  <section class="wrap">
+    <div class="sec-h"><h2>La linea della giornata</h2><p>Tocca una fermata per aprire l'esercizio.</p></div>
+    <div class="linemap"><ol class="stops">${stops}</ol></div>
+  </section>
+  <section class="wrap">
+    <div class="sec-h"><h2>Regole di viaggio</h2></div>
+    <div class="rules">
+      <div class="rule warn"><div class="k">!</div><h3>Solo dati finti</h3><p>Tutti i materiali sono fittizi. Non incollate dati reali o personali, né di colleghi né dell'ente.</p></div>
+      <div class="rule"><div class="k tab">20' + 10'</div><h3>Lavoro, poi confronto</h3><p>Venti minuti con Copilot, dieci in coppia: due persone che si guardano il risultato.</p></div>
+      <div class="rule"><div class="k">↷</div><h3>Fermate indipendenti</h3><p>Ogni esercizio sta in piedi da solo. Se restate indietro, saltate e ripartite dal successivo.</p></div>
+      <div class="rule"><div class="k">✓</div><h3>Controllate voi</h3><p>Copilot legge, scrive e calcola, ma può indovinare. Le righe evidenziate in giallo dicono cosa verificare a mano.</p></div>
+    </div>
+  </section>
+  <footer class="wrap">Datapizza per Autoguidovie · Blocco 1, giornata 1B · Strumento: Microsoft 365 Copilot. I progressi delle tappe restano solo su questo dispositivo.</footer>`;
+}
+
+/* ---------- FERMATA ---------- */
+function matItem(k){
+  const m=MATS[k]; const ic=m.kind==="img"?"JPG":m.kind==="xls"?"XLSX":"DOCX";
+  const view = m.html?`<button type="button" data-mat="${k}">Leggi</button>`:(k==="scheda"?`<a href="#scheda">Compila</a>`:"");
+  return `<li class="mat"><span class="ic ${m.kind}">${ic}</span><span class="nm"><b>${m.file}</b>${esc(m.desc)}</span><span class="acts">${view}<a href="${m.drive}" target="_blank" rel="noopener">Drive</a></span></li>`;
+}
+const CHECK_RE=/^(Controlla|Confronta|Apri la foto accanto|Rileggi|Per ogni risposta controlla|Solo per la skill)/;
+function stepHTML(ex,s,i){
+  const done=store.get(`s${ex.id}-${i}`,false);
+  const items=s.do.map(d=>CHECK_RE.test(d)?`<li class="ck"><span class="hand">controlla</span>${esc(d)}</li>`:`<li>${esc(d)}</li>`).join("");
+  const exq=s.ex?`<div class="prompt"><div class="prompt-h"><span class="l">${esc(s.ex.l)} · <b>dalle istruzioni</b></span><button class="copy" type="button" data-copy="${ex.id}-${i}">Copia</button></div><pre>${esc(s.ex.x)}</pre></div>`:"";
+  return `<li class="tappa ${done?"ok":""}" id="t${ex.id}-${i}">
+    <div class="tappa-h"><span class="num">${i+1}</span><h2>${esc(s.t)}</h2><span class="min tab">${s.min}'</span>
+      <label for="c${ex.id}-${i}"><input type="checkbox" id="c${ex.id}-${i}" data-step="${ex.id}-${i}" ${done?"checked":""}> Fatto</label></div>
+    <div class="body">
+      <ul class="do">${items}</ul>
+      ${s.mat?`<div><button class="btn" type="button" data-mat="${s.mat}">Apri il profilo da incollare</button></div>`:""}
+      ${exq}
+      ${s.q?`<div class="q"><small>Domanda guida</small>${esc(s.q)}</div>`:""}
+      <div class="out"><b>Output</b><span>${esc(s.out)}</span></div>
+    </div></li>`;
+}
+function decideHTML(){
+  return `<div class="card doc" id="decide"><h3>Come scegliere</h3><div class="tblw"><table><thead><tr><th>Quando</th><th>Cosa serve</th><th>Perché</th></tr></thead><tbody>
+<tr><td>Un compito ripetitivo con passi e formato fissi, che parte da una richiesta chiara</td><td><span class="tag skill">Skill</span></td><td>Si scrive una volta e si richiama, il risultato ha sempre la stessa forma</td></tr>
+<tr><td>Un assistente con un ruolo, che consulta documenti, fa domande e gestisce compiti simili</td><td><span class="tag agente">Agente</span></td><td>Serve conversare, e avere fonti e limiti sempre a disposizione</td></tr>
+<tr><td>Un compito che si fa una volta sola o richiede un giudizio nuovo ogni volta</td><td><span class="tag nessuno">Nessuno dei due</span></td><td>Il tempo per costruirlo è maggiore del tempo che fa risparmiare</td></tr>
+</tbody></table></div><p class="mini">Da mat-9-esempi-agenti-e-skill.docx</p></div>`;
+}
+function verdict(){}
+const FORM=[
+ ["Parte 1 · Il compito",[["p1a","Che compito ripeti"],["p1b","Ogni quanto",1],["p1c","Cosa ricevi in ingresso"],["p1d","Cosa produci"],["p1e","Regole che rispetti sempre"],["p1f","Cosa non devi mai fare"],["p1g","Chi controlla il risultato",1]]],
+ ["Parte 2 · La scelta",[["p2a","Cosa consiglia lo strumento (agente, skill, nessuno dei due) e perché"],["p2b","Cosa scegli tu e perché"]]],
+ ["Parte 3 · Agente",[["a1","Nome e ruolo",1],["a2","Istruzioni: tono, limiti, cosa non fa"],["a3","Fonti da caricare"],["a4","Formato della risposta"],["a5","Quando passa la mano a una persona"]],"agente"],
+ ["Parte 3 · Skill",[["k1","Nome",1],["k2","Quando si usa (descrizione di 2 frasi)"],["k3","Passi da seguire, numerati"],["k4","Regole: cosa fa sempre e cosa non fa mai"],["k5","Formato della risposta e un esempio"]],"skill"]
+];
+function formHTML(){
+  const f=store.get("form",{}); const kind=f.kind||"agente";
+  const fs=FORM.map(([lg,fields,only])=>`<fieldset ${only?`data-only="${only}" ${only!==kind?"hidden":""}`:""}><legend>${lg}</legend>${
+    only===undefined&&lg.startsWith("Parte 2")?`<label for="f-kind">Ho scelto<select id="f-kind" data-f="kind"><option value="agente" ${kind==="agente"?"selected":""}>Un agente</option><option value="skill" ${kind==="skill"?"selected":""}>Una skill</option><option value="nessuno" ${kind==="nessuno"?"selected":""}>Nessuno dei due</option></select></label>`:""}${
+    fields.map(([k,l,one])=>`<label for="f-${k}">${l}${one?`<input id="f-${k}" data-f="${k}" value="${esc(f[k]||"")}">`:`<textarea id="f-${k}" data-f="${k}">${esc(f[k]||"")}</textarea>`}</label>`).join("")}</fieldset>`).join("");
+  const cases=["Tipico","Dato mancante","Fuori perimetro","Non attivazione (skill)"];
+  const ct=`<fieldset><legend>Prove · tre casi</legend><div class="cases"><table><thead><tr><th>Caso</th><th>Esito atteso</th><th>Ottenuto prima</th><th>Ottenuto dopo la correzione</th></tr></thead><tbody>${cases.map((c,i)=>`<tr><td>${c}</td>${["e","p","d"].map(x=>`<td><input id="f-c${i}${x}" data-f="c${i}${x}" aria-label="${c} ${x}" value="${esc(f["c"+i+x]||"")}"></td>`).join("")}</tr>`).join("")}</tbody></table></div></fieldset>`;
+  const nota=`<fieldset><legend>Nota d'uso · 5 righe</legend>${[["n1","Cosa fa"],["n2","Cosa non fa"],["n3","Quando non usarlo"],["n4","Cosa controllare sempre prima di fidarsi"],["n5","Chi lo aggiorna quando cambia la procedura"]].map(([k,l])=>`<label for="f-${k}">${l}<input id="f-${k}" data-f="${k}" value="${esc(f[k]||"")}"></label>`).join("")}</fieldset>`;
+  return `<div class="card" id="scheda"><h3>Scheda · agente o skill</h3><p class="mini" style="margin:0 0 12px">Compila man mano. Resta salvata su questo dispositivo. Con "Copia la scheda" la incolli in un documento.</p>
+   <form class="scheda" id="form" onsubmit="return false">${fs}${ct}${nota}</form>
+   <div class="tbtns" style="margin-top:12px"><button class="btn pri" type="button" id="f-copy">Copia la scheda</button><button class="btn" type="button" id="f-clear">Svuota</button><span class="mini" id="f-msg" style="margin:6px 0 0"></span></div></div>`;
+}
+function formText(){
+  const f=store.get("form",{}); const kind=f.kind||"agente"; let out="SCHEDA AGENTE O SKILL\n";
+  FORM.forEach(([lg,fields,only])=>{ if(only&&only!==kind)return; out+=`\n${lg.toUpperCase()}\n`; if(lg.startsWith("Parte 2"))out+=`Ho scelto: ${kind}\n`; fields.forEach(([k,l])=>out+=`${l}: ${f[k]||""}\n`)});
+  out+="\nPROVE\n";["Tipico","Dato mancante","Fuori perimetro","Non attivazione"].forEach((c,i)=>out+=`${c} · atteso: ${f["c"+i+"e"]||""} · prima: ${f["c"+i+"p"]||""} · dopo: ${f["c"+i+"d"]||""}\n`);
+  out+="\nNOTA D'USO\n";[["n1","Cosa fa"],["n2","Cosa non fa"],["n3","Quando non usarlo"],["n4","Cosa controllare"],["n5","Chi lo aggiorna"]].forEach(([k,l])=>out+=`${l}: ${f[k]||""}\n`);
+  return out;
+}
+
+function fermata(id){
+  const ex=EX.find(e=>e.id===id); if(!ex) return home();
+  const ag=AGENDA.find(a=>a.ex===id); const t0=SESS[session].start+ag.o;
+  const prev=EX.find(e=>e.id===id-1), next=EX.find(e=>e.id===id+1);
+  return `
+  <div class="wrap">
+    <nav class="crumb"><a href="#linea">← Linea</a><span>/</span><span>Fermata ${ex.id} di ${EX.length}</span><span>/</span><span class="tab">${hhmm(t0)}–${hhmm(t0+ag.d)}</span></nav>
+    <div class="pole"><div class="sign" aria-hidden="true"><div><span>FERMATA</span><b>${ex.id}</b></div></div>
+      <div><h1>${esc(ex.short)}</h1>
+      <div class="chips"><span class="chip lv">${ex.level}</span><span class="chip tab">${ex.min} minuti</span><span class="chip">${ex.steps.length} tappe</span><span class="chip">Microsoft 365 Copilot</span></div></div></div>
+    <div class="ex-grid">
+      <div style="min-width:0">
+        <div class="card"><div class="case"><div class="avatar">${ex.ini}</div><div><div class="who">${esc(ex.who)}</div><div class="role">${esc(ex.role)}</div>
+          <p>${esc(ex.caso)}</p><ul class="goals">${ex.goals.map(g=>`<li>${esc(g)}</li>`).join("")}</ul>
+          ${ex.note?`<p class="mini"><b>${esc(ex.note)}</b></p>`:""}</div></div></div>
+        ${ex.decide?`<div style="margin-top:18px">${decideHTML()}</div>`:""}
+        <ol class="route">${ex.steps.map((s,i)=>stepHTML(ex,s,i)).join("")}</ol>
+        <div class="capolinea"><h3>Capolinea · cosa porti al confronto</h3><ul>${ex.finale.map(f=>`<li>${esc(f)}</li>`).join("")}</ul></div>
+        <div class="card" style="margin-top:18px"><h3>Confronto in coppia · 10'</h3><ol class="do">${ex.confronto.map(c=>`<li>${esc(c)}</li>`).join("")}</ol></div>
+        ${ex.form?`<div style="margin-top:18px">${formHTML()}</div>`:""}
+        <div class="next" style="margin-top:18px">
+          ${prev?`<a href="#fermata-${prev.id}"><small>← Fermata precedente</small><b>${esc(prev.short)}</b></a>`:`<a href="#linea"><small>← Torna</small><b>Mappa della linea</b></a>`}
+          ${next?`<a href="#fermata-${next.id}" style="text-align:right"><small>Fermata successiva →</small><b>${esc(next.short)}</b></a>`:`<a href="#linea" style="text-align:right"><small>Capolinea →</small><b>Chiusura</b></a>`}
+        </div>
+      </div>
+      <aside class="aside">
+        <div class="card timer" id="timer"></div>
+        <div class="card"><h3>Materiali</h3><ul class="mats">${ex.mats.map(matItem).join("")}</ul>
+          <p class="mini">"Leggi" apre il testo qui, da copiare in chat. "Drive" apre il file originale da allegare.</p></div>
+      </aside>
+    </div>
+  </div>`;
+}
+
+/* ---------- timer ---------- */
+let T={id:null,el:0,run:false,h:null};
+function busSVG(){return `<svg class="bus" viewBox="0 0 34 22" aria-hidden="true"><rect x="1" y="2" width="32" height="15" rx="3" fill="var(--route)"/><rect x="4" y="5" width="6" height="5" rx="1" fill="#fff"/><rect x="12" y="5" width="6" height="5" rx="1" fill="#fff"/><rect x="20" y="5" width="6" height="5" rx="1" fill="#fff"/><rect x="28" y="5" width="3" height="8" rx="1" fill="#fff"/><circle cx="8" cy="18" r="3" fill="var(--ink)"/><circle cx="25" cy="18" r="3" fill="var(--ink)"/></svg>`}
+function renderTimer(){
+  const box=$("#timer"); if(!box)return; const ex=EX.find(e=>e.id===T.id);
+  const [w,c]=ex.timer, tot=(w+c)*60, el=Math.min(T.el,tot);
+  const inWork=el<w*60, left=inWork?w*60-el:tot-el;
+  const mm=String(Math.floor(left/60)).padStart(2,"0"), ss=String(left%60).padStart(2,"0");
+  const pct=el/tot*100, wp=w/(w+c)*100;
+  box.innerHTML=`<h3>Cronometro</h3><div class="dial tab">${mm}:${ss}</div>
+   <div class="phase">${el>=tot?"Tempo finito: si passa alla fermata successiva":inWork?`Lavoro con Copilot · ${w}'`:`Confronto in coppia · ${c}'`}</div>
+   <div class="track"><div class="bar"><i style="width:${wp}%;background:var(--route)"></i><i style="width:${100-wp}%;background:var(--sign)"></i></div><span class="mk" style="left:${wp}%"></span><span style="position:absolute;left:${pct}%;top:0">${busSVG()}</span></div>
+   <div class="tbtns"><button class="btn pri" type="button" id="t-go">${T.run?"Pausa":el>0&&el<tot?"Riprendi":"Avvia"}</button><button class="btn" type="button" id="t-skip">${inWork?"Vai al confronto":"Ricomincia"}</button></div>`;
+  $("#t-go").onclick=()=>{T.run=!T.run; if(T.el>=tot)T.el=0; tick(); renderTimer()};
+  $("#t-skip").onclick=()=>{T.el=inWork?w*60:0; if(!inWork)T.run=false; renderTimer()};
+}
+function tick(){clearInterval(T.h); if(!T.run)return; T.h=setInterval(()=>{T.el++;const ex=EX.find(e=>e.id===T.id);if(T.el>=(ex.timer[0]+ex.timer[1])*60){T.run=false;clearInterval(T.h)}renderTimer()},1000)}
+
+/* ---------- drawer ---------- */
+let lastFocus=null;
+function openMat(k){
+  const m=MATS[k]; lastFocus=document.activeElement;
+  $("#dr-title").textContent=m.title||m.file; $("#dr-body").innerHTML=m.html+`<p class="mini" style="margin-top:20px">File originale: <a href="${m.drive}" target="_blank" rel="noopener">${m.file} su Drive</a></p>`;
+  $("#dr-copy").onclick=e=>copyText($("#dr-body").innerText.replace(/\nFile originale:.*$/s,"").trim(),e.currentTarget);
+  $("#drawer").hidden=false; $("#dr-close").focus();
+}
+function closeMat(){$("#drawer").hidden=true; if(lastFocus)lastFocus.focus()}
+$("#dr-close").onclick=closeMat;
+$("#drawer").addEventListener("click",e=>{if(e.target.id==="drawer")closeMat()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#drawer").hidden)closeMat()});
+
+/* ---------- router ---------- */
+function route(){
+  const h=location.hash.replace("#","");
+  const m=h.match(/^fermata-(\d)$/);
+  clearInterval(T.h);
+  if(m){const id=+m[1]; if(T.id!==id){T={id,el:0,run:false,h:null}} $("#app").innerHTML=fermata(id); renderTimer(); tick(); verdict(); if(window._fromNav)scrollTo(0,0)}
+  else if(h==="scheda"){location.hash="fermata-4";setTimeout(()=>{const s=$("#scheda");if(s)s.scrollIntoView()},50);return}
+  else {$("#app").innerHTML=home(); updClock()}
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.s===session)));
+}
+window.addEventListener("hashchange",()=>{window._fromNav=true;route()});
+
+/* ---------- eventi delegati ---------- */
+document.addEventListener("click",e=>{
+  const c=e.target.closest("[data-copy]"); if(c){const [a,b]=c.dataset.copy.split("-").map(Number);copyText(EX.find(x=>x.id===a).steps[b].ex.x,c);return}
+  const mt=e.target.closest("[data-mat]"); if(mt){openMat(mt.dataset.mat);return}
+  const go=e.target.closest("tr[data-go]"); if(go){location.hash=go.dataset.go;return}
+  const s=e.target.closest(".seg button"); if(s){session=s.dataset.s;store.set("session",session);route();return}
+  const dq=e.target.closest("[data-dq]"); if(dq){const a=store.get("dq",{});a[dq.dataset.dq]=dq.dataset.v;store.set("dq",a);verdict();return}
+  if(e.target.id==="f-copy"){copyText(formText(),e.target);return}
+  if(e.target.id==="f-clear"){const m=$("#f-msg"); if(m.dataset.arm){store.set("form",{});route();}else{m.dataset.arm="1";m.textContent="Tocca di nuovo per svuotare";setTimeout(()=>{m.textContent="";delete m.dataset.arm},3000)}}
+});
+document.addEventListener("keydown",e=>{const go=e.target.closest&&e.target.closest("tr[data-go]");if(go&&(e.key==="Enter"||e.key===" ")){e.preventDefault();location.hash=go.dataset.go}});
+document.addEventListener("change",e=>{
+  const st=e.target.dataset&&e.target.dataset.step; if(st){store.set("s"+st,e.target.checked);e.target.closest(".tappa").classList.toggle("ok",e.target.checked)}
+  if(e.target.dataset&&e.target.dataset.f==="kind"){const f=store.get("form",{});f.kind=e.target.value;store.set("form",f);document.querySelectorAll("[data-only]").forEach(fs=>fs.hidden=fs.dataset.only!==e.target.value)}
+});
+document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.f; if(k&&k!=="kind"){const f=store.get("form",{});f[k]=e.target.value;store.set("form",f)}});
+
+/* ---------- orologio ---------- */
+function updClock(){const d=new Date();const t=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;$("#clock").textContent=t;const b=$("#bclock");if(b)b.textContent=t}
+let lastMin=nowMin();
+setInterval(()=>{updClock();const n=nowMin();if(n!==lastMin){lastMin=n;if(!location.hash.startsWith("#fermata"))route()}},5000);
+
+route(); updClock();
+</script>
+</body>
+</html>
